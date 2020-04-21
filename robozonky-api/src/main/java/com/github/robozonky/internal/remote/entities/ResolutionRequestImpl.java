@@ -18,16 +18,12 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.enums.Resolution;
 
-public class ResolutionRequestImpl extends BaseEntity implements ResolutionRequest {
+public class ResolutionRequestImpl implements ResolutionRequest {
 
-    @XmlElement
     private long reservationId;
-    @XmlElement
     private Resolution resolution;
 
     public ResolutionRequestImpl(final long reservationId, final Resolution resolution) {

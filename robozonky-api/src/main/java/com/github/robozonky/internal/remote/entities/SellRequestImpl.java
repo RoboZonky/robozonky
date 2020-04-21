@@ -19,24 +19,17 @@ package com.github.robozonky.internal.remote.entities;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellRequest;
 
-public class SellRequestImpl extends BaseEntity implements SellRequest {
+public class SellRequestImpl implements SellRequest {
 
-    @XmlElement
     private long investmentId;
-    @XmlElement
     private BigDecimal remainingPrincipal;
-    @XmlElement
     private BigDecimal price;
-    @XmlElement
     private BigDecimal discount;
-    @XmlElement
     private BigDecimal feeAmount;
 
     public SellRequestImpl(final long investmentId, final SellInfo sellInfo) {

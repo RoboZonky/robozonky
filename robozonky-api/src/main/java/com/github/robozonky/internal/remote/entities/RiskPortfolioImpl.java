@@ -18,26 +18,18 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
+public class RiskPortfolioImpl implements RiskPortfolio {
 
-    @XmlElement
     private Ratio interestRate;
-    @XmlElement
     private Money unpaid;
-    @XmlElement
     private Money paid;
-    @XmlElement
     private Money due;
-    @XmlElement
     private Money totalAmount;
-    @XmlElement
     private Rating rating;
 
     RiskPortfolioImpl() {

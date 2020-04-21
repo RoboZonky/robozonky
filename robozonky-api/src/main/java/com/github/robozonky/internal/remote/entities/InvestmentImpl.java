@@ -21,8 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,111 +39,62 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     private static final Logger LOGGER = LogManager.getLogger(InvestmentImpl.class);
 
-    @XmlElement
     private PaymentStatus paymentStatus;
-    @XmlElement
     private LoanHealth loanHealthInfo;
-    @XmlElement
     private boolean smpRelated;
-    @XmlElement
     private boolean onSmp;
-    @XmlElement
     private boolean canBeOffered;
-    @XmlElement
     private boolean inWithdrawal;
-    @XmlElement
     private boolean hasCollectionHistory;
-    @XmlElement
     private boolean insuranceActive;
-    @XmlElement
     private boolean additionallyInsured;
-    @XmlElement
     private boolean instalmentPostponement;
-    @XmlElement
     private int legalDpd;
-    @XmlElement
     private int loanInvestmentsCount = 0;
-    @XmlElement
     private int loanTermInMonth = 84;
-    @XmlElement
     private int currentTerm = 0;
-    @XmlElement
     private int remainingMonths = loanTermInMonth - currentTerm;
-    @XmlElement
     private long borrowerNo = 0;
-    @XmlElement
     private long loanPublicIdentifier = 0;
-    @XmlElement
     private String loanName;
-    @XmlElement
     private String nickname;
-    @XmlElement
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
-    @XmlElement
     private Ratio interestRate;
-    @XmlElement
     private Ratio revenueRate;
-    @XmlElement
     private Rating rating;
-    @XmlElement
     private InvestmentType investmentType;
 
     // OffsetDateTime is expensive to parse, and Investments are on the hot path. Only do it when needed.
-    @XmlElement
     private String investmentDate;
-    @XmlElement
     private String nextPaymentDate;
-    @XmlElement
     private String activeFrom;
-    @XmlElement
     private String activeTo;
-    @XmlElement
     private String smpFeeExpirationDate;
 
-    @XmlElement
     private Money loanAnnuity = Money.ZERO;
-    @XmlElement
     private Money loanAmount = Money.ZERO;
-    @XmlElement
     private Money paid = Money.ZERO;
-    @XmlElement
     private Money toPay = Money.ZERO;
-    @XmlElement
     private Money amountDue = Money.ZERO;
-    @XmlElement
     private Money paidInterest = Money.ZERO;
-    @XmlElement
     private Money dueInterest = Money.ZERO;
-    @XmlElement
     private Money paidPrincipal = Money.ZERO;
-    @XmlElement
     private Money duePrincipal = Money.ZERO;
-    @XmlElement
     private Money expectedInterest = Money.ZERO;
-    @XmlElement
     private Money purchasePrice = Money.ZERO;
-    @XmlElement
     private Money remainingPrincipal = Money.ZERO;
-    @XmlElement
     private Money smpPrice = Money.ZERO;
-    @XmlElement
     private Money smpSoldFor = Money.ZERO;
-    @XmlElement
     private Money smpFee = Money.ZERO;
-    @XmlElement
     private Money paidPenalty = Money.ZERO;
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
      * unknown fields by Jackson.
      */
-    @XmlElement
     private Object insuranceHistory;
-    @XmlElement
     private Object loanHealthStats;
-    @XmlElement
     private Object firstName;
-    @XmlElement
     private Object surname;
 
     InvestmentImpl() {
@@ -249,7 +198,7 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @Override
     public OffsetDateTime getInvestmentDate() {
         return Optional.ofNullable(investmentDate)
-            .map(OffsetDateTimeAdapter::fromString)
+            .map(OffsetDateTime::parse)
             .orElseGet(() -> {
                 final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
                 final OffsetDateTime d = DateUtil.offsetNow()
@@ -262,25 +211,25 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @Override
     public Optional<OffsetDateTime> getNextPaymentDate() {
         return Optional.ofNullable(nextPaymentDate)
-            .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTime::parse);
     }
 
     @Override
     public Optional<OffsetDateTime> getActiveFrom() {
         return Optional.ofNullable(activeFrom)
-            .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTime::parse);
     }
 
     @Override
     public Optional<OffsetDateTime> getActiveTo() {
         return Optional.ofNullable(activeTo)
-            .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTime::parse);
     }
 
     @Override
     public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
         return Optional.ofNullable(smpFeeExpirationDate)
-            .map(OffsetDateTimeAdapter::fromString);
+            .map(OffsetDateTime::parse);
     }
 
     @Override

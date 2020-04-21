@@ -20,14 +20,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.Reservations;
 
-public class ReservationsImpl extends BaseEntity implements Reservations {
+public class ReservationsImpl implements Reservations {
 
-    @XmlElement
     private Collection<ReservationImpl> reservations = Collections.emptyList();
 
     ReservationsImpl() {

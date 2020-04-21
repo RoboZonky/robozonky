@@ -20,9 +20,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
-@JsonDeserialize(using = Purpose.PurposeDeserializer.class)
+@JsonbTypeDeserializer(Purpose.PurposeDeserializer.class)
 public enum Purpose implements BaseEnum {
 
     AUTO_MOTO("auto-moto"),
@@ -56,7 +56,7 @@ public enum Purpose implements BaseEnum {
         return code;
     }
 
-    static final class PurposeDeserializer extends AbstractDeserializer<Purpose> {
+    public static final class PurposeDeserializer extends AbstractDeserializer<Purpose> {
 
         public PurposeDeserializer() {
             super(Purpose::valueOf, OTHER);

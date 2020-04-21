@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,49 +16,43 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import java.lang.reflect.Type;
+import java.util.function.Function;
+
+import javax.json.bind.serializer.DeserializationContext;
+import javax.json.bind.serializer.JsonbDeserializer;
+import javax.json.stream.JsonParser;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.util.function.Function;
-
-abstract class AbstractDeserializer<T extends Enum<T>> extends JsonDeserializer<T> {
+abstract class AbstractDeserializer<T extends Enum<T>> implements JsonbDeserializer<T> {
 
     protected final Logger logger = LogManager.getLogger(getClass());
-    private final Function<String, T> parser;
+    private final Function<String, T> converter;
     private final T defaultValue;
     private final boolean nullAllowed;
 
-    protected AbstractDeserializer(final Function<String, T> parser, final T defaultValue) {
-        this(parser, defaultValue, false);
+    protected AbstractDeserializer(final Function<String, T> converter, final T defaultValue) {
+        this(converter, defaultValue, false);
     }
 
-    protected AbstractDeserializer(final Function<String, T> parser, final T defaultValue, final boolean nullAllowed) {
-        this.parser = parser;
+    protected AbstractDeserializer(final Function<String, T> converter, final T defaultValue,
+            final boolean nullAllowed) {
+        this.converter = converter;
         this.defaultValue = defaultValue;
         this.nullAllowed = nullAllowed;
     }
 
     @Override
-    public T deserialize(final JsonParser jsonParser, final DeserializationContext ctx) throws IOException {
-        var id = jsonParser.getText();
+    public T deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
+        var id = parser.getString();
         try {
-            return parser.apply(id);
+            return converter.apply(id);
         } catch (final Exception ex) {
             logger.warn("Received unknown value from Zonky: '{}'. This may be a problem, but we continue.", id);
             return defaultValue;
         }
     }
 
-    @Override
-    public T getNullValue(final DeserializationContext ctx) {
-        if (nullAllowed) {
-            return null;
-        }
-        logger.warn("Unexpectedly received null value from Zonky. This may be a problem, but we continue.");
-        return defaultValue;
-    }
 }

@@ -21,8 +21,6 @@ import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
@@ -33,97 +31,48 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
 
-public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
+public abstract class BaseLoanImpl implements BaseLoan {
 
-    @XmlElement
     protected boolean topped;
-    @XmlElement
     protected boolean covered;
-    @XmlElement
     protected boolean published;
-    @XmlElement
     protected boolean insuranceActive;
-    @XmlElement
     protected boolean insuredInFuture;
-    @XmlElement
     protected boolean additionallyInsured;
-    @XmlElement
     protected int id;
-    @XmlElement
     protected int termInMonths;
-    @XmlElement
     protected int investmentsCount;
-    @XmlElement
     protected int userId;
-    @XmlElement
     protected int activeLoansCount;
-    @XmlElement
     protected long publicIdentifier = 0;
-    @XmlElement
     protected long borrowerNo = 0;
-    @XmlElement
     protected String name;
-    @XmlElement
     protected String nickName;
-    @XmlElement
     protected String story;
-    @XmlElement
     protected Rating rating;
-    @XmlElement
     protected MainIncomeType mainIncomeType;
-    @XmlElement
     protected Region region;
-    @XmlElement
     protected Purpose purpose;
 
     // various ratios
-    @XmlElement
     protected Ratio interestRate;
-    @XmlElement
     protected Ratio investmentRate;
-    @XmlElement
     protected Ratio revenueRate;
 
     // OffsetDateTime is expensive to parse, and Loans are on the hot path. Only do it when needed.
-    @XmlElement
     protected String datePublished;
-    @XmlElement
     protected String deadline;
 
-    @XmlElement
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-    @XmlElement
     protected Currency currency = Defaults.CURRENCY;
 
-    @XmlElement
     protected Money amount;
-    @XmlElement
     protected Money remainingInvestment;
-    @XmlElement
     protected Money reservedAmount;
-    @XmlElement
     protected Money annuity;
-    @XmlElement
     protected Money annuityWithInsurance;
-    @XmlElement
     protected Money premium;
-    @XmlElement
     protected Money zonkyPlusAmount;
-
-    /*
-     * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
-     * unknown fields by Jackson.
-     */
-    @XmlElement
-    private Object photos;
-    @XmlElement
-    private Object flags;
-    @XmlElement
-    private Object borrowerRelatedInvestmentInfo;
-    @XmlElement
-    private Object myOtherInvestments;
-    @XmlElement
-    private Object insuranceHistory;
 
     @Override
     public Country getCountryOfOrigin() {
@@ -252,12 +201,12 @@ public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
 
     @Override
     public OffsetDateTime getDatePublished() {
-        return OffsetDateTimeAdapter.fromString(datePublished);
+        return OffsetDateTime.parse(datePublished);
     }
 
     @Override
     public OffsetDateTime getDeadline() {
-        return OffsetDateTimeAdapter.fromString(deadline);
+        return OffsetDateTime.parse(deadline);
     }
 
     @Override

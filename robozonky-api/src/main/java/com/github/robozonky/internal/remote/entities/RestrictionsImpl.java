@@ -18,22 +18,15 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
 
-public class RestrictionsImpl extends BaseEntity implements Restrictions {
+public class RestrictionsImpl implements Restrictions {
 
-    @XmlElement
     private boolean cannotInvest;
-    @XmlElement
     private boolean cannotAccessSmp;
-    @XmlElement
     private Money minimumInvestmentAmount = Money.from(200);
-    @XmlElement
     private Money maximumInvestmentAmount = Money.from(5_000);
-    @XmlElement
     private Money investmentStep = Money.from(200);
 
     public RestrictionsImpl(final boolean permissive) {

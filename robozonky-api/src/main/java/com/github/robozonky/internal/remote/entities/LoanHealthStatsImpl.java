@@ -19,24 +19,16 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 
-public class LoanHealthStatsImpl extends BaseEntity implements LoanHealthStats {
+public class LoanHealthStatsImpl implements LoanHealthStats {
 
-    @XmlElement
     private int paidInstalments;
-    @XmlElement
     private int dueInstalments;
-    @XmlElement
     private Integer instalmentsCurrentlyInDue;
-    @XmlElement
     private int longestDaysDue;
-    @XmlElement
     private int daysSinceLastInDue;
-    @XmlElement
     private LoanHealth loanHealthInfo = LoanHealth.HISTORICALLY_IN_DUE;
 
     LoanHealthStatsImpl() {

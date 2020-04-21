@@ -20,17 +20,13 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
 
-public class SellFeeImpl extends BaseEntity implements SellFee {
+public class SellFeeImpl implements SellFee {
 
-    @XmlElement
     private OffsetDateTime expiresAt;
 
-    @XmlElement
     private Money value;
 
     SellFeeImpl() {

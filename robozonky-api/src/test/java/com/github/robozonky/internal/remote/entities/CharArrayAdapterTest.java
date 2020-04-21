@@ -30,8 +30,8 @@ class CharArrayAdapterTest {
     void marshalAndUnmarshal() {
         final String s = UUID.randomUUID()
             .toString();
-        final char[] array = adapter.unmarshal(s);
-        final String newS = adapter.marshal(array);
+        final char[] array = adapter.adaptFromJson(s);
+        final String newS = adapter.adaptToJson(array);
         assertThat(newS).isEqualTo(s);
     }
 

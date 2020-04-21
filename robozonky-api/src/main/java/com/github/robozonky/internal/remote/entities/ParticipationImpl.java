@@ -21,8 +21,6 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -34,57 +32,33 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
 
-public class ParticipationImpl extends BaseEntity implements Participation {
+public class ParticipationImpl implements Participation {
 
-    @XmlElement
     protected long borrowerNo;
-    @XmlElement
     protected int loanId;
-    @XmlElement
     protected int originalInstalmentCount;
-    @XmlElement
     protected int remainingInstalmentCount;
-    @XmlElement
     protected int userId;
-    @XmlElement
     protected long id;
-    @XmlElement
     protected long investmentId;
-    @XmlElement
     protected MainIncomeType incomeType;
-    @XmlElement
     protected Ratio interestRate;
-    @XmlElement
     protected LoanHealth loanHealthInfo;
-    @XmlElement
     protected String loanName;
-    @XmlElement
     protected Purpose purpose;
-    @XmlElement
     protected Rating rating;
-    @XmlElement
     protected boolean willExceedLoanInvestmentLimit;
-    @XmlElement
     protected boolean insuranceActive;
-    @XmlElement
     protected boolean additionallyInsured;
-    @XmlElement
-    private Object loanInvestments;
 
     // Dates and times are expensive to parse, and Participations are on the hot path. Only do it when needed.
-    @XmlElement
     protected String deadline;
-    @XmlElement
     protected String nextPaymentDate;
-    @XmlElement
+
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-    @XmlElement
     protected Currency currency;
-    @XmlElement
     protected Money remainingPrincipal;
-    @XmlElement
     protected Money discount;
-    @XmlElement
     protected Money price;
 
     ParticipationImpl() {
@@ -185,11 +159,6 @@ public class ParticipationImpl extends BaseEntity implements Participation {
     }
 
     @Override
-    public Object getLoanInvestments() { // FIXME figure out what this means
-        return loanInvestments;
-    }
-
-    @Override
     public LoanHealth getLoanHealthInfo() {
         return loanHealthInfo;
     }
@@ -206,12 +175,12 @@ public class ParticipationImpl extends BaseEntity implements Participation {
 
     @Override
     public OffsetDateTime getDeadline() {
-        return OffsetDateTimeAdapter.fromString(deadline);
+        return OffsetDateTime.parse(deadline);
     }
 
     @Override
     public LocalDate getNextPaymentDate() {
-        return LocalDateAdapter.fromString(nextPaymentDate);
+        return LocalDate.parse(nextPaymentDate);
     }
 
     @Override

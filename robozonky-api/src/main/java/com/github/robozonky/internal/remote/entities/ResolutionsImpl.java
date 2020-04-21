@@ -22,14 +22,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Resolutions;
 
-public class ResolutionsImpl extends BaseEntity implements Resolutions {
+public class ResolutionsImpl implements Resolutions {
 
-    @XmlElement
     private List<ResolutionRequestImpl> resolutions = Collections.emptyList();
 
     public ResolutionsImpl(final Collection<ResolutionRequestImpl> resolutions) {

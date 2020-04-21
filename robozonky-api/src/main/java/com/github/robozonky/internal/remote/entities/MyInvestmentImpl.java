@@ -18,8 +18,6 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.MyInvestment;
 
 /**
@@ -38,9 +36,7 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
  */
 public class MyInvestmentImpl extends BaseInvestmentImpl implements MyInvestment {
 
-    @XmlElement
     private int investorId;
-    @XmlElement
     private String investorNickname;
 
     MyInvestmentImpl() {

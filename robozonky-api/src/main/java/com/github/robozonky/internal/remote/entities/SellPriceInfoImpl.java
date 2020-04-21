@@ -18,28 +18,21 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.entities.SellPriceInfo;
 
-public class SellPriceInfoImpl extends BaseEntity implements SellPriceInfo {
+public class SellPriceInfoImpl implements SellPriceInfo {
 
-    @XmlElement
     private Money sellPrice;
 
-    @XmlElement
     private SellFee fee;
 
-    @XmlElement
     private Money boughtFor;
 
-    @XmlElement
     private Money remainingPrincipal;
 
-    @XmlElement
     private Ratio discount;
 
     SellPriceInfoImpl() {

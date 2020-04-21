@@ -22,9 +22,9 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.toScale;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 
-@XmlJavaTypeAdapter(RatioAdapter.class)
+@JsonbTypeAdapter(RatioAdapter.class)
 public final class Ratio extends Number implements Comparable<Ratio> {
 
     public static final Ratio ZERO = new Ratio(BigDecimal.ZERO);

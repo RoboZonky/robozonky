@@ -18,14 +18,11 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 
 public class ReservationImpl extends BaseLoanImpl implements Reservation {
 
-    @XmlElement
     private MyReservationImpl myReservation;
 
     protected ReservationImpl() {

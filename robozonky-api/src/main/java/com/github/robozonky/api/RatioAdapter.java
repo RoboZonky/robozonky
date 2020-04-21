@@ -16,18 +16,18 @@
 
 package com.github.robozonky.api;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.json.bind.adapter.JsonbAdapter;
 
-final class RatioAdapter extends XmlAdapter<String, Ratio> {
+final class RatioAdapter implements JsonbAdapter<Ratio, String> {
 
     @Override
-    public Ratio unmarshal(final String s) {
-        return Ratio.fromRaw(s);
+    public String adaptToJson(Ratio obj) {
+        return obj.bigDecimalValue()
+            .toPlainString();
     }
 
     @Override
-    public String marshal(final Ratio rate) {
-        return rate.bigDecimalValue()
-            .toPlainString();
+    public Ratio adaptFromJson(String obj) {
+        return Ratio.fromRaw(obj);
     }
 }

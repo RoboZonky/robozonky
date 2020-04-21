@@ -23,34 +23,19 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
-public class StatisticsImpl extends BaseEntity implements Statistics {
+public class StatisticsImpl implements Statistics {
 
     private static final Supplier<Statistics> EMPTY = Memoizer.memoize(StatisticsImpl::emptyAndFresh);
 
-    @XmlElement
     private Ratio profitability;
-    @XmlElement
     private List<RiskPortfolioImpl> riskPortfolio;
-    @XmlElement
     private OffsetDateTime timestamp;
-
-    /**
-     * Data structures intentionally not implemented. We do not need this information.
-     */
-    @XmlElement
-    private Object superInvestorOverview;
-    @XmlElement
-    private Object currentOverview;
-    @XmlElement
-    private Object overallOverview;
 
     private StatisticsImpl() {
         // for JAXB

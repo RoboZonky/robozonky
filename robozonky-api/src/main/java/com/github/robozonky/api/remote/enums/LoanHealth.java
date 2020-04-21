@@ -16,12 +16,12 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
 /**
  * {@link #UNKNOWN} is an internal value, not in the Zonky API, and therefore should only ever go last.
  */
-@JsonDeserialize(using = LoanHealth.LoanHealthInfoDeserializer.class)
+@JsonbTypeDeserializer(LoanHealth.LoanHealthInfoDeserializer.class)
 public enum LoanHealth {
 
     HEALTHY,
@@ -29,7 +29,7 @@ public enum LoanHealth {
     HISTORICALLY_IN_DUE,
     UNKNOWN;
 
-    static final class LoanHealthInfoDeserializer extends AbstractDeserializer<LoanHealth> {
+    public static final class LoanHealthInfoDeserializer extends AbstractDeserializer<LoanHealth> {
 
         public LoanHealthInfoDeserializer() {
             super(LoanHealth::valueOf, UNKNOWN, true);

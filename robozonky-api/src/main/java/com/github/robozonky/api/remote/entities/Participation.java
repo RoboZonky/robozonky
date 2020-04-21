@@ -70,8 +70,6 @@ public interface Participation {
      */
     boolean isAdditionallyInsured();
 
-    Object getLoanInvestments();
-
     LoanHealth getLoanHealthInfo();
 
     Country getCountryOfOrigin();

@@ -18,19 +18,13 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellPriceInfo;
 
-public class SellInfoImpl extends BaseEntity implements SellInfo {
+public class SellInfoImpl implements SellInfo {
 
-    @XmlElement
-    private Object loanHealthStatsRo; // For some reason, identical to loanHealthStats; ignore.
-    @XmlElement
     private LoanHealthStatsImpl loanHealthStats;
-    @XmlElement
     private SellPriceInfoImpl priceInfo;
 
     SellInfoImpl() {

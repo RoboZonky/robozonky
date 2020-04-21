@@ -20,17 +20,13 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.internal.test.DateUtil;
 
-public class LastPublishedItemImpl extends BaseEntity implements LastPublishedItem {
+public class LastPublishedItemImpl implements LastPublishedItem {
 
-    @XmlElement
     private long id;
     // Expensive to deserialize, do it on-demand.
-    @XmlElement
     private String datePublished;
 
     LastPublishedItemImpl() {
@@ -53,7 +49,7 @@ public class LastPublishedItemImpl extends BaseEntity implements LastPublishedIt
 
     @Override
     public OffsetDateTime getDatePublished() {
-        return OffsetDateTimeAdapter.fromString(datePublished);
+        return OffsetDateTime.parse(datePublished);
     }
 
     public void setId(final long id) {

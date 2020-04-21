@@ -19,14 +19,14 @@ package com.github.robozonky.api.remote.enums;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
  * its integer ID after all other values already got one. Never change the value of {@link #getCode()}, as that will be
  * used throughout the strategies etc.
  */
-@JsonDeserialize(using = Country.CountryDeserializer.class)
+@JsonbTypeDeserializer(Country.CountryDeserializer.class)
 public enum Country implements BaseEnum {
 
     CZECHIA("CZ"),
@@ -50,7 +50,7 @@ public enum Country implements BaseEnum {
         return code;
     }
 
-    static final class CountryDeserializer extends AbstractDeserializer<Country> {
+    public static final class CountryDeserializer extends AbstractDeserializer<Country> {
 
         public CountryDeserializer() {
             super(Country::findByCode, UNKNOWN);

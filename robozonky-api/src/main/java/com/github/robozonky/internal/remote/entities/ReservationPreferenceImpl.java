@@ -19,19 +19,14 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.ReservationPreference;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class ReservationPreferenceImpl extends BaseEntity implements ReservationPreference {
+public class ReservationPreferenceImpl implements ReservationPreference {
 
-    @XmlElement
     private LoanTermInterval loanTermInterval;
-    @XmlElement
     private Rating ratingType;
-    @XmlElement
     private boolean insuredOnly;
 
     private ReservationPreferenceImpl() {

@@ -19,9 +19,9 @@ package com.github.robozonky.api.remote.enums;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
-@JsonDeserialize(using = MainIncomeType.MainIncomeTypeDeserializer.class)
+@JsonbTypeDeserializer(MainIncomeType.MainIncomeTypeDeserializer.class)
 public enum MainIncomeType implements BaseEnum {
 
     EMPLOYMENT("zaměstnanec"),
@@ -53,7 +53,7 @@ public enum MainIncomeType implements BaseEnum {
         return code;
     }
 
-    static final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
+    public static final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
 
         public MainIncomeTypeDeserializer() {
             super(MainIncomeType::valueOf, OTHERS_MAIN);

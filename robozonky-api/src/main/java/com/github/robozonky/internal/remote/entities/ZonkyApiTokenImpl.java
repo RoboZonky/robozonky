@@ -16,8 +16,6 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAmount;
@@ -26,15 +24,11 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.test.DateUtil;
@@ -45,28 +39,27 @@ import com.github.robozonky.internal.test.DateUtil;
  * Knowledge of this token will allow anyone to access the service as if they were the authenticated user. This is
  * therefore highly sensitive information and should never be kept in memory for longer than necessary.
  */
-@XmlRootElement(name = "token")
-@XmlAccessorType(XmlAccessType.FIELD)
-public class ZonkyApiTokenImpl extends BaseEntity implements ZonkyApiToken {
+public class ZonkyApiTokenImpl implements ZonkyApiToken {
 
     public static final String REFRESH_TOKEN_STRING = "refresh_token";
     private static final AtomicLong ID_GENERATOR = new AtomicLong(0);
-    @XmlTransient
+    @JsonbTransient
     private final long id = ID_GENERATOR.getAndIncrement();
-    @XmlElement(name = "access_token")
+    @JsonbProperty("access_token")
+    @JsonbTypeAdapter(CharArrayAdapter.class)
     private char[] accessToken;
-    @XmlElement(name = REFRESH_TOKEN_STRING)
+    @JsonbProperty(REFRESH_TOKEN_STRING)
+    @JsonbTypeAdapter(CharArrayAdapter.class)
     private char[] refreshToken;
-    @XmlElement(name = "token_type")
+    @JsonbProperty("token_type")
     private String type;
-    @XmlElement
     private String scope;
-    @XmlElement(name = "expires_in")
+    @JsonbProperty("expires_in")
     private int expiresIn;
     /**
      * This is not part of the Zonky API, but it will be useful inside RoboZonky.
      */
-    @XmlTransient
+    @JsonbTransient
     private OffsetDateTime obtainedOn = DateUtil.offsetNow();
 
     ZonkyApiTokenImpl() {
@@ -96,11 +89,9 @@ public class ZonkyApiTokenImpl extends BaseEntity implements ZonkyApiToken {
     }
 
     public static ZonkyApiToken unmarshal(final String token) {
-        try {
-            final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiTokenImpl.class);
-            final Unmarshaller u = ctx.createUnmarshaller();
-            return (ZonkyApiToken) u.unmarshal(new StringReader(token));
-        } catch (final JAXBException ex) {
+        try (final Jsonb jsonb = JsonbBuilder.create()) {
+            return jsonb.fromJson(token, ZonkyApiTokenImpl.class);
+        } catch (final Exception ex) {
             throw new IllegalStateException("Failed unmarshalling Zonky API token.", ex);
         }
     }
@@ -110,14 +101,10 @@ public class ZonkyApiTokenImpl extends BaseEntity implements ZonkyApiToken {
      * character elements.
      */
     public static String marshal(final ZonkyApiToken token) {
-        try {
-            final JAXBContext ctx = JAXBContext.newInstance(ZonkyApiTokenImpl.class);
-            final Marshaller m = ctx.createMarshaller();
-            final StringWriter w = new StringWriter();
-            m.marshal(token, w);
-            return w.toString();
-        } catch (final JAXBException ex) {
-            throw new IllegalStateException("Failed marshalling Zonky API token.", ex);
+        try (final Jsonb jsonb = JsonbBuilder.create()) {
+            return jsonb.toJson(token, ZonkyApiTokenImpl.class);
+        } catch (final Exception ex) {
+            throw new IllegalStateException("Failed umarshalling Zonky API token.", ex);
         }
     }
 

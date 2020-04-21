@@ -194,22 +194,8 @@
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jackson2-provider</artifactId>
+        <artifactId>resteasy-json-binding-provider</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion> <!-- should not be necessary, yet drags in a ton of dependencies -->
-            <groupId>com.github.fge</groupId>
-            <artifactId>json-patch</artifactId>
-          </exclusion>
-          <exclusion> <!-- dragged in on account of the previously excluded json-patch -->
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -220,32 +206,6 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore-nio</artifactId>
         <version>4.4.13</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-        <exclusions>
-          <exclusion> <!-- Clashes with jakarta.activation from jakarta.mail. -->
-            <groupId>jakarta.activation</groupId>
-            <artifactId>jakarta.activation-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <!-- Email notifications. -->
       <dependency>

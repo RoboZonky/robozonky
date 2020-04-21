@@ -21,8 +21,6 @@ import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.BaseInvestment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -34,19 +32,13 @@ import com.github.robozonky.internal.test.DateUtil;
  * Do not use instances of this class directly. Instead, use {@link InvestmentImpl}. Otherwise you may be bitten by
  * various quirks of the Zonky API, returning null in unexpected places.
  */
-abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
+abstract class BaseInvestmentImpl implements BaseInvestment {
 
-    @XmlElement
     private long id;
-    @XmlElement
     private int loanId;
-    @XmlElement
     private Currency currency = Defaults.CURRENCY;
-    @XmlElement
     private Money amount;
-    @XmlElement
     private InvestmentStatus status;
-    @XmlElement
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
     BaseInvestmentImpl() {

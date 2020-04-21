@@ -16,17 +16,17 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.json.bind.adapter.JsonbAdapter;
 
-class CharArrayAdapter extends XmlAdapter<String, char[]> {
+final class CharArrayAdapter implements JsonbAdapter<char[], String> {
 
     @Override
-    public char[] unmarshal(final String s) {
-        return s.toCharArray();
+    public String adaptToJson(char[] obj) {
+        return String.valueOf(obj);
     }
 
     @Override
-    public String marshal(final char[] charArray) {
-        return String.valueOf(charArray);
+    public char[] adaptFromJson(String obj) {
+        return obj.toCharArray();
     }
 }

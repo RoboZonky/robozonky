@@ -16,22 +16,22 @@
 
 package com.github.robozonky.api;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.json.bind.adapter.JsonbAdapter;
 
-final class MoneyAdapter extends XmlAdapter<String, Money> {
+final class MoneyAdapter implements JsonbAdapter<Money, String> {
 
     @Override
-    public Money unmarshal(String v) {
-        return Money.from(v);
+    public String adaptToJson(Money obj) {
+        if (obj.isZero()) {
+            return "0";
+        }
+        return obj.getValue()
+                .stripTrailingZeros()
+                .toPlainString();
     }
 
     @Override
-    public String marshal(Money v) {
-        if (v.isZero()) {
-            return "0";
-        }
-        return v.getValue()
-            .stripTrailingZeros()
-            .toPlainString();
+    public Money adaptFromJson(String obj) {
+        return Money.from(obj);
     }
 }

@@ -19,14 +19,11 @@ package com.github.robozonky.internal.remote.entities;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 
-public class PurchaseRequestImpl extends BaseEntity implements PurchaseRequest {
+public class PurchaseRequestImpl implements PurchaseRequest {
 
-    @XmlElement
     private BigDecimal amount;
 
     public PurchaseRequestImpl(final Participation participation) {

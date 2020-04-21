@@ -19,8 +19,6 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -37,9 +35,7 @@ import com.github.robozonky.api.remote.enums.Region;
  */
 public class LoanImpl extends BaseLoanImpl implements Loan {
 
-    @XmlElement
     protected String url;
-    @XmlElement
     protected MyInvestmentImpl myInvestment;
 
     public LoanImpl() {

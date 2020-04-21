@@ -24,8 +24,6 @@ import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.entities.ReservationPreference;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
@@ -33,7 +31,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.util.functional.Memoizer;
 import com.github.robozonky.internal.util.functional.Tuple;
 
-public class ReservationPreferencesImpl extends BaseEntity implements ReservationPreferences {
+public class ReservationPreferencesImpl implements ReservationPreferences {
 
     public static boolean isEnabled(ReservationPreferences reservationPreferences) {
         return reservationPreferences.isReservationsEnabled() &&
@@ -50,9 +48,7 @@ public class ReservationPreferencesImpl extends BaseEntity implements Reservatio
         return new ReservationPreferencesImpl(prefs);
     });
 
-    @XmlElement
     private boolean reservationsEnabled;
-    @XmlElement
     private Set<ReservationPreferenceImpl> reservationPreferences;
 
     private ReservationPreferencesImpl() {
