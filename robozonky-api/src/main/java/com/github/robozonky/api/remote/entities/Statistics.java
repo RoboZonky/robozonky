@@ -29,7 +29,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
-public class Statistics extends BaseEntity {
+public class Statistics {
 
     private static final Supplier<Statistics> EMPTY = Memoizer.memoize(Statistics::emptyAndFresh);
 

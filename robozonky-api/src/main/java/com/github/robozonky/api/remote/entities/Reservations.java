@@ -22,7 +22,7 @@ import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Reservations extends BaseEntity {
+public class Reservations {
 
     private Collection<Reservation> reservations = Collections.emptyList();
 

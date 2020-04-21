@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 
-public class SellPriceInfo extends BaseEntity {
+public class SellPriceInfo {
 
     @XmlElement
     private String sellPrice;

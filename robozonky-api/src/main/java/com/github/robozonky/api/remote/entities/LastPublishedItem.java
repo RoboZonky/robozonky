@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.internal.test.DateUtil;
 
-public class LastPublishedItem extends BaseEntity {
+public class LastPublishedItem {
 
     private long id;
     // Expensive to deserialize, do it on-demand.

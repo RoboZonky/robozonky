@@ -25,7 +25,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class RiskPortfolio extends BaseEntity {
+public class RiskPortfolio {
 
     private Ratio interestRate;
     @XmlElement

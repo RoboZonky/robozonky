@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanHealth;
 
-public class LoanHealthStats extends BaseEntity {
+public class LoanHealthStats {
 
     @XmlElement
     private int paidInstalments;

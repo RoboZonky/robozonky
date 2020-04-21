@@ -33,7 +33,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
 
-public class Participation extends BaseEntity {
+public class Participation {
 
     protected long borrowerNo;
     protected int loanId;

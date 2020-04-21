@@ -24,7 +24,7 @@ import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Resolutions extends BaseEntity {
+public class Resolutions {
 
     private List<ResolutionRequest> resolutions = Collections.emptyList();
 

@@ -30,7 +30,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.util.functional.Memoizer;
 import com.github.robozonky.internal.util.functional.Tuple;
 
-public class ReservationPreferences extends BaseEntity {
+public class ReservationPreferences {
 
     public static final Supplier<ReservationPreferences> TOTAL = Memoizer.memoize(() -> {
         final ReservationPreference[] prefs = Arrays.stream(Rating.values())

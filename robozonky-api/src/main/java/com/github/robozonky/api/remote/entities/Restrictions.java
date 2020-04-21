@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 
-public class Restrictions extends BaseEntity {
+public class Restrictions {
 
     @XmlElement
     private boolean cannotInvest;

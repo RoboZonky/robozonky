@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.Money;
 
-public class SellRequest extends BaseEntity {
+public class SellRequest {
 
     private long investmentId;
     private BigDecimal remainingPrincipal;

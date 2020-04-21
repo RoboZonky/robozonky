@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.Resolution;
 
-public class ResolutionRequest extends BaseEntity {
+public class ResolutionRequest {
 
     private long reservationId;
     private Resolution resolution;

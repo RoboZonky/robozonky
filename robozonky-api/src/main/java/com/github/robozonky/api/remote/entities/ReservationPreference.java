@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class ReservationPreference extends BaseEntity {
+public class ReservationPreference {
 
     private LoanTermInterval loanTermInterval;
     private Rating ratingType;

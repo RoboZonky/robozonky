@@ -21,7 +21,7 @@ import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class PurchaseRequest extends BaseEntity {
+public class PurchaseRequest {
 
     private BigDecimal amount;
 

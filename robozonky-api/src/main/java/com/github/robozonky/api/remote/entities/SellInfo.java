@@ -20,10 +20,7 @@ import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
 
-/*
-"loanHealthStatsRo":,"priceInfo":,"sellPrice":308.58}
- */
-public class SellInfo extends BaseEntity {
+public class SellInfo {
 
     @XmlElement
     private Object loanHealthStatsRo; // For some reason, identical to loanHealthStats; ignore.

@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 
-public class MyReservation extends BaseEntity {
+public class MyReservation {
 
     private long id;
 

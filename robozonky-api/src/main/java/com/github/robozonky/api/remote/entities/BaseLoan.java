@@ -33,7 +33,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
 
-public abstract class BaseLoan extends BaseEntity {
+public abstract class BaseLoan {
 
     protected boolean topped;
     protected boolean covered;
