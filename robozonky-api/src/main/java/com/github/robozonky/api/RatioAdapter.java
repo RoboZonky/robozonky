@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.api;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import com.github.robozonky.api.Ratio;
 
 class RatioAdapter extends XmlAdapter<String, Ratio> {
 
