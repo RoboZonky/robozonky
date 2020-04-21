@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.entities;
+package com.github.robozonky.internal.remote.adapters;
 
-import static org.assertj.core.api.Assertions.*;
+import javax.json.bind.adapter.JsonbAdapter;
 
-import java.util.UUID;
+import com.github.robozonky.api.Ratio;
 
-import org.junit.jupiter.api.Test;
+public final class RatioAdapter implements JsonbAdapter<Ratio, String> {
 
-class CharArrayAdapterTest {
-
-    private final CharArrayAdapter adapter = new CharArrayAdapter();
-
-    @Test
-    void marshalAndUnmarshal() {
-        final String s = UUID.randomUUID()
-            .toString();
-        final char[] array = adapter.adaptFromJson(s);
-        final String newS = adapter.adaptToJson(array);
-        assertThat(newS).isEqualTo(s);
+    @Override
+    public String adaptToJson(Ratio obj) {
+        return obj.bigDecimalValue()
+            .toPlainString();
     }
 
+    @Override
+    public Ratio adaptFromJson(String obj) {
+        return Ratio.fromRaw(obj);
+    }
 }

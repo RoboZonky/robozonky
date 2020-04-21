@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api;
+package com.github.robozonky.internal.remote.adapters;
 
 import javax.json.bind.adapter.JsonbAdapter;
 
-final class RatioAdapter implements JsonbAdapter<Ratio, String> {
+public final class CharArrayAdapter implements JsonbAdapter<char[], String> {
 
     @Override
-    public String adaptToJson(Ratio obj) {
-        return obj.bigDecimalValue()
-            .toPlainString();
+    public String adaptToJson(char[] obj) {
+        return String.valueOf(obj);
     }
 
     @Override
-    public Ratio adaptFromJson(String obj) {
-        return Ratio.fromRaw(obj);
+    public char[] adaptFromJson(String obj) {
+        return obj.toCharArray();
     }
 }

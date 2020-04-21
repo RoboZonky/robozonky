@@ -31,6 +31,7 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.adapters.CharArrayAdapter;
 import com.github.robozonky.internal.test.DateUtil;
 
 /**
@@ -62,7 +63,7 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
     @JsonbTransient
     private OffsetDateTime obtainedOn = DateUtil.offsetNow();
 
-    ZonkyApiTokenImpl() {
+    public ZonkyApiTokenImpl() {
         // fox JAXB
     }
 

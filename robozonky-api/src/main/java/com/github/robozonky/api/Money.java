@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.adapters.MoneyAdapter;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
 /**

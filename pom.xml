@@ -160,10 +160,6 @@
         <version>${version.org.jboss.resteasy}</version>
         <exclusions>
           <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
             <groupId>org.jboss.spec.javax.annotation</groupId>
             <artifactId>jboss-annotations-api_1.3_spec</artifactId>
           </exclusion>
@@ -179,10 +175,6 @@
             <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
           </exclusion>
           <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
             <groupId>org.jboss.spec.javax.annotation</groupId>
             <artifactId>jboss-annotations-api_1.3_spec</artifactId>
           </exclusion>
@@ -192,10 +184,21 @@
           </exclusion>
         </exclusions>
       </dependency>
+      <!-- JSON-B -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-json-binding-provider</artifactId>
         <version>${version.org.jboss.resteasy}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.json.bind</groupId>
+        <artifactId>jakarta.json.bind-api</artifactId>
+        <version>1.0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish</groupId>
+        <artifactId>jakarta.json</artifactId>
+        <version>1.1.6</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -212,17 +215,6 @@
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
         <version>2.3.30</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>2.3.2</version>
-        <exclusions>
-          <exclusion> <!-- Clashes with jakarta.activation from jakarta.mail. -->
-            <groupId>jakarta.activation</groupId>
-            <artifactId>jakarta.activation-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>jakarta.mail</groupId>
@@ -386,7 +378,7 @@
         <artifactId>mockserver-core</artifactId>
         <version>${version.org.mock-server}</version>
         <exclusions>
-          <exclusion> <!-- We have our own, based on Jakarta EE -->
+          <exclusion> <!-- We have our own. -->
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
           </exclusion>

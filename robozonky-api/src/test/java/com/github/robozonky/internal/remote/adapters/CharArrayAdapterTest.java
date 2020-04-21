@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api;
+package com.github.robozonky.internal.remote.adapters;
 
-import javax.json.bind.adapter.JsonbAdapter;
+import static org.assertj.core.api.Assertions.*;
 
-final class MoneyAdapter implements JsonbAdapter<Money, String> {
+import java.util.UUID;
 
-    @Override
-    public String adaptToJson(Money obj) {
-        if (obj.isZero()) {
-            return "0";
-        }
-        return obj.getValue()
-                .stripTrailingZeros()
-                .toPlainString();
+import org.junit.jupiter.api.Test;
+
+class CharArrayAdapterTest {
+
+    private final CharArrayAdapter adapter = new CharArrayAdapter();
+
+    @Test
+    void marshalAndUnmarshal() {
+        final String s = UUID.randomUUID()
+            .toString();
+        final char[] array = adapter.adaptFromJson(s);
+        final String newS = adapter.adaptToJson(array);
+        assertThat(newS).isEqualTo(s);
     }
 
-    @Override
-    public Money adaptFromJson(String obj) {
-        return Money.from(obj);
-    }
 }
