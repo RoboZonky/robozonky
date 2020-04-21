@@ -16,7 +16,7 @@
 
 package com.github.robozonky.internal.remote;
 
-import static com.github.robozonky.api.remote.entities.ZonkyApiToken.REFRESH_TOKEN_STRING;
+import static com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl.REFRESH_TOKEN_STRING;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.endpoints.ZonkyOAuthApi;

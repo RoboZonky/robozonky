@@ -35,6 +35,7 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -42,7 +43,7 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 class ReservationSessionTest extends AbstractZonkyLeveragingTest {
 
     private static Reservation mockReservation() {
-        final MyReservation mr = mock(MyReservation.class);
+        final MyReservation mr = mock(MyReservationImpl.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(200));
         return new MockReservationBuilder()
             .setMyReservation(mr)

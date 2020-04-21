@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class FallbackSecretProviderTest {
 
@@ -45,11 +46,11 @@ class FallbackSecretProviderTest {
                 FallbackSecretProviderTest.PWD.toCharArray());
         // make sure original values were set
         assertThat(p.getToken()).isEmpty();
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID()
+        final ZonkyApiToken token = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                UUID.randomUUID()
+                                                          UUID.randomUUID()
                     .toString(),
-                299);
+                                                          299);
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
     }

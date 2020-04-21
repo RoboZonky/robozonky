@@ -30,6 +30,9 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.MyReservationImpl;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 
 class ReservationDescriptorTest {
 
@@ -38,9 +41,9 @@ class ReservationDescriptorTest {
     }
 
     private static Reservation mockReservation(final Rating r) {
-        final MyReservation mr = mock(MyReservation.class);
+        final MyReservation mr = mock(MyReservationImpl.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(1_000));
-        final Reservation rs = mock(Reservation.class);
+        final Reservation rs = mock(ReservationImpl.class);
         when(rs.getId()).thenReturn(1);
         when(rs.getRating()).thenReturn(r);
         when(rs.getAmount()).thenReturn(Money.from(2_000));
@@ -52,7 +55,7 @@ class ReservationDescriptorTest {
 
     @Test
     void constructor() {
-        final Loan l = mock(Loan.class);
+        final Loan l = mock(LoanImpl.class);
         final Reservation mockedReservation = ReservationDescriptorTest.mockReservation(Rating.AAAAA);
         final ReservationDescriptor ld = new ReservationDescriptor(mockedReservation, () -> l);
         assertThat(ld.item()).isSameAs(mockedReservation);

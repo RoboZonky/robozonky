@@ -38,6 +38,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
+import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -46,7 +47,7 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static Reservation mockReservation(final int amount) {
-        final MyReservation r = mock(MyReservation.class);
+        final MyReservation r = mock(MyReservationImpl.class);
         when(r.getReservedAmount()).thenReturn(Money.from(amount));
         return new MockReservationBuilder()
             .setAmount(amount)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.internal.remote.entities;
 
 import java.time.YearMonth;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 class YearMonthAdapter extends XmlAdapter<String, YearMonth> {

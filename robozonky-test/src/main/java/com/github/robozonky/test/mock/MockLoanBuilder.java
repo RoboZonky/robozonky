@@ -21,17 +21,17 @@ import static org.mockito.Mockito.*;
 import java.net.URL;
 import java.util.Optional;
 
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
-public class MockLoanBuilder extends BaseLoanMockBuilder<Loan, MockLoanBuilder> {
+public class MockLoanBuilder extends BaseLoanMockBuilder<LoanImpl, MockLoanBuilder> {
 
-    public static Loan fresh() {
+    public static LoanImpl fresh() {
         return new MockLoanBuilder().build();
     }
 
     public MockLoanBuilder() {
-        super(Loan.class);
+        super(LoanImpl.class);
     }
 
     public MockLoanBuilder setUrl(final URL url) {

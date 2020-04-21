@@ -16,48 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import com.github.robozonky.api.Money;
 
-public class MyReservation {
+public interface MyReservation {
 
-    private long id;
+    long getId();
 
-    @XmlElement
-    private String reservedAmount = "0";
-
-    /*
-     * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
-     * unknown fields by Jackson.
-     */
-    @XmlElement
-    private Object timeCreated;
-    @XmlElement
-    private Object deadline;
-
-    MyReservation() {
-        // for JAXB
-    }
-
-    @XmlElement
-    public long getId() {
-        return id;
-    }
-
-    @XmlTransient
-    public Money getReservedAmount() {
-        return Money.from(reservedAmount);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", MyReservation.class.getSimpleName() + "[", "]")
-            .add("id=" + id)
-            .add("reservedAmount='" + reservedAmount + "'")
-            .toString();
-    }
+    Money getReservedAmount();
 }

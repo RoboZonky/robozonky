@@ -35,18 +35,21 @@ import com.github.robozonky.api.remote.entities.SellPriceInfo;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.SellFeeImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
 class SellInfoCacheTest extends AbstractZonkyLeveragingTest {
 
     public static SellInfo mockSellInfo(final BigDecimal price, final BigDecimal fee) {
-        SellFee sellFee = mock(SellFee.class);
+        SellFee sellFee = mock(SellFeeImpl.class);
         when(sellFee.getValue()).thenReturn(Money.from(fee));
         when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
-        SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
+        SellPriceInfo sellPriceInfo = mock(SellPriceInfoImpl.class);
         when(sellPriceInfo.getFee()).thenReturn(sellFee);
         when(sellPriceInfo.getSellPrice()).thenReturn(Money.from(price));
-        SellInfo sellInfo = mock(SellInfo.class);
+        SellInfo sellInfo = mock(SellInfoImpl.class);
         when(sellInfo.getPriceInfo()).thenReturn(sellPriceInfo);
         return sellInfo;
     }

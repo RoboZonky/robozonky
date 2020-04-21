@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.internal.remote.entities;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.time.LocalDate;
 
-class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
+class CharArrayAdapter extends XmlAdapter<String, char[]> {
 
-    public static LocalDate fromString(final String s) {
-        return new LocalDateAdapter().unmarshal(s);
+    @Override
+    public char[] unmarshal(final String s) {
+        return s.toCharArray();
     }
 
     @Override
-    public LocalDate unmarshal(final String s) {
-        return LocalDate.parse(s);
-    }
-
-    @Override
-    public String marshal(final LocalDate localDate) {
-        return localDate.toString();
+    public String marshal(final char[] charArray) {
+        return String.valueOf(charArray);
     }
 }

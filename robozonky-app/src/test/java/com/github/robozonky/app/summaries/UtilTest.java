@@ -40,6 +40,11 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.RiskPortfolioImpl;
+import com.github.robozonky.internal.remote.entities.SellFeeImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
+import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
@@ -54,8 +59,8 @@ class UtilTest extends AbstractZonkyLeveragingTest {
             .setPaidInterest(BigDecimal.ZERO)
             .setPaidPenalty(BigDecimal.ZERO)
             .build();
-        final Statistics stats = mock(Statistics.class);
-        final RiskPortfolio r = new RiskPortfolio(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal()
+        final Statistics stats = mock(StatisticsImpl.class);
+        final RiskPortfolio r = new RiskPortfolioImpl(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal()
             .orElseThrow());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
         final Zonky zonky = harmlessZonky();
@@ -68,13 +73,13 @@ class UtilTest extends AbstractZonkyLeveragingTest {
     }
 
     private static void mockSellInfo(Zonky zonky, final BigDecimal price, final BigDecimal fee) {
-        SellFee sellFee = mock(SellFee.class);
+        SellFee sellFee = mock(SellFeeImpl.class);
         when(sellFee.getValue()).thenReturn(Money.from(fee));
         when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
-        SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
+        SellPriceInfo sellPriceInfo = mock(SellPriceInfoImpl.class);
         when(sellPriceInfo.getSellPrice()).thenReturn(Money.from(price));
         when(sellPriceInfo.getFee()).thenReturn(sellFee);
-        SellInfo sellInfo = mock(SellInfo.class);
+        SellInfo sellInfo = mock(SellInfoImpl.class);
         when(sellInfo.getPriceInfo()).thenReturn(sellPriceInfo);
         when(zonky.getSellInfo(anyLong())).thenReturn(sellInfo);
     }

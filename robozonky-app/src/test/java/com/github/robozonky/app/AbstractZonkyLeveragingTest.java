@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
+import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
@@ -37,7 +38,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
     }
 
     private static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
-        final MyInvestment m = mock(MyInvestment.class);
+        final MyInvestment m = mock(MyInvestmentImpl.class);
         when(m.getId()).thenReturn(RANDOM.nextLong());
         when(m.getTimeCreated()).thenReturn(Optional.of(creationDate));
         return m;

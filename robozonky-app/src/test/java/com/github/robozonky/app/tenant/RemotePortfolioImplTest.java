@@ -29,11 +29,12 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.RiskPortfolioImpl;
+import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
@@ -61,9 +62,9 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
             .setAmount(BigDecimal.TEN)
             .build();
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
-        Statistics s = mock(Statistics.class);
+        Statistics s = mock(StatisticsImpl.class);
         when(s.getRiskPortfolio())
-            .thenReturn(singletonList(new RiskPortfolio(Rating.D, Money.from(1), Money.from(2), Money.from(3))));
+            .thenReturn(singletonList(new RiskPortfolioImpl(Rating.D, Money.from(1), Money.from(2), Money.from(3))));
         when(zonky.getStatistics()).thenReturn(s);
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertSoftly(softly -> {

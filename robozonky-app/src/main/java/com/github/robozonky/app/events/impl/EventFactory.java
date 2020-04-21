@@ -68,10 +68,11 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.api.strategies.RecommendedReservation;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.LazyEvent;
 
 /**
- * Events which require an instance of {@link PortfolioOverview} or {@link Loan} are prime candidates for lazy
+ * Events which require an instance of {@link PortfolioOverview} or {@link LoanImpl} are prime candidates for lazy
  * instantiation, as retrieving it may incur some fairly heavy logic, incl. network requests.
  */
 public final class EventFactory {

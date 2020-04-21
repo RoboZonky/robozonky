@@ -16,64 +16,17 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import com.github.robozonky.api.Money;
 
-public class Restrictions {
+public interface Restrictions {
 
-    @XmlElement
-    private boolean cannotInvest;
-    @XmlElement
-    private boolean cannotAccessSmp;
-    @XmlElement
-    private int minimumInvestmentAmount = 200;
-    @XmlElement
-    private int maximumInvestmentAmount = 5_000;
-    @XmlElement
-    private int investmentStep = 200;
+    boolean isCannotInvest();
 
-    public Restrictions(final boolean permissive) {
-        this.cannotAccessSmp = !permissive;
-        this.cannotInvest = !permissive;
-    }
+    boolean isCannotAccessSmp();
 
-    public Restrictions() {
-        this(false);
-    }
+    Money getMinimumInvestmentAmount();
 
-    public boolean isCannotInvest() {
-        return cannotInvest;
-    }
+    Money getInvestmentStep();
 
-    public boolean isCannotAccessSmp() {
-        return cannotAccessSmp;
-    }
-
-    @XmlTransient
-    public Money getMinimumInvestmentAmount() {
-        return Money.from(minimumInvestmentAmount);
-    }
-
-    public Money getInvestmentStep() {
-        return Money.from(investmentStep);
-    }
-
-    public Money getMaximumInvestmentAmount() {
-        return Money.from(maximumInvestmentAmount);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", Restrictions.class.getSimpleName() + "[", "]")
-            .add("cannotAccessSmp=" + cannotAccessSmp)
-            .add("cannotInvest=" + cannotInvest)
-            .add("investmentStep=" + investmentStep)
-            .add("maximumInvestmentAmount=" + maximumInvestmentAmount)
-            .add("minimumInvestmentAmount=" + minimumInvestmentAmount)
-            .toString();
-    }
+    Money getMaximumInvestmentAmount();
 }

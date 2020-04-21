@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -40,7 +41,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void emptyGet() {
         final int loanId = 1;
-        final MyInvestment mi = mock(MyInvestment.class);
+        final MyInvestment mi = mock(MyInvestmentImpl.class);
         final OffsetDateTime d = OffsetDateTime.now();
         when(mi.getTimeCreated()).thenReturn(Optional.of(d));
         final Loan loan = new MockLoanBuilder()

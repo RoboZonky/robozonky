@@ -16,41 +16,11 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-
 import com.github.robozonky.api.remote.enums.Resolution;
 
-public class ResolutionRequest {
+public interface ResolutionRequest {
 
-    private long reservationId;
-    private Resolution resolution;
+    long getReservationId();
 
-    public ResolutionRequest(final long reservationId, final Resolution resolution) {
-        this.reservationId = reservationId;
-        this.resolution = resolution;
-    }
-
-    ResolutionRequest() {
-        // for JAXB
-    }
-
-    @XmlElement
-    public long getReservationId() {
-        return reservationId;
-    }
-
-    @XmlElement
-    public Resolution getResolution() {
-        return resolution;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", ResolutionRequest.class.getSimpleName() + "[", "]")
-            .add("reservationId=" + reservationId)
-            .add("resolution=" + resolution)
-            .toString();
-    }
+    Resolution getResolution();
 }

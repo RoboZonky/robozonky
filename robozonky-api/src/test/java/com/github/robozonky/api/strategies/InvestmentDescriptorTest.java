@@ -29,14 +29,16 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 
 class InvestmentDescriptorTest {
 
-    private static final Loan LOAN = mock(Loan.class);
+    private static final Loan LOAN = mock(LoanImpl.class);
 
     private static Investment mockInvestment(final BigDecimal amount) {
-        final Investment i = mock(Investment.class);
+        final Investment i = mock(InvestmentImpl.class);
         when(i.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(amount)));
         return i;
     }
@@ -45,7 +47,7 @@ class InvestmentDescriptorTest {
     void recommend() {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
-        final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN, () -> mock(SellInfo.class));
+        final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN, () -> mock(SellInfoImpl.class));
         assertThat(id.item()).isSameAs(i);
         assertThat(id.sellInfo()).isNotEmpty();
         final Optional<RecommendedInvestment> r = id.recommend();

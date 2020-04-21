@@ -67,7 +67,11 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MutableParticipation;
+import com.github.robozonky.internal.remote.entities.MyReservationImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -75,14 +79,14 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedLoan recommendedLoan() {
-        final Loan loan = new MockLoanBuilder().setNonReservedRemainingInvestment(2000)
+        final LoanImpl loan = new MockLoanBuilder().setNonReservedRemainingInvestment(2000)
             .build();
         return new LoanDescriptor(loan).recommend(Money.from(200))
             .orElse(null);
     }
 
     private static RecommendedParticipation recommendedParticipation() {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
         return new ParticipationDescriptor(p, MockLoanBuilder::fresh).recommend()
             .orElse(null);
@@ -97,7 +101,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     }
 
     private static RecommendedReservation recommendedReservation() {
-        final MyReservation mr = mock(MyReservation.class);
+        final MyReservation mr = mock(MyReservationImpl.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(200));
         final Reservation r = new MockReservationBuilder()
             .setMyReservation(mr)
@@ -284,7 +288,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void purchasingCompleted() {
-        var participation = mock(Participation.class);
+        var participation = mock(ParticipationImpl.class);
         var e = EventFactory.purchasingCompleted(singleton(participation), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getParticipationsPurchased())
@@ -324,7 +328,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void reservationCheckCompleted() {
-        var reservation = mock(Reservation.class);
+        var reservation = mock(ReservationImpl.class);
         var e = EventFactory.reservationCheckCompleted(singleton(reservation), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getReservationsAccepted())

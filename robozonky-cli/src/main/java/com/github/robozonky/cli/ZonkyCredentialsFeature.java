@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.util.FileUtil;
@@ -93,7 +94,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
         final SecretProvider s = SecretProvider.keyStoreBased(keyStoreHandler);
         final ZonkyApiToken token = s.getToken()
             .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
-        Files.write(target, ZonkyApiToken.marshal(token)
+        Files.write(target, ZonkyApiTokenImpl.marshal(token)
             .getBytes(Defaults.CHARSET));
         FileUtil.configurePermissions(target.toFile(), false);
         LOGGER.info("Raw token XML written to {}.", target);

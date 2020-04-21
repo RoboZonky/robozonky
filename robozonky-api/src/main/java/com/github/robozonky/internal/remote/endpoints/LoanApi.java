@@ -24,14 +24,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.LastPublishedItem;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface LoanApi extends EntityCollectionApi<Loan> {
+public interface LoanApi extends EntityCollectionApi<LoanImpl> {
 
     /**
      * @return Every single loan that ever was.
@@ -40,13 +40,13 @@ public interface LoanApi extends EntityCollectionApi<Loan> {
     @GET
     @Path(ApiConstants.MARKETPLACE)
     @Override
-    List<Loan> items();
+    List<LoanImpl> items();
 
     @GET
     @Path(ApiConstants.LOANS + "/last-published")
-    LastPublishedItem lastPublished();
+    LastPublishedItemImpl lastPublished();
 
     @GET
     @Path(ApiConstants.LOANS + "/{loanId}")
-    Loan item(@PathParam("loanId") int id);
+    LoanImpl item(@PathParam("loanId") int id);
 }

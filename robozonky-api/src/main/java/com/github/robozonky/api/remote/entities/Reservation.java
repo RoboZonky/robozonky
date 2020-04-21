@@ -16,28 +16,7 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
+public interface Reservation extends BaseLoan {
 
-import javax.xml.bind.annotation.XmlElement;
-
-public class Reservation extends BaseLoan {
-
-    private MyReservation myReservation;
-
-    protected Reservation() {
-        // for JAXB
-    }
-
-    @XmlElement
-    public MyReservation getMyReservation() {
-        return myReservation;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", Reservation.class.getSimpleName() + "[", "]")
-            .add("super=" + super.toString())
-            .add("myReservation=" + myReservation)
-            .toString();
-    }
+    MyReservation getMyReservation();
 }

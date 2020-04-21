@@ -26,17 +26,17 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 class LoanDescriptorTest {
 
-    static Loan mockLoan() {
+    static LoanImpl mockLoan() {
         return mockLoan(Rating.D);
     }
 
-    static Loan mockLoan(final Rating r) {
-        final Loan loan = mock(Loan.class);
+    static LoanImpl mockLoan(final Rating r) {
+        final LoanImpl loan = mock(LoanImpl.class);
         when(loan.getId()).thenReturn(1);
         when(loan.getRating()).thenReturn(r);
         when(loan.getAmount()).thenReturn(Money.from(2_000));
@@ -47,7 +47,7 @@ class LoanDescriptorTest {
 
     @Test
     void constructor() {
-        final Loan mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
+        final LoanImpl mockedLoan = LoanDescriptorTest.mockLoan(Rating.AAAAA);
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         assertSoftly(softly -> {
             softly.assertThat(ld.item())
@@ -59,7 +59,7 @@ class LoanDescriptorTest {
 
     @Test
     void equalsSelf() {
-        final Loan mockedLoan = LoanDescriptorTest.mockLoan();
+        final LoanImpl mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         assertThat(ld)
             .isNotEqualTo(null)
@@ -70,7 +70,7 @@ class LoanDescriptorTest {
 
     @Test
     void recommendAmount() {
-        final Loan mockedLoan = LoanDescriptorTest.mockLoan();
+        final LoanImpl mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<RecommendedLoan> r = ld.recommend(Money.from(200));
         assertThat(r).isPresent();
@@ -85,7 +85,7 @@ class LoanDescriptorTest {
 
     @Test
     void recommendWrongAmount() {
-        final Loan mockedLoan = LoanDescriptorTest.mockLoan();
+        final LoanImpl mockedLoan = LoanDescriptorTest.mockLoan();
         final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
         final Optional<RecommendedLoan> r = ld.recommend(mockedLoan.getNonReservedRemainingInvestment()
             .add(1));

@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.internal.remote.entities;
 
-import static org.assertj.core.api.Assertions.*;
+import java.time.OffsetDateTime;
 
-import java.util.UUID;
+import javax.xml.bind.annotation.XmlElement;
 
-import org.junit.jupiter.api.Test;
+import com.github.robozonky.api.remote.entities.Consent;
 
-class CharArrayAdapterTest {
+public class ConsentImpl implements Consent {
 
-    private final CharArrayAdapter adapter = new CharArrayAdapter();
+    @XmlElement
+    private OffsetDateTime agreedOn;
 
-    @Test
-    void marshalAndUnmarshal() {
-        final String s = UUID.randomUUID()
-            .toString();
-        final char[] array = adapter.unmarshal(s);
-        final String newS = adapter.marshal(array);
-        assertThat(newS).isEqualTo(s);
+    private ConsentImpl() {
+        // For JAXB.
+    }
+
+    ConsentImpl(OffsetDateTime agreedOn) {
+        this.agreedOn = agreedOn;
+    }
+
+    @Override
+    public OffsetDateTime getAgreedOn() {
+        return agreedOn;
     }
 
 }

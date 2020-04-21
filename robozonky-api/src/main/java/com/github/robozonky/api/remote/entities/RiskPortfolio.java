@@ -16,86 +16,21 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class RiskPortfolio {
+public interface RiskPortfolio {
 
-    private Ratio interestRate;
-    @XmlElement
-    private String unpaid;
-    @XmlElement
-    private String paid;
-    @XmlElement
-    private String due;
-    @XmlElement
-    private String totalAmount;
-    private Rating rating;
+    Ratio getInterestRate();
 
-    RiskPortfolio() {
-        // for JAXB
-    }
+    Money getUnpaid();
 
-    public RiskPortfolio(final Rating rating, final Money paid, final Money unpaid, final Money due) {
-        this.interestRate = rating.getInterestRate();
-        this.paid = paid.getValue()
-            .toPlainString();
-        this.unpaid = unpaid.getValue()
-            .toPlainString();
-        this.due = due.getValue()
-            .toPlainString();
-        this.rating = rating;
-        this.totalAmount = paid.add(unpaid)
-            .add(due)
-            .getValue()
-            .toPlainString();
-    }
+    Money getPaid();
 
-    @XmlElement
-    public Ratio getInterestRate() {
-        return interestRate;
-    }
+    Money getDue();
 
-    @XmlTransient
-    public Money getUnpaid() {
-        return Money.from(unpaid);
-    }
+    Money getTotalAmount();
 
-    @XmlTransient
-    public Money getPaid() {
-        return Money.from(paid);
-    }
-
-    @XmlTransient
-    public Money getDue() {
-        return Money.from(due);
-    }
-
-    @XmlTransient
-    public Money getTotalAmount() {
-        return Money.from(totalAmount);
-    }
-
-    @XmlElement
-    public Rating getRating() {
-        return rating;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", RiskPortfolio.class.getSimpleName() + "[", "]")
-            .add("due='" + due + "'")
-            .add("interestRate=" + interestRate)
-            .add("paid='" + paid + "'")
-            .add("rating=" + rating)
-            .add("totalAmount='" + totalAmount + "'")
-            .add("unpaid='" + unpaid + "'")
-            .toString();
-    }
+    Rating getRating();
 }

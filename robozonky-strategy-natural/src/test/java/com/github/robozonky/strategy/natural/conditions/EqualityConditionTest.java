@@ -27,10 +27,10 @@ import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -51,7 +51,7 @@ class EqualityConditionTest {
     }
 
     private static Wrapper<?> mockLoan(final Rating r) {
-        final Loan loan = new MockLoanBuilder().setRating(r)
+        final LoanImpl loan = new MockLoanBuilder().setRating(r)
             .build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }

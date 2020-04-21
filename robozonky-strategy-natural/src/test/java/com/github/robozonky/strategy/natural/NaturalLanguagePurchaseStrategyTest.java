@@ -37,6 +37,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -56,7 +57,7 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
     }
 
     private static Participation mockParticipation() {
-        return mock(Participation.class);
+        return mock(ParticipationImpl.class);
     }
 
     @Test

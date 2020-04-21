@@ -35,6 +35,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class ParticipationWrapperTest {
@@ -56,7 +57,7 @@ class ParticipationWrapperTest {
     private static final Participation PARTICIPATION = mockParticipation(LOAN);
 
     private static Participation mockParticipation(final Loan loan) {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getInterestRate()).thenReturn(Ratio.ONE);
         doReturn(Money.ZERO).when(p)
             .getRemainingPrincipal();
@@ -89,7 +90,7 @@ class ParticipationWrapperTest {
             .setAnnuity(BigDecimal.ONE)
             .build();
         final int invested = 200;
-        final Participation participation = mock(Participation.class);
+        final Participation participation = mock(ParticipationImpl.class);
         when(participation.getId()).thenReturn((long) (Math.random() * 1000));
         when(participation.getInterestRate()).thenReturn(Ratio.ONE);
         doReturn(Money.ZERO).when(participation)
@@ -167,7 +168,7 @@ class ParticipationWrapperTest {
             .setRating(Rating.C)
             .build();
         final int invested = 200;
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         doReturn(loan.getRating()).when(p)
             .getRating();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(invested));

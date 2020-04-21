@@ -29,11 +29,12 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 
 class ParticipationDescriptorTest {
 
     private static Participation mockParticipation(final BigDecimal amount) {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(amount));
         return p;
     }

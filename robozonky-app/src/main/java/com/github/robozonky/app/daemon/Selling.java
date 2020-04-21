@@ -41,10 +41,11 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
 /**
- * Implements selling of {@link Investment}s on the secondary marketplace.
+ * Implements selling of {@link InvestmentImpl}s on the secondary marketplace.
  */
 final class Selling implements TenantPayload {
 

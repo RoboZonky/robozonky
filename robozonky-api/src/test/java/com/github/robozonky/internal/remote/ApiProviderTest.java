@@ -26,11 +26,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class ApiProviderTest {
 
     private static ZonkyApiToken mockToken() {
-        final ZonkyApiToken t = mock(ZonkyApiToken.class);
+        final ZonkyApiToken t = mock(ZonkyApiTokenImpl.class);
         when(t.getAccessToken()).thenReturn(UUID.randomUUID()
             .toString()
             .toCharArray());

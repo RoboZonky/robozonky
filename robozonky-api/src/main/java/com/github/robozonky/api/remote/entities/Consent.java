@@ -18,23 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
 
-import javax.xml.bind.annotation.XmlElement;
+public interface Consent {
 
-public class Consent {
-
-    @XmlElement
-    private OffsetDateTime agreedOn;
-
-    private Consent() {
-        // For JAXB.
-    }
-
-    Consent(OffsetDateTime agreedOn) {
-        this.agreedOn = agreedOn;
-    }
-
-    public OffsetDateTime getAgreedOn() {
-        return agreedOn;
-    }
-
+    OffsetDateTime getAgreedOn();
 }

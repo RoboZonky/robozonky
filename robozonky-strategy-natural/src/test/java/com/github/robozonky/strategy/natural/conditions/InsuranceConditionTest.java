@@ -24,9 +24,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -36,7 +36,7 @@ class InsuranceConditionTest {
 
     @Test
     void basic() {
-        final Loan loan = new MockLoanBuilder()
+        final LoanImpl loan = new MockLoanBuilder()
             .setInsuranceActive(true)
             .build();
         final Wrapper<?> wrap = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);

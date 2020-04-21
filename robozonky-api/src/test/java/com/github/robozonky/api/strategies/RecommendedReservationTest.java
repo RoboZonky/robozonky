@@ -26,11 +26,12 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 
 class RecommendedReservationTest {
 
     private static Reservation mockReservation() {
-        final Reservation reservation = mock(Reservation.class);
+        final Reservation reservation = mock(ReservationImpl.class);
         when(reservation.getDatePublished()).thenReturn(OffsetDateTime.now());
         return reservation;
     }

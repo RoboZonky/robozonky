@@ -17,64 +17,20 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.OptionalInt;
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.enums.LoanHealth;
 
-public class LoanHealthStats {
+public interface LoanHealthStats {
 
-    @XmlElement
-    private int paidInstalments;
-    @XmlElement
-    private int dueInstalments;
-    @XmlElement
-    private Integer instalmentsCurrentlyInDue;
-    @XmlElement
-    private int longestDaysDue;
-    @XmlElement
-    private int daysSinceLastInDue;
-    @XmlElement
-    private LoanHealth loanHealthInfo = LoanHealth.HISTORICALLY_IN_DUE;
+    int getPaidInstalments();
 
-    LoanHealthStats() {
-        // For JAXB.
-    }
+    int getDueInstalments();
 
-    public int getPaidInstalments() {
-        return paidInstalments;
-    }
+    OptionalInt getInstalmentsCurrentlyInDue();
 
-    public int getDueInstalments() {
-        return dueInstalments;
-    }
+    int getLongestDaysDue();
 
-    public OptionalInt getInstalmentsCurrentlyInDue() {
-        return instalmentsCurrentlyInDue == null ? OptionalInt.empty() : OptionalInt.of(instalmentsCurrentlyInDue);
-    }
+    int getDaysSinceLastInDue();
 
-    public int getLongestDaysDue() {
-        return longestDaysDue;
-    }
-
-    public int getDaysSinceLastInDue() {
-        return daysSinceLastInDue;
-    }
-
-    public LoanHealth getLoanHealthInfo() {
-        return loanHealthInfo;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", LoanHealthStats.class.getSimpleName() + "[", "]")
-            .add("daysSinceLastInDue=" + daysSinceLastInDue)
-            .add("dueInstalments=" + dueInstalments)
-            .add("instalmentsCurrentlyInDue=" + instalmentsCurrentlyInDue)
-            .add("loanHealthInfo=" + loanHealthInfo)
-            .add("longestDaysDue=" + longestDaysDue)
-            .add("paidInstalments=" + paidInstalments)
-            .toString();
-    }
+    LoanHealth getLoanHealthInfo();
 }

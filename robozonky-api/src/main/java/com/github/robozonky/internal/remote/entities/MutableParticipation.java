@@ -21,14 +21,13 @@ import java.util.Currency;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public final class MutableParticipation extends Participation {
+public final class MutableParticipation extends ParticipationImpl {
 
     public MutableParticipation(Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {
         super(loan, remainingPrincipal, remainingInstalmentCount);

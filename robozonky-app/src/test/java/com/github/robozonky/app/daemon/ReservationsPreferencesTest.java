@@ -25,8 +25,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.ReservationPreference;
-import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -37,6 +35,8 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ReservationPreferenceImpl;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
 class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
@@ -88,7 +88,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
     @Test
     void enable() {
         final Zonky z = harmlessZonky();
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferences()); // disabled
+        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl()); // disabled
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(CORRECT_STRATEGY));
         final TenantPayload p = new ReservationsPreferences();
@@ -100,7 +100,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
     @Test
     void enabledAndDoesNotNeedChanging() {
         final Zonky z = harmlessZonky();
-        when(z.getReservationPreferences()).thenReturn(ReservationPreferences.TOTAL.get());
+        when(z.getReservationPreferences()).thenReturn(ReservationPreferencesImpl.TOTAL.get());
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(CORRECT_STRATEGY));
         final TenantPayload p = new ReservationsPreferences();
@@ -111,9 +111,9 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void enabledAndNeedsChanging() {
-        final ReservationPreference rp = new ReservationPreference(LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
+        final ReservationPreferenceImpl rp = new ReservationPreferenceImpl(LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
         final Zonky z = harmlessZonky();
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferences(rp));
+        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(rp));
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(CORRECT_STRATEGY));
         final TenantPayload p = new ReservationsPreferences();

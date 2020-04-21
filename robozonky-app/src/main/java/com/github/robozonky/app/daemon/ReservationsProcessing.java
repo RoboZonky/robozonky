@@ -27,6 +27,7 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
 final class ReservationsProcessing implements TenantPayload {
@@ -35,7 +36,7 @@ final class ReservationsProcessing implements TenantPayload {
 
     private static void process(final PowerTenant tenant, final ReservationStrategy strategy) {
         final ReservationPreferences preferences = tenant.call(Zonky::getReservationPreferences);
-        if (!ReservationPreferences.isEnabled(preferences)) {
+        if (!ReservationPreferencesImpl.isEnabled(preferences)) {
             LOGGER.info("Reservation system is disabled or there are no active categories.");
             return;
         }

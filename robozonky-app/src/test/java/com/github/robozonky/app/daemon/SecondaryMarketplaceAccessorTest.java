@@ -38,6 +38,8 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -47,7 +49,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     void readsMarketplace() {
         final Loan l = new MockLoanBuilder().build();
         int loanId = l.getId();
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getId()).thenReturn(1l);
         when(p.getLoanId()).thenReturn(loanId);
         when(p.getLoanHealthInfo()).thenReturn(LoanHealth.HEALTHY);
@@ -71,7 +73,7 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void detectsUpdates() {
         final Zonky z = harmlessZonky();
-        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedItem.class));
+        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedItemImpl.class));
         final PowerTenant t = mockTenant(z);
         final AtomicReference<LastPublishedItem> state = new AtomicReference<>(null);
         final AbstractMarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t,

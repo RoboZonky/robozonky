@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.endpoints.ZonkyOAuthApi;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class OAuthTest {
 
@@ -34,7 +35,7 @@ class OAuthTest {
     @Test
     void login() {
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
-        when(api.login(anyString(), anyString(), anyString())).thenReturn(mock(ZonkyApiToken.class));
+        when(api.login(anyString(), anyString(), anyString())).thenReturn(mock(ZonkyApiTokenImpl.class));
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);
         final OAuth oauth = new OAuth(wrapper);
         final ZonkyApiToken token = oauth.login(PASSWORD.toCharArray());
@@ -47,10 +48,10 @@ class OAuthTest {
     void refresh() {
         final String originalTokenId = UUID.randomUUID()
             .toString();
-        final ZonkyApiToken originToken = new ZonkyApiToken(UUID.randomUUID()
+        final ZonkyApiToken originToken = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(), originalTokenId,
-                OffsetDateTime.now());
-        final ZonkyApiToken resultToken = mock(ZonkyApiToken.class);
+                                                                OffsetDateTime.now());
+        final ZonkyApiTokenImpl resultToken = mock(ZonkyApiTokenImpl.class);
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
         when(api.refresh(eq(originalTokenId), anyString())).thenReturn(resultToken);
         final Api<ZonkyOAuthApi> wrapper = new Api<>(api);

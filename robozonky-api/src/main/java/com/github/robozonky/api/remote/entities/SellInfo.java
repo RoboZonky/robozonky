@@ -16,36 +16,9 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
+public interface SellInfo {
 
-import javax.xml.bind.annotation.XmlElement;
+    LoanHealthStats getLoanHealthStats();
 
-public class SellInfo {
-
-    @XmlElement
-    private Object loanHealthStatsRo; // For some reason, identical to loanHealthStats; ignore.
-    @XmlElement
-    private LoanHealthStats loanHealthStats;
-    @XmlElement
-    private SellPriceInfo priceInfo;
-
-    SellInfo() {
-        // for JAXB
-    }
-
-    public LoanHealthStats getLoanHealthStats() {
-        return loanHealthStats;
-    }
-
-    public SellPriceInfo getPriceInfo() {
-        return priceInfo;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SellInfo.class.getSimpleName() + "[", "]")
-            .add("loanHealthStats=" + loanHealthStats)
-            .add("priceInfo=" + priceInfo)
-            .toString();
-    }
+    SellPriceInfo getPriceInfo();
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.internal.remote.entities;
 
 import static com.github.robozonky.internal.test.DateUtil.offsetNow;
 import static org.assertj.core.api.Assertions.*;
@@ -23,19 +23,21 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-class LastPublishedItemTest {
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
+
+class LastPublishedItemImplTest {
 
     @Test
     void equality() {
-        final LastPublishedItem l = new LastPublishedItem(1);
+        final LastPublishedItem l = new LastPublishedItemImpl(1);
         assertThat(l).isEqualTo(l)
             .isNotEqualTo(null)
             .isNotEqualTo("")
-            .isNotEqualTo(new LastPublishedItem(l.getId() + 1));
-        final LastPublishedItem equal = new LastPublishedItem(l.getId(), l.getDatePublished());
+            .isNotEqualTo(new LastPublishedItemImpl(l.getId() + 1));
+        final LastPublishedItem equal = new LastPublishedItemImpl(l.getId(), l.getDatePublished());
         assertThat(l).isEqualTo(equal);
         assertThat(equal).isEqualTo(l);
-        final LastPublishedItem diff = new LastPublishedItem(l.getId(), offsetNow().plus(Duration.ofSeconds(1)));
+        final LastPublishedItem diff = new LastPublishedItemImpl(l.getId(), offsetNow().plus(Duration.ofSeconds(1)));
         assertThat(diff).isEqualTo(l);
         assertThat(l).isEqualTo(diff);
     }

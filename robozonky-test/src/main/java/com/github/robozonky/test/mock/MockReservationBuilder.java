@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,20 @@
 
 package com.github.robozonky.test.mock;
 
+import static org.mockito.Mockito.*;
+
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 
-import static org.mockito.Mockito.when;
-
-public class MockReservationBuilder extends BaseLoanMockBuilder<Reservation, MockReservationBuilder> {
+public class MockReservationBuilder extends BaseLoanMockBuilder<ReservationImpl, MockReservationBuilder> {
 
     public static Reservation fresh() {
         return new MockReservationBuilder().build();
     }
 
     public MockReservationBuilder() {
-        super(Reservation.class);
+        super(ReservationImpl.class);
     }
 
     public MockReservationBuilder setMyReservation(final MyReservation myReservation) {

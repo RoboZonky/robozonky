@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-@XmlJavaTypeAdapters({
-        @XmlJavaTypeAdapter(type = char[].class, value = CharArrayAdapter.class),
-        @XmlJavaTypeAdapter(type = OffsetDateTime.class, value = OffsetDateTimeAdapter.class),
-        @XmlJavaTypeAdapter(type = LocalDate.class, value = LocalDateAdapter.class),
-        @XmlJavaTypeAdapter(type = YearMonth.class, value = YearMonthAdapter.class),
-})
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.internal.remote.entities;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.YearMonth;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+class LocalDateAdapter extends XmlAdapter<String, LocalDate> {
+
+    public static LocalDate fromString(final String s) {
+        return new LocalDateAdapter().unmarshal(s);
+    }
+
+    @Override
+    public LocalDate unmarshal(final String s) {
+        return LocalDate.parse(s);
+    }
+
+    @Override
+    public String marshal(final LocalDate localDate) {
+        return localDate.toString();
+    }
+}

@@ -28,6 +28,8 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.util.StreamUtil;
 
@@ -78,7 +80,7 @@ public interface Tenant extends AutoCloseable {
     Optional<ReservationStrategy> getReservationStrategy();
 
     /**
-     * Retrieve a {@link Loan} from Zonky, possibly caching it in the process. If you don't wish to cache it,
+     * Retrieve a {@link LoanImpl} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getLoan(int)}.
      * 
      * @param loanId
@@ -89,7 +91,7 @@ public interface Tenant extends AutoCloseable {
     }
 
     /**
-     * Retrieve a {@link SellInfo} from Zonky, possibly caching it in the process. If you don't wish to cache it,
+     * Retrieve a {@link SellInfoImpl} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getSellInfo(long)}.
      * 
      * @param investmentId

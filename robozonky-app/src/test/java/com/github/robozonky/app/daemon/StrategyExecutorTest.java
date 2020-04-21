@@ -55,6 +55,8 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
@@ -94,7 +96,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void purchasingNoStrategy() {
-        final Participation mock = mock(Participation.class);
+        final Participation mock = mock(ParticipationImpl.class);
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> MockLoanBuilder.fresh());
         final PowerTenant tenant = mockTenant();
         final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor(pd);
@@ -112,7 +114,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Loan loan = new MockLoanBuilder().setAmount(200)
             .build();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
-        final Participation mock = mock(Participation.class);
+        final Participation mock = mock(ParticipationImpl.class);
         when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
         final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> loan);
         final PowerTenant tenant = mockTenant(zonky);
@@ -146,7 +148,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Rating rating = loan.getRating();
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
-        final Participation mock = mock(Participation.class);
+        final Participation mock = mock(ParticipationImpl.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loanId);
         when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
@@ -192,7 +194,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         doReturn(PurchaseResult.failure(new ClientErrorException(410))).when(zonky)
             .purchase(any());
-        final Participation mock = mock(Participation.class);
+        final Participation mock = mock(ParticipationImpl.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loanId);
         when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
@@ -221,7 +223,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
         doThrow(BadRequestException.class).when(zonky)
             .purchase(any());
-        final Participation mock = mock(Participation.class);
+        final Participation mock = mock(ParticipationImpl.class);
         when(mock.getId()).thenReturn(1L);
         when(mock.getLoanId()).thenReturn(loanId);
         when(mock.getRemainingPrincipal()).thenReturn(Money.from(250));
@@ -250,7 +252,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoStrategy() {
-        final Loan loan = new MockLoanBuilder()
+        final LoanImpl loan = new MockLoanBuilder()
             .setAmount(2)
             .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
@@ -276,7 +278,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoneAccepted() {
-        final Loan loan = new MockLoanBuilder()
+        final LoanImpl loan = new MockLoanBuilder()
             .setAmount(100_000)
             .setRating(Rating.D)
             .setMyInvestment(mockMyInvestment())
@@ -295,7 +297,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingSomeAccepted() {
-        final Loan loan = new MockLoanBuilder()
+        final LoanImpl loan = new MockLoanBuilder()
             .setAmount(100_000)
             .setRating(Rating.C)
             .setNonReservedRemainingInvestment(20_000)

@@ -33,14 +33,15 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
-    static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID()
+    static final ZonkyApiToken TOKEN = new ZonkyApiTokenImpl(UUID.randomUUID()
         .toString(),
-            UUID.randomUUID()
+                                                             UUID.randomUUID()
                 .toString(),
-            300);
+                                                             300);
 
     private static InputStream c(final ZonkyApiToken token) {
         final String error = "{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: "

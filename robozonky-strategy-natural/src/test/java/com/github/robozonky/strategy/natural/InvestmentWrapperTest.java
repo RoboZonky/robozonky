@@ -41,6 +41,10 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
+import com.github.robozonky.internal.remote.entities.SellFeeImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -228,15 +232,15 @@ class InvestmentWrapperTest {
     void sellInfoValues() {
         final Investment investment = MockInvestmentBuilder.fresh(LOAN, 200)
             .build();
-        final LoanHealthStats healthInfo = mock(LoanHealthStats.class);
+        final LoanHealthStats healthInfo = mock(LoanHealthStatsImpl.class);
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
-        final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
+        final SellPriceInfo priceInfo = mock(SellPriceInfoImpl.class);
         when(priceInfo.getDiscount()).thenReturn(Ratio.fromPercentage(10));
         when(priceInfo.getSellPrice()).thenReturn(Money.from(10));
-        final SellFee feeInfo = mock(SellFee.class);
+        final SellFee feeInfo = mock(SellFeeImpl.class);
         when(feeInfo.getValue()).thenReturn(Money.from(2));
         when(priceInfo.getFee()).thenReturn(feeInfo);
-        final SellInfo sellInfo = mock(SellInfo.class);
+        final SellInfo sellInfo = mock(SellInfoImpl.class);
         when(sellInfo.getLoanHealthStats()).thenReturn(healthInfo);
         when(sellInfo.getPriceInfo()).thenReturn(priceInfo);
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN, () -> sellInfo);

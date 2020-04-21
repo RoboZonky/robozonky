@@ -45,6 +45,7 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -149,7 +150,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Investment i = mockInvestment(loan, healthy ? LoanHealth.HEALTHY : LoanHealth.HISTORICALLY_IN_DUE);
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
-        SellInfo sellInfo = mock(SellInfo.class);
+        SellInfo sellInfo = mock(SellInfoImpl.class);
         when(zonky.getSellInfo(eq(i.getId()))).thenReturn(sellInfo);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());

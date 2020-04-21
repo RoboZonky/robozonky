@@ -21,10 +21,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.Reservations;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
+import com.github.robozonky.internal.remote.entities.ReservationsImpl;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
@@ -32,10 +32,10 @@ public interface ReservationApi {
 
     @GET
     @Path(ApiConstants.RESERVATIONS)
-    Reservations items();
+    ReservationsImpl items();
 
     @GET
     @Path(ApiConstants.RESERVATION_PREFERENCES)
-    ReservationPreferences preferences();
+    ReservationPreferencesImpl preferences();
 
 }

@@ -27,13 +27,13 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class LoanWrapperTest {
@@ -42,7 +42,7 @@ class LoanWrapperTest {
 
     @Test
     void fromLoan() {
-        final Loan loan = new MockLoanBuilder()
+        final LoanImpl loan = new MockLoanBuilder()
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
@@ -112,7 +112,7 @@ class LoanWrapperTest {
 
     @Test
     void fromLoanWithoutRevenueRate() {
-        final Loan loan = new MockLoanBuilder()
+        final LoanImpl loan = new MockLoanBuilder()
             .setRating(Rating.D)
             .build();
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
@@ -122,7 +122,7 @@ class LoanWrapperTest {
 
     @Test
     void values() {
-        final Loan l = new MockLoanBuilder()
+        final LoanImpl l = new MockLoanBuilder()
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)
@@ -187,7 +187,7 @@ class LoanWrapperTest {
 
     @Test
     void equality() {
-        final Loan l = new MockLoanBuilder()
+        final LoanImpl l = new MockLoanBuilder()
             .setInsuranceActive(true)
             .setAmount(100_000)
             .setRating(Rating.D)

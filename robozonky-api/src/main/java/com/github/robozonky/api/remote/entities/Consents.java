@@ -16,24 +16,9 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import javax.xml.bind.annotation.XmlElement;
+public interface Consents {
 
-import com.github.robozonky.internal.Defaults;
-
-public class Consents {
-
-    private static final OffsetDateTime EPOCH = Instant.EPOCH.atZone(Defaults.ZONE_ID)
-        .toOffsetDateTime();
-
-    @XmlElement
-    private Consent smpConsent = new Consent(EPOCH);
-
-    public Optional<Consent> getSmpConsent() {
-        return Optional.ofNullable(smpConsent);
-    }
-
+    Optional<Consent> getSmpConsent();
 }

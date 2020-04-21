@@ -25,14 +25,14 @@ import java.util.Optional;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 
-public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInvestmentBuilder> {
+public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockInvestmentBuilder> {
 
     public static MockInvestmentBuilder fresh() {
         return new MockInvestmentBuilder();
@@ -65,7 +65,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<Investment, MockInves
     }
 
     public MockInvestmentBuilder() {
-        super(Investment.class);
+        super(InvestmentImpl.class);
         when(mock.getId()).thenReturn(RANDOM.nextLong());
     }
 

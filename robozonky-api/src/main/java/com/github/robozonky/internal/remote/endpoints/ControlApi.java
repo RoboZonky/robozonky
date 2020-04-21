@@ -24,15 +24,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.Consents;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.PurchaseRequest;
-import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.Resolutions;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.entities.ConsentsImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.PurchaseRequestImpl;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
+import com.github.robozonky.internal.remote.entities.ResolutionsImpl;
+import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
+import com.github.robozonky.internal.remote.entities.SellRequestImpl;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
@@ -44,23 +44,23 @@ public interface ControlApi {
 
     @GET
     @Path("/investors/me/restrictions")
-    Restrictions restrictions();
+    RestrictionsImpl restrictions();
 
     @GET
     @Path(ApiConstants.ME + "/consents")
-    Consents consents();
+    ConsentsImpl consents();
 
     @POST
     @Path("/marketplace/investment")
-    void invest(Investment investment);
+    void invest(InvestmentImpl investment);
 
     @POST
     @Path(ApiConstants.ME + "/traded-investments")
-    void offer(SellRequest sellRequest);
+    void offer(SellRequestImpl sellRequest);
 
     @POST
     @Path(ApiConstants.SMP_INVESTMENTS + "/{id}/shares")
-    void purchase(@PathParam("id") long id, PurchaseRequest purchaseRequest);
+    void purchase(@PathParam("id") long id, PurchaseRequestImpl purchaseRequest);
 
     @DELETE
     @Path("/traded-investments/{id}")
@@ -68,10 +68,10 @@ public interface ControlApi {
 
     @PATCH
     @Path(ApiConstants.RESERVATIONS)
-    void accept(Resolutions resolutions);
+    void accept(ResolutionsImpl resolutions);
 
     @PATCH
     @Path(ApiConstants.RESERVATION_PREFERENCES)
-    void setReservationPreferences(ReservationPreferences preferences);
+    void setReservationPreferences(ReservationPreferencesImpl preferences);
 
 }

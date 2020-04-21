@@ -31,12 +31,12 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -44,7 +44,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest {
 
-    private static Loan mockLoan(final int amount) {
+    private static LoanImpl mockLoan(final int amount) {
         return new MockLoanBuilder()
             .setAmount(amount)
             .setDatePublished(OffsetDateTime.now())
@@ -89,7 +89,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
-        final Loan l = mockLoan(1000);
+        final LoanImpl l = mockLoan(1000);
         final Rating r = l.getRating();
         when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
         final Stream<RecommendedLoan> result = s.recommend(Collections.singletonList(new LoanDescriptor(l)),
@@ -105,8 +105,8 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
-        final Loan l = mockLoan(100_000);
-        final Loan l2 = mockLoan(100);
+        final LoanImpl l = mockLoan(100_000);
+        final LoanImpl l2 = mockLoan(100);
         final LoanDescriptor ld = new LoanDescriptor(l);
         final List<RecommendedLoan> result = s
             .recommend(Arrays.asList(new LoanDescriptor(l2), ld), portfolio, mockSessionInfo())

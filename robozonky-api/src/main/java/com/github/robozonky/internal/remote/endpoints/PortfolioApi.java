@@ -24,27 +24,27 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface PortfolioApi extends EntityCollectionApi<Investment> {
+public interface PortfolioApi extends EntityCollectionApi<InvestmentImpl> {
 
     @Path(ApiConstants.INVESTMENTS)
     @GET
     @Override
-    List<Investment> items();
+    List<InvestmentImpl> items();
 
     @Path("/statistics/me/public-overview")
     @GET
-    Statistics getStatistics();
+    StatisticsImpl getStatistics();
 
     @Path(ApiConstants.INVESTMENTS + "/{investmentId}/smpSellInfo")
     @GET
-    SellInfo getSellInfo(@PathParam("investmentId") long investmentId);
+    SellInfoImpl getSellInfo(@PathParam("investmentId") long investmentId);
 
 }

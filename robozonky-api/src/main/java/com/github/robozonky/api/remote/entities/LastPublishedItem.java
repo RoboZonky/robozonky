@@ -17,65 +17,10 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
-import java.util.Objects;
-import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
+public interface LastPublishedItem {
 
-import com.github.robozonky.internal.test.DateUtil;
+    long getId();
 
-public class LastPublishedItem {
-
-    private long id;
-    // Expensive to deserialize, do it on-demand.
-    @XmlElement
-    private String datePublished;
-
-    LastPublishedItem() {
-        // for JAXB
-    }
-
-    public LastPublishedItem(final long id) {
-        this(id, DateUtil.offsetNow());
-    }
-
-    public LastPublishedItem(final long id, final OffsetDateTime datePublished) {
-        this.id = id;
-        this.datePublished = datePublished.toString();
-    }
-
-    @XmlElement
-    public long getId() {
-        return id;
-    }
-
-    @XmlElement
-    public OffsetDateTime getDatePublished() {
-        return OffsetDateTimeAdapter.fromString(datePublished);
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || !Objects.equals(getClass(), o.getClass())) {
-            return false;
-        }
-        final LastPublishedItem that = (LastPublishedItem) o;
-        return id == that.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", LastPublishedItem.class.getSimpleName() + "[", "]")
-            .add("id=" + id)
-            .add("datePublished=" + datePublished)
-            .toString();
-    }
+    OffsetDateTime getDatePublished();
 }
