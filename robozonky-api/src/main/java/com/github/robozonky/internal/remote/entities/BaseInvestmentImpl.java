@@ -21,28 +21,32 @@ import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbTypeAdapter;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.BaseInvestment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
 import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link InvestmentImpl}. Otherwise you may be bitten by
  * various quirks of the Zonky API, returning null in unexpected places.
  */
-abstract class BaseInvestmentImpl implements BaseInvestment {
+public abstract class BaseInvestmentImpl implements BaseInvestment {
 
     private long id;
     private int loanId;
+    @JsonbTypeAdapter(CurrencyAdapter.class)
     private Currency currency = Defaults.CURRENCY;
     private Money amount;
     private InvestmentStatus status;
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
 
-    BaseInvestmentImpl() {
-        // for JAXB
+    public BaseInvestmentImpl() {
+        // For JSON-B.
     }
 
     BaseInvestmentImpl(final Loan loan, final Money amount) {

@@ -88,17 +88,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private Money smpFee = Money.ZERO;
     private Money paidPenalty = Money.ZERO;
 
-    /*
-     * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
-     * unknown fields by Jackson.
-     */
-    private Object insuranceHistory;
-    private Object loanHealthStats;
-    private Object firstName;
-    private Object surname;
-
-    InvestmentImpl() {
-        // for JAXB
+    public InvestmentImpl() {
+        // For JSON-B.
     }
 
     public InvestmentImpl(final Loan loan, final Money amount) {

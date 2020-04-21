@@ -39,8 +39,8 @@ public class MyInvestmentImpl extends BaseInvestmentImpl implements MyInvestment
     private int investorId;
     private String investorNickname;
 
-    MyInvestmentImpl() {
-        // for JAXB
+    public MyInvestmentImpl() {
+        // For JSON-B.
     }
 
     @Override

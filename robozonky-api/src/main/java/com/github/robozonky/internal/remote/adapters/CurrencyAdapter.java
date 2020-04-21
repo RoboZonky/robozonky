@@ -14,30 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.entities;
+package com.github.robozonky.internal.remote.adapters;
 
-import java.time.OffsetDateTime;
+import java.util.Currency;
 
-import com.github.robozonky.api.remote.entities.Consent;
+import javax.json.bind.adapter.JsonbAdapter;
 
-public class ConsentImpl implements Consent {
+public final class CurrencyAdapter implements JsonbAdapter<Currency, String> {
 
-    private OffsetDateTime agreedOn;
-
-    public ConsentImpl() {
-        // For JSON-B.
-    }
-
-    ConsentImpl(OffsetDateTime agreedOn) {
-        this.agreedOn = agreedOn;
+    @Override
+    public String adaptToJson(Currency obj) {
+        return obj.getCurrencyCode();
     }
 
     @Override
-    public OffsetDateTime getAgreedOn() {
-        return agreedOn;
-    }
-
-    public void setAgreedOn(final OffsetDateTime agreedOn) {
-        this.agreedOn = agreedOn;
+    public Currency adaptFromJson(String obj) {
+        return Currency.getInstance(obj);
     }
 }

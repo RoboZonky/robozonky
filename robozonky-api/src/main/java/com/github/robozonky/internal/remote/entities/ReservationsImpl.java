@@ -27,8 +27,8 @@ public class ReservationsImpl implements Reservations {
 
     private Collection<ReservationImpl> reservations = Collections.emptyList();
 
-    ReservationsImpl() {
-        // for JAXB
+    public ReservationsImpl() {
+        // For JSON-B.
     }
 
     @Override

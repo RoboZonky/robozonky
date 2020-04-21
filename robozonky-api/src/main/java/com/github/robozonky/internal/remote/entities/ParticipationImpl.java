@@ -21,6 +21,8 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbTypeAdapter;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -31,6 +33,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
 
 public class ParticipationImpl implements Participation {
 
@@ -56,13 +59,14 @@ public class ParticipationImpl implements Participation {
     protected String nextPaymentDate;
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
+    @JsonbTypeAdapter(CurrencyAdapter.class)
     protected Currency currency;
     protected Money remainingPrincipal;
     protected Money discount;
     protected Money price;
 
-    ParticipationImpl() {
-        // for JAXB
+    public ParticipationImpl() {
+        // For JSON-B.
     }
 
     public ParticipationImpl(final Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {

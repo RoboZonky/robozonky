@@ -31,8 +31,8 @@ public class ResolutionRequestImpl implements ResolutionRequest {
         this.resolution = resolution;
     }
 
-    ResolutionRequestImpl() {
-        // for JAXB
+    public ResolutionRequestImpl() {
+        // For JSON-B.
     }
 
     @Override

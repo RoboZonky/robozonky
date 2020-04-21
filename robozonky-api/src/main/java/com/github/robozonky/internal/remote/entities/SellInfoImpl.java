@@ -27,8 +27,8 @@ public class SellInfoImpl implements SellInfo {
     private LoanHealthStatsImpl loanHealthStats;
     private SellPriceInfoImpl priceInfo;
 
-    SellInfoImpl() {
-        // for JAXB
+    public SellInfoImpl() {
+        // For JSON-B.
     }
 
     @Override

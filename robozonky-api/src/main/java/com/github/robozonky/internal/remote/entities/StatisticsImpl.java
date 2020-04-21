@@ -37,8 +37,8 @@ public class StatisticsImpl implements Statistics {
     private List<RiskPortfolioImpl> riskPortfolio;
     private OffsetDateTime timestamp;
 
-    private StatisticsImpl() {
-        // for JAXB
+    public StatisticsImpl() {
+        // For JSON-B.
     }
 
     public static Statistics empty() {

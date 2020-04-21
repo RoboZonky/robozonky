@@ -39,7 +39,7 @@ public class LoanImpl extends BaseLoanImpl implements Loan {
     protected MyInvestmentImpl myInvestment;
 
     public LoanImpl() {
-        // for JAXB
+        // For JSON-B.
     }
 
     @Override

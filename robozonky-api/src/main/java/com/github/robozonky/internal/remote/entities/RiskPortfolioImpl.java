@@ -32,8 +32,8 @@ public class RiskPortfolioImpl implements RiskPortfolio {
     private Money totalAmount;
     private Rating rating;
 
-    RiskPortfolioImpl() {
-        // for JAXB
+    public RiskPortfolioImpl() {
+        // For JSON-B.
     }
 
     public RiskPortfolioImpl(final Rating rating, final Money paid, final Money unpaid, final Money due) {

@@ -21,6 +21,8 @@ import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbTypeAdapter;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
@@ -30,6 +32,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
 
 public abstract class BaseLoanImpl implements BaseLoan {
 
@@ -64,6 +67,7 @@ public abstract class BaseLoanImpl implements BaseLoan {
     protected String deadline;
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
+    @JsonbTypeAdapter(CurrencyAdapter.class)
     protected Currency currency = Defaults.CURRENCY;
 
     protected Money amount;

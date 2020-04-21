@@ -29,8 +29,8 @@ public class ReservationPreferenceImpl implements ReservationPreference {
     private Rating ratingType;
     private boolean insuredOnly;
 
-    private ReservationPreferenceImpl() {
-        // for JAXB
+    public ReservationPreferenceImpl() {
+        // For JSON-B.
     }
 
     public ReservationPreferenceImpl(final LoanTermInterval loanTermInterval, final Rating rating,

@@ -35,8 +35,8 @@ public class SellPriceInfoImpl implements SellPriceInfo {
 
     private Ratio discount;
 
-    SellPriceInfoImpl() {
-        // For JAXB.
+    public SellPriceInfoImpl() {
+        // For JSON-B.
     }
 
     @Override

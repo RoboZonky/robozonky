@@ -29,8 +29,8 @@ public class SellFeeImpl implements SellFee {
 
     private Money value;
 
-    SellFeeImpl() {
-        // for JAXB
+    public SellFeeImpl() {
+        // For JSON-B.
     }
 
     @Override

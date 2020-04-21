@@ -25,8 +25,8 @@ public class ReservationImpl extends BaseLoanImpl implements Reservation {
 
     private MyReservationImpl myReservation;
 
-    protected ReservationImpl() {
-        // for JAXB
+    public ReservationImpl() {
+        // For JSON-B.
     }
 
     @Override

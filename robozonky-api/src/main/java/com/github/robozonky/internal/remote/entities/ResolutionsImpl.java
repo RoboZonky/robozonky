@@ -33,8 +33,8 @@ public class ResolutionsImpl implements Resolutions {
         this.resolutions = new ArrayList<>(resolutions);
     }
 
-    ResolutionsImpl() {
-        // for JAXB
+    public ResolutionsImpl() {
+        // For JSON-B.
     }
 
     @Override

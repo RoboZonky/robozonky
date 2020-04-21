@@ -51,7 +51,7 @@ public class ReservationPreferencesImpl implements ReservationPreferences {
     private boolean reservationsEnabled;
     private Set<ReservationPreferenceImpl> reservationPreferences;
 
-    private ReservationPreferencesImpl() {
+    public ReservationPreferencesImpl() {
         // fox JAXB
     }
 

@@ -29,8 +29,8 @@ public class LastPublishedItemImpl implements LastPublishedItem {
     // Expensive to deserialize, do it on-demand.
     private String datePublished;
 
-    LastPublishedItemImpl() {
-        // for JAXB
+    public LastPublishedItemImpl() {
+        // For JSON-B.
     }
 
     public LastPublishedItemImpl(final long id) {

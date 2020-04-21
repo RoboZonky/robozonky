@@ -31,8 +31,8 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
     private int daysSinceLastInDue;
     private LoanHealth loanHealthInfo = LoanHealth.HISTORICALLY_IN_DUE;
 
-    LoanHealthStatsImpl() {
-        // For JAXB.
+    public LoanHealthStatsImpl() {
+        // For JSON-B.
     }
 
     @Override

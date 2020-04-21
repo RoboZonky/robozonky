@@ -26,8 +26,8 @@ public class MyReservationImpl implements MyReservation {
     private long id;
     private Money reservedAmount = Money.ZERO;
 
-    MyReservationImpl() {
-        // for JAXB
+    public MyReservationImpl() {
+        // For JSON-B.
     }
 
     @Override
