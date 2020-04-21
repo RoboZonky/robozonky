@@ -31,13 +31,13 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
-public class StatisticsImpl implements Statistics {
+public class StatisticsImpl extends BaseEntity implements Statistics {
 
     private static final Supplier<Statistics> EMPTY = Memoizer.memoize(StatisticsImpl::emptyAndFresh);
 
     @XmlElement
     private Ratio profitability;
-    private List<RiskPortfolio> riskPortfolio;
+    private List<RiskPortfolioImpl> riskPortfolio;
     private OffsetDateTime timestamp;
 
     /**
@@ -66,10 +66,6 @@ public class StatisticsImpl implements Statistics {
         return s;
     }
 
-    private static <T> List<T> unmodifiableOrEmpty(final List<T> possiblyNull) {
-        return possiblyNull == null ? Collections.emptyList() : Collections.unmodifiableList(possiblyNull);
-    }
-
     @Override
     public Optional<Ratio> getProfitability() {
         return Optional.ofNullable(profitability);
@@ -78,7 +74,7 @@ public class StatisticsImpl implements Statistics {
     @Override
     @XmlElement
     public List<RiskPortfolio> getRiskPortfolio() { // "riskPortfolio" is null for new Zonky users
-        return unmodifiableOrEmpty(riskPortfolio);
+        return riskPortfolio == null ? Collections.emptyList() : Collections.unmodifiableList(riskPortfolio);
     }
 
     @Override

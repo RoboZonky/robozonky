@@ -26,7 +26,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellRequest;
 
-public class SellRequestImpl implements SellRequest {
+public class SellRequestImpl extends BaseEntity implements SellRequest {
 
     private long investmentId;
     private BigDecimal remainingPrincipal;

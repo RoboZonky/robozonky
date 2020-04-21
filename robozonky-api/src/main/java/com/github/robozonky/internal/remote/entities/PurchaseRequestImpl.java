@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.PurchaseRequest;
 
-public class PurchaseRequestImpl implements PurchaseRequest {
+public class PurchaseRequestImpl extends BaseEntity implements PurchaseRequest {
 
     private BigDecimal amount;
 

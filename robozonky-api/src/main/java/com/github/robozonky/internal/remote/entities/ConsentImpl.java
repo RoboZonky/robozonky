@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.github.robozonky.api.remote.entities.Consent;
 
-public class ConsentImpl implements Consent {
+public class ConsentImpl extends BaseEntity implements Consent {
 
     @XmlElement
     private OffsetDateTime agreedOn;

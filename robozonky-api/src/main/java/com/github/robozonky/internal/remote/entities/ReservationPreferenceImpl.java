@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.ReservationPreference;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class ReservationPreferenceImpl implements ReservationPreference {
+public class ReservationPreferenceImpl extends BaseEntity implements ReservationPreference {
 
     private LoanTermInterval loanTermInterval;
     private Rating ratingType;

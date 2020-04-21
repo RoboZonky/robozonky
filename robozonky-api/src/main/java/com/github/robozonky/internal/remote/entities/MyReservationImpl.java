@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.MyReservation;
 
-public class MyReservationImpl implements MyReservation {
+public class MyReservationImpl extends BaseEntity implements MyReservation {
 
     private long id;
 

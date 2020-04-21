@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
 
-public class SellFeeImpl implements SellFee {
+public class SellFeeImpl extends BaseEntity implements SellFee {
 
     @XmlElement
     private OffsetDateTime expiresAt;

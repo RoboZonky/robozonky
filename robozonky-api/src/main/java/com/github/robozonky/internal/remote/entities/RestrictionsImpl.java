@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
 
-public class RestrictionsImpl implements Restrictions {
+public class RestrictionsImpl extends BaseEntity implements Restrictions {
 
     @XmlElement
     private boolean cannotInvest;

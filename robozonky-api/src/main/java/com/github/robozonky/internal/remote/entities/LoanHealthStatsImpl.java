@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 
-public class LoanHealthStatsImpl implements LoanHealthStats {
+public class LoanHealthStatsImpl extends BaseEntity implements LoanHealthStats {
 
     @XmlElement
     private int paidInstalments;

@@ -35,7 +35,7 @@ import com.github.robozonky.internal.test.DateUtil;
  * Do not use instances of this class directly. Instead, use {@link InvestmentImpl}. Otherwise you may be bitten by
  * various quirks of the Zonky API, returning null in unexpected places.
  */
-abstract class BaseInvestmentImpl implements BaseInvestment {
+abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
 
     private long id;
     private int loanId;

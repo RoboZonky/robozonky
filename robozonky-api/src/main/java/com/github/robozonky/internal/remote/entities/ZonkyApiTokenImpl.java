@@ -47,7 +47,7 @@ import com.github.robozonky.internal.test.DateUtil;
  */
 @XmlRootElement(name = "token")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ZonkyApiTokenImpl implements ZonkyApiToken {
+public class ZonkyApiTokenImpl extends BaseEntity implements ZonkyApiToken {
 
     public static final String REFRESH_TOKEN_STRING = "refresh_token";
     private static final AtomicLong ID_GENERATOR = new AtomicLong(0);

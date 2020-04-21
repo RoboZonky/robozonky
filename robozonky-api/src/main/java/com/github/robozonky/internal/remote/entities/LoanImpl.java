@@ -39,7 +39,7 @@ public class LoanImpl extends BaseLoanImpl implements Loan {
 
     protected String url;
     @XmlElement
-    protected MyInvestment myInvestment;
+    protected MyInvestmentImpl myInvestment;
 
     protected LoanImpl() {
         // for JAXB

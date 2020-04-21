@@ -25,9 +25,9 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.Reservations;
 
-public class ReservationsImpl implements Reservations {
+public class ReservationsImpl extends BaseEntity implements Reservations {
 
-    private Collection<Reservation> reservations = Collections.emptyList();
+    private Collection<ReservationImpl> reservations = Collections.emptyList();
 
     ReservationsImpl() {
         // for JAXB
@@ -36,7 +36,7 @@ public class ReservationsImpl implements Reservations {
     @Override
     @XmlElement
     public Collection<Reservation> getReservations() {
-        return reservations;
+        return Collections.unmodifiableCollection(reservations);
     }
 
     @Override

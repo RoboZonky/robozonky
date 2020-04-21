@@ -26,13 +26,13 @@ import com.github.robozonky.api.remote.entities.Consent;
 import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.internal.Defaults;
 
-public class ConsentsImpl implements Consents {
+public class ConsentsImpl extends BaseEntity implements Consents {
 
     private static final OffsetDateTime EPOCH = Instant.EPOCH.atZone(Defaults.ZONE_ID)
         .toOffsetDateTime();
 
     @XmlElement
-    private Consent smpConsent = new ConsentImpl(EPOCH);
+    private ConsentImpl smpConsent = new ConsentImpl(EPOCH);
 
     @Override
     public Optional<Consent> getSmpConsent() {

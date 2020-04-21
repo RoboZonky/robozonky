@@ -26,7 +26,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.entities.SellPriceInfo;
 
-public class SellPriceInfoImpl implements SellPriceInfo {
+public class SellPriceInfoImpl extends BaseEntity implements SellPriceInfo {
 
     @XmlElement
     private String sellPrice;

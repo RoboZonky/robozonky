@@ -25,7 +25,7 @@ import com.github.robozonky.api.remote.entities.Reservation;
 
 public class ReservationImpl extends BaseLoanImpl implements Reservation {
 
-    private MyReservation myReservation;
+    private MyReservationImpl myReservation;
 
     protected ReservationImpl() {
         // for JAXB

@@ -27,11 +27,11 @@ import javax.xml.bind.annotation.XmlElement;
 import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Resolutions;
 
-public class ResolutionsImpl implements Resolutions {
+public class ResolutionsImpl extends BaseEntity implements Resolutions {
 
-    private List<ResolutionRequest> resolutions = Collections.emptyList();
+    private List<ResolutionRequestImpl> resolutions = Collections.emptyList();
 
-    public ResolutionsImpl(final Collection<ResolutionRequest> resolutions) {
+    public ResolutionsImpl(final Collection<ResolutionRequestImpl> resolutions) {
         this.resolutions = new ArrayList<>(resolutions);
     }
 
@@ -42,7 +42,7 @@ public class ResolutionsImpl implements Resolutions {
     @Override
     @XmlElement
     public List<ResolutionRequest> getResolutions() {
-        return resolutions;
+        return Collections.unmodifiableList(resolutions);
     }
 
     @Override

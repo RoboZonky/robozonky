@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.remote.entities;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -32,7 +33,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.util.functional.Memoizer;
 import com.github.robozonky.internal.util.functional.Tuple;
 
-public class ReservationPreferencesImpl implements ReservationPreferences {
+public class ReservationPreferencesImpl extends BaseEntity implements ReservationPreferences {
 
     public static boolean isEnabled(ReservationPreferences reservationPreferences) {
         return reservationPreferences.isReservationsEnabled() &&
@@ -50,7 +51,7 @@ public class ReservationPreferencesImpl implements ReservationPreferences {
     });
 
     private boolean reservationsEnabled;
-    private Set<ReservationPreference> reservationPreferences;
+    private Set<ReservationPreferenceImpl> reservationPreferences;
 
     private ReservationPreferencesImpl() {
         // fox JAXB
@@ -71,7 +72,7 @@ public class ReservationPreferencesImpl implements ReservationPreferences {
     @Override
     @XmlElement
     public Set<ReservationPreference> getReservationPreferences() {
-        return reservationPreferences;
+        return Collections.unmodifiableSet(reservationPreferences);
     }
 
     @Override

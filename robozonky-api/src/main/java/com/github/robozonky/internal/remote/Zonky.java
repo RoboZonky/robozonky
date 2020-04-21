@@ -16,7 +16,8 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.Collections;
+import static java.util.Collections.singleton;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,7 +36,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -159,9 +159,9 @@ public class Zonky {
     }
 
     public void accept(final Reservation reservation) {
-        final ResolutionRequest r = new ResolutionRequestImpl(reservation.getMyReservation()
+        final ResolutionRequestImpl r = new ResolutionRequestImpl(reservation.getMyReservation()
             .getId(), Resolution.ACCEPTED);
-        final ResolutionsImpl rs = new ResolutionsImpl(Collections.singleton(r));
+        final ResolutionsImpl rs = new ResolutionsImpl(singleton(r));
         controlApi.run(c -> c.accept(rs));
     }
 

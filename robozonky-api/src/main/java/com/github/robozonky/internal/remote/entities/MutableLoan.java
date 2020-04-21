@@ -20,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.util.Currency;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -33,7 +32,7 @@ public final class MutableLoan extends LoanImpl {
         this.url = url;
     }
 
-    public void setMyInvestment(final MyInvestment myInvestment) {
+    public void setMyInvestment(final MyInvestmentImpl myInvestment) {
         this.myInvestment = myInvestment;
     }
 

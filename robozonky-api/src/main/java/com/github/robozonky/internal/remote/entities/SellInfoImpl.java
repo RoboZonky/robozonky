@@ -24,14 +24,14 @@ import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.SellPriceInfo;
 
-public class SellInfoImpl implements SellInfo {
+public class SellInfoImpl extends BaseEntity implements SellInfo {
 
     @XmlElement
     private Object loanHealthStatsRo; // For some reason, identical to loanHealthStats; ignore.
     @XmlElement
-    private LoanHealthStats loanHealthStats;
+    private LoanHealthStatsImpl loanHealthStats;
     @XmlElement
-    private SellPriceInfo priceInfo;
+    private SellPriceInfoImpl priceInfo;
 
     SellInfoImpl() {
         // for JAXB
