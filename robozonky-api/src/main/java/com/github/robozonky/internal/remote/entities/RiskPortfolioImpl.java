@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
 
+    @XmlElement
     private Ratio interestRate;
     @XmlElement
     private Money unpaid;
@@ -36,6 +37,7 @@ public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
     private Money due;
     @XmlElement
     private Money totalAmount;
+    @XmlElement
     private Rating rating;
 
     RiskPortfolioImpl() {
@@ -53,7 +55,6 @@ public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
     }
 
     @Override
-    @XmlElement
     public Ratio getInterestRate() {
         return interestRate;
     }
@@ -79,9 +80,32 @@ public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
     }
 
     @Override
-    @XmlElement
     public Rating getRating() {
         return rating;
+    }
+
+    public void setInterestRate(final Ratio interestRate) {
+        this.interestRate = interestRate;
+    }
+
+    public void setUnpaid(final Money unpaid) {
+        this.unpaid = unpaid;
+    }
+
+    public void setPaid(final Money paid) {
+        this.paid = paid;
+    }
+
+    public void setDue(final Money due) {
+        this.due = due;
+    }
+
+    public void setTotalAmount(final Money totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
     }
 
     @Override

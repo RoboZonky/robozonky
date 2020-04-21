@@ -47,6 +47,14 @@ public class SellFeeImpl extends BaseEntity implements SellFee {
         return value;
     }
 
+    public void setExpiresAt(final OffsetDateTime expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+
+    public void setValue(final Money value) {
+        this.value = value;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SellFeeImpl.class.getSimpleName() + "[", "]")

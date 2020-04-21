@@ -39,4 +39,7 @@ public class ConsentsImpl extends BaseEntity implements Consents {
         return Optional.ofNullable(smpConsent);
     }
 
+    public void setSmpConsent(final ConsentImpl smpConsent) {
+        this.smpConsent = smpConsent;
+    }
 }

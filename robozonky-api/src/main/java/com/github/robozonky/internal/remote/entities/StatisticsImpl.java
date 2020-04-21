@@ -37,7 +37,9 @@ public class StatisticsImpl extends BaseEntity implements Statistics {
 
     @XmlElement
     private Ratio profitability;
+    @XmlElement
     private List<RiskPortfolioImpl> riskPortfolio;
+    @XmlElement
     private OffsetDateTime timestamp;
 
     /**
@@ -72,15 +74,25 @@ public class StatisticsImpl extends BaseEntity implements Statistics {
     }
 
     @Override
-    @XmlElement
     public List<RiskPortfolio> getRiskPortfolio() { // "riskPortfolio" is null for new Zonky users
         return riskPortfolio == null ? Collections.emptyList() : Collections.unmodifiableList(riskPortfolio);
     }
 
     @Override
-    @XmlElement
     public OffsetDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public void setProfitability(final Ratio profitability) {
+        this.profitability = profitability;
+    }
+
+    public void setRiskPortfolio(final List<RiskPortfolioImpl> riskPortfolio) {
+        this.riskPortfolio = riskPortfolio;
+    }
+
+    public void setTimestamp(final OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

@@ -25,7 +25,9 @@ import com.github.robozonky.api.remote.enums.Resolution;
 
 public class ResolutionRequestImpl extends BaseEntity implements ResolutionRequest {
 
+    @XmlElement
     private long reservationId;
+    @XmlElement
     private Resolution resolution;
 
     public ResolutionRequestImpl(final long reservationId, final Resolution resolution) {
@@ -38,15 +40,21 @@ public class ResolutionRequestImpl extends BaseEntity implements ResolutionReque
     }
 
     @Override
-    @XmlElement
     public long getReservationId() {
         return reservationId;
     }
 
     @Override
-    @XmlElement
     public Resolution getResolution() {
         return resolution;
+    }
+
+    public void setReservationId(final long reservationId) {
+        this.reservationId = reservationId;
+    }
+
+    public void setResolution(final Resolution resolution) {
+        this.resolution = resolution;
     }
 
     @Override

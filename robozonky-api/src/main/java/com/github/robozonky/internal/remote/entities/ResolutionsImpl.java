@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.entities.Resolutions;
 
 public class ResolutionsImpl extends BaseEntity implements Resolutions {
 
+    @XmlElement
     private List<ResolutionRequestImpl> resolutions = Collections.emptyList();
 
     public ResolutionsImpl(final Collection<ResolutionRequestImpl> resolutions) {
@@ -40,9 +41,12 @@ public class ResolutionsImpl extends BaseEntity implements Resolutions {
     }
 
     @Override
-    @XmlElement
     public List<ResolutionRequest> getResolutions() {
         return Collections.unmodifiableList(resolutions);
+    }
+
+    public void setResolutions(final List<ResolutionRequestImpl> resolutions) {
+        this.resolutions = resolutions;
     }
 
     @Override

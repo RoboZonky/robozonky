@@ -73,6 +73,30 @@ public class LoanHealthStatsImpl extends BaseEntity implements LoanHealthStats {
         return loanHealthInfo;
     }
 
+    public void setPaidInstalments(final int paidInstalments) {
+        this.paidInstalments = paidInstalments;
+    }
+
+    public void setDueInstalments(final int dueInstalments) {
+        this.dueInstalments = dueInstalments;
+    }
+
+    public void setInstalmentsCurrentlyInDue(final Integer instalmentsCurrentlyInDue) {
+        this.instalmentsCurrentlyInDue = instalmentsCurrentlyInDue;
+    }
+
+    public void setLongestDaysDue(final int longestDaysDue) {
+        this.longestDaysDue = longestDaysDue;
+    }
+
+    public void setDaysSinceLastInDue(final int daysSinceLastInDue) {
+        this.daysSinceLastInDue = daysSinceLastInDue;
+    }
+
+    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
+        this.loanHealthInfo = loanHealthInfo;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", LoanHealthStatsImpl.class.getSimpleName() + "[", "]")

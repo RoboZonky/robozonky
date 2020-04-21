@@ -71,6 +71,26 @@ public class SellPriceInfoImpl extends BaseEntity implements SellPriceInfo {
         return discount;
     }
 
+    public void setSellPrice(final Money sellPrice) {
+        this.sellPrice = sellPrice;
+    }
+
+    public void setFee(final SellFee fee) {
+        this.fee = fee;
+    }
+
+    public void setBoughtFor(final Money boughtFor) {
+        this.boughtFor = boughtFor;
+    }
+
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
+    public void setDiscount(final Ratio discount) {
+        this.discount = discount;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SellPriceInfoImpl.class.getSimpleName() + "[", "]")

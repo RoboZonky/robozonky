@@ -27,6 +27,7 @@ import com.github.robozonky.internal.test.DateUtil;
 
 public class LastPublishedItemImpl extends BaseEntity implements LastPublishedItem {
 
+    @XmlElement
     private long id;
     // Expensive to deserialize, do it on-demand.
     @XmlElement
@@ -46,15 +47,21 @@ public class LastPublishedItemImpl extends BaseEntity implements LastPublishedIt
     }
 
     @Override
-    @XmlElement
     public long getId() {
         return id;
     }
 
     @Override
-    @XmlElement
     public OffsetDateTime getDatePublished() {
         return OffsetDateTimeAdapter.fromString(datePublished);
+    }
+
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    public void setDatePublished(final OffsetDateTime datePublished) {
+        this.datePublished = datePublished.toString();
     }
 
     @Override

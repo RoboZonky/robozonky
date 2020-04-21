@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.Reservations;
 
 public class ReservationsImpl extends BaseEntity implements Reservations {
 
+    @XmlElement
     private Collection<ReservationImpl> reservations = Collections.emptyList();
 
     ReservationsImpl() {
@@ -34,9 +35,12 @@ public class ReservationsImpl extends BaseEntity implements Reservations {
     }
 
     @Override
-    @XmlElement
     public Collection<Reservation> getReservations() {
         return Collections.unmodifiableCollection(reservations);
+    }
+
+    public void setReservations(final Collection<ReservationImpl> reservations) {
+        this.reservations = reservations;
     }
 
     @Override

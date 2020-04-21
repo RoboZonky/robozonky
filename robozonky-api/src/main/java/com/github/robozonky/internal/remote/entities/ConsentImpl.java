@@ -40,4 +40,7 @@ public class ConsentImpl extends BaseEntity implements Consent {
         return agreedOn;
     }
 
+    public void setAgreedOn(final OffsetDateTime agreedOn) {
+        this.agreedOn = agreedOn;
+    }
 }

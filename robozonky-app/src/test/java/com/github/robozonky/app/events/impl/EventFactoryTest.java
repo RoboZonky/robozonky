@@ -68,7 +68,6 @@ import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.MutableParticipation;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
@@ -174,8 +173,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentPurchased() {
         final Loan loan = MockLoanBuilder.fresh();
-        final Participation participation = new MutableParticipation(loan, Money.from(200),
-                loan.getTermInMonths() - 1);
+        final Participation participation = new ParticipationImpl(loan, Money.from(200), loan.getTermInMonths() - 1);
         final InvestmentPurchasedEvent e = EventFactory.investmentPurchased(participation, loan, Money.from(200),
                 mockPortfolioOverview());
         assertSoftly(softly -> {

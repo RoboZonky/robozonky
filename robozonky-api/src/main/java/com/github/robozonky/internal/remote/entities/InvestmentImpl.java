@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,27 +45,49 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private PaymentStatus paymentStatus;
     @XmlElement
     private LoanHealth loanHealthInfo;
+    @XmlElement
     private boolean smpRelated;
+    @XmlElement
     private boolean onSmp;
+    @XmlElement
     private boolean canBeOffered;
+    @XmlElement
     private boolean inWithdrawal;
+    @XmlElement
     private boolean hasCollectionHistory;
+    @XmlElement
     private boolean insuranceActive;
+    @XmlElement
     private boolean additionallyInsured;
+    @XmlElement
     private boolean instalmentPostponement;
+    @XmlElement
     private int legalDpd;
+    @XmlElement
     private int loanInvestmentsCount = 0;
+    @XmlElement
     private int loanTermInMonth = 84;
+    @XmlElement
     private int currentTerm = 0;
+    @XmlElement
     private int remainingMonths = loanTermInMonth - currentTerm;
+    @XmlElement
     private long borrowerNo = 0;
+    @XmlElement
     private long loanPublicIdentifier = 0;
+    @XmlElement
     private String loanName;
+    @XmlElement
     private String nickname;
+    @XmlElement
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
+    @XmlElement
     private Ratio interestRate;
+    @XmlElement
     private Ratio revenueRate;
+    @XmlElement
     private Rating rating;
+    @XmlElement
     private InvestmentType investmentType;
 
     // OffsetDateTime is expensive to parse, and Investments are on the hot path. Only do it when needed.
@@ -146,91 +167,76 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    @XmlElement
     public Rating getRating() {
         return rating;
     }
 
     @Override
-    @XmlElement
     public Optional<LoanHealth> getLoanHealthInfo() {
         return Optional.ofNullable(loanHealthInfo);
     }
 
     @Override
-    @XmlElement
     public int getLegalDpd() {
         return legalDpd;
     }
 
     @Override
-    @XmlElement
     public int getLoanInvestmentsCount() {
         return loanInvestmentsCount;
     }
 
     @Override
-    @XmlElement
     public int getLoanTermInMonth() {
         return loanTermInMonth;
     }
 
     @Override
-    @XmlElement
     public int getCurrentTerm() {
         return currentTerm;
     }
 
     @Override
-    @XmlElement
     public boolean isSmpRelated() {
         return smpRelated;
     }
 
     @Override
-    @XmlElement
     public boolean isOnSmp() {
         return onSmp;
     }
 
     @Override
-    @XmlElement
     public boolean isCanBeOffered() {
         return canBeOffered;
     }
 
     @Override
-    @XmlElement
     public boolean isInWithdrawal() {
         return inWithdrawal;
     }
 
     @Override
-    @XmlElement
     public int getRemainingMonths() {
         return remainingMonths;
     }
 
     @Override
-    @XmlElement
     public long getBorrowerNo() {
         return borrowerNo;
     }
 
     @Override
-    @XmlElement
     public long getLoanPublicIdentifier() {
         return loanPublicIdentifier;
     }
 
     @Override
-    @XmlElement
     public String getLoanName() {
         return loanName;
     }
 
     @Override
-    @XmlElement
     public String getNickname() {
         return nickname;
     }
@@ -241,7 +247,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    @XmlTransient
     public OffsetDateTime getInvestmentDate() {
         return Optional.ofNullable(investmentDate)
             .map(OffsetDateTimeAdapter::fromString)
@@ -255,77 +260,65 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    @XmlTransient
     public Optional<OffsetDateTime> getNextPaymentDate() {
         return Optional.ofNullable(nextPaymentDate)
             .map(OffsetDateTimeAdapter::fromString);
     }
 
     @Override
-    @XmlTransient
     public Optional<OffsetDateTime> getActiveFrom() {
         return Optional.ofNullable(activeFrom)
             .map(OffsetDateTimeAdapter::fromString);
     }
 
     @Override
-    @XmlTransient
     public Optional<OffsetDateTime> getActiveTo() {
         return Optional.ofNullable(activeTo)
             .map(OffsetDateTimeAdapter::fromString);
     }
 
     @Override
-    @XmlTransient
     public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
         return Optional.ofNullable(smpFeeExpirationDate)
             .map(OffsetDateTimeAdapter::fromString);
     }
 
     @Override
-    @XmlElement
     public Ratio getInterestRate() {
         return interestRate;
     }
 
     @Override
-    @XmlElement
     public Optional<Ratio> getRevenueRate() {
         return Optional.ofNullable(revenueRate);
     }
 
     @Override
-    @XmlElement
     public InsuranceStatus getInsuranceStatus() {
         return insuranceStatus;
     }
 
     @Override
-    @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
     }
 
     @Override
-    @XmlElement
     public boolean isAdditionallyInsured() {
         return additionallyInsured;
     }
 
     @Override
-    @XmlElement
     public boolean isInstalmentPostponement() {
         return instalmentPostponement;
     }
 
     @Override
-    @XmlElement
     public boolean hasCollectionHistory() {
         return hasCollectionHistory;
     }
 
     @Override
-    @XmlElement
     public InvestmentType getInvestmentType() {
         return investmentType;
     }
@@ -361,7 +354,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    @XmlTransient
     public Money getPaidInterest() {
         return paidInterest;
     }
@@ -409,6 +401,186 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @Override
     public Optional<Money> getSmpPrice() {
         return Optional.ofNullable(smpPrice);
+    }
+
+    public void setPaymentStatus(final PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
+        this.loanHealthInfo = loanHealthInfo;
+    }
+
+    public void setSmpRelated(final boolean smpRelated) {
+        this.smpRelated = smpRelated;
+    }
+
+    public void setOnSmp(final boolean onSmp) {
+        this.onSmp = onSmp;
+    }
+
+    public void setCanBeOffered(final boolean canBeOffered) {
+        this.canBeOffered = canBeOffered;
+    }
+
+    public void setInWithdrawal(final boolean inWithdrawal) {
+        this.inWithdrawal = inWithdrawal;
+    }
+
+    public void setHasCollectionHistory(final boolean hasCollectionHistory) {
+        this.hasCollectionHistory = hasCollectionHistory;
+    }
+
+    public void setInsuranceActive(final boolean insuranceActive) {
+        this.insuranceActive = insuranceActive;
+    }
+
+    public void setAdditionallyInsured(final boolean additionallyInsured) {
+        this.additionallyInsured = additionallyInsured;
+    }
+
+    public void setInstalmentPostponement(final boolean instalmentPostponement) {
+        this.instalmentPostponement = instalmentPostponement;
+    }
+
+    public void setLegalDpd(final int legalDpd) {
+        this.legalDpd = legalDpd;
+    }
+
+    public void setLoanInvestmentsCount(final int loanInvestmentsCount) {
+        this.loanInvestmentsCount = loanInvestmentsCount;
+    }
+
+    public void setLoanTermInMonth(final int loanTermInMonth) {
+        this.loanTermInMonth = loanTermInMonth;
+    }
+
+    public void setCurrentTerm(final int currentTerm) {
+        this.currentTerm = currentTerm;
+    }
+
+    public void setRemainingMonths(final int remainingMonths) {
+        this.remainingMonths = remainingMonths;
+    }
+
+    public void setBorrowerNo(final long borrowerNo) {
+        this.borrowerNo = borrowerNo;
+    }
+
+    public void setLoanPublicIdentifier(final long loanPublicIdentifier) {
+        this.loanPublicIdentifier = loanPublicIdentifier;
+    }
+
+    public void setLoanName(final String loanName) {
+        this.loanName = loanName;
+    }
+
+    public void setNickname(final String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setInsuranceStatus(final InsuranceStatus insuranceStatus) {
+        this.insuranceStatus = insuranceStatus;
+    }
+
+    public void setInterestRate(final Ratio interestRate) {
+        this.interestRate = interestRate;
+    }
+
+    public void setRevenueRate(final Ratio revenueRate) {
+        this.revenueRate = revenueRate;
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
+    }
+
+    public void setInvestmentType(final InvestmentType investmentType) {
+        this.investmentType = investmentType;
+    }
+
+    public void setInvestmentDate(final OffsetDateTime investmentDate) {
+        this.investmentDate = investmentDate.toString();
+    }
+
+    public void setNextPaymentDate(final OffsetDateTime nextPaymentDate) {
+        this.nextPaymentDate = nextPaymentDate.toString();
+    }
+
+    public void setActiveFrom(final OffsetDateTime activeFrom) {
+        this.activeFrom = activeFrom.toString();
+    }
+
+    public void setActiveTo(final OffsetDateTime activeTo) {
+        this.activeTo = activeTo.toString();
+    }
+
+    public void setSmpFeeExpirationDate(final OffsetDateTime smpFeeExpirationDate) {
+        this.smpFeeExpirationDate = smpFeeExpirationDate.toString();
+    }
+
+    public void setLoanAnnuity(final Money loanAnnuity) {
+        this.loanAnnuity = loanAnnuity;
+    }
+
+    public void setLoanAmount(final Money loanAmount) {
+        this.loanAmount = loanAmount;
+    }
+
+    public void setPaid(final Money paid) {
+        this.paid = paid;
+    }
+
+    public void setToPay(final Money toPay) {
+        this.toPay = toPay;
+    }
+
+    public void setAmountDue(final Money amountDue) {
+        this.amountDue = amountDue;
+    }
+
+    public void setPaidInterest(final Money paidInterest) {
+        this.paidInterest = paidInterest;
+    }
+
+    public void setDueInterest(final Money dueInterest) {
+        this.dueInterest = dueInterest;
+    }
+
+    public void setPaidPrincipal(final Money paidPrincipal) {
+        this.paidPrincipal = paidPrincipal;
+    }
+
+    public void setDuePrincipal(final Money duePrincipal) {
+        this.duePrincipal = duePrincipal;
+    }
+
+    public void setExpectedInterest(final Money expectedInterest) {
+        this.expectedInterest = expectedInterest;
+    }
+
+    public void setPurchasePrice(final Money purchasePrice) {
+        this.purchasePrice = purchasePrice;
+    }
+
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
+    public void setSmpPrice(final Money smpPrice) {
+        this.smpPrice = smpPrice;
+    }
+
+    public void setSmpSoldFor(final Money smpSoldFor) {
+        this.smpSoldFor = smpSoldFor;
+    }
+
+    public void setSmpFee(final Money smpFee) {
+        this.smpFee = smpFee;
+    }
+
+    public void setPaidPenalty(final Money paidPenalty) {
+        this.paidPenalty = paidPenalty;
     }
 
     @Override

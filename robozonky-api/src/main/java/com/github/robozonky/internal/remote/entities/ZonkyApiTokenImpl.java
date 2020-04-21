@@ -173,6 +173,30 @@ public class ZonkyApiTokenImpl extends BaseEntity implements ZonkyApiToken {
         return getExpiresOn().isBefore(maxExpirationDate);
     }
 
+    public void setAccessToken(final char[] accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public void setRefreshToken(final char[] refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
+    }
+
+    public void setScope(final String scope) {
+        this.scope = scope;
+    }
+
+    public void setExpiresIn(final int expiresIn) {
+        this.expiresIn = expiresIn;
+    }
+
+    public void setObtainedOn(final OffsetDateTime obtainedOn) {
+        this.obtainedOn = obtainedOn;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

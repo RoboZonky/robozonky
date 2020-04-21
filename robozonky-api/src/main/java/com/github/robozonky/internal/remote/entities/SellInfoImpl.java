@@ -47,6 +47,14 @@ public class SellInfoImpl extends BaseEntity implements SellInfo {
         return priceInfo;
     }
 
+    public void setLoanHealthStats(final LoanHealthStatsImpl loanHealthStats) {
+        this.loanHealthStats = loanHealthStats;
+    }
+
+    public void setPriceInfo(final SellPriceInfoImpl priceInfo) {
+        this.priceInfo = priceInfo;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", SellInfoImpl.class.getSimpleName() + "[", "]")

@@ -28,10 +28,15 @@ import com.github.robozonky.api.remote.entities.SellRequest;
 
 public class SellRequestImpl extends BaseEntity implements SellRequest {
 
+    @XmlElement
     private long investmentId;
+    @XmlElement
     private BigDecimal remainingPrincipal;
+    @XmlElement
     private BigDecimal price;
+    @XmlElement
     private BigDecimal discount;
+    @XmlElement
     private BigDecimal feeAmount;
 
     public SellRequestImpl(final long investmentId, final SellInfo sellInfo) {
@@ -66,33 +71,48 @@ public class SellRequestImpl extends BaseEntity implements SellRequest {
     }
 
     @Override
-    @XmlElement
     public long getInvestmentId() {
         return investmentId;
     }
 
     @Override
-    @XmlElement
     public BigDecimal getRemainingPrincipal() {
         return remainingPrincipal;
     }
 
     @Override
-    @XmlElement
     public BigDecimal getPrice() {
         return price;
     }
 
     @Override
-    @XmlElement
     public BigDecimal getDiscount() {
         return discount;
     }
 
     @Override
-    @XmlElement
     public BigDecimal getFeeAmount() {
         return feeAmount;
+    }
+
+    public void setInvestmentId(final long investmentId) {
+        this.investmentId = investmentId;
+    }
+
+    public void setRemainingPrincipal(final BigDecimal remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
+    public void setPrice(final BigDecimal price) {
+        this.price = price;
+    }
+
+    public void setDiscount(final BigDecimal discount) {
+        this.discount = discount;
+    }
+
+    public void setFeeAmount(final BigDecimal feeAmount) {
+        this.feeAmount = feeAmount;
     }
 
     @Override

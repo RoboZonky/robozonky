@@ -37,11 +37,12 @@ import com.github.robozonky.api.remote.enums.Region;
  */
 public class LoanImpl extends BaseLoanImpl implements Loan {
 
+    @XmlElement
     protected String url;
     @XmlElement
     protected MyInvestmentImpl myInvestment;
 
-    protected LoanImpl() {
+    public LoanImpl() {
         // for JAXB
     }
 
@@ -51,9 +52,16 @@ public class LoanImpl extends BaseLoanImpl implements Loan {
     }
 
     @Override
-    @XmlElement
     public String getUrl() {
         return url;
+    }
+
+    public void setUrl(final String url) {
+        this.url = url;
+    }
+
+    public void setMyInvestment(final MyInvestmentImpl myInvestment) {
+        this.myInvestment = myInvestment;
     }
 
     @Override

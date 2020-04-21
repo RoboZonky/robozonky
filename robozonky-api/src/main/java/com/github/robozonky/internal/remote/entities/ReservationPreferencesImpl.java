@@ -50,7 +50,9 @@ public class ReservationPreferencesImpl extends BaseEntity implements Reservatio
         return new ReservationPreferencesImpl(prefs);
     });
 
+    @XmlElement
     private boolean reservationsEnabled;
+    @XmlElement
     private Set<ReservationPreferenceImpl> reservationPreferences;
 
     private ReservationPreferencesImpl() {
@@ -64,15 +66,21 @@ public class ReservationPreferencesImpl extends BaseEntity implements Reservatio
     }
 
     @Override
-    @XmlElement
     public boolean isReservationsEnabled() {
         return reservationsEnabled;
     }
 
     @Override
-    @XmlElement
     public Set<ReservationPreference> getReservationPreferences() {
         return Collections.unmodifiableSet(reservationPreferences);
+    }
+
+    public void setReservationsEnabled(final boolean reservationsEnabled) {
+        this.reservationsEnabled = reservationsEnabled;
+    }
+
+    public void setReservationPreferences(final Set<ReservationPreferenceImpl> reservationPreferences) {
+        this.reservationPreferences = reservationPreferences;
     }
 
     @Override

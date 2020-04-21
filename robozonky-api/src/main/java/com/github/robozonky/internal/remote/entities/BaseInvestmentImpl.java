@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.BaseInvestment;
@@ -37,11 +36,15 @@ import com.github.robozonky.internal.test.DateUtil;
  */
 abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
 
+    @XmlElement
     private long id;
+    @XmlElement
     private int loanId;
+    @XmlElement
     private Currency currency = Defaults.CURRENCY;
     @XmlElement
     private Money amount;
+    @XmlElement
     private InvestmentStatus status;
     @XmlElement
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
@@ -58,31 +61,26 @@ abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
     }
 
     @Override
-    @XmlTransient
     public Optional<OffsetDateTime> getTimeCreated() {
         return Optional.ofNullable(timeCreated);
     }
 
     @Override
-    @XmlElement
     public InvestmentStatus getStatus() {
         return status;
     }
 
     @Override
-    @XmlElement
     public int getLoanId() {
         return loanId;
     }
 
     @Override
-    @XmlElement
     public Currency getCurrency() {
         return currency;
     }
 
     @Override
-    @XmlElement
     public long getId() {
         return id;
     }
@@ -90,6 +88,30 @@ abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
     @Override
     public Money getAmount() {
         return amount;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    public void setLoanId(final int loanId) {
+        this.loanId = loanId;
+    }
+
+    public void setCurrency(final Currency currency) {
+        this.currency = currency;
+    }
+
+    public void setAmount(final Money amount) {
+        this.amount = amount;
+    }
+
+    public void setStatus(final InvestmentStatus status) {
+        this.status = status;
+    }
+
+    public void setTimeCreated(final OffsetDateTime timeCreated) {
+        this.timeCreated = timeCreated;
     }
 
     @Override

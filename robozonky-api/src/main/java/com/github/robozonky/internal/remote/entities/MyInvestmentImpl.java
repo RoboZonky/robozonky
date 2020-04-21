@@ -38,7 +38,9 @@ import com.github.robozonky.api.remote.entities.MyInvestment;
  */
 public class MyInvestmentImpl extends BaseInvestmentImpl implements MyInvestment {
 
+    @XmlElement
     private int investorId;
+    @XmlElement
     private String investorNickname;
 
     MyInvestmentImpl() {
@@ -46,15 +48,21 @@ public class MyInvestmentImpl extends BaseInvestmentImpl implements MyInvestment
     }
 
     @Override
-    @XmlElement
     public int getInvestorId() {
         return investorId;
     }
 
     @Override
-    @XmlElement
     public String getInvestorNickname() {
         return investorNickname;
+    }
+
+    public void setInvestorId(final int investorId) {
+        this.investorId = investorId;
+    }
+
+    public void setInvestorNickname(final String investorNickname) {
+        this.investorNickname = investorNickname;
     }
 
     @Override

@@ -19,15 +19,14 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.MyReservation;
 
 public class MyReservationImpl extends BaseEntity implements MyReservation {
 
+    @XmlElement
     private long id;
-
     @XmlElement
     private Money reservedAmount = Money.ZERO;
 
@@ -45,15 +44,21 @@ public class MyReservationImpl extends BaseEntity implements MyReservation {
     }
 
     @Override
-    @XmlElement
     public long getId() {
         return id;
     }
 
     @Override
-    @XmlTransient
     public Money getReservedAmount() {
         return reservedAmount;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    public void setReservedAmount(final Money reservedAmount) {
+        this.reservedAmount = reservedAmount;
     }
 
     @Override

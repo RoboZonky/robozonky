@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -36,29 +35,51 @@ import com.github.robozonky.internal.Defaults;
 
 public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
 
+    @XmlElement
     protected boolean topped;
+    @XmlElement
     protected boolean covered;
+    @XmlElement
     protected boolean published;
+    @XmlElement
     protected boolean insuranceActive;
+    @XmlElement
     protected boolean insuredInFuture;
+    @XmlElement
     protected boolean additionallyInsured;
+    @XmlElement
     protected int id;
+    @XmlElement
     protected int termInMonths;
+    @XmlElement
     protected int investmentsCount;
+    @XmlElement
     protected int userId;
+    @XmlElement
     protected int activeLoansCount;
+    @XmlElement
     protected long publicIdentifier = 0;
+    @XmlElement
     protected long borrowerNo = 0;
+    @XmlElement
     protected String name;
+    @XmlElement
     protected String nickName;
+    @XmlElement
     protected String story;
+    @XmlElement
     protected Rating rating;
+    @XmlElement
     protected MainIncomeType mainIncomeType;
+    @XmlElement
     protected Region region;
+    @XmlElement
     protected Purpose purpose;
 
     // various ratios
+    @XmlElement
     protected Ratio interestRate;
+    @XmlElement
     protected Ratio investmentRate;
     @XmlElement
     protected Ratio revenueRate;
@@ -69,7 +90,9 @@ public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
     @XmlElement
     protected String deadline;
 
+    @XmlElement
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
+    @XmlElement
     protected Currency currency = Defaults.CURRENCY;
 
     @XmlElement
@@ -103,165 +126,136 @@ public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
     private Object insuranceHistory;
 
     @Override
-    @XmlElement
     public Country getCountryOfOrigin() {
         return countryOfOrigin;
     }
 
     @Override
-    @XmlElement
     public Currency getCurrency() {
         return currency;
     }
 
     @Override
-    @XmlElement
     public MainIncomeType getMainIncomeType() {
         return mainIncomeType;
     }
 
     @Override
-    @XmlElement
     public Ratio getInvestmentRate() {
         return investmentRate;
     }
 
     @Override
-    @XmlElement
     public Region getRegion() {
         return region;
     }
 
     @Override
-    @XmlElement
     public Purpose getPurpose() {
         return purpose;
     }
 
     @Override
-    @XmlElement
     public int getId() {
         return id;
     }
 
     @Override
-    @XmlElement
     public long getPublicIdentifier() {
         return publicIdentifier;
     }
 
     @Override
-    @XmlElement
     public long getBorrowerNo() {
         return borrowerNo;
     }
 
     @Override
-    @XmlElement
     public String getName() {
         return name;
     }
 
     @Override
-    @XmlElement
     public String getStory() {
         return story;
     }
 
     @Override
-    @XmlElement
     public String getNickName() {
         return nickName;
     }
 
     @Override
-    @XmlElement
     public int getTermInMonths() {
         return termInMonths;
     }
 
     @Override
-    @XmlElement
     public Ratio getInterestRate() {
         return interestRate;
     }
 
     @Override
-    @XmlElement
     public Rating getRating() {
         return rating;
     }
 
     @Override
-    @XmlElement
     public boolean isTopped() {
         return topped;
     }
 
     @Override
-    @XmlElement
     public boolean isCovered() {
         return covered;
     }
 
     @Override
-    @XmlElement
     public boolean isPublished() {
         return published;
     }
 
     @Override
-    @XmlElement
     public int getInvestmentsCount() {
         return investmentsCount;
     }
 
     @Override
-    @XmlElement
     public int getActiveLoansCount() {
         return activeLoansCount;
     }
 
     @Override
-    @XmlElement
     public boolean isInsuranceActive() {
         return insuranceActive;
     }
 
     @Override
-    @XmlElement
     public boolean isInsuredInFuture() {
         return insuredInFuture;
     }
 
     @Override
-    @XmlElement
     public boolean isAdditionallyInsured() {
         return additionallyInsured;
     }
 
     @Override
-    @XmlElement
     public int getUserId() {
         return userId;
     }
 
     @Override
-    @XmlTransient
     public Optional<Ratio> getRevenueRate() {
         return Optional.ofNullable(revenueRate);
     }
 
-    // Datetime fields are all transient.
-
     @Override
-    @XmlTransient
     public OffsetDateTime getDatePublished() {
         return OffsetDateTimeAdapter.fromString(datePublished);
     }
 
     @Override
-    @XmlTransient
     public OffsetDateTime getDeadline() {
         return OffsetDateTimeAdapter.fromString(deadline);
     }
@@ -304,6 +298,142 @@ public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
     @Override
     public Money getAnnuityWithInsurance() {
         return annuityWithInsurance;
+    }
+
+    public void setTopped(final boolean topped) {
+        this.topped = topped;
+    }
+
+    public void setCovered(final boolean covered) {
+        this.covered = covered;
+    }
+
+    public void setPublished(final boolean published) {
+        this.published = published;
+    }
+
+    public void setInsuranceActive(final boolean insuranceActive) {
+        this.insuranceActive = insuranceActive;
+    }
+
+    public void setInsuredInFuture(final boolean insuredInFuture) {
+        this.insuredInFuture = insuredInFuture;
+    }
+
+    public void setAdditionallyInsured(final boolean additionallyInsured) {
+        this.additionallyInsured = additionallyInsured;
+    }
+
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    public void setTermInMonths(final int termInMonths) {
+        this.termInMonths = termInMonths;
+    }
+
+    public void setInvestmentsCount(final int investmentsCount) {
+        this.investmentsCount = investmentsCount;
+    }
+
+    public void setUserId(final int userId) {
+        this.userId = userId;
+    }
+
+    public void setActiveLoansCount(final int activeLoansCount) {
+        this.activeLoansCount = activeLoansCount;
+    }
+
+    public void setPublicIdentifier(final long publicIdentifier) {
+        this.publicIdentifier = publicIdentifier;
+    }
+
+    public void setBorrowerNo(final long borrowerNo) {
+        this.borrowerNo = borrowerNo;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setNickName(final String nickName) {
+        this.nickName = nickName;
+    }
+
+    public void setStory(final String story) {
+        this.story = story;
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
+    }
+
+    public void setMainIncomeType(final MainIncomeType mainIncomeType) {
+        this.mainIncomeType = mainIncomeType;
+    }
+
+    public void setRegion(final Region region) {
+        this.region = region;
+    }
+
+    public void setPurpose(final Purpose purpose) {
+        this.purpose = purpose;
+    }
+
+    public void setInterestRate(final Ratio interestRate) {
+        this.interestRate = interestRate;
+    }
+
+    public void setInvestmentRate(final Ratio investmentRate) {
+        this.investmentRate = investmentRate;
+    }
+
+    public void setRevenueRate(final Ratio revenueRate) {
+        this.revenueRate = revenueRate;
+    }
+
+    public void setDatePublished(final OffsetDateTime datePublished) {
+        this.datePublished = datePublished.toString();
+    }
+
+    public void setDeadline(final OffsetDateTime deadline) {
+        this.deadline = deadline.toString();
+    }
+
+    public void setCountryOfOrigin(final Country countryOfOrigin) {
+        this.countryOfOrigin = countryOfOrigin;
+    }
+
+    public void setCurrency(final Currency currency) {
+        this.currency = currency;
+    }
+
+    public void setAmount(final Money amount) {
+        this.amount = amount;
+    }
+
+    public void setRemainingInvestment(final Money remainingInvestment) {
+        this.remainingInvestment = remainingInvestment;
+    }
+
+    public void setReservedAmount(final Money reservedAmount) {
+        this.reservedAmount = reservedAmount;
+    }
+
+    public void setAnnuity(final Money annuity) {
+        this.annuity = annuity;
+    }
+
+    public void setAnnuityWithInsurance(final Money annuityWithInsurance) {
+        this.annuityWithInsurance = annuityWithInsurance;
+    }
+
+    public void setPremium(final Money premium) {
+        this.premium = premium;
+    }
+
+    public void setZonkyPlusAmount(final Money zonkyPlusAmount) {
+        this.zonkyPlusAmount = zonkyPlusAmount;
     }
 
     @Override

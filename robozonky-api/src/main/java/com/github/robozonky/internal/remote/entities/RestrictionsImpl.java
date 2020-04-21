@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -31,11 +30,11 @@ public class RestrictionsImpl extends BaseEntity implements Restrictions {
     @XmlElement
     private boolean cannotAccessSmp;
     @XmlElement
-    private int minimumInvestmentAmount = 200;
+    private Money minimumInvestmentAmount = Money.from(200);
     @XmlElement
-    private int maximumInvestmentAmount = 5_000;
+    private Money maximumInvestmentAmount = Money.from(5_000);
     @XmlElement
-    private int investmentStep = 200;
+    private Money investmentStep = Money.from(200);
 
     public RestrictionsImpl(final boolean permissive) {
         this.cannotAccessSmp = !permissive;
@@ -57,19 +56,38 @@ public class RestrictionsImpl extends BaseEntity implements Restrictions {
     }
 
     @Override
-    @XmlTransient
     public Money getMinimumInvestmentAmount() {
-        return Money.from(minimumInvestmentAmount);
+        return minimumInvestmentAmount;
     }
 
     @Override
     public Money getInvestmentStep() {
-        return Money.from(investmentStep);
+        return investmentStep;
     }
 
     @Override
     public Money getMaximumInvestmentAmount() {
-        return Money.from(maximumInvestmentAmount);
+        return maximumInvestmentAmount;
+    }
+
+    public void setCannotInvest(final boolean cannotInvest) {
+        this.cannotInvest = cannotInvest;
+    }
+
+    public void setCannotAccessSmp(final boolean cannotAccessSmp) {
+        this.cannotAccessSmp = cannotAccessSmp;
+    }
+
+    public void setMinimumInvestmentAmount(final Money minimumInvestmentAmount) {
+        this.minimumInvestmentAmount = minimumInvestmentAmount;
+    }
+
+    public void setMaximumInvestmentAmount(final Money maximumInvestmentAmount) {
+        this.maximumInvestmentAmount = maximumInvestmentAmount;
+    }
+
+    public void setInvestmentStep(final Money investmentStep) {
+        this.investmentStep = investmentStep;
     }
 
     @Override

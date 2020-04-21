@@ -27,8 +27,11 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 public class ReservationPreferenceImpl extends BaseEntity implements ReservationPreference {
 
+    @XmlElement
     private LoanTermInterval loanTermInterval;
+    @XmlElement
     private Rating ratingType;
+    @XmlElement
     private boolean insuredOnly;
 
     private ReservationPreferenceImpl() {
@@ -43,21 +46,30 @@ public class ReservationPreferenceImpl extends BaseEntity implements Reservation
     }
 
     @Override
-    @XmlElement
     public LoanTermInterval getLoanTermInterval() {
         return loanTermInterval;
     }
 
     @Override
-    @XmlElement
     public Rating getRatingType() {
         return ratingType;
     }
 
     @Override
-    @XmlElement
     public boolean isInsuredOnly() {
         return insuredOnly;
+    }
+
+    public void setLoanTermInterval(final LoanTermInterval loanTermInterval) {
+        this.loanTermInterval = loanTermInterval;
+    }
+
+    public void setRatingType(final Rating ratingType) {
+        this.ratingType = ratingType;
+    }
+
+    public void setInsuredOnly(final boolean insuredOnly) {
+        this.insuredOnly = insuredOnly;
     }
 
     @Override

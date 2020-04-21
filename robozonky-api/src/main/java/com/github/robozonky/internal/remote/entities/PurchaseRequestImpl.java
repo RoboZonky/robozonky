@@ -26,6 +26,7 @@ import com.github.robozonky.api.remote.entities.PurchaseRequest;
 
 public class PurchaseRequestImpl extends BaseEntity implements PurchaseRequest {
 
+    @XmlElement
     private BigDecimal amount;
 
     public PurchaseRequestImpl(final Participation participation) {
@@ -34,9 +35,12 @@ public class PurchaseRequestImpl extends BaseEntity implements PurchaseRequest {
     }
 
     @Override
-    @XmlElement
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public void setAmount(final BigDecimal amount) {
+        this.amount = amount;
     }
 
     @Override

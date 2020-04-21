@@ -42,8 +42,8 @@ import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
-import com.github.robozonky.internal.remote.entities.MutableLoan;
-import com.github.robozonky.internal.remote.entities.MutableParticipation;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class Util {
@@ -85,7 +85,7 @@ final class Util {
     }
 
     public static Loan randomizeLoan() {
-        final MutableLoan loan = new MutableLoan();
+        final LoanImpl loan = new LoanImpl();
         loan.setId(100_000 + RANDOM.nextInt(900_000)); // six-digit number
         loan.setCountryOfOrigin(randomize(Country.values()));
         loan.setCurrency(Defaults.CURRENCY);
@@ -133,8 +133,8 @@ final class Util {
     }
 
     public static Participation randomizeParticipation(final Loan loan) {
-        return new MutableParticipation(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L)),
-                RANDOM.nextInt(loan.getTermInMonths()));
+        return new ParticipationImpl(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L)),
+                                     RANDOM.nextInt(loan.getTermInMonths()));
     }
 
     public static PortfolioOverview randomizePortfolioOverview() {

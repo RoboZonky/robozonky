@@ -25,6 +25,7 @@ import com.github.robozonky.api.remote.entities.Reservation;
 
 public class ReservationImpl extends BaseLoanImpl implements Reservation {
 
+    @XmlElement
     private MyReservationImpl myReservation;
 
     protected ReservationImpl() {
@@ -32,9 +33,12 @@ public class ReservationImpl extends BaseLoanImpl implements Reservation {
     }
 
     @Override
-    @XmlElement
     public MyReservation getMyReservation() {
         return myReservation;
+    }
+
+    public void setMyReservation(final MyReservationImpl myReservation) {
+        this.myReservation = myReservation;
     }
 
     @Override
