@@ -23,7 +23,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-class LastPublishedLoanTest {
+class LastPublishedItemTest {
 
     @Test
     void equality() {
