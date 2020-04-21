@@ -19,6 +19,8 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 
@@ -26,6 +28,7 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
 
     private int paidInstalments;
     private int dueInstalments;
+    @JsonbProperty(nillable = true)
     private Integer instalmentsCurrentlyInDue;
     private int longestDaysDue;
     private int daysSinceLastInDue;

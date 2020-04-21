@@ -32,7 +32,7 @@ public enum LoanHealth {
     public static final class LoanHealthInfoDeserializer extends AbstractDeserializer<LoanHealth> {
 
         public LoanHealthInfoDeserializer() {
-            super(LoanHealth::valueOf, UNKNOWN, true);
+            super(LoanHealth::valueOf, UNKNOWN);
         }
     }
 }

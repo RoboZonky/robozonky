@@ -21,6 +21,8 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +41,9 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     private static final Logger LOGGER = LogManager.getLogger(InvestmentImpl.class);
 
+    @JsonbProperty(nillable = true)
     private PaymentStatus paymentStatus;
+    @JsonbProperty(nillable = true)
     private LoanHealth loanHealthInfo;
     private boolean smpRelated;
     private boolean onSmp;
@@ -65,10 +69,15 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private InvestmentType investmentType;
 
     // OffsetDateTime is expensive to parse, and Investments are on the hot path. Only do it when needed.
+    @JsonbProperty(nillable = true)
     private String investmentDate;
+    @JsonbProperty(nillable = true)
     private String nextPaymentDate;
+    @JsonbProperty(nillable = true)
     private String activeFrom;
+    @JsonbProperty(nillable = true)
     private String activeTo;
+    @JsonbProperty(nillable = true)
     private String smpFeeExpirationDate;
 
     private Money loanAnnuity = Money.ZERO;
@@ -82,9 +91,13 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private Money duePrincipal = Money.ZERO;
     private Money expectedInterest = Money.ZERO;
     private Money purchasePrice = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money remainingPrincipal = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money smpPrice = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money smpSoldFor = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money smpFee = Money.ZERO;
     private Money paidPenalty = Money.ZERO;
 

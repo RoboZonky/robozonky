@@ -19,6 +19,8 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -36,6 +38,7 @@ import com.github.robozonky.api.remote.enums.Region;
 public class LoanImpl extends BaseLoanImpl implements Loan {
 
     protected String url;
+    @JsonbProperty(nillable = true)
     protected MyInvestmentImpl myInvestment;
 
     public LoanImpl() {

@@ -20,11 +20,14 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
 
 public class SellFeeImpl implements SellFee {
 
+    @JsonbProperty(nillable = true)
     private OffsetDateTime expiresAt;
 
     private Money value;

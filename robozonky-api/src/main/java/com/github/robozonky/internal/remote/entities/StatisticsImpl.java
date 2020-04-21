@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.entities.Statistics;
@@ -33,6 +35,7 @@ public class StatisticsImpl implements Statistics {
 
     private static final Supplier<Statistics> EMPTY = Memoizer.memoize(StatisticsImpl::emptyAndFresh);
 
+    @JsonbProperty(nillable = true)
     private Ratio profitability;
     private List<RiskPortfolioImpl> riskPortfolio;
     private OffsetDateTime timestamp;

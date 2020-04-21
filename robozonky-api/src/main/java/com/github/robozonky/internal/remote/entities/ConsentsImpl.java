@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import javax.json.bind.annotation.JsonbProperty;
+
 import com.github.robozonky.api.remote.entities.Consent;
 import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.internal.Defaults;
@@ -29,6 +31,7 @@ public class ConsentsImpl implements Consents {
     private static final OffsetDateTime EPOCH = Instant.EPOCH.atZone(Defaults.ZONE_ID)
         .toOffsetDateTime();
 
+    @JsonbProperty(nillable = true)
     private ConsentImpl smpConsent = new ConsentImpl(EPOCH);
 
     @Override

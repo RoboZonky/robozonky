@@ -31,26 +31,19 @@ abstract class AbstractDeserializer<T extends Enum<T>> implements JsonbDeseriali
     protected final Logger logger = LogManager.getLogger(getClass());
     private final Function<String, T> converter;
     private final T defaultValue;
-    private final boolean nullAllowed;
 
     protected AbstractDeserializer(final Function<String, T> converter, final T defaultValue) {
-        this(converter, defaultValue, false);
-    }
-
-    protected AbstractDeserializer(final Function<String, T> converter, final T defaultValue,
-            final boolean nullAllowed) {
         this.converter = converter;
         this.defaultValue = defaultValue;
-        this.nullAllowed = nullAllowed;
     }
 
     @Override
     public T deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
-        var id = parser.getString();
         try {
+            var id = parser.getString();
             return converter.apply(id);
         } catch (final Exception ex) {
-            logger.warn("Received unknown value from Zonky: '{}'. This may be a problem, but we continue.", id);
+            logger.warn("Received unknown value from Zonky: '{}'. This may be a problem, but we continue.", parser.getString());
             return defaultValue;
         }
     }
