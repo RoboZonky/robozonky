@@ -297,7 +297,7 @@ public class ParticipationImpl extends BaseEntity implements Participation {
         this.deadline = deadline.toString();
     }
 
-    public void setNextPaymentDate(final OffsetDateTime nextPaymentDate) {
+    public void setNextPaymentDate(final LocalDate nextPaymentDate) {
         this.nextPaymentDate = nextPaymentDate.toString();
     }
 

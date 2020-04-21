@@ -499,24 +499,30 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.investmentType = investmentType;
     }
 
+    private static String toOptionalString(final OffsetDateTime dateTime) {
+        return Optional.ofNullable(dateTime)
+            .map(OffsetDateTime::toString)
+            .orElse(null);
+    }
+
     public void setInvestmentDate(final OffsetDateTime investmentDate) {
-        this.investmentDate = investmentDate.toString();
+        this.investmentDate = toOptionalString(investmentDate);
     }
 
     public void setNextPaymentDate(final OffsetDateTime nextPaymentDate) {
-        this.nextPaymentDate = nextPaymentDate.toString();
+        this.nextPaymentDate = toOptionalString(nextPaymentDate);
     }
 
     public void setActiveFrom(final OffsetDateTime activeFrom) {
-        this.activeFrom = activeFrom.toString();
+        this.activeFrom = toOptionalString(activeFrom);
     }
 
     public void setActiveTo(final OffsetDateTime activeTo) {
-        this.activeTo = activeTo.toString();
+        this.activeTo = toOptionalString(activeTo);
     }
 
     public void setSmpFeeExpirationDate(final OffsetDateTime smpFeeExpirationDate) {
-        this.smpFeeExpirationDate = smpFeeExpirationDate.toString();
+        this.smpFeeExpirationDate = toOptionalString(smpFeeExpirationDate);
     }
 
     public void setLoanAnnuity(final Money loanAnnuity) {
