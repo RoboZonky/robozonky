@@ -49,7 +49,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
             "--password" }, description = "Authorization code obtained from Zonky. If not provided, will check for existing token", required = true, interactive = true, arity = "0..1")
     private char[] password = null;
     @Option(names = { "-t",
-            "--token" }, description = "Raw XML of the Zonky API token will be stored in this file. Keep it secret, keep it safe.")
+            "--token" }, description = "Raw JSON of the Zonky API token will be stored in this file. Keep it secret, keep it safe.")
     private Path tokenTargetPath = null;
 
     ZonkyCredentialsFeature(final ApiProvider apiProvider, final File keystore, final char[] keystoreSecret,
@@ -97,7 +97,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
         Files.write(target, ZonkyApiTokenImpl.marshal(token)
             .getBytes(Defaults.CHARSET));
         FileUtil.configurePermissions(target.toFile(), false);
-        LOGGER.info("Raw token XML written to {}.", target);
+        LOGGER.info("Raw token JSON written to {}.", target);
     }
 
     @Override
