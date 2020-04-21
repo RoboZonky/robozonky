@@ -30,7 +30,7 @@ import javax.ws.rs.ProcessingException;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.LoanApi;
+import com.github.robozonky.internal.remote.endpoints.LoanApi;
 
 class ApiTest {
 

@@ -14,30 +14,37 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote;
+package com.github.robozonky.internal.remote.endpoints;
 
 import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.LastPublishedItem;
-import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface ParticipationApi extends EntityCollectionApi<Participation> {
+public interface PortfolioApi extends EntityCollectionApi<Investment> {
 
+    @Path(ApiConstants.INVESTMENTS)
     @GET
-    @Path(ApiConstants.LOANS + "/smp-last-published")
-    LastPublishedItem lastPublished();
-
-    @GET
-    @Path(ApiConstants.SMP_INVESTMENTS)
     @Override
-    List<Participation> items();
+    List<Investment> items();
+
+    @Path("/statistics/me/public-overview")
+    @GET
+    Statistics getStatistics();
+
+    @Path(ApiConstants.INVESTMENTS + "/{investmentId}/smpSellInfo")
+    @GET
+    SellInfo getSellInfo(@PathParam("investmentId") long investmentId);
+
 }

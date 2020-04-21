@@ -14,28 +14,30 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote;
+package com.github.robozonky.internal.remote.endpoints;
+
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.Reservations;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
+import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
-public interface ReservationApi {
+public interface ParticipationApi extends EntityCollectionApi<Participation> {
 
     @GET
-    @Path(ApiConstants.RESERVATIONS)
-    Reservations items();
+    @Path(ApiConstants.LOANS + "/smp-last-published")
+    LastPublishedItem lastPublished();
 
     @GET
-    @Path(ApiConstants.RESERVATION_PREFERENCES)
-    ReservationPreferences preferences();
-
+    @Path(ApiConstants.SMP_INVESTMENTS)
+    @Override
+    List<Participation> items();
 }

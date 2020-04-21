@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.robozonky.api.remote;
+package com.github.robozonky.internal.remote.endpoints;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

@@ -31,11 +31,6 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.EntityCollectionApi;
-import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.ParticipationApi;
-import com.github.robozonky.api.remote.PortfolioApi;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
@@ -46,6 +41,11 @@ import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.endpoints.ControlApi;
+import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
+import com.github.robozonky.internal.remote.endpoints.LoanApi;
+import com.github.robozonky.internal.remote.endpoints.ParticipationApi;
+import com.github.robozonky.internal.remote.endpoints.PortfolioApi;
 
 class ZonkyTest {
 

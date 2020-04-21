@@ -24,8 +24,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.endpoints.ZonkyOAuthApi;
 
 class OAuthTest {
 

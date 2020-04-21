@@ -27,17 +27,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.EntityCollectionApi;
-import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.ParticipationApi;
-import com.github.robozonky.api.remote.PortfolioApi;
-import com.github.robozonky.api.remote.ReservationApi;
-import com.github.robozonky.api.remote.ZonkyOAuthApi;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.endpoints.ControlApi;
+import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
+import com.github.robozonky.internal.remote.endpoints.LoanApi;
+import com.github.robozonky.internal.remote.endpoints.ParticipationApi;
+import com.github.robozonky.internal.remote.endpoints.PortfolioApi;
+import com.github.robozonky.internal.remote.endpoints.ReservationApi;
+import com.github.robozonky.internal.remote.endpoints.ZonkyOAuthApi;
 import com.github.robozonky.internal.util.StreamUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
 

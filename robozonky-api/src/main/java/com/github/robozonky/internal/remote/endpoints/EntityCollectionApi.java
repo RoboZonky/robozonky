@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote;
+package com.github.robozonky.internal.remote.endpoints;
 
 import java.util.List;
 
