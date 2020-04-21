@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
@@ -31,9 +30,8 @@ public class SellFeeImpl extends BaseEntity implements SellFee {
     @XmlElement
     private OffsetDateTime expiresAt;
 
-    // String to be represented as money.
     @XmlElement
-    private String value;
+    private Money value;
 
     SellFeeImpl() {
         // for JAXB
@@ -45,9 +43,8 @@ public class SellFeeImpl extends BaseEntity implements SellFee {
     }
 
     @Override
-    @XmlTransient
     public Money getValue() {
-        return Money.from(value);
+        return value;
     }
 
     @Override

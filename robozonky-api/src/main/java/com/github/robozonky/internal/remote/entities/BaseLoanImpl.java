@@ -72,21 +72,20 @@ public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     protected Currency currency = Defaults.CURRENCY;
 
-    // Strings to be represented as money.
     @XmlElement
-    protected String amount;
+    protected Money amount;
     @XmlElement
-    protected String remainingInvestment;
+    protected Money remainingInvestment;
     @XmlElement
-    protected String reservedAmount;
+    protected Money reservedAmount;
     @XmlElement
-    protected String annuity;
+    protected Money annuity;
     @XmlElement
-    protected String annuityWithInsurance;
+    protected Money annuityWithInsurance;
     @XmlElement
-    protected String premium;
+    protected Money premium;
     @XmlElement
-    protected String zonkyPlusAmount;
+    protected Money zonkyPlusAmount;
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
@@ -267,54 +266,44 @@ public abstract class BaseLoanImpl extends BaseEntity implements BaseLoan {
         return OffsetDateTimeAdapter.fromString(deadline);
     }
 
-    // Money-based fields are all transient.
-
     @Override
-    @XmlTransient
     public Money getAmount() {
-        return Money.from(amount, currency);
+        return amount;
     }
 
     @Override
-    @XmlTransient
     public Money getRemainingInvestment() {
-        return Money.from(remainingInvestment, currency);
+        return remainingInvestment;
     }
 
     @Override
-    @XmlTransient
     public Money getNonReservedRemainingInvestment() {
-        return getRemainingInvestment().subtract(Money.from(reservedAmount, currency));
+        return getRemainingInvestment().subtract(reservedAmount);
     }
 
     @Override
-    @XmlTransient
     public Money getReservedAmount() {
-        return Money.from(reservedAmount, currency);
+        return reservedAmount;
     }
 
     @Override
-    @XmlTransient
     public Money getZonkyPlusAmount() {
-        return Money.from(zonkyPlusAmount, currency);
+        return zonkyPlusAmount;
     }
 
     @Override
-    @XmlTransient
     public Money getAnnuity() {
-        return Money.from(annuity, currency);
+        return annuity;
     }
 
     @Override
-    @XmlTransient
     public Money getPremium() {
-        return Money.from(premium, currency);
+        return premium;
     }
 
     @Override
-    @XmlTransient
     public Money getAnnuityWithInsurance() {
-        return Money.from(annuityWithInsurance, currency);
+        return annuityWithInsurance;
     }
 
     @Override

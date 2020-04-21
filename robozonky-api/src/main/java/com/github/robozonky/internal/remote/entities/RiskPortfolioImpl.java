@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -30,13 +29,13 @@ public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
 
     private Ratio interestRate;
     @XmlElement
-    private String unpaid;
+    private Money unpaid;
     @XmlElement
-    private String paid;
+    private Money paid;
     @XmlElement
-    private String due;
+    private Money due;
     @XmlElement
-    private String totalAmount;
+    private Money totalAmount;
     private Rating rating;
 
     RiskPortfolioImpl() {
@@ -45,17 +44,12 @@ public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
 
     public RiskPortfolioImpl(final Rating rating, final Money paid, final Money unpaid, final Money due) {
         this.interestRate = rating.getInterestRate();
-        this.paid = paid.getValue()
-            .toPlainString();
-        this.unpaid = unpaid.getValue()
-            .toPlainString();
-        this.due = due.getValue()
-            .toPlainString();
+        this.paid = paid;
+        this.unpaid = unpaid;
+        this.due = due;
         this.rating = rating;
         this.totalAmount = paid.add(unpaid)
-            .add(due)
-            .getValue()
-            .toPlainString();
+            .add(due);
     }
 
     @Override
@@ -65,27 +59,23 @@ public class RiskPortfolioImpl extends BaseEntity implements RiskPortfolio {
     }
 
     @Override
-    @XmlTransient
     public Money getUnpaid() {
-        return Money.from(unpaid);
+        return unpaid;
     }
 
     @Override
-    @XmlTransient
     public Money getPaid() {
-        return Money.from(paid);
+        return paid;
     }
 
     @Override
-    @XmlTransient
     public Money getDue() {
-        return Money.from(due);
+        return due;
     }
 
     @Override
-    @XmlTransient
     public Money getTotalAmount() {
-        return Money.from(totalAmount);
+        return totalAmount;
     }
 
     @Override

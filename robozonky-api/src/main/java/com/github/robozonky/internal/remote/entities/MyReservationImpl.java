@@ -29,7 +29,7 @@ public class MyReservationImpl extends BaseEntity implements MyReservation {
     private long id;
 
     @XmlElement
-    private String reservedAmount = "0";
+    private Money reservedAmount = Money.ZERO;
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
@@ -53,7 +53,7 @@ public class MyReservationImpl extends BaseEntity implements MyReservation {
     @Override
     @XmlTransient
     public Money getReservedAmount() {
-        return Money.from(reservedAmount);
+        return reservedAmount;
     }
 
     @Override

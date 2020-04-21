@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.StringJoiner;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -29,20 +28,19 @@ import com.github.robozonky.api.remote.entities.SellPriceInfo;
 public class SellPriceInfoImpl extends BaseEntity implements SellPriceInfo {
 
     @XmlElement
-    private String sellPrice;
+    private Money sellPrice;
 
     @XmlElement
     private SellFee fee;
 
-    // Strings to be represented as money.
     @XmlElement
-    private String boughtFor;
+    private Money boughtFor;
 
     @XmlElement
-    private String remainingPrincipal;
+    private Money remainingPrincipal;
 
     @XmlElement
-    private String discount;
+    private Ratio discount;
 
     SellPriceInfoImpl() {
         // For JAXB.
@@ -54,27 +52,23 @@ public class SellPriceInfoImpl extends BaseEntity implements SellPriceInfo {
     }
 
     @Override
-    @XmlTransient
     public Money getSellPrice() {
-        return Money.from(sellPrice);
+        return sellPrice;
     }
 
     @Override
-    @XmlTransient
     public Money getBoughtFor() {
-        return Money.from(boughtFor);
+        return boughtFor;
     }
 
     @Override
-    @XmlTransient
     public Money getRemainingPrincipal() {
-        return Money.from(remainingPrincipal);
+        return remainingPrincipal;
     }
 
     @Override
-    @XmlTransient
     public Ratio getDiscount() {
-        return Ratio.fromRaw(discount);
+        return discount;
     }
 
     @Override

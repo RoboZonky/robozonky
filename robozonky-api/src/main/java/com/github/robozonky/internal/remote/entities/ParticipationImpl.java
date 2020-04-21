@@ -64,11 +64,11 @@ public class ParticipationImpl extends BaseEntity implements Participation {
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     protected Currency currency;
     @XmlElement
-    protected String remainingPrincipal;
+    protected Money remainingPrincipal;
     @XmlElement
-    protected String discount;
+    protected Money discount;
     @XmlElement
-    protected String price;
+    protected Money price;
 
     ParticipationImpl() {
         // for JAXB
@@ -88,8 +88,7 @@ public class ParticipationImpl extends BaseEntity implements Participation {
         this.userId = loan.getUserId();
         this.additionallyInsured = loan.isAdditionallyInsured();
         this.insuranceActive = loan.isInsuranceActive();
-        this.remainingPrincipal = remainingPrincipal.getValue()
-            .toPlainString();
+        this.remainingPrincipal = remainingPrincipal;
         this.remainingInstalmentCount = remainingInstalmentCount;
     }
 
@@ -220,21 +219,18 @@ public class ParticipationImpl extends BaseEntity implements Participation {
     }
 
     @Override
-    @XmlTransient
     public Money getRemainingPrincipal() {
-        return Money.from(remainingPrincipal, currency);
+        return remainingPrincipal;
     }
 
     @Override
-    @XmlTransient
     public Money getDiscount() {
-        return Money.from(discount, currency);
+        return discount;
     }
 
     @Override
-    @XmlTransient
     public Money getPrice() {
-        return Money.from(price, currency);
+        return price;
     }
 
     @Override

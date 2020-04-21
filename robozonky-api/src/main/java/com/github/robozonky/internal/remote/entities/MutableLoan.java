@@ -19,6 +19,7 @@ package com.github.robozonky.internal.remote.entities;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -136,31 +137,31 @@ public final class MutableLoan extends LoanImpl {
         this.currency = currency;
     }
 
-    public void setAmount(final String amount) {
+    public void setAmount(final Money amount) {
         this.amount = amount;
     }
 
-    public void setRemainingInvestment(final String remainingInvestment) {
+    public void setRemainingInvestment(final Money remainingInvestment) {
         this.remainingInvestment = remainingInvestment;
     }
 
-    public void setReservedAmount(final String reservedAmount) {
+    public void setReservedAmount(final Money reservedAmount) {
         this.reservedAmount = reservedAmount;
     }
 
-    public void setAnnuity(final String annuity) {
+    public void setAnnuity(final Money annuity) {
         this.annuity = annuity;
     }
 
-    public void setAnnuityWithInsurance(final String annuityWithInsurance) {
+    public void setAnnuityWithInsurance(final Money annuityWithInsurance) {
         this.annuityWithInsurance = annuityWithInsurance;
     }
 
-    public void setPremium(final String premium) {
+    public void setPremium(final Money premium) {
         this.premium = premium;
     }
 
-    public void setZonkyPlusAmount(final String zonkyPlusAmount) {
+    public void setZonkyPlusAmount(final Money zonkyPlusAmount) {
         this.zonkyPlusAmount = zonkyPlusAmount;
     }
 

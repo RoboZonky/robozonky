@@ -81,39 +81,38 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @XmlElement
     private String smpFeeExpirationDate;
 
-    // string-based money
     @XmlElement
-    private String loanAnnuity = "0";
+    private Money loanAnnuity = Money.ZERO;
     @XmlElement
-    private String loanAmount = "0";
+    private Money loanAmount = Money.ZERO;
     @XmlElement
-    private String paid = "0";
+    private Money paid = Money.ZERO;
     @XmlElement
-    private String toPay = "0";
+    private Money toPay = Money.ZERO;
     @XmlElement
-    private String amountDue = "0";
+    private Money amountDue = Money.ZERO;
     @XmlElement
-    private String paidInterest = "0";
+    private Money paidInterest = Money.ZERO;
     @XmlElement
-    private String dueInterest = "0";
+    private Money dueInterest = Money.ZERO;
     @XmlElement
-    private String paidPrincipal = "0";
+    private Money paidPrincipal = Money.ZERO;
     @XmlElement
-    private String duePrincipal = "0";
+    private Money duePrincipal = Money.ZERO;
     @XmlElement
-    private String expectedInterest = "0";
+    private Money expectedInterest = Money.ZERO;
     @XmlElement
-    private String purchasePrice = "0";
+    private Money purchasePrice = Money.ZERO;
     @XmlElement
-    private String remainingPrincipal = "0";
+    private Money remainingPrincipal = Money.ZERO;
     @XmlElement
-    private String smpPrice = "0";
+    private Money smpPrice = Money.ZERO;
     @XmlElement
-    private String smpSoldFor = "0";
+    private Money smpSoldFor = Money.ZERO;
     @XmlElement
-    private String smpFee = "0";
+    private Money smpFee = Money.ZERO;
     @XmlElement
-    private String paidPenalty = "0";
+    private Money paidPenalty = Money.ZERO;
 
     /*
      * Don't waste time deserializing some types, as we're never going to use them. Yet we do not want these reported as
@@ -138,8 +137,7 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.rating = loan.getRating();
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
-        this.remainingPrincipal = amount.getValue()
-            .toPlainString();
+        this.remainingPrincipal = amount;
         this.purchasePrice = remainingPrincipal;
         this.remainingMonths = loan.getTermInMonths();
         this.loanTermInMonth = loan.getTermInMonths();
@@ -332,106 +330,85 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return investmentType;
     }
 
-    // money types are all transient
-
     @Override
-    @XmlTransient
     public Money getLoanAnnuity() {
-        return Money.from(loanAnnuity);
+        return loanAnnuity;
     }
 
     @Override
-    @XmlTransient
     public Money getLoanAmount() {
-        return Money.from(loanAmount);
+        return loanAmount;
     }
 
     @Override
-    @XmlTransient
     public Money getPurchasePrice() {
-        return Money.from(purchasePrice);
+        return purchasePrice;
     }
 
     @Override
-    @XmlTransient
     public Money getPaid() {
-        return Money.from(paid);
+        return paid;
     }
 
     @Override
-    @XmlTransient
     public Money getToPay() {
-        return Money.from(toPay);
+        return toPay;
     }
 
     @Override
-    @XmlTransient
     public Money getAmountDue() {
-        return Money.from(amountDue);
+        return amountDue;
     }
 
     @Override
     @XmlTransient
     public Money getPaidInterest() {
-        return Money.from(paidInterest);
+        return paidInterest;
     }
 
     @Override
-    @XmlTransient
     public Money getDueInterest() {
-        return Money.from(dueInterest);
+        return dueInterest;
     }
 
     @Override
-    @XmlTransient
     public Money getPaidPrincipal() {
-        return Money.from(paidPrincipal);
+        return paidPrincipal;
     }
 
     @Override
-    @XmlTransient
     public Money getDuePrincipal() {
-        return Money.from(duePrincipal);
+        return duePrincipal;
     }
 
     @Override
-    @XmlTransient
     public Money getExpectedInterest() {
-        return Money.from(expectedInterest);
+        return expectedInterest;
     }
 
     @Override
-    @XmlTransient
     public Optional<Money> getRemainingPrincipal() {
-        return Optional.ofNullable(remainingPrincipal)
-            .map(Money::from);
+        return Optional.ofNullable(remainingPrincipal);
     }
 
     @Override
-    @XmlTransient
     public Optional<Money> getSmpSoldFor() {
-        return Optional.ofNullable(smpSoldFor)
-            .map(Money::from);
+        return Optional.ofNullable(smpSoldFor);
     }
 
     @Override
-    @XmlTransient
     public Money getPaidPenalty() {
-        return Money.from(paidPenalty);
+        return paidPenalty;
     }
 
     @Override
-    @XmlTransient
     public Optional<Money> getSmpFee() {
-        return Optional.ofNullable(smpFee)
-            .map(Money::from);
+        return Optional.ofNullable(smpFee);
     }
 
     @Override
-    @XmlTransient
     public Optional<Money> getSmpPrice() {
-        return Optional.ofNullable(smpPrice)
-            .map(Money::from);
+        return Optional.ofNullable(smpPrice);
     }
 
     @Override

@@ -113,15 +113,15 @@ public final class MutableParticipation extends ParticipationImpl {
         this.currency = currency;
     }
 
-    public void setRemainingPrincipal(final String remainingPrincipal) {
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
         this.remainingPrincipal = remainingPrincipal;
     }
 
-    public void setDiscount(final String discount) {
+    public void setDiscount(final Money discount) {
         this.discount = discount;
     }
 
-    public void setPrice(final String price) {
+    public void setPrice(final Money price) {
         this.price = price;
     }
 

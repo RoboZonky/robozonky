@@ -41,7 +41,7 @@ abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
     private int loanId;
     private Currency currency = Defaults.CURRENCY;
     @XmlElement
-    private String amount;
+    private Money amount;
     private InvestmentStatus status;
     @XmlElement
     private OffsetDateTime timeCreated = DateUtil.offsetNow();
@@ -53,8 +53,7 @@ abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
     BaseInvestmentImpl(final Loan loan, final Money amount) {
         this.currency = amount.getCurrency();
         this.loanId = loan.getId();
-        this.amount = amount.getValue()
-            .toPlainString();
+        this.amount = amount;
         this.status = InvestmentStatus.ACTIVE;
     }
 
@@ -88,12 +87,9 @@ abstract class BaseInvestmentImpl extends BaseEntity implements BaseInvestment {
         return id;
     }
 
-    // Money types are all transient.
-
     @Override
-    @XmlTransient
     public Money getAmount() {
-        return Money.from(amount, currency);
+        return amount;
     }
 
     @Override

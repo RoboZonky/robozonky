@@ -18,16 +18,18 @@ package com.github.robozonky.api;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-final class RatioAdapter extends XmlAdapter<String, Ratio> {
+final class MoneyAdapter extends XmlAdapter<String, Money> {
 
     @Override
-    public Ratio unmarshal(final String s) {
-        return Ratio.fromRaw(s);
+    public Money unmarshal(String v) {
+        return Money.from(v);
     }
 
     @Override
-    public String marshal(final Ratio rate) {
-        return rate.bigDecimalValue()
-            .toPlainString();
+    public String marshal(Money v) {
+        if (v.isZero()) {
+            return "0";
+        }
+        return v.getValue().stripTrailingZeros().toPlainString();
     }
 }

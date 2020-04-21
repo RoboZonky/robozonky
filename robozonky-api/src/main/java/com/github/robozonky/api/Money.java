@@ -30,6 +30,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
@@ -37,6 +39,7 @@ import com.github.robozonky.internal.util.functional.Memoizer;
  * Represents a monetary amount of any size, in any currency. Rounds to 2 decimal points. Two instances equal if their
  * {@link #getCurrency()} and {@link #getValue()} equal, or when {@link #isZero()} regardless of currency.
  */
+@XmlJavaTypeAdapter(MoneyAdapter.class)
 public final class Money implements Comparable<Money> {
 
     private static final Function<Currency, Money> ZERO_PROVIDER = Memoizer

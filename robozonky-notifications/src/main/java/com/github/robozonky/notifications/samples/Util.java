@@ -94,19 +94,19 @@ final class Util {
         loan.setRegion(randomize(Region.values()));
         // set basic financial properties
         final Integer amount = (2 + RANDOM.nextInt(68) * 10_0000); // from 20 to 700_000
-        loan.setAmount(amount.toString());
+        loan.setAmount(Money.from(amount));
         final int term = 6 + RANDOM.nextInt(76); // from 6 to 84
         loan.setTermInMonths(term);
         final BigDecimal annuity = divide(amount, term);
-        loan.setAnnuity(annuity.toPlainString());
+        loan.setAnnuity(Money.from(annuity));
         // set insurance properties
         final boolean isInsured = RANDOM.nextBoolean();
         if (isInsured) {
             loan.setInsuranceActive(true);
-            loan.setAnnuityWithInsurance(plus(annuity, 50).toPlainString());
+            loan.setAnnuityWithInsurance(Money.from(plus(annuity, 50)));
         } else {
             loan.setInsuranceActive(false);
-            loan.setAnnuityWithInsurance(annuity.toPlainString());
+            loan.setAnnuityWithInsurance(Money.from(annuity));
         }
         loan.setAdditionallyInsured(false);
         loan.setInsuredInFuture(false);
