@@ -111,7 +111,8 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void enabledAndNeedsChanging() {
-        final ReservationPreferenceImpl rp = new ReservationPreferenceImpl(LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
+        final ReservationPreferenceImpl rp = new ReservationPreferenceImpl(LoanTermInterval.FROM_0_TO_12, Rating.AAAAA,
+                false);
         final Zonky z = harmlessZonky();
         when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(rp));
         final Tenant t = mockTenant(z);

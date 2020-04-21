@@ -82,12 +82,12 @@ public class ZonkyApiTokenImpl extends BaseEntity implements ZonkyApiToken {
     }
 
     public ZonkyApiTokenImpl(final String accessToken, final String refreshToken, final int expiresIn,
-                             final OffsetDateTime obtainedOn) {
+            final OffsetDateTime obtainedOn) {
         this(accessToken, refreshToken, expiresIn, obtainedOn, REFRESH_TOKEN_STRING);
     }
 
     public ZonkyApiTokenImpl(final String accessToken, final String refreshToken, final int expiresIn,
-                             final OffsetDateTime obtainedOn, final String type) {
+            final OffsetDateTime obtainedOn, final String type) {
         this.accessToken = accessToken.toCharArray();
         this.refreshToken = refreshToken.toCharArray();
         this.expiresIn = expiresIn;

@@ -30,6 +30,8 @@ final class MoneyAdapter extends XmlAdapter<String, Money> {
         if (v.isZero()) {
             return "0";
         }
-        return v.getValue().stripTrailingZeros().toPlainString();
+        return v.getValue()
+            .stripTrailingZeros()
+            .toPlainString();
     }
 }

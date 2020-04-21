@@ -134,7 +134,7 @@ final class Util {
 
     public static Participation randomizeParticipation(final Loan loan) {
         return new ParticipationImpl(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L)),
-                                     RANDOM.nextInt(loan.getTermInMonths()));
+                RANDOM.nextInt(loan.getTermInMonths()));
     }
 
     public static PortfolioOverview randomizePortfolioOverview() {

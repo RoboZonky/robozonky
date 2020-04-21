@@ -37,7 +37,7 @@ abstract class BaseEntity {
 
     private boolean hasBeenCalledBefore(final String key) {
         final String id = this.getClass()
-                .getCanonicalName() + ":" + key;
+            .getCanonicalName() + ":" + key;
         return !CHANGES_ALREADY_NOTIFIED.add(id);
     }
 
@@ -52,7 +52,7 @@ abstract class BaseEntity {
     void handleUnknownSetter(final String key, final Object value) {
         if (!hasBeenCalledBefore(key)) {
             logger.debug("Trying to set value '{}' to unknown property '{}'. Indicates unsupported API.",
-                         value, key);
+                    value, key);
         }
     }
 

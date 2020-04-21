@@ -39,7 +39,7 @@ public class ReservationPreferenceImpl extends BaseEntity implements Reservation
     }
 
     public ReservationPreferenceImpl(final LoanTermInterval loanTermInterval, final Rating rating,
-                                     final boolean insuredOnly) {
+            final boolean insuredOnly) {
         this.loanTermInterval = loanTermInterval;
         this.ratingType = rating;
         this.insuredOnly = insuredOnly;

@@ -111,8 +111,8 @@ class RatingTest {
     @Test
     void noRatingCodeTwice() {
         final Set<String> codes = Stream.of(Rating.values())
-                .map(Rating::getCode)
-                .collect(Collectors.toSet());
+            .map(Rating::getCode)
+            .collect(Collectors.toSet());
         assertThat(codes).hasSize(Rating.values().length);
     }
 

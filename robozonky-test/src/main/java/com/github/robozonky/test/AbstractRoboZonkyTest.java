@@ -65,9 +65,9 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     protected static SecretProvider mockSecretProvider() {
         return mockSecretProvider(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                                        UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                                        299));
+                299));
     }
 
     protected static Zonky harmlessZonky() {

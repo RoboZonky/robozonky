@@ -71,8 +71,9 @@ class SessionInfoImplTest {
     void constructorRestrictive() {
         var id = UUID.randomUUID()
             .toString();
-        var sessionInfo = new SessionInfoImpl(ConsentsImpl::new, () -> new RestrictionsImpl(false), "someone@somewhere.cz", id,
-                                              false);
+        var sessionInfo = new SessionInfoImpl(ConsentsImpl::new, () -> new RestrictionsImpl(false),
+                "someone@somewhere.cz", id,
+                false);
         assertSoftly(softly -> {
             softly.assertThat(sessionInfo.getUsername())
                 .isEqualTo("someone@somewhere.cz");

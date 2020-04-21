@@ -38,7 +38,7 @@ public class ReservationPreferencesImpl extends BaseEntity implements Reservatio
     public static boolean isEnabled(ReservationPreferences reservationPreferences) {
         return reservationPreferences.isReservationsEnabled() &&
                 !reservationPreferences.getReservationPreferences()
-                        .isEmpty();
+                    .isEmpty();
     }
 
     public static final Supplier<ReservationPreferencesImpl> TOTAL = Memoizer.memoize(() -> {

@@ -50,7 +50,7 @@ class OAuthTest {
             .toString();
         final ZonkyApiToken originToken = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(), originalTokenId,
-                                                                OffsetDateTime.now());
+                OffsetDateTime.now());
         final ZonkyApiTokenImpl resultToken = mock(ZonkyApiTokenImpl.class);
         final ZonkyOAuthApi api = mock(ZonkyOAuthApi.class);
         when(api.refresh(eq(originalTokenId), anyString())).thenReturn(resultToken);

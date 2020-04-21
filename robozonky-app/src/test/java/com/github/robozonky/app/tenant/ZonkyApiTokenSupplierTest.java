@@ -51,9 +51,9 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     private static ZonkyApiToken getTokenExpiringIn(final Duration duration) {
         return new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                     UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                     OffsetDateTime.ofInstant(DateUtil.now()
+                OffsetDateTime.ofInstant(DateUtil.now()
                     .plus(duration), Defaults.ZONE_ID));
     }
 
@@ -88,9 +88,9 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
         secrets.setToken(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                               UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                               199));
+                199));
         assertThatThrownBy(t::get).isInstanceOf(IllegalStateException.class)
             .hasCauseInstanceOf(IllegalStateException.class);
     }
@@ -105,9 +105,9 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
         secrets.setToken(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                               UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                               199));
+                199));
         assertThatThrownBy(t::get).isInstanceOf(NotAuthorizedException.class);
     }
 
@@ -121,9 +121,9 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
         secrets.setToken(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                               UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                               199));
+                199));
         assertThatThrownBy(t::get).isInstanceOf(BadRequestException.class);
     }
 

@@ -39,9 +39,9 @@ class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
     static final ZonkyApiToken TOKEN = new ZonkyApiTokenImpl(UUID.randomUUID()
         .toString(),
-                                                             UUID.randomUUID()
+            UUID.randomUUID()
                 .toString(),
-                                                             300);
+            300);
 
     private static InputStream c(final ZonkyApiToken token) {
         final String error = "{\"error\":\"invalid_token\",\"error_description\":\"Invalid access token: "

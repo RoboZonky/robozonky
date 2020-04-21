@@ -99,9 +99,9 @@ class KeyStoreSecretProviderTest {
         assertThat(p.getToken()).isEmpty();
         final ZonkyApiToken token = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                                          UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                                          299);
+                299);
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
         assertThat(p.setToken(null)).isTrue();
@@ -119,9 +119,9 @@ class KeyStoreSecretProviderTest {
             .toString());
         final ZonkyApiToken token = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                                          UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                                          299);
+                299);
         assertThat(p.setToken(token)).isFalse();
         assertThat(p.getToken()).isEmpty();
         assertThat(p.setToken(null)).isFalse();

@@ -48,9 +48,9 @@ class FallbackSecretProviderTest {
         assertThat(p.getToken()).isEmpty();
         final ZonkyApiToken token = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
-                                                          UUID.randomUUID()
+                UUID.randomUUID()
                     .toString(),
-                                                          299);
+                299);
         assertThat(p.setToken(token)).isTrue();
         assertThat(p.getToken()).contains(token);
     }
