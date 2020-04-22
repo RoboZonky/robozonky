@@ -105,28 +105,41 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
     class ValidMetadata {
 
         @BeforeEach
-        void setupMetadata() {
+        void setupMetadata() { // This is a mocked response of the Central Search REST API.
             server.when(HttpRequest.request()
-                .withPath("/maven2/com/github/robozonky/robozonky/maven-metadata.xml"))
+                .withPath("/solrsearch/select"))
                 .respond(HttpResponse.response()
-                    .withBody("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                            "<metadata>\n" +
-                            "  <groupId>com.github.robozonky</groupId>\n" +
-                            "  <artifactId>robozonky</artifactId>\n" +
-                            "  <versioning>\n" +
-                            "    <latest>4.0.2-cr-2</latest>\n" +
-                            "    <release>4.0.1</release>\n" +
-                            "    <versions>\n" +
-                            "      <version>4.0.0-cr-1</version>\n" +
-                            "      <version>4.0.0</version>\n" +
-                            "      <version>4.0.1</version>\n" +
-                            "      <version>4.0.2-cr-1</version>\n" +
-                            "      <version>4.0.2-cr-2</version>\n" +
-                            "    </versions>\n" +
-                            "    <lastUpdated>20171015201449</lastUpdated" +
-                            ">\n" +
-                            "  </versioning>\n" +
-                            "</metadata>"));
+                    .withBody("{\"responseHeader\":{\"status\":0,\"QTime\":1,\"params\":{\"q\":\"g:\\\"com.github" +
+                            ".robozonky\\\" AND a:\\\"robozonky\\\"\",\"core\":\"gav\",\"indent\":\"off\"," +
+                            "\"fl\":\"id,g,a,v,p,ec,timestamp,tags\",\"start\":\"\",\"sort\":\"score desc," +
+                            "timestamp desc,g asc,a asc,v desc\",\"rows\":\"100\",\"wt\":\"json\"," +
+                            "\"version\":\"2.2\"}},\"response\":{\"numFound\":5,\"start\":0," +
+                            "\"docs\":[" +
+                            "{\"id\":\"com.github.robozonky:robozonky:4.8" +
+                            ".0-cr-2\",\"g\":\"com.github.robozonky\",\"a\":\"robozonky\",\"v\":\"4.8" +
+                            ".0-cr-2\",\"p\":\"pom\",\"timestamp\":1535571473000,\"ec\":[\".pom\"]," +
+                            "\"tags\":[\"define\",\"profit\",\"automated\",\"strategy\",\"zonky\"," +
+                            "\"investment\",\"investing\"]}," +
+                            "{\"id\":\"com.github.robozonky:robozonky:4.8" +
+                            ".0-cr-1\",\"g\":\"com.github.robozonky\",\"a\":\"robozonky\",\"v\":\"4.8" +
+                            ".0-cr-1\",\"p\":\"pom\",\"timestamp\":1535483325000,\"ec\":[\".pom\"]," +
+                            "\"tags\":[\"define\",\"profit\",\"automated\",\"strategy\",\"zonky\"," +
+                            "\"investment\",\"investing\"]}," +
+                            "{\"id\":\"com.github.robozonky:robozonky:4.7.7" +
+                            ".7\",\"g\":\"com.github.robozonky\",\"a\":\"robozonky\",\"v\":\"4.7.7\"," +
+                            "\"p\":\"pom\",\"timestamp\":1536400436000,\"ec\":[\".pom\"]," +
+                            "\"tags\":[\"define\",\"profit\",\"automated\",\"strategy\",\"zonky\"," +
+                            "\"investment\",\"investing\"]}," +
+                            "{\"id\":\"com.github.robozonky:robozonky:4.7" +
+                            ".6\",\"g\":\"com.github.robozonky\",\"a\":\"robozonky\",\"v\":\"4.7.6\"," +
+                            "\"p\":\"pom\",\"timestamp\":1533972934000,\"ec\":[\".pom\"]," +
+                            "\"tags\":[\"define\",\"profit\",\"automated\",\"strategy\",\"zonky\"," +
+                            "\"investment\",\"investing\"]}," +
+                            "{\"id\":\"com.github.robozonky:robozonky:4.7" +
+                            ".6-cr-1\",\"g\":\"com.github.robozonky\",\"a\":\"robozonky\",\"v\":\"4.7.6-cr-1\"," +
+                            "\"p\":\"pom\",\"timestamp\":1533972934000,\"ec\":[\".pom\"]," +
+                            "\"tags\":[\"define\",\"profit\",\"automated\",\"strategy\",\"zonky\"," +
+                            "\"investment\",\"investing\"]}]}}"));
         }
 
         @Test
@@ -142,39 +155,39 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
         void checkLatestVersionBothOutdated() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                     "robozonky");
-            final Either<Throwable, Response> result = parser.apply("4.0.0");
-            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-2"));
+            final Either<Throwable, Response> result = parser.apply("4.7.6");
+            assertThat(result.get()).isEqualTo(Response.moreRecent("4.7.7", "4.8.0-cr-2"));
         }
 
         @Test
         void checkLatestVersionExperimentalMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                     "robozonky");
-            final Either<Throwable, Response> result = parser.apply("4.0.1");
-            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-2"));
+            final Either<Throwable, Response> result = parser.apply("4.7.7");
+            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.8.0-cr-2"));
         }
 
         @Test
         void checkLatestVersionExperimentalEvenMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                     "robozonky");
-            final Either<Throwable, Response> result = parser.apply("4.0.0-cr-1");
-            assertThat(result.get()).isEqualTo(Response.moreRecent("4.0.1", "4.0.2-cr-2"));
+            final Either<Throwable, Response> result = parser.apply("4.7.6-cr-1");
+            assertThat(result.get()).isEqualTo(Response.moreRecent("4.7.7", "4.8.0-cr-2"));
         }
 
         @Test
         void checkLatestVersionExperimentalYetMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                     "robozonky");
-            final Either<Throwable, Response> result = parser.apply("4.0.2-cr-1");
-            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.0.2-cr-2"));
+            final Either<Throwable, Response> result = parser.apply("4.8.0-cr-1");
+            assertThat(result.get()).isEqualTo(Response.moreRecentExperimental("4.8.0-cr-2"));
         }
 
         @Test
         void checkLatestVersionNoneMoreRecent() {
             final MavenMetadataParser parser = new MavenMetadataParser(serverUrl, "com.github.robozonky",
                     "robozonky");
-            final Either<Throwable, Response> result = parser.apply("4.0.2-cr-2");
+            final Either<Throwable, Response> result = parser.apply("4.8.0-cr-2");
             assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
         }
     }

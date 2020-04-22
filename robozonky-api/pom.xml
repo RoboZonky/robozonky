@@ -133,7 +133,6 @@
         <configuration>
           <excludedClasses> <!-- Mostly getters and setters. -->
             <param>com.github.robozonky.internal.remote.entities.*</param>
-            <param>com.github.robozonky.internal.util.XmlUtil</param>
           </excludedClasses>
         </configuration>
       </plugin>

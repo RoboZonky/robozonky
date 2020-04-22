@@ -16,24 +16,22 @@
 
 package com.github.robozonky.app.version;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -41,20 +39,17 @@ import org.w3c.dom.NodeList;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
-import com.github.robozonky.internal.util.XmlUtil;
 import com.github.robozonky.internal.util.functional.Either;
 
 /**
- * Retrieve latest released version from Maven Central. By default will check
- * https://repo1.maven.org/maven2/com/github/robozonky/robozonky/maven-metadata.xml.
+ * Retrieve latest released version from Maven Central. By default will check the REST API:
+ * https://search.maven.org/classic/#api.
  * <p>
- * This class is based on the assumption that the Maven Metadata always report versions in the increasing order of
+ * This class is based on the assumption that the search always returns versions in the decreasing order of
  * recency.
  */
 final class MavenMetadataParser implements Function<String, Either<Throwable, Response>> {
 
-    private static final String URL_SEPARATOR = "/";
-    private static final Pattern PATTERN_DOT = Pattern.compile("\\Q.\\E");
     private static final Pattern PATTERN_STABLE_VERSION = Pattern.compile("\\A[1-9][0-9]*\\.[0-9]+\\.[0-9]+\\z");
 
     private final String groupId;
@@ -72,26 +67,23 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
     }
 
     public MavenMetadataParser() {
-        this("https://repo1.maven.org");
+        this("http://search.maven.org/");
     }
 
     /**
-     * Assemble the Maven Central metadata URL from the given groupId and artifactId.
+     * Assemble and read the Maven Central query URL from the given groupId and artifactId.
      * 
      * @param groupId    Group ID in question.
      * @param artifactId Artifact ID in question.
-     * @param hostname   Maven Central hostname, such as "https://repo1.maven.org"
+     * @param hostname   Maven Central search API hostname, such as "http://search.maven.org/"
      * @return Stream to read the Maven Central metadata from.
      * @throws IOException Network communications failure.
      */
     private static InputStream getMavenCentralData(final String groupId, final String artifactId,
             final String hostname) {
         try {
-            var rootUrlParts = Stream.of(hostname, "maven2");
-            var mavenGroupParts = Arrays.stream(MavenMetadataParser.PATTERN_DOT.split(groupId));
-            var artifactParts = Stream.of(artifactId, "maven-metadata.xml");
-            var url = Stream.concat(Stream.concat(rootUrlParts, mavenGroupParts), artifactParts)
-                .collect(joining(URL_SEPARATOR));
+            var url = hostname + "/solrsearch/select?q=g:%22" + groupId + "%22+AND+a:%22" + artifactId
+                    + "%22&core=gav&rows=100&wt=json";
             return UrlUtil.open(new URL(url));
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
@@ -110,15 +102,14 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
             .collect(toList());
     }
 
-    private static List<String> retrieveVersionStrings(final InputStream xml) {
-        try {
-            var docFactory = XmlUtil.getDocumentBuilderFactory();
-            var docBuilder = docFactory.newDocumentBuilder();
-            var doc = docBuilder.parse(xml);
-            var xPathFactory = XPathFactory.newInstance();
-            var xpath = xPathFactory.newXPath();
-            var expr = xpath.compile("/metadata/versioning/versions/version");
-            return MavenMetadataParser.extractItems((NodeList) expr.evaluate(doc, XPathConstants.NODESET));
+    private static List<String> retrieveVersionStrings(final InputStream json) {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            return jsonb.fromJson(json, CentralResponse.class)
+                .getResponse()
+                .getDocs()
+                .stream()
+                .map(CentralResponseGav::getV)
+                .collect(Collectors.toUnmodifiableList());
         } catch (final Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -133,41 +124,37 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
         }
     }
 
-    private static Either<Throwable, List<String>> mavenMetadataXmlToVersionStrings(final String source) {
+    private static Either<Throwable, List<String>> centralSearchJsonToVersionStrings(final String source) {
         return read(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
                 MavenMetadataParser::retrieveVersionStrings);
     }
 
-    private static List<String> subListAfter(final List<String> items, final String item) {
+    private static List<String> subListBefore(final List<String> items, final String item) {
         var indexOfItem = items.lastIndexOf(item);
-        return items.subList(indexOfItem + 1, items.size());
-    }
-
-    private static String last(final List<String> items) {
-        return items.get(items.size() - 1);
+        return items.subList(0, indexOfItem);
     }
 
     private static Either<Throwable, Response> processVersion(final String version, final List<String> knownVersions) {
         if (!knownVersions.contains(version)) {
             return Either.left(new IllegalStateException("Unknown RoboZonky version " + version));
         }
-        var newerVersions = subListAfter(knownVersions, version);
+        var newerVersions = subListBefore(knownVersions, version);
         if (newerVersions.isEmpty()) {
             return Either.right(Response.noMoreRecentVersion());
         }
         return newerVersions.stream()
             .filter(MavenMetadataParser::isStable)
-            .reduce((first, second) -> second) // last element in the stream of versions
+            .reduce((first, second) -> first) // first element in the stream of versions
             .map(stable -> {
-                var evenNewerExperimentalVersions = subListAfter(newerVersions, stable);
+                var evenNewerExperimentalVersions = subListBefore(newerVersions, stable);
                 if (evenNewerExperimentalVersions.isEmpty()) {
                     return Either.<Throwable, Response>right(Response.moreRecentStable(stable));
                 } else {
-                    var experimental = last(evenNewerExperimentalVersions);
+                    var experimental = evenNewerExperimentalVersions.get(0);
                     return Either.<Throwable, Response>right(Response.moreRecent(stable, experimental));
                 }
             })
-            .orElseGet(() -> Either.right(Response.moreRecentExperimental(last(newerVersions))));
+            .orElseGet(() -> Either.right(Response.moreRecentExperimental(newerVersions.get(0))));
     }
 
     private Either<Throwable, String> getLatestSource() {
@@ -179,7 +166,7 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
 
     private Either<Throwable, List<String>> getAvailableVersions() {
         return getLatestSource()
-            .fold(Either::left, MavenMetadataParser::mavenMetadataXmlToVersionStrings);
+            .fold(Either::left, MavenMetadataParser::centralSearchJsonToVersionStrings);
     }
 
     @Override
