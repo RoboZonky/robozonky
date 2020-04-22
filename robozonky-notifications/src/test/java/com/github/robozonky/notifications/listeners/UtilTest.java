@@ -31,6 +31,7 @@ import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class UtilTest {
@@ -82,8 +83,9 @@ class UtilTest {
 
             @Override
             public Loan getLoan() {
-                return new MockLoanBuilder().setRating(Rating.D)
-                    .setInterestRate(Ratio.ONE)
+                return new MockLoanBuilder()
+                    .set(LoanImpl::setRating, Rating.D)
+                    .set(LoanImpl::setInterestRate, Ratio.ONE)
                     .build();
             }
 

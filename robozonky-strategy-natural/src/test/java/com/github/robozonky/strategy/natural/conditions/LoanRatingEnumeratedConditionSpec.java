@@ -36,7 +36,8 @@ class LoanRatingEnumeratedConditionSpec implements AbstractEnumeratedConditionTe
 
     @Override
     public Wrapper<?> getMocked() {
-        final LoanImpl loan = new MockLoanBuilder().setRating(this.getTriggerItem())
+        final LoanImpl loan = new MockLoanBuilder()
+            .set(LoanImpl::setRating, this.getTriggerItem())
             .build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }

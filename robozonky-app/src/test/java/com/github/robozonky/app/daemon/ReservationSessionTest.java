@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
@@ -35,7 +34,9 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -43,10 +44,10 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 class ReservationSessionTest extends AbstractZonkyLeveragingTest {
 
     private static Reservation mockReservation() {
-        final MyReservation mr = mock(MyReservationImpl.class);
+        final MyReservationImpl mr = mock(MyReservationImpl.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(200));
         return new MockReservationBuilder()
-            .setMyReservation(mr)
+            .set(ReservationImpl::setMyReservation, mr)
             .build();
     }
 
@@ -61,10 +62,11 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properReal() {
         final Loan l = new MockLoanBuilder()
-            .setAmount(200)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(200)
-            .setMyInvestment(mockMyInvestment())
+            .set(LoanImpl::setAmount, Money.from(200))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(200))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
         final Reservation p = mockReservation();
@@ -92,10 +94,11 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properDry() {
         final Loan l = new MockLoanBuilder()
-            .setAmount(200)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(200)
-            .setMyInvestment(mockMyInvestment())
+            .set(LoanImpl::setAmount, Money.from(200))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(200))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
         final Reservation p = mockReservation();
@@ -124,10 +127,11 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properFail() {
         final Loan l = new MockLoanBuilder()
-            .setAmount(200)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(200)
-            .setMyInvestment(mockMyInvestment())
+            .set(LoanImpl::setAmount, Money.from(200))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(200))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
         final Reservation p = mockReservation();

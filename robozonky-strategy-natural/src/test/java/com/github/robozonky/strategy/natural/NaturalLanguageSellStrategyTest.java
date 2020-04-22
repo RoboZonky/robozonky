@@ -37,6 +37,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -44,24 +45,6 @@ import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
-
-    private InvestmentDescriptor mockDescriptor() {
-        return mockDescriptor(mockInvestment());
-    }
-
-    private InvestmentDescriptor mockDescriptor(final Investment investment) {
-        final Loan l = new MockLoanBuilder()
-            .setAmount(100_000)
-            .build();
-        return new InvestmentDescriptor(investment, () -> l);
-    }
-
-    private InvestmentDescriptor mockDescriptor(final Investment investment, final SellInfo sellInfo) {
-        final Loan l = new MockLoanBuilder()
-            .setAmount(100_000)
-            .build();
-        return new InvestmentDescriptor(investment, () -> l, () -> sellInfo);
-    }
 
     private static Investment mockInvestment() {
         return mockInvestment(BigDecimal.TEN);
@@ -72,6 +55,24 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
             .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
             .set(InvestmentImpl::setSmpFee, Money.from(fee))
             .build();
+    }
+
+    private InvestmentDescriptor mockDescriptor() {
+        return mockDescriptor(mockInvestment());
+    }
+
+    private InvestmentDescriptor mockDescriptor(final Investment investment) {
+        final Loan l = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .build();
+        return new InvestmentDescriptor(investment, () -> l);
+    }
+
+    private InvestmentDescriptor mockDescriptor(final Investment investment, final SellInfo sellInfo) {
+        final Loan l = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .build();
+        return new InvestmentDescriptor(investment, () -> l, () -> sellInfo);
     }
 
     @Test
@@ -135,7 +136,7 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
         when(spi.getDiscount()).thenReturn(Ratio.ONE);
         final SellInfo si = mock(SellInfoImpl.class);
         when(si.getPriceInfo()).thenReturn(spi);
-        final Investment withoutFee = mockInvestment(null);
+        final Investment withoutFee = mockInvestment(BigDecimal.ZERO);
         final Investment withoutFee2 = mockInvestment(BigDecimal.ZERO);
         final Investment withoutFee3 = mockInvestment(BigDecimal.ZERO);
         final Stream<RecommendedInvestment> result = s.recommend(

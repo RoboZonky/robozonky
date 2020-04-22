@@ -16,12 +16,6 @@
 
 package com.github.robozonky.test.mock;
 
-import static org.mockito.Mockito.*;
-
-import java.net.URL;
-import java.util.Optional;
-
-import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 public class MockLoanBuilder extends BaseLoanMockBuilder<LoanImpl, MockLoanBuilder> {
@@ -32,16 +26,7 @@ public class MockLoanBuilder extends BaseLoanMockBuilder<LoanImpl, MockLoanBuild
 
     public MockLoanBuilder() {
         super(LoanImpl.class);
-    }
-
-    public MockLoanBuilder setUrl(final URL url) {
-        when(mock.getUrl()).thenReturn(url.toString());
-        return this;
-    }
-
-    public MockLoanBuilder setMyInvestment(final MyInvestment myInvestment) {
-        when(mock.getMyInvestment()).thenReturn(Optional.ofNullable(myInvestment));
-        return this;
+        set(LoanImpl::setId, RANDOM.nextInt());
     }
 
 }

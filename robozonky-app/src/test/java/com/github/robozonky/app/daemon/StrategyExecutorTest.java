@@ -111,7 +111,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void purchasingNoneAccepted() {
         final Zonky zonky = harmlessZonky();
-        final Loan loan = new MockLoanBuilder().setAmount(200)
+        final Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(200))
             .build();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         final Participation mock = mock(ParticipationImpl.class);
@@ -138,11 +139,12 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void purchasingSomeAccepted() {
         final Loan loan = new MockLoanBuilder()
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(1000)
-            .setMyInvestment(mockMyInvestment())
-            .setDatePublished(OffsetDateTime.now())
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1_000))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
+            .set(LoanImpl::setDatePublished, OffsetDateTime.now())
             .build();
         final int loanId = loan.getId();
         final Rating rating = loan.getRating();
@@ -182,11 +184,12 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void tryPurchaseButZonkyFail() {
         final Loan loan = new MockLoanBuilder()
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(1000)
-            .setMyInvestment(mockMyInvestment())
-            .setDatePublished(OffsetDateTime.now())
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1_000))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
+            .set(LoanImpl::setDatePublished, OffsetDateTime.now())
             .build();
         final int loanId = loan.getId();
         final Rating rating = loan.getRating();
@@ -211,11 +214,12 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void tryPurchaseButZonkyUnknownFailPassthrough() {
         final Loan loan = new MockLoanBuilder()
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(1000)
-            .setMyInvestment(mockMyInvestment())
-            .setDatePublished(OffsetDateTime.now())
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1_000))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
+            .set(LoanImpl::setDatePublished, OffsetDateTime.now())
             .build();
         final int loanId = loan.getId();
         final Rating rating = loan.getRating();
@@ -252,8 +256,8 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoStrategy() {
-        final LoanImpl loan = new MockLoanBuilder()
-            .setAmount(2)
+        final Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(2))
             .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
@@ -278,11 +282,11 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoneAccepted() {
-        final LoanImpl loan = new MockLoanBuilder()
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setMyInvestment(mockMyInvestment())
-            .setDatePublished(OffsetDateTime.now())
+        final Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
+            .set(LoanImpl::setDatePublished, OffsetDateTime.now())
             .build();
         final int loanId = loan.getId();
         final LoanDescriptor ld = new LoanDescriptor(loan);
@@ -297,10 +301,11 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingSomeAccepted() {
-        final LoanImpl loan = new MockLoanBuilder()
-            .setAmount(100_000)
-            .setRating(Rating.C)
-            .setNonReservedRemainingInvestment(20_000)
+        final Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.C)
+            .set(LoanImpl::setRemainingInvestment, Money.from(20_000))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
         final Zonky z = harmlessZonky();
@@ -340,7 +345,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         setClock(Clock.fixed(now, Defaults.ZONE_ID));
         final Zonky zonky = harmlessZonky();
         final Loan loan = new MockLoanBuilder()
-            .setRating(Rating.D)
+            .set(LoanImpl::setRating, Rating.D)
             .build();
         when(zonky.getAvailableLoans(any())).thenAnswer(i -> Stream.of(loan));
         final PowerTenant tenant = mockTenant(zonky);

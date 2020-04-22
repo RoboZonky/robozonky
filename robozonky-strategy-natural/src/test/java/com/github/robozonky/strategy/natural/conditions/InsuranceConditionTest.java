@@ -37,7 +37,7 @@ class InsuranceConditionTest {
     @Test
     void basic() {
         final LoanImpl loan = new MockLoanBuilder()
-            .setInsuranceActive(true)
+            .set(LoanImpl::setInsuranceActive, true)
             .build();
         final Wrapper<?> wrap = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
         assertSoftly(softly -> {

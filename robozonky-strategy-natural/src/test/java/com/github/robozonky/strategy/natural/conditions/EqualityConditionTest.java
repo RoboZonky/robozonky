@@ -51,7 +51,8 @@ class EqualityConditionTest {
     }
 
     private static Wrapper<?> mockLoan(final Rating r) {
-        final LoanImpl loan = new MockLoanBuilder().setRating(r)
+        final LoanImpl loan = new MockLoanBuilder()
+            .set(LoanImpl::setRating, r)
             .build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }

@@ -49,6 +49,7 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.SellFeeImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
@@ -107,7 +108,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.refresh(eq(token))).thenReturn(token);
         final Zonky z = harmlessZonky();
         final Loan l = new MockLoanBuilder()
-            .setRemainingInvestment(1_000)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1_000))
             .build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final SellFee sf = mock(SellFeeImpl.class);

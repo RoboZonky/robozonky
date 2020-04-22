@@ -34,27 +34,28 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-class LoanWrapperTest {
+class LoanWrapperTest extends AbstractRoboZonkyTest {
 
-    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
+    private static final PortfolioOverview FOLIO = mockPortfolioOverview();
 
     @Test
     void fromLoan() {
         final LoanImpl loan = new MockLoanBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(LoanImpl::setInsuranceActive, true)
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(LoanImpl::setRegion, Region.JIHOCESKY)
+            .set(LoanImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
-            .setInterestRate(Ratio.ONE)
-            .setAnnuity(BigDecimal.ONE)
+            .set(LoanImpl::setTermInMonths, 20)
+            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
             .build();
         LoanDescriptor ld = new LoanDescriptor(loan);
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(ld, FOLIO);
@@ -113,7 +114,7 @@ class LoanWrapperTest {
     @Test
     void fromLoanWithoutRevenueRate() {
         final LoanImpl loan = new MockLoanBuilder()
-            .setRating(Rating.D)
+            .set(LoanImpl::setRating, Rating.D)
             .build();
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
@@ -123,17 +124,17 @@ class LoanWrapperTest {
     @Test
     void values() {
         final LoanImpl l = new MockLoanBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setRevenueRate(null)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(LoanImpl::setInsuranceActive, true)
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setRevenueRate, null)
+            .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(LoanImpl::setRegion, Region.JIHOCESKY)
+            .set(LoanImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
+            .set(LoanImpl::setTermInMonths, 20)
             .build();
         final LoanDescriptor original = new LoanDescriptor(l);
         final PortfolioOverview portfolioOverview = mock(PortfolioOverview.class);
@@ -188,16 +189,16 @@ class LoanWrapperTest {
     @Test
     void equality() {
         final LoanImpl l = new MockLoanBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(LoanImpl::setInsuranceActive, true)
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(LoanImpl::setRegion, Region.JIHOCESKY)
+            .set(LoanImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
+            .set(LoanImpl::setTermInMonths, 20)
             .build();
         final LoanDescriptor original = new LoanDescriptor(l);
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(original, FOLIO);

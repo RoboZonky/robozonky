@@ -16,9 +16,6 @@
 
 package com.github.robozonky.test.mock;
 
-import static org.mockito.Mockito.*;
-
-import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
 
@@ -30,10 +27,7 @@ public class MockReservationBuilder extends BaseLoanMockBuilder<ReservationImpl,
 
     public MockReservationBuilder() {
         super(ReservationImpl.class);
+        set(ReservationImpl::setId, RANDOM.nextInt());
     }
 
-    public MockReservationBuilder setMyReservation(final MyReservation myReservation) {
-        when(mock.getMyReservation()).thenReturn(myReservation);
-        return this;
-    }
 }

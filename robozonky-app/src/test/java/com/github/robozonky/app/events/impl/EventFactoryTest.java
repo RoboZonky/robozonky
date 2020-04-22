@@ -53,7 +53,6 @@ import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -79,7 +78,9 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedLoan recommendedLoan() {
-        final LoanImpl loan = new MockLoanBuilder().setNonReservedRemainingInvestment(2000)
+        final LoanImpl loan = new MockLoanBuilder()
+            .set(LoanImpl::setRemainingInvestment, Money.from(2_000))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();
         return new LoanDescriptor(loan).recommend(Money.from(200))
             .orElse(null);
@@ -101,10 +102,10 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     }
 
     private static RecommendedReservation recommendedReservation() {
-        final MyReservation mr = mock(MyReservationImpl.class);
+        final MyReservationImpl mr = mock(MyReservationImpl.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(200));
         final Reservation r = new MockReservationBuilder()
-            .setMyReservation(mr)
+            .set(ReservationImpl::setMyReservation, mr)
             .build();
         final Loan l = MockLoanBuilder.fresh();
         return new ReservationDescriptor(r, () -> l)
@@ -119,8 +120,9 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void thresholds() {
-        final Loan loan = new MockLoanBuilder().setRating(Rating.D)
-            .setAmount(100_000)
+        final Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setAmount, Money.from(100_000))
             .build();
         final Investment investment = MockInvestmentBuilder.fresh(loan, BigDecimal.TEN)
             .build();

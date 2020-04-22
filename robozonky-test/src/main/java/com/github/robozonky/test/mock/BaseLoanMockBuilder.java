@@ -16,18 +16,6 @@
 
 package com.github.robozonky.test.mock;
 
-import static org.mockito.Mockito.*;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.util.Optional;
-
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.remote.entities.BaseLoanImpl;
 
 abstract class BaseLoanMockBuilder<T extends BaseLoanImpl, S extends BaseLoanMockBuilder<T, S>>
@@ -35,84 +23,5 @@ abstract class BaseLoanMockBuilder<T extends BaseLoanImpl, S extends BaseLoanMoc
 
     protected BaseLoanMockBuilder(Class<T> clz) {
         super(clz);
-        when(mock.getId()).thenReturn(RANDOM.nextInt(Integer.MAX_VALUE));
     }
-
-    public S setAmount(final int amount) {
-        when(mock.getAmount()).thenReturn(Money.from(amount));
-        return (S) this;
-    }
-
-    public S setRemainingInvestment(final int amount) {
-        when(mock.getRemainingInvestment()).thenReturn(Money.from(amount));
-        return (S) this;
-    }
-
-    public S setNonReservedRemainingInvestment(final int amount) {
-        when(mock.getNonReservedRemainingInvestment()).thenReturn(Money.from(amount));
-        return (S) this;
-    }
-
-    public S setRevenueRate(final Ratio rate) {
-        when(mock.getRevenueRate()).thenReturn(Optional.ofNullable(rate));
-        return (S) this;
-    }
-
-    public S setInterestRate(final Ratio rate) {
-        when(mock.getInterestRate()).thenReturn(rate);
-        return (S) this;
-    }
-
-    public S setAnnuity(final BigDecimal annuity) {
-        when(mock.getAnnuity()).thenReturn(Money.from(annuity));
-        return (S) this;
-    }
-
-    public S setRating(final Rating rating) {
-        when(mock.getRating()).thenReturn(rating);
-        when(mock.getInterestRate()).thenReturn(rating.getInterestRate());
-        when(mock.getRevenueRate()).thenReturn(Optional.of(rating.getMaximalRevenueRate()));
-        return (S) this;
-    }
-
-    public S setInsuranceActive(final boolean active) {
-        when(mock.isInsuranceActive()).thenReturn(active);
-        return (S) this;
-    }
-
-    public S setMainIncomeType(final MainIncomeType mainIncomeType) {
-        when(mock.getMainIncomeType()).thenReturn(mainIncomeType);
-        return (S) this;
-    }
-
-    public S setRegion(final Region region) {
-        when(mock.getRegion()).thenReturn(region);
-        return (S) this;
-    }
-
-    public S setPurpose(final Purpose purpose) {
-        when(mock.getPurpose()).thenReturn(purpose);
-        return (S) this;
-    }
-
-    public S setStory(final String story) {
-        when(mock.getStory()).thenReturn(story);
-        return (S) this;
-    }
-
-    public S setTermInMonths(final int termInMonths) {
-        when(mock.getTermInMonths()).thenReturn(termInMonths);
-        return (S) this;
-    }
-
-    public S setDatePublished(final OffsetDateTime datePublished) {
-        when(mock.getDatePublished()).thenReturn(datePublished);
-        return (S) this;
-    }
-
-    public S setName(final String name) {
-        when(mock.getName()).thenReturn(name);
-        return (S) this;
-    }
-
 }

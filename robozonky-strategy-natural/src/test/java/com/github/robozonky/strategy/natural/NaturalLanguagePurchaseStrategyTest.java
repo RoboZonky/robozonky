@@ -37,6 +37,7 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.RecommendedParticipation;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
@@ -51,7 +52,7 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static ParticipationDescriptor mockDescriptor(final Participation participation) {
         final Loan l = new MockLoanBuilder()
-            .setAmount(100_000)
+            .set(LoanImpl::setAmount, Money.from(100_000))
             .build();
         return new ParticipationDescriptor(participation, () -> l);
     }

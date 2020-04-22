@@ -46,10 +46,11 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
 
     private static LoanImpl mockLoan(final int amount) {
         return new MockLoanBuilder()
-            .setAmount(amount)
-            .setDatePublished(OffsetDateTime.now())
-            .setNonReservedRemainingInvestment(amount)
-            .setRating(Rating.A)
+            .set(LoanImpl::setAmount, Money.from(amount))
+            .set(LoanImpl::setRemainingInvestment, Money.from(amount))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setDatePublished, OffsetDateTime.now())
+            .set(LoanImpl::setRating, Rating.A)
             .build();
     }
 

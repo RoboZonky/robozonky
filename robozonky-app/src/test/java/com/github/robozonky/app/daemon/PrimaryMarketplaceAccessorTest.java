@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -37,7 +38,7 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
-import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -47,13 +48,15 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void eliminatesUselessLoans() {
         final Loan alreadyInvested = new MockLoanBuilder()
-            .setRating(Rating.B)
-            .setNonReservedRemainingInvestment(1)
-            .setMyInvestment(mock(MyInvestmentImpl.class))
+            .set(LoanImpl::setRating, Rating.B)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final Loan normal = new MockLoanBuilder()
-            .setRating(Rating.A)
-            .setNonReservedRemainingInvestment(1)
+            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableLoans(any())).thenReturn(Stream.of(alreadyInvested, normal));

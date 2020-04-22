@@ -27,6 +27,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
 
     private MockInvestmentBuilder() {
         super(InvestmentImpl.class);
+        set(InvestmentImpl::setId, RANDOM.nextLong());
     }
 
     public static MockInvestmentBuilder fresh() {
@@ -39,7 +40,6 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
 
     public static MockInvestmentBuilder fresh(final Loan loan, final BigDecimal invested) {
         return fresh()
-            .set(InvestmentImpl::setId, RANDOM.nextLong())
             .set(InvestmentImpl::setLoanId, loan.getId())
             .set(InvestmentImpl::setInterestRate, loan.getInterestRate())
             .set(InvestmentImpl::setRevenueRate, loan.getRevenueRate()

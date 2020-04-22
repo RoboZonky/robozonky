@@ -27,6 +27,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -37,9 +38,10 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
 
     private static Loan mockLoan(final int amount) {
         return new MockLoanBuilder()
-            .setRating(Rating.A)
-            .setAmount(amount)
-            .setNonReservedRemainingInvestment(amount)
+            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setAmount, Money.from(amount))
+            .set(LoanImpl::setRemainingInvestment, Money.from(amount))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();
     }
 

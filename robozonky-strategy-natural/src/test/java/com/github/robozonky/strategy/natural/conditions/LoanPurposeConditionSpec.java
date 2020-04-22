@@ -36,7 +36,8 @@ class LoanPurposeConditionSpec implements AbstractEnumeratedConditionTest.Condit
 
     @Override
     public Wrapper<?> getMocked() {
-        final LoanImpl loan = new MockLoanBuilder().setPurpose(this.getTriggerItem())
+        final LoanImpl loan = new MockLoanBuilder()
+            .set(LoanImpl::setPurpose, this.getTriggerItem())
             .build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }

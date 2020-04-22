@@ -25,6 +25,7 @@ import java.util.Comparator;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.Defaults;
@@ -37,9 +38,10 @@ class PrimaryMarketplaceComparatorTest {
 
     private static LoanImpl mockLoan(final Rating rating, final int amount, final OffsetDateTime published) {
         return new MockLoanBuilder()
-            .setRating(rating)
-            .setDatePublished(published)
-            .setNonReservedRemainingInvestment(amount)
+            .set(LoanImpl::setRating, rating)
+            .set(LoanImpl::setDatePublished, published)
+            .set(LoanImpl::setRemainingInvestment, Money.from(amount))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();
     }
 

@@ -50,8 +50,9 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 class InvestorTest extends AbstractZonkyLeveragingTest {
 
     private static final LoanImpl LOAN = new MockLoanBuilder()
-        .setRating(Rating.A)
-        .setNonReservedRemainingInvestment(100_000)
+        .set(LoanImpl::setRating, Rating.A)
+        .set(LoanImpl::setRemainingInvestment, Money.from(100_000))
+        .set(LoanImpl::setReservedAmount, Money.from(0))
         .build();
     private static final LoanDescriptor DESCRIPTOR = new LoanDescriptor(LOAN);
 

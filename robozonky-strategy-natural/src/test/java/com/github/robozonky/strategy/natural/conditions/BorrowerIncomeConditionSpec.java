@@ -36,7 +36,8 @@ class BorrowerIncomeConditionSpec implements AbstractEnumeratedConditionTest.Con
 
     @Override
     public Wrapper<?> getMocked() {
-        final LoanImpl loan = new MockLoanBuilder().setMainIncomeType(this.getTriggerItem())
+        final LoanImpl loan = new MockLoanBuilder()
+            .set(LoanImpl::setMainIncomeType, this.getTriggerItem())
             .build();
         return Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
     }
