@@ -64,6 +64,7 @@ public class App implements Runnable {
      */
     void exit(final ReturnCode result) {
         LOGGER.trace("Exit requested with return code {}.", result);
+        LogManager.shutdown(); // Wait for async logging to finish before shutting down.
         actuallyExit(result.getCode());
     }
 
