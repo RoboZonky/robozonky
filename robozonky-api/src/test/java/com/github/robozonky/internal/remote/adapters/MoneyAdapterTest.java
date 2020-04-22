@@ -16,21 +16,29 @@
 
 package com.github.robozonky.internal.remote.adapters;
 
-import javax.json.bind.adapter.JsonbAdapter;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 
-public final class MoneyAdapter implements JsonbAdapter<Money, String> {
+public class MoneyAdapterTest {
 
-    @Override
-    public String adaptToJson(Money obj) {
-        return obj.getValue()
-            .stripTrailingZeros()
-            .toPlainString();
+    private final MoneyAdapter adapter = new MoneyAdapter();
+
+    @Test
+    void marshalAndUnmarshal() {
+        String json = adapter.adaptToJson(Money.from("123.456"));
+        Money money = adapter.adaptFromJson(json);
+        Assertions.assertThat(money)
+            .isEqualTo(Money.from("123.456"));
     }
 
-    @Override
-    public Money adaptFromJson(String obj) {
-        return Money.from(obj);
+    @Test
+    void marshalAndUnmarshalZero() {
+        String json = adapter.adaptToJson(Money.ZERO);
+        Money money = adapter.adaptFromJson(json);
+        Assertions.assertThat(money)
+            .isSameAs(Money.ZERO);
     }
+
 }
