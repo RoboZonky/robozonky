@@ -27,6 +27,7 @@ import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
@@ -39,6 +40,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
@@ -60,8 +62,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         .setUrl(getSomeUrl())
         .build();
     private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
-        .setInvestmentDate(OffsetDateTime.now())
-        .setExpectedInterest(BigDecimal.TEN)
+        .set(InvestmentImpl::setExpectedInterest, Money.from(BigDecimal.TEN))
         .build();
     private static final Loan LOAN2 = new MockLoanBuilder()
         .setAmount(200)
@@ -75,7 +76,6 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         .setUrl(getSomeUrl())
         .build();
     private static final Investment INVESTMENT2 = MockInvestmentBuilder.fresh(LOAN2, 200)
-        .setInvestmentDate(OffsetDateTime.now())
         .build();
     private static SessionInfo SESSION = mockSessionInfo();
 

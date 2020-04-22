@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -35,6 +36,7 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -67,8 +69,8 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static Investment mockInvestment(final BigDecimal fee) {
         return MockInvestmentBuilder.fresh()
-            .setRemainingPrincipal(BigDecimal.TEN)
-            .setSmpFee(fee)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
+            .set(InvestmentImpl::setSmpFee, Money.from(fee))
             .build();
     }
 

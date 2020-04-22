@@ -41,6 +41,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.SellFeeImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
@@ -62,10 +63,10 @@ class InvestmentWrapperTest {
             .toString())
         .setTermInMonths(20)
         .build();
-    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
-        .setLoanHealthInfo(LoanHealth.HEALTHY)
-        .setPurchasePrice(BigDecimal.TEN)
-        .setSellPrice(BigDecimal.ONE)
+    private static final InvestmentImpl INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
+        .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HEALTHY)
+        .set(InvestmentImpl::setPurchasePrice, Money.from(BigDecimal.TEN))
+        .set(InvestmentImpl::setSmpPrice, Money.from(BigDecimal.ONE))
         .build();
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
@@ -86,11 +87,11 @@ class InvestmentWrapperTest {
             .build();
         final int invested = 200;
         final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
-            .setRemainingMonths(10)
-            .setLoanHealthInfo(LoanHealth.HEALTHY)
-            .setPurchasePrice(BigDecimal.TEN)
-            .setSellPrice(BigDecimal.ONE)
-            .setSmpFee(BigDecimal.ONE)
+            .set(InvestmentImpl::setRemainingMonths, 10)
+            .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HEALTHY)
+            .set(InvestmentImpl::setPurchasePrice, Money.from(BigDecimal.TEN))
+            .set(InvestmentImpl::setSmpPrice, Money.from(BigDecimal.ONE))
+            .set(InvestmentImpl::setSmpFee, Money.from(BigDecimal.ONE))
             .build();
         final InvestmentDescriptor id = new InvestmentDescriptor(investment, () -> loan);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(id, FOLIO);
@@ -155,7 +156,7 @@ class InvestmentWrapperTest {
             .build();
         final int invested = 200;
         final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
-            .setSmpFee(BigDecimal.ONE)
+            .set(InvestmentImpl::setSmpFee, Money.from(BigDecimal.ONE))
             .build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);

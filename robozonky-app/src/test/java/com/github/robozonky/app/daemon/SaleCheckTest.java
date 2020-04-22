@@ -35,6 +35,7 @@ import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -55,16 +56,16 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
     class SomethingIsOffered {
 
         private final Investment soldEarlier = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-            .setOnSmp(false)
-            .setStatus(InvestmentStatus.ACTIVE)
+            .set(InvestmentImpl::setOnSmp, false)
+            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
             .build();
         private final Investment soldNow = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-            .setOnSmp(false)
-            .setStatus(InvestmentStatus.SOLD)
+            .set(InvestmentImpl::setOnSmp, false)
+            .set(InvestmentImpl::setStatus, InvestmentStatus.SOLD)
             .build();
         private final Investment onSmp = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-            .setStatus(InvestmentStatus.ACTIVE)
-            .setOnSmp(true)
+            .set(InvestmentImpl::setOnSmp, true)
+            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
             .build();
 
         @BeforeEach

@@ -33,6 +33,7 @@ import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.RiskPortfolioImpl;
 import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
@@ -58,8 +59,8 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         Investment i = MockInvestmentBuilder.fresh()
-            .setRating(Rating.C)
-            .setAmount(BigDecimal.TEN)
+            .set(InvestmentImpl::setRating, Rating.C)
+            .set(InvestmentImpl::setAmount, Money.from(BigDecimal.TEN))
             .build();
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         Statistics s = mock(StatisticsImpl.class);

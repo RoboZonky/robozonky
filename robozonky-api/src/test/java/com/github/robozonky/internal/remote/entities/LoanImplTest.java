@@ -52,25 +52,44 @@ class LoanImplTest {
         try (Jsonb jsonb = JsonbBuilder.create()) {
             Loan loan = jsonb.fromJson(LOAN_JSON, LoanImpl.class);
             assertSoftly(softly -> {
-                softly.assertThat(loan.getId()).isEqualTo(710354);
-                softly.assertThat(loan.getUrl()).isEqualTo("https://app.zonky.cz/loan/710354");
-                softly.assertThat(loan.getName()).isNotBlank();
-                softly.assertThat(loan.getStory()).isNotBlank();
-                softly.assertThat(loan.getTermInMonths()).isEqualTo(60);
-                softly.assertThat(loan.getInterestRate()).isEqualTo(Rating.AAAA.getInterestRate());
-                softly.assertThat(loan.getAmount()).isEqualTo(Money.from(360_000));
-                softly.assertThat(loan.getAnnuity()).isEqualTo(Money.from(6_921));
-                softly.assertThat(loan.getAnnuityWithInsurance()).isEqualTo(Money.from(7_536));
-                softly.assertThat(loan.getPremium()).isEqualTo(Money.from(615));
-                softly.assertThat(loan.getRating()).isEqualTo(Rating.AAAA);
-                softly.assertThat(loan.getCurrency()).isEqualTo(Defaults.CURRENCY);
-                softly.assertThat(loan.getCountryOfOrigin()).isEqualTo(Defaults.COUNTRY_OF_ORIGIN);
-                softly.assertThat(loan.getRemainingInvestment()).isEqualTo(Money.from(318_900));
-                softly.assertThat(loan.getReservedAmount()).isEqualTo(Money.from(72_000));
-                softly.assertThat(loan.getZonkyPlusAmount()).isEqualTo(Money.from(4_100));
-                softly.assertThat(loan.getRegion()).isEqualTo(Region.MORAVSKOSLEZSKY);
-                softly.assertThat(loan.getMainIncomeType()).isEqualTo(MainIncomeType.EMPLOYMENT);
-                softly.assertThat(loan.isInsuranceActive()).isTrue();
+                softly.assertThat(loan.getId())
+                    .isEqualTo(710354);
+                softly.assertThat(loan.getUrl())
+                    .isEqualTo("https://app.zonky.cz/loan/710354");
+                softly.assertThat(loan.getName())
+                    .isNotBlank();
+                softly.assertThat(loan.getStory())
+                    .isNotBlank();
+                softly.assertThat(loan.getTermInMonths())
+                    .isEqualTo(60);
+                softly.assertThat(loan.getInterestRate())
+                    .isEqualTo(Rating.AAAA.getInterestRate());
+                softly.assertThat(loan.getAmount())
+                    .isEqualTo(Money.from(360_000));
+                softly.assertThat(loan.getAnnuity())
+                    .isEqualTo(Money.from(6_921));
+                softly.assertThat(loan.getAnnuityWithInsurance())
+                    .isEqualTo(Money.from(7_536));
+                softly.assertThat(loan.getPremium())
+                    .isEqualTo(Money.from(615));
+                softly.assertThat(loan.getRating())
+                    .isEqualTo(Rating.AAAA);
+                softly.assertThat(loan.getCurrency())
+                    .isEqualTo(Defaults.CURRENCY);
+                softly.assertThat(loan.getCountryOfOrigin())
+                    .isEqualTo(Defaults.COUNTRY_OF_ORIGIN);
+                softly.assertThat(loan.getRemainingInvestment())
+                    .isEqualTo(Money.from(318_900));
+                softly.assertThat(loan.getReservedAmount())
+                    .isEqualTo(Money.from(72_000));
+                softly.assertThat(loan.getZonkyPlusAmount())
+                    .isEqualTo(Money.from(4_100));
+                softly.assertThat(loan.getRegion())
+                    .isEqualTo(Region.MORAVSKOSLEZSKY);
+                softly.assertThat(loan.getMainIncomeType())
+                    .isEqualTo(MainIncomeType.EMPLOYMENT);
+                softly.assertThat(loan.isInsuranceActive())
+                    .isTrue();
             });
         }
     }

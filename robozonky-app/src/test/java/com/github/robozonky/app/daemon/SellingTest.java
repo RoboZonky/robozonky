@@ -30,6 +30,7 @@ import javax.ws.rs.InternalServerErrorException;
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
@@ -45,6 +46,7 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -62,15 +64,14 @@ class SellingTest extends AbstractZonkyLeveragingTest {
 
     private static Investment mockInvestment(final Loan loan, final LoanHealth loanHealth) {
         return MockInvestmentBuilder.fresh(loan, 200)
-            .setLoanId(loan.getId())
-            .setRating(Rating.AAAAA)
-            .setLoanTermInMonth(1000)
-            .setLoanHealthInfo(loanHealth)
-            .setRemainingPrincipal(BigDecimal.valueOf(100))
-            .setStatus(InvestmentStatus.ACTIVE)
-            .setOnSmp(false)
-            .setIsCanBeOffered(true)
-            .setInWithdrawal(false)
+            .set(InvestmentImpl::setRating, Rating.AAAAA)
+            .set(InvestmentImpl::setLoanTermInMonth, 1000)
+            .set(InvestmentImpl::setLoanHealthInfo, loanHealth)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.valueOf(100)))
+            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
+            .set(InvestmentImpl::setOnSmp, false)
+            .set(InvestmentImpl::setCanBeOffered, true)
+            .set(InvestmentImpl::setInWithdrawal, false)
             .build();
     }
 

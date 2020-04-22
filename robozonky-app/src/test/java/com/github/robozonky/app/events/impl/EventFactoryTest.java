@@ -67,6 +67,7 @@ import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -93,7 +94,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static RecommendedInvestment recommendedInvestment() {
         return new InvestmentDescriptor(MockInvestmentBuilder.fresh()
-            .setRemainingPrincipal(BigDecimal.TEN)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
             .build(),
                 MockLoanBuilder::fresh).recommend()
                     .orElse(null);
