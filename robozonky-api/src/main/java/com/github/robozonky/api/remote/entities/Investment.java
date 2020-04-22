@@ -55,8 +55,6 @@ public interface Investment extends BaseInvestment {
      */
     int getCurrentTerm();
 
-    boolean isSmpRelated();
-
     boolean isOnSmp();
 
     boolean isCanBeOffered();

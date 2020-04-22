@@ -45,7 +45,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private PaymentStatus paymentStatus;
     @JsonbProperty(nillable = true)
     private LoanHealth loanHealthInfo;
-    private boolean smpRelated;
     private boolean onSmp;
     private boolean canBeOffered;
     private boolean inWithdrawal;
@@ -64,6 +63,7 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private String nickname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
     private Ratio interestRate;
+    @JsonbProperty(nillable = true)
     private Ratio revenueRate;
     private Rating rating;
     private InvestmentType investmentType;
@@ -82,8 +82,11 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     private Money loanAnnuity = Money.ZERO;
     private Money loanAmount = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money paid = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money toPay = Money.ZERO;
+    @JsonbProperty(nillable = true)
     private Money amountDue = Money.ZERO;
     private Money paidInterest = Money.ZERO;
     private Money dueInterest = Money.ZERO;
@@ -147,11 +150,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @Override
     public int getCurrentTerm() {
         return currentTerm;
-    }
-
-    @Override
-    public boolean isSmpRelated() {
-        return smpRelated;
     }
 
     @Override
@@ -362,10 +360,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
         this.loanHealthInfo = loanHealthInfo;
-    }
-
-    public void setSmpRelated(final boolean smpRelated) {
-        this.smpRelated = smpRelated;
     }
 
     public void setOnSmp(final boolean onSmp) {
@@ -588,7 +582,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
             .add("smpFee='" + smpFee + "'")
             .add("smpFeeExpirationDate='" + smpFeeExpirationDate + "'")
             .add("smpPrice='" + smpPrice + "'")
-            .add("smpRelated=" + smpRelated)
             .add("smpSoldFor='" + smpSoldFor + "'")
             .add("toPay='" + toPay + "'")
             .toString();
