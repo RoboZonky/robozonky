@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -32,6 +33,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.strategy.natural.Wrapper;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 
@@ -42,16 +44,16 @@ class ReservationWrapperTest {
     @Test
     void values() {
         final Reservation l = new MockReservationBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(ReservationImpl::setInsuranceActive, true)
+            .set(ReservationImpl::setAmount, Money.from(100_000))
+            .set(ReservationImpl::setRating, Rating.D)
+            .set(ReservationImpl::setInterestRate, Ratio.ONE)
+            .set(ReservationImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(ReservationImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(ReservationImpl::setRegion, Region.JIHOCESKY)
+            .set(ReservationImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
+            .set(ReservationImpl::setTermInMonths, 20)
             .build();
         final ReservationDescriptor original = new ReservationDescriptor(l, () -> null);
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original, FOLIO);
@@ -90,16 +92,16 @@ class ReservationWrapperTest {
     @Test
     void equality() {
         final Reservation l = new MockReservationBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(ReservationImpl::setInsuranceActive, true)
+            .set(ReservationImpl::setAmount, Money.from(100_000))
+            .set(ReservationImpl::setRating, Rating.D)
+            .set(ReservationImpl::setInterestRate, Ratio.ONE)
+            .set(ReservationImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(ReservationImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(ReservationImpl::setRegion, Region.JIHOCESKY)
+            .set(ReservationImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
+            .set(ReservationImpl::setTermInMonths, 20)
             .build();
         final ReservationDescriptor original = new ReservationDescriptor(l, () -> null);
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(original, FOLIO);

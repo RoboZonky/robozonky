@@ -41,52 +41,59 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.SellFeeImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-class InvestmentWrapperTest {
+class InvestmentWrapperTest extends AbstractRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
-        .setInsuranceActive(true)
-        .setAmount(100_000)
-        .setRating(Rating.D)
-        .setInterestRate(Ratio.ONE)
-        .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-        .setPurpose(Purpose.AUTO_MOTO)
-        .setRegion(Region.JIHOCESKY)
-        .setStory(UUID.randomUUID()
+        .set(LoanImpl::setInsuranceActive, true)
+        .set(LoanImpl::setAmount, Money.from(100_000))
+        .set(LoanImpl::setRating, Rating.D)
+        .set(LoanImpl::setInterestRate, Ratio.ONE)
+        .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+        .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+        .set(LoanImpl::setRegion, Region.JIHOCESKY)
+        .set(LoanImpl::setStory, UUID.randomUUID()
             .toString())
-        .setTermInMonths(20)
+        .set(LoanImpl::setTermInMonths, 20)
         .build();
-    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
-        .setLoanHealthInfo(LoanHealth.HEALTHY)
-        .setPurchasePrice(BigDecimal.TEN)
-        .setSellPrice(BigDecimal.ONE)
+    private static final InvestmentImpl INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 2_000)
+        .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HEALTHY)
+        .set(InvestmentImpl::setPurchasePrice, Money.from(BigDecimal.TEN))
+        .set(InvestmentImpl::setSmpPrice, Money.from(BigDecimal.ONE))
         .build();
-    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
+    private static final PortfolioOverview FOLIO = mockPortfolioOverview();
 
     @Test
     void fromInvestment() {
         final Loan loan = new MockLoanBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(LoanImpl::setInsuranceActive, true)
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(LoanImpl::setRegion, Region.JIHOCESKY)
+            .set(LoanImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
-            .setAnnuity(BigDecimal.ONE)
+            .set(LoanImpl::setTermInMonths, 20)
+            .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
             .build();
         final int invested = 200;
         final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
-            .setRemainingMonths(10)
-            .setLoanHealthInfo(LoanHealth.HEALTHY)
-            .setPurchasePrice(BigDecimal.TEN)
-            .setSellPrice(BigDecimal.ONE)
-            .setSmpFee(BigDecimal.ONE)
+            .set(InvestmentImpl::setRemainingMonths, 10)
+            .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HEALTHY)
+            .set(InvestmentImpl::setPurchasePrice, Money.from(BigDecimal.TEN))
+            .set(InvestmentImpl::setSmpPrice, Money.from(BigDecimal.ONE))
+            .set(InvestmentImpl::setSmpFee, Money.from(BigDecimal.ONE))
             .build();
         final InvestmentDescriptor id = new InvestmentDescriptor(investment, () -> loan);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(id, FOLIO);
@@ -147,11 +154,11 @@ class InvestmentWrapperTest {
     @Test
     void fromInvestmentWithoutRevenueRate() {
         final Loan loan = new MockLoanBuilder()
-            .setRating(Rating.A)
+            .set(LoanImpl::setRating, Rating.A)
             .build();
         final int invested = 200;
         final Investment investment = MockInvestmentBuilder.fresh(loan, invested)
-            .setSmpFee(BigDecimal.ONE)
+            .set(InvestmentImpl::setSmpFee, Money.from(BigDecimal.ONE))
             .build();
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(new InvestmentDescriptor(investment, () -> loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
@@ -213,6 +220,8 @@ class InvestmentWrapperTest {
     @Test
     void failsOnNoSellInfo() {
         final Investment investment = MockInvestmentBuilder.fresh(LOAN, 2_000)
+            .set(InvestmentImpl::setSmpPrice, null)
+            .set(InvestmentImpl::setSmpFee, null)
             .build();
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
@@ -227,16 +236,18 @@ class InvestmentWrapperTest {
     @Test
     void sellInfoValues() {
         final Investment investment = MockInvestmentBuilder.fresh(LOAN, 200)
+            .set(InvestmentImpl::setSmpPrice, null)
+            .set(InvestmentImpl::setSmpFee, null)
             .build();
-        final LoanHealthStats healthInfo = mock(LoanHealthStats.class);
+        final LoanHealthStats healthInfo = mock(LoanHealthStatsImpl.class);
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
-        final SellPriceInfo priceInfo = mock(SellPriceInfo.class);
+        final SellPriceInfo priceInfo = mock(SellPriceInfoImpl.class);
         when(priceInfo.getDiscount()).thenReturn(Ratio.fromPercentage(10));
         when(priceInfo.getSellPrice()).thenReturn(Money.from(10));
-        final SellFee feeInfo = mock(SellFee.class);
+        final SellFee feeInfo = mock(SellFeeImpl.class);
         when(feeInfo.getValue()).thenReturn(Money.from(2));
         when(priceInfo.getFee()).thenReturn(feeInfo);
-        final SellInfo sellInfo = mock(SellInfo.class);
+        final SellInfo sellInfo = mock(SellInfoImpl.class);
         when(sellInfo.getLoanHealthStats()).thenReturn(healthInfo);
         when(sellInfo.getPriceInfo()).thenReturn(priceInfo);
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN, () -> sellInfo);

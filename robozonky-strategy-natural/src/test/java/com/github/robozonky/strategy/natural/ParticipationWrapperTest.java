@@ -35,28 +35,31 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-class ParticipationWrapperTest {
+class ParticipationWrapperTest extends AbstractRoboZonkyTest {
 
-    private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
+    private static final PortfolioOverview FOLIO = mockPortfolioOverview();
 
     private static final Loan LOAN = new MockLoanBuilder()
-        .setInsuranceActive(true)
-        .setAmount(100_000)
-        .setRating(Rating.D)
-        .setInterestRate(Ratio.ONE)
-        .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-        .setPurpose(Purpose.AUTO_MOTO)
-        .setRegion(Region.JIHOCESKY)
-        .setStory(UUID.randomUUID()
+        .set(LoanImpl::setInsuranceActive, true)
+        .set(LoanImpl::setAmount, Money.from(100_000))
+        .set(LoanImpl::setRating, Rating.D)
+        .set(LoanImpl::setInterestRate, Ratio.ONE)
+        .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+        .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+        .set(LoanImpl::setRegion, Region.JIHOCESKY)
+        .set(LoanImpl::setStory, UUID.randomUUID()
             .toString())
-        .setTermInMonths(20)
+        .set(LoanImpl::setTermInMonths, 20)
         .build();
     private static final Participation PARTICIPATION = mockParticipation(LOAN);
 
     private static Participation mockParticipation(final Loan loan) {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getInterestRate()).thenReturn(Ratio.ONE);
         doReturn(Money.ZERO).when(p)
             .getRemainingPrincipal();
@@ -76,20 +79,20 @@ class ParticipationWrapperTest {
     @Test
     void fromParticipation() {
         final Loan loan = new MockLoanBuilder()
-            .setInsuranceActive(true)
-            .setAmount(100_000)
-            .setRating(Rating.D)
-            .setInterestRate(Ratio.ONE)
-            .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-            .setPurpose(Purpose.AUTO_MOTO)
-            .setRegion(Region.JIHOCESKY)
-            .setStory(UUID.randomUUID()
+            .set(LoanImpl::setInsuranceActive, true)
+            .set(LoanImpl::setAmount, Money.from(100_000))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+            .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+            .set(LoanImpl::setRegion, Region.JIHOCESKY)
+            .set(LoanImpl::setStory, UUID.randomUUID()
                 .toString())
-            .setTermInMonths(20)
-            .setAnnuity(BigDecimal.ONE)
+            .set(LoanImpl::setTermInMonths, 20)
+            .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
             .build();
         final int invested = 200;
-        final Participation participation = mock(Participation.class);
+        final Participation participation = mock(ParticipationImpl.class);
         when(participation.getId()).thenReturn((long) (Math.random() * 1000));
         when(participation.getInterestRate()).thenReturn(Ratio.ONE);
         doReturn(Money.ZERO).when(participation)
@@ -164,10 +167,10 @@ class ParticipationWrapperTest {
     @Test
     void fromParticipationWithoutRevenueRate() {
         final Loan loan = new MockLoanBuilder()
-            .setRating(Rating.C)
+            .set(LoanImpl::setRating, Rating.C)
             .build();
         final int invested = 200;
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         doReturn(loan.getRating()).when(p)
             .getRating();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(invested));

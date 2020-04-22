@@ -31,13 +31,14 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
+import com.github.robozonky.internal.remote.entities.MyReservationImpl;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -46,14 +47,15 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static Reservation mockReservation(final int amount) {
-        final MyReservation r = mock(MyReservation.class);
+        final MyReservationImpl r = mock(MyReservationImpl.class);
         when(r.getReservedAmount()).thenReturn(Money.from(amount));
         return new MockReservationBuilder()
-            .setAmount(amount)
-            .setDatePublished(OffsetDateTime.now())
-            .setNonReservedRemainingInvestment(amount)
-            .setMyReservation(r)
-            .setRating(Rating.A)
+            .set(ReservationImpl::setAmount, Money.from(amount))
+            .set(ReservationImpl::setRemainingInvestment, Money.from(amount))
+            .set(ReservationImpl::setReservedAmount, Money.from(0))
+            .set(ReservationImpl::setDatePublished, OffsetDateTime.now())
+            .set(ReservationImpl::setMyReservation, r)
+            .set(ReservationImpl::setRating, Rating.A)
             .build();
     }
 

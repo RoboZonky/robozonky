@@ -28,11 +28,7 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyInvestment;
-import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.ReservationPreference;
-import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -43,6 +39,12 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
+import com.github.robozonky.internal.remote.entities.MyReservationImpl;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
+import com.github.robozonky.internal.remote.entities.ReservationPreferenceImpl;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -68,11 +70,11 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
                 .flatMap(Optional::stream);
         }
     };
-    private static final ReservationPreference SOME_PREFERENCE = new ReservationPreference(
+    private static final ReservationPreferenceImpl SOME_PREFERENCE = new ReservationPreferenceImpl(
             LoanTermInterval.FROM_0_TO_12, Rating.AAAAA, false);
 
-    private static MyReservation mockMyReservation() {
-        final MyReservation r = mock(MyReservation.class);
+    private static MyReservationImpl mockMyReservation() {
+        final MyReservationImpl r = mock(MyReservationImpl.class);
         when(r.getReservedAmount()).thenReturn(Money.from(200));
         when(r.getId()).thenReturn((long) (Math.random() * 1000));
         return r;
@@ -90,7 +92,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
     @Test
     void disabledOnline() {
         final Zonky z = harmlessZonky();
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferences()); // disabled by default
+        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl()); // disabled by default
         final Tenant t = mockTenant(z);
         when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final TenantPayload p = new ReservationsProcessing();
@@ -102,17 +104,20 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
     @Test
     void enabled() {
         final Zonky z = harmlessZonky();
-        final Reservation simple = new MockReservationBuilder().setMyReservation(mockMyReservation())
+        final Reservation simple = new MockReservationBuilder()
+            .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
-        final Reservation withInvestment = new MockReservationBuilder().setMyReservation(mockMyReservation())
+        final Reservation withInvestment = new MockReservationBuilder()
+            .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
-        final MyInvestment i = mockMyInvestment();
-        final Loan loanWithInvestment = new MockLoanBuilder().setMyInvestment(i)
+        final MyInvestmentImpl i = mockMyInvestment();
+        final Loan loanWithInvestment = new MockLoanBuilder()
+            .set(LoanImpl::setMyInvestment, i)
             .build();
         final Loan fresh = MockLoanBuilder.fresh();
         when(z.getLoan(eq(simple.getId()))).thenReturn(fresh);
         when(z.getLoan(eq(withInvestment.getId()))).thenReturn(loanWithInvestment);
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferences(SOME_PREFERENCE));
+        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(SOME_PREFERENCE));
         when(z.getPendingReservations()).thenReturn(Stream.of(withInvestment, simple));
         final Tenant t = mockTenant(z, false);
         when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -126,15 +131,17 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
     @Test
     void skipsInvestmentsProperly() { // simulate skipping investments by introducing one of them twice
         final Zonky z = harmlessZonky();
-        final Reservation simple = new MockReservationBuilder().setMyReservation(mockMyReservation())
+        final Reservation simple = new MockReservationBuilder()
+            .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
-        final Reservation simple2 = new MockReservationBuilder().setMyReservation(mockMyReservation())
+        final Reservation simple2 = new MockReservationBuilder()
+            .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
         final Loan fresh1 = MockLoanBuilder.fresh();
         final Loan fresh2 = MockLoanBuilder.fresh();
         when(z.getLoan(eq(simple.getId()))).thenReturn(fresh1);
         when(z.getLoan(eq(simple2.getId()))).thenReturn(fresh2);
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferences(SOME_PREFERENCE));
+        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(SOME_PREFERENCE));
         when(z.getPendingReservations()).thenReturn(Stream.of(simple, simple, simple2));
         final Tenant t = mockTenant(z, false);
         when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));

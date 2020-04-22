@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class ZonkyPasswordFeatureTest {
 
@@ -45,7 +46,7 @@ class ZonkyPasswordFeatureTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static ApiProvider mockApi(final char... password) {
         final ApiProvider api = spy(new ApiProvider());
-        final ZonkyApiToken token = mock(ZonkyApiToken.class);
+        final ZonkyApiToken token = mock(ZonkyApiTokenImpl.class);
         when(token.getAccessToken()).thenReturn(new char[0]);
         final OAuth oauth = mock(OAuth.class);
         when(oauth.login(eq(password))).thenReturn(token);
@@ -67,7 +68,7 @@ class ZonkyPasswordFeatureTest {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private static ApiProvider mockFailingApi() {
         final ApiProvider api = spy(new ApiProvider());
-        final ZonkyApiToken token = mock(ZonkyApiToken.class);
+        final ZonkyApiToken token = mock(ZonkyApiTokenImpl.class);
         when(token.getAccessToken()).thenReturn(new char[0]);
         final OAuth oauth = mock(OAuth.class);
         when(oauth.login(any())).thenReturn(token);

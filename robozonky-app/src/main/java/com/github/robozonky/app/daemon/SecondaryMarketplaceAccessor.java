@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -41,10 +41,10 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     private static final Logger LOGGER = Audit.purchasing();
 
     private final PowerTenant tenant;
-    private final UnaryOperator<LastPublishedParticipation> stateAccessor;
+    private final UnaryOperator<LastPublishedItem> stateAccessor;
 
     public SecondaryMarketplaceAccessor(final PowerTenant tenant,
-            final UnaryOperator<LastPublishedParticipation> stateAccessor) {
+            final UnaryOperator<LastPublishedItem> stateAccessor) {
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
     }
@@ -99,8 +99,8 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     @Override
     public boolean hasUpdates() {
         try {
-            final LastPublishedParticipation current = tenant.call(Zonky::getLastPublishedParticipationInfo);
-            final LastPublishedParticipation previous = stateAccessor.apply(current);
+            final LastPublishedItem current = tenant.call(Zonky::getLastPublishedParticipationInfo);
+            final LastPublishedItem previous = stateAccessor.apply(current);
             LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {

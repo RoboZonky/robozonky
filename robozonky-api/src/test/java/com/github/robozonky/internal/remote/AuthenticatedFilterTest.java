@@ -33,10 +33,11 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.Defaults;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class AuthenticatedFilterTest extends AbstractCommonFilterTest {
 
-    static final ZonkyApiToken TOKEN = new ZonkyApiToken(UUID.randomUUID()
+    static final ZonkyApiToken TOKEN = new ZonkyApiTokenImpl(UUID.randomUUID()
         .toString(),
             UUID.randomUUID()
                 .toString(),

@@ -27,13 +27,14 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 
 class RecommendedParticipationTest {
 
     private static final Loan LOAN = LoanDescriptorTest.mockLoan();
 
     private static Participation mockParticipation() {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
         return p;
     }

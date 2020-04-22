@@ -18,40 +18,12 @@ package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 
-public class SellFee extends BaseEntity {
+public interface SellFee {
 
-    @XmlElement
-    private OffsetDateTime expiresAt;
+    Optional<OffsetDateTime> getExpiresAt();
 
-    // String to be represented as money.
-    @XmlElement
-    private String value;
-
-    SellFee() {
-        // for JAXB
-    }
-
-    public Optional<OffsetDateTime> getExpiresAt() {
-        return Optional.ofNullable(expiresAt);
-    }
-
-    @XmlTransient
-    public Money getValue() {
-        return Money.from(value);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SellFee.class.getSimpleName() + "[", "]")
-            .add("value='" + value + "'")
-            .add("expiresAt=" + expiresAt)
-            .toString();
-    }
+    Money getValue();
 }

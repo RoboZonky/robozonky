@@ -17,28 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
-
-public class Reservations extends BaseEntity {
-
-    private Collection<Reservation> reservations = Collections.emptyList();
-
-    Reservations() {
-        // for JAXB
-    }
-
-    @XmlElement
-    public Collection<Reservation> getReservations() {
-        return reservations;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", Reservations.class.getSimpleName() + "[", "]")
-            .add("reservations=" + reservations)
-            .toString();
-    }
+public interface Reservations {
+    Collection<Reservation> getReservations();
 }

@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Consents;
-import com.github.robozonky.api.remote.entities.Restrictions;
+import com.github.robozonky.internal.remote.entities.ConsentsImpl;
+import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 
 class SessionInfoImplTest {
 
@@ -71,7 +71,8 @@ class SessionInfoImplTest {
     void constructorRestrictive() {
         var id = UUID.randomUUID()
             .toString();
-        var sessionInfo = new SessionInfoImpl(Consents::new, () -> new Restrictions(false), "someone@somewhere.cz", id,
+        var sessionInfo = new SessionInfoImpl(ConsentsImpl::new, () -> new RestrictionsImpl(false),
+                "someone@somewhere.cz", id,
                 false);
         assertSoftly(softly -> {
             softly.assertThat(sessionInfo.getUsername())

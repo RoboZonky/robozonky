@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -32,7 +32,7 @@ import com.github.robozonky.internal.tenant.Tenant;
 class PurchasingOperationDescriptor
         implements OperationDescriptor<ParticipationDescriptor, PurchaseStrategy, Participation> {
 
-    private final AtomicReference<LastPublishedParticipation> lastChecked = new AtomicReference<>();
+    private final AtomicReference<LastPublishedItem> lastChecked = new AtomicReference<>();
 
     @Override
     public boolean isEnabled(final Tenant tenant) {

@@ -27,17 +27,17 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
-import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.EntityCollectionApi;
-import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.ParticipationApi;
-import com.github.robozonky.api.remote.PortfolioApi;
-import com.github.robozonky.api.remote.ReservationApi;
-import com.github.robozonky.api.remote.ZonkyOAuthApi;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.endpoints.ControlApi;
+import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
+import com.github.robozonky.internal.remote.endpoints.LoanApi;
+import com.github.robozonky.internal.remote.endpoints.ParticipationApi;
+import com.github.robozonky.internal.remote.endpoints.PortfolioApi;
+import com.github.robozonky.internal.remote.endpoints.ReservationApi;
+import com.github.robozonky.internal.remote.endpoints.ZonkyOAuthApi;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.util.StreamUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
@@ -143,7 +143,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    PaginatedApi<Loan, LoanApi> marketplace(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<LoanImpl, LoanApi> marketplace(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(LoanApi.class, token);
     }
 
@@ -153,7 +153,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    PaginatedApi<Participation, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<ParticipationImpl, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
         // if we ever use the API for retrieving anything but the whole marketplace, request counting must be enabled
         return this.obtainPaginated(ParticipationApi.class, token, null);
     }
@@ -164,7 +164,7 @@ public class ApiProvider implements AutoCloseable {
      * @param token Supplier of a valid Zonky API token, always representing the active user.
      * @return New API instance.
      */
-    PaginatedApi<Investment, PortfolioApi> portfolio(final Supplier<ZonkyApiToken> token) {
+    PaginatedApi<InvestmentImpl, PortfolioApi> portfolio(final Supplier<ZonkyApiToken> token) {
         return this.obtainPaginated(PortfolioApi.class, token);
     }
 

@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 /**
  * Every set*() operation must result in a {@link KeyStoreHandler#save()} call.
@@ -78,7 +79,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
         try {
             final ZonkyApiToken result = this.ksh.get(ALIAS_TOKEN)
                 .map(String::new)
-                .map(ZonkyApiToken::unmarshal)
+                .map(ZonkyApiTokenImpl::unmarshal)
                 .orElse(null);
             return Optional.ofNullable(result);
         } catch (final Exception ex) {
@@ -95,7 +96,7 @@ final class KeyStoreSecretProvider implements SecretProvider {
                 this.ksh.save();
                 return true;
             } else {
-                return this.set(ALIAS_TOKEN, () -> ZonkyApiToken.marshal(apiToken)
+                return this.set(ALIAS_TOKEN, () -> ZonkyApiTokenImpl.marshal(apiToken)
                     .toCharArray());
             }
         } catch (final Exception ex) {

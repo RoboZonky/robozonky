@@ -16,32 +16,17 @@
 
 package com.github.robozonky.test.mock;
 
-import static org.mockito.Mockito.*;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
-import java.net.URL;
-import java.util.Optional;
+public class MockLoanBuilder extends BaseLoanMockBuilder<LoanImpl, MockLoanBuilder> {
 
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyInvestment;
-
-public class MockLoanBuilder extends BaseLoanMockBuilder<Loan, MockLoanBuilder> {
-
-    public static Loan fresh() {
+    public static LoanImpl fresh() {
         return new MockLoanBuilder().build();
     }
 
     public MockLoanBuilder() {
-        super(Loan.class);
-    }
-
-    public MockLoanBuilder setUrl(final URL url) {
-        when(mock.getUrl()).thenReturn(url.toString());
-        return this;
-    }
-
-    public MockLoanBuilder setMyInvestment(final MyInvestment myInvestment) {
-        when(mock.getMyInvestment()).thenReturn(Optional.ofNullable(myInvestment));
-        return this;
+        super(LoanImpl.class);
+        set(LoanImpl::setId, RANDOM.nextInt());
     }
 
 }

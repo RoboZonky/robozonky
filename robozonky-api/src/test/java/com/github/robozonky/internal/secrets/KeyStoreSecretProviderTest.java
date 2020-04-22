@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class KeyStoreSecretProviderTest {
 
@@ -96,7 +97,7 @@ class KeyStoreSecretProviderTest {
         final SecretProvider p = newProvider(USR, PWD);
         // make sure original values were set
         assertThat(p.getToken()).isEmpty();
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID()
+        final ZonkyApiToken token = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),
@@ -116,7 +117,7 @@ class KeyStoreSecretProviderTest {
             .get(any());
         final SecretProvider p = SecretProvider.keyStoreBased(ksh, UUID.randomUUID()
             .toString());
-        final ZonkyApiToken token = new ZonkyApiToken(UUID.randomUUID()
+        final ZonkyApiToken token = new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),

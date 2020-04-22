@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.installer.DataValidator;
 
@@ -93,7 +94,7 @@ class ZonkySettingsValidatorTest {
     @Test
     void properLogin() {
         // mock data
-        final ZonkyApiToken token = mock(ZonkyApiToken.class);
+        final ZonkyApiToken token = mock(ZonkyApiTokenImpl.class);
         final OAuth oauth = mock(OAuth.class);
         when(oauth.login(any())).thenReturn(token);
         final Zonky zonky = mock(Zonky.class);

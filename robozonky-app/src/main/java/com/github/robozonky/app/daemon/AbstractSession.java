@@ -23,10 +23,10 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.remote.ControlApi;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.Recommended;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.remote.endpoints.ControlApi;
 
 abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
 

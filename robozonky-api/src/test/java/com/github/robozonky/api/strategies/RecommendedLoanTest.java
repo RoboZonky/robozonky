@@ -22,12 +22,12 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 class RecommendedLoanTest {
 
     private static LoanDescriptor mockLoanDescriptor() {
-        final Loan loan = LoanDescriptorTest.mockLoan();
+        final LoanImpl loan = LoanDescriptorTest.mockLoan();
         return new LoanDescriptor(loan);
     }
 

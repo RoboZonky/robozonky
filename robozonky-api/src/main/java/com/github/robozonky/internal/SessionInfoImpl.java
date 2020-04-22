@@ -27,6 +27,8 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.internal.async.Reloadable;
+import com.github.robozonky.internal.remote.entities.ConsentsImpl;
+import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 import com.github.robozonky.internal.test.DateUtil;
 
 public class SessionInfoImpl implements SessionInfo {
@@ -41,7 +43,7 @@ public class SessionInfoImpl implements SessionInfo {
     }
 
     public SessionInfoImpl(final String userName, final String name, final boolean isDryRun) {
-        this(Consents::new, () -> new Restrictions(true), userName, name, isDryRun);
+        this(ConsentsImpl::new, () -> new RestrictionsImpl(true), userName, name, isDryRun);
     }
 
     public SessionInfoImpl(final Supplier<Consents> consents, final Supplier<Restrictions> restrictions,

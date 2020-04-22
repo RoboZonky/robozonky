@@ -16,27 +16,29 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void getters() {
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         when(p.getId()).thenReturn(1l);
         final Loan l = MockLoanBuilder.fresh();
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
@@ -47,7 +49,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     @Test
     void freshAccessorEveryTimeButTheyShareState() {
         final Zonky z = harmlessZonky();
-        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedParticipation.class));
+        when(z.getLastPublishedParticipationInfo()).thenReturn(mock(LastPublishedItemImpl.class));
         final PowerTenant t = mockTenant(z);
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         final AbstractMarketplaceAccessor<ParticipationDescriptor> a1 = d.newMarketplaceAccessor(t);
@@ -60,7 +62,7 @@ class PurchasingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     void enabled() {
         final Zonky z = harmlessZonky();
         final PowerTenant t = mockTenant(z);
-        when(z.getRestrictions()).thenReturn(new Restrictions(false));
+        when(z.getRestrictions()).thenReturn(new RestrictionsImpl(false));
         final PurchasingOperationDescriptor d = new PurchasingOperationDescriptor();
         assertThat(d.isEnabled(t)).isFalse();
     }

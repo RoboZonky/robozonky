@@ -44,6 +44,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
@@ -117,7 +118,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void delegatesSellInfo() {
-        final SellInfo fresh = mock(SellInfo.class);
+        final SellInfo fresh = mock(SellInfoImpl.class);
         final long investmentId = 1;
         when(zonky.getSellInfo(eq(investmentId))).thenReturn(fresh);
         final SellInfo result = tenant.getSellInfo(investmentId);

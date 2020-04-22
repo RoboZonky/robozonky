@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 
 class ReservationComparatorTest {
@@ -34,10 +35,10 @@ class ReservationComparatorTest {
     @Test
     void sortByRating() {
         final Reservation l1 = new MockReservationBuilder()
-            .setRating(Rating.D)
+            .set(ReservationImpl::setRating, Rating.D)
             .build();
         final Reservation l2 = new MockReservationBuilder()
-            .setRating(Rating.A)
+            .set(ReservationImpl::setRating, Rating.A)
             .build();
         final ReservationDescriptor ld1 = new ReservationDescriptor(l1, () -> null),
                 ld2 = new ReservationDescriptor(l2, () -> null);

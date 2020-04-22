@@ -41,8 +41,9 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.entities.MutableLoan;
-import com.github.robozonky.internal.remote.entities.MutableParticipation;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class Util {
@@ -84,7 +85,7 @@ final class Util {
     }
 
     public static Loan randomizeLoan() {
-        final MutableLoan loan = new MutableLoan();
+        final LoanImpl loan = new LoanImpl();
         loan.setId(100_000 + RANDOM.nextInt(900_000)); // six-digit number
         loan.setCountryOfOrigin(randomize(Country.values()));
         loan.setCurrency(Defaults.CURRENCY);
@@ -93,22 +94,20 @@ final class Util {
         loan.setRegion(randomize(Region.values()));
         // set basic financial properties
         final Integer amount = (2 + RANDOM.nextInt(68) * 10_0000); // from 20 to 700_000
-        loan.setAmount(amount.toString());
+        loan.setAmount(Money.from(amount));
         final int term = 6 + RANDOM.nextInt(76); // from 6 to 84
         loan.setTermInMonths(term);
         final BigDecimal annuity = divide(amount, term);
-        loan.setAnnuity(annuity.toPlainString());
+        loan.setAnnuity(Money.from(annuity));
         // set insurance properties
         final boolean isInsured = RANDOM.nextBoolean();
         if (isInsured) {
             loan.setInsuranceActive(true);
-            loan.setAnnuityWithInsurance(plus(annuity, 50).toPlainString());
+            loan.setAnnuityWithInsurance(Money.from(plus(annuity, 50)));
         } else {
             loan.setInsuranceActive(false);
-            loan.setAnnuityWithInsurance(annuity.toPlainString());
+            loan.setAnnuityWithInsurance(Money.from(annuity));
         }
-        loan.setAdditionallyInsured(false);
-        loan.setInsuredInFuture(false);
         // set rating and infer other dependent properties
         loan.setRating(randomize(Rating.values()));
         loan.setInterestRate(loan.getRating()
@@ -118,8 +117,6 @@ final class Util {
         // set various dates
         loan.setDatePublished(OffsetDateTime.now()
             .minusDays(3));
-        loan.setDeadline(loan.getDatePublished()
-            .plusDays(2));
         // set textual properties
         loan.setUrl("https://app.zonky.cz/#/marketplace/detail/" + loan.getId() + "/");
         loan.setStory(LOREM_IPSUM);
@@ -128,11 +125,11 @@ final class Util {
     }
 
     public static Investment randomizeInvestment(final Loan loan) {
-        return new Investment(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L))); // from 200 to 5000
+        return new InvestmentImpl(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L))); // from 200 to 5000
     }
 
     public static Participation randomizeParticipation(final Loan loan) {
-        return new MutableParticipation(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L)),
+        return new ParticipationImpl(loan, Money.from(200 + (RANDOM.nextInt(24) * 200L)),
                 RANDOM.nextInt(loan.getTermInMonths()));
     }
 

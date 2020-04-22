@@ -24,6 +24,7 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
 final class ReservationsPreferences implements TenantPayload {
@@ -36,13 +37,13 @@ final class ReservationsPreferences implements TenantPayload {
             return;
         }
         final ReservationPreferences preferences = tenant.call(Zonky::getReservationPreferences);
-        if (!ReservationPreferences.isEnabled(preferences)) {
+        if (!ReservationPreferencesImpl.isEnabled(preferences)) {
             LOGGER.info("Reservation system is disabled and will be enabled.");
             enableReservationSystem(tenant);
             return;
         }
         LOGGER.trace("Retrieved reservation preferences: {}.", preferences);
-        if (preferences.equals(ReservationPreferences.TOTAL.get())) {
+        if (preferences.equals(ReservationPreferencesImpl.TOTAL.get())) {
             LOGGER.debug("Keeping existing reservation preferences on account of them being complete.");
             return;
         }
@@ -51,7 +52,7 @@ final class ReservationsPreferences implements TenantPayload {
 
     private static void enableReservationSystem(final PowerTenant tenant) {
         LOGGER.info("Enabling reservation system and overriding existing settings.");
-        tenant.run(z -> z.setReservationPreferences(ReservationPreferences.TOTAL.get()));
+        tenant.run(z -> z.setReservationPreferences(ReservationPreferencesImpl.TOTAL.get()));
     }
 
     @Override

@@ -16,9 +16,15 @@
 
 package com.github.robozonky.api.remote.enums;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
@@ -101,4 +107,25 @@ class RatingTest {
             }
         });
     }
+
+    @Test
+    void noRatingCodeTwice() {
+        final Set<String> codes = Stream.of(Rating.values())
+            .map(Rating::getCode)
+            .collect(Collectors.toSet());
+        assertThat(codes).hasSize(Rating.values().length);
+    }
+
+    @Test
+    void maxFeeDiscount() {
+        final Ratio revenue = Rating.D.getMaximalRevenueRate(Money.from(Long.MAX_VALUE));
+        assertThat(revenue.doubleValue()).isEqualTo(0.1599, Offset.offset(0.0001));
+    }
+
+    @Test
+    void minFeeDiscount() {
+        final Ratio revenue = Rating.AAAAAA.getMinimalRevenueRate();
+        assertThat(revenue.doubleValue()).isEqualTo(0.0234, Offset.offset(0.0001));
+    }
+
 }

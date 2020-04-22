@@ -16,26 +16,27 @@
 
 package com.github.robozonky.app.daemon;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void getters() {
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
-        final Loan l = MockLoanBuilder.fresh();
+        final LoanImpl l = MockLoanBuilder.fresh();
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(d.identify(ld)).isEqualTo(l.getId());
         assertThat(d.getMinimumBalance(mockTenant())).isEqualTo(Money.from(200));
@@ -44,7 +45,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     @Test
     void freshAccessorEveryTimeButTheyShareState() {
         final Zonky z = harmlessZonky();
-        when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
+        when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedItemImpl.class));
         final PowerTenant t = mockTenant(z);
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
         final AbstractMarketplaceAccessor<LoanDescriptor> a1 = d.newMarketplaceAccessor(t);
@@ -57,7 +58,7 @@ class InvestingOperationDescriptionTest extends AbstractZonkyLeveragingTest {
     void enabled() {
         final Zonky z = harmlessZonky();
         final PowerTenant t = mockTenant(z);
-        when(z.getRestrictions()).thenReturn(new Restrictions(false));
+        when(z.getRestrictions()).thenReturn(new RestrictionsImpl(false));
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
         assertThat(d.isEnabled(t)).isFalse();
     }

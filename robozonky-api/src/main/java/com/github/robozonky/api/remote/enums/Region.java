@@ -19,14 +19,16 @@ package com.github.robozonky.api.remote.enums;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
+
+import com.github.robozonky.internal.util.json.RegionDeserializer;
 
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
  * its integer ID after all other values already got one. Never change the value of {@link #getCode()}, as that will be
  * used throughout the strategies etc.
  */
-@JsonDeserialize(using = Region.RegionDeserializer.class)
+@JsonbTypeDeserializer(RegionDeserializer.class)
 public enum Region implements BaseEnum {
 
     PRAHA("Praha", "Hlavní město Praha"),
@@ -76,15 +78,5 @@ public enum Region implements BaseEnum {
      */
     public String getRichCode() {
         return richCode;
-    }
-
-    static final class RegionDeserializer extends AbstractDeserializer<Region> {
-
-        public RegionDeserializer() {
-            super(s -> {
-                final int actualId = Integer.parseInt(s) - 1; // regions in Zonky API are indexed from 1
-                return Region.values()[actualId];
-            }, UNKNOWN);
-        }
     }
 }

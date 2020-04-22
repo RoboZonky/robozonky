@@ -22,22 +22,24 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Random;
 
-import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
 
-    protected static MyInvestment mockMyInvestment() {
+    protected static MyInvestmentImpl mockMyInvestment() {
         return mockMyInvestment(OffsetDateTime.now());
     }
 
-    private static MyInvestment mockMyInvestment(final OffsetDateTime creationDate) {
-        final MyInvestment m = mock(MyInvestment.class);
+    private static MyInvestmentImpl mockMyInvestment(final OffsetDateTime creationDate) {
+        final MyInvestmentImpl m = mock(MyInvestmentImpl.class);
         when(m.getId()).thenReturn(RANDOM.nextLong());
         when(m.getTimeCreated()).thenReturn(Optional.of(creationDate));
         return m;
@@ -45,9 +47,11 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
 
     protected static LoanDescriptor mockLoanDescriptor() {
         final MockLoanBuilder b = new MockLoanBuilder()
-            .setNonReservedRemainingInvestment(Integer.MAX_VALUE)
-            .setDatePublished(OffsetDateTime.now())
-            .setRating(Rating.AAAAA);
+            .set(LoanImpl::setAmount, Money.from(Integer.MAX_VALUE))
+            .set(LoanImpl::setRemainingInvestment, Money.from(Integer.MAX_VALUE))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setDatePublished, OffsetDateTime.now())
+            .set(LoanImpl::setRating, Rating.AAAAA);
         return new LoanDescriptor(b.build());
     }
 

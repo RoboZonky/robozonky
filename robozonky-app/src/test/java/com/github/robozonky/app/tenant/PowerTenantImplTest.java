@@ -49,6 +49,11 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.SellFeeImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
+import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -71,7 +76,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
             .build();
         try (tenant) {
             final Statistics s = tenant.call(Zonky::getStatistics);
-            assertThat(s).isSameAs(Statistics.empty());
+            assertThat(s).isSameAs(StatisticsImpl.empty());
         } catch (final Exception e) {
             fail(e);
         }
@@ -103,14 +108,14 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(a.refresh(eq(token))).thenReturn(token);
         final Zonky z = harmlessZonky();
         final Loan l = new MockLoanBuilder()
-            .setRemainingInvestment(1_000)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1_000))
             .build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final SellFee sf = mock(SellFee.class);
+        final SellFee sf = mock(SellFeeImpl.class);
         when(sf.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)));
-        final SellPriceInfo spi = mock(SellPriceInfo.class);
+        final SellPriceInfo spi = mock(SellPriceInfoImpl.class);
         when(spi.getFee()).thenReturn(sf);
-        final SellInfo si = mock(SellInfo.class);
+        final SellInfo si = mock(SellInfoImpl.class);
         when(si.getPriceInfo()).thenReturn(spi);
         when(z.getSellInfo(anyLong())).thenReturn(si);
         doThrow(IllegalStateException.class).when(z)

@@ -129,87 +129,47 @@
       </dependency>
       <!--
           JAX-RS.
-          There is a massive set of exclusions of Java EE APIs that need to be later replaced by Jakarta EE.
-          This is done in order for the sake of dependency convergence and eliminating Java EE/Jakarta EE conflicts.
       -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client-api</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-core-spi</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-core</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.annotation</groupId>
-            <artifactId>jboss-annotations-api_1.3_spec</artifactId>
-          </exclusion>
-          <exclusion>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
+      <!-- JSON-B -->
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jackson2-provider</artifactId>
+        <artifactId>resteasy-json-binding-provider</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.jboss.spec.javax.xml.bind</groupId>
-            <artifactId>jboss-jaxb-api_2.3_spec</artifactId>
-          </exclusion>
-          <exclusion> <!-- should not be necessary, yet drags in a ton of dependencies -->
-            <groupId>com.github.fge</groupId>
-            <artifactId>json-patch</artifactId>
-          </exclusion>
-          <exclusion> <!-- dragged in on account of the previously excluded json-patch -->
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-          </exclusion>
-        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.json.bind</groupId>
+        <artifactId>jakarta.json.bind-api</artifactId>
+        <version>1.0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish</groupId>
+        <artifactId>jakarta.json</artifactId>
+        <version>1.1.6</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse</groupId>
+        <artifactId>yasson</artifactId>
+        <version>1.0.7</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -221,48 +181,11 @@
         <artifactId>httpcore-nio</artifactId>
         <version>4.4.13</version>
       </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.jaxrs</groupId>
-        <artifactId>jackson-jaxrs-json-provider</artifactId>
-        <version>${version.com.fasterxml.jackson}</version>
-        <exclusions>
-          <exclusion> <!-- Clashes with jakarta.activation from jakarta.mail. -->
-            <groupId>jakarta.activation</groupId>
-            <artifactId>jakarta.activation-api</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
       <!-- Email notifications. -->
       <dependency>
         <groupId>org.freemarker</groupId>
         <artifactId>freemarker</artifactId>
         <version>2.3.30</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>2.3.2</version>
-        <exclusions>
-          <exclusion> <!-- Clashes with jakarta.activation from jakarta.mail. -->
-            <groupId>jakarta.activation</groupId>
-            <artifactId>jakarta.activation-api</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>jakarta.mail</groupId>
@@ -426,7 +349,7 @@
         <artifactId>mockserver-core</artifactId>
         <version>${version.org.mock-server}</version>
         <exclusions>
-          <exclusion> <!-- We have our own, based on Jakarta EE -->
+          <exclusion> <!-- We have our own. -->
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
           </exclusion>
@@ -465,6 +388,11 @@
       </dependency>
       <!-- For the sake of used/unused dependency analysis and convergence. -->
       <dependency>
+        <groupId>org.jboss.spec.javax.ws.rs</groupId>
+        <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+        <version>2.0.1.Final</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>4.5.12</version>
@@ -483,16 +411,6 @@
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-commons</artifactId>
         <version>${version.org.junit.platform}</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.ws.rs</groupId>
-        <artifactId>jakarta.ws.rs-api</artifactId>
-        <version>2.1.5</version>
-      </dependency>
-      <dependency>
-        <groupId>jakarta.annotation</groupId>
-        <artifactId>jakarta.annotation-api</artifactId>
-        <version>1.3.5</version>
       </dependency>
       <dependency>
         <groupId>org.jboss.logging</groupId>
@@ -663,10 +581,6 @@
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
                 <!-- For async logging, configured at runtime. -->
                 <ignoredUnusedDeclaredDependency>com.lmax</ignoredUnusedDeclaredDependency>
-                <!-- For when we mess with deps exclusions. -->
-                <ignoredUnusedDeclaredDependency>com.sun.activation</ignoredUnusedDeclaredDependency>
-                <!-- Runtime dependency for javax/annotation/Priority. -->
-                <ignoredUnusedDeclaredDependency>jakarta.annotation</ignoredUnusedDeclaredDependency>
                 <!-- httpasyncclient replaces the regular client in runtime. -->
                 <ignoredUnusedDeclaredDependency>org.apache.httpcomponents</ignoredUnusedDeclaredDependency>
                 <!-- log4j-core is a base dependency of Log4J. -->
@@ -676,10 +590,6 @@
                 <ignoredUnusedDeclaredDependency>org.junit.jupiter</ignoredUnusedDeclaredDependency>
                 <ignoredUnusedDeclaredDependency>org.mock-server</ignoredUnusedDeclaredDependency>
               </ignoredUnusedDeclaredDependencies>
-              <ignoredUsedUndeclaredDependencies>
-                <ignoredUsedUndeclaredDependency>com.fasterxml.jackson.core</ignoredUsedUndeclaredDependency>
-                <ignoredUsedUndeclaredDependency>jakarta.xml.bind</ignoredUsedUndeclaredDependency>
-              </ignoredUsedUndeclaredDependencies>
             </configuration>
           </execution>
         </executions>

@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 
 class TenantTest {
 
@@ -36,7 +38,7 @@ class TenantTest {
 
     @Test
     void delegatesSellInfo() {
-        SellInfo result = mock(SellInfo.class);
+        SellInfo result = mock(SellInfoImpl.class);
         Tenant my = spy(Tenant.class);
         when(my.call(notNull())).thenReturn(result);
         SellInfo actual = my.getSellInfo(1);
@@ -47,7 +49,7 @@ class TenantTest {
 
     @Test
     void delegatesLoan() {
-        Loan result = mock(Loan.class);
+        Loan result = mock(LoanImpl.class);
         Tenant my = spy(Tenant.class);
         when(my.call(notNull())).thenReturn(result);
         Loan actual = my.getLoan(1);

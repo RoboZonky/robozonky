@@ -19,14 +19,14 @@ package com.github.robozonky.api.remote.enums;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 class SerializationTest {
 
@@ -38,10 +38,11 @@ class SerializationTest {
         return "\"" + toEscape + "\"";
     }
 
-    private static void deserialize(final String name, final Object value) throws IOException {
-        final ObjectMapper mapper = new ObjectMapper();
-        final Object result = mapper.readValue(name, value.getClass());
-        assertThat(result).isSameAs(value);
+    private static void deserialize(final String name, final Object value) throws Exception {
+        try (final Jsonb jsonb = JsonbBuilder.create()) {
+            final Object result = jsonb.fromJson(name, value.getClass());
+            assertThat(result).isSameAs(value);
+        }
     }
 
     private static String deserializeTestName(final Enum<?> instance) {

@@ -40,6 +40,8 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseFailureType;
 import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -56,13 +58,14 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void properReal() {
         final Loan l = new MockLoanBuilder()
-            .setAmount(200)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(200)
-            .setMyInvestment(mockMyInvestment())
+            .set(LoanImpl::setAmount, Money.from(200))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(200))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         doReturn(l.getId()).when(p)
             .getLoanId();
         when(p.getRating()).thenReturn(Rating.D);
@@ -91,12 +94,13 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void failure() {
         final Loan l = new MockLoanBuilder()
-            .setAmount(200)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(200)
-            .setMyInvestment(mockMyInvestment())
+            .set(LoanImpl::setAmount, Money.from(200))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(200))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         doReturn(l.getId()).when(p)
             .getLoanId();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
@@ -125,12 +129,13 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void failureDueToTooManyRequests() {
         final Loan l = new MockLoanBuilder()
-            .setAmount(200)
-            .setRating(Rating.D)
-            .setNonReservedRemainingInvestment(200)
-            .setMyInvestment(mockMyInvestment())
+            .set(LoanImpl::setAmount, Money.from(200))
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRemainingInvestment, Money.from(200))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         doReturn(l.getId()).when(p)
             .getLoanId();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));

@@ -34,9 +34,6 @@ import org.mockito.stubbing.Answer;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Consents;
-import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.internal.remote.ApiProvider;
@@ -44,6 +41,10 @@ import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ConsentsImpl;
+import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
+import com.github.robozonky.internal.remote.entities.StatisticsImpl;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
@@ -62,7 +63,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
     }
 
     protected static SecretProvider mockSecretProvider() {
-        return mockSecretProvider(new ZonkyApiToken(UUID.randomUUID()
+        return mockSecretProvider(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),
@@ -73,9 +74,9 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
         final Zonky zonky = mock(Zonky.class);
         when(zonky.invest(any())).thenReturn(InvestmentResult.success());
         when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
-        when(zonky.getRestrictions()).thenReturn(new Restrictions(true));
-        when(zonky.getConsents()).thenReturn(new Consents());
-        when(zonky.getStatistics()).thenReturn(Statistics.empty());
+        when(zonky.getRestrictions()).thenReturn(new RestrictionsImpl(true));
+        when(zonky.getConsents()).thenReturn(new ConsentsImpl());
+        when(zonky.getStatistics()).thenReturn(StatisticsImpl.empty());
         when(zonky.getInvestments(any())).thenAnswer(i -> Stream.empty());
         return zonky;
     }

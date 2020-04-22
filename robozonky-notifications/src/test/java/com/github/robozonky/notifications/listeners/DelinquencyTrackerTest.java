@@ -20,13 +20,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
@@ -39,6 +38,8 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
@@ -49,44 +50,33 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
-        .setAmount(200)
-        .setAnnuity(BigDecimal.TEN)
-        .setRating(Rating.D)
-        .setInterestRate(Ratio.fromPercentage(Rating.D.getCode()))
-        .setPurpose(Purpose.AUTO_MOTO)
-        .setRegion(Region.JIHOCESKY)
-        .setMainIncomeType(MainIncomeType.EMPLOYMENT)
-        .setName("")
-        .setUrl(getSomeUrl())
+        .set(LoanImpl::setAmount, Money.from(200))
+        .set(LoanImpl::setAnnuity, Money.from(BigDecimal.TEN))
+        .set(LoanImpl::setRating, Rating.D)
+        .set(LoanImpl::setInterestRate, Ratio.fromPercentage(Rating.D.getCode()))
+        .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
+        .set(LoanImpl::setRegion, Region.JIHOCESKY)
+        .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
+        .set(LoanImpl::setName, "")
+        .set(LoanImpl::setUrl, "http://localhost")
         .build();
     private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
-        .setInvestmentDate(OffsetDateTime.now())
-        .setExpectedInterest(BigDecimal.TEN)
+        .set(InvestmentImpl::setExpectedInterest, Money.from(BigDecimal.TEN))
         .build();
     private static final Loan LOAN2 = new MockLoanBuilder()
-        .setAmount(200)
-        .setAnnuity(BigDecimal.TEN)
-        .setRating(Rating.A)
-        .setInterestRate(Ratio.fromPercentage(Rating.A.getCode()))
-        .setPurpose(Purpose.TRAVEL)
-        .setRegion(Region.JIHOMORAVSKY)
-        .setMainIncomeType(MainIncomeType.OTHERS_MAIN)
-        .setName("")
-        .setUrl(getSomeUrl())
+        .set(LoanImpl::setAmount, Money.from(200))
+        .set(LoanImpl::setAnnuity, Money.from(BigDecimal.TEN))
+        .set(LoanImpl::setRating, Rating.A)
+        .set(LoanImpl::setInterestRate, Ratio.fromPercentage(Rating.A.getCode()))
+        .set(LoanImpl::setPurpose, Purpose.TRAVEL)
+        .set(LoanImpl::setRegion, Region.JIHOMORAVSKY)
+        .set(LoanImpl::setMainIncomeType, MainIncomeType.OTHERS_MAIN)
+        .set(LoanImpl::setName, "")
+        .set(LoanImpl::setUrl, "http://localhost")
         .build();
     private static final Investment INVESTMENT2 = MockInvestmentBuilder.fresh(LOAN2, 200)
-        .setInvestmentDate(OffsetDateTime.now())
         .build();
     private static SessionInfo SESSION = mockSessionInfo();
-
-    public static URL getSomeUrl() {
-        try {
-            return new URL("http://localhost");
-        } catch (final MalformedURLException ex) {
-            fail("Shouldn't have happened.", ex);
-            return null;
-        }
-    }
 
     @Test
     void standard() {

@@ -40,22 +40,38 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.RiskPortfolioImpl;
+import com.github.robozonky.internal.remote.entities.SellFeeImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
+import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 
 class UtilTest extends AbstractZonkyLeveragingTest {
 
+    private static void mockSellInfo(Zonky zonky, final BigDecimal price, final BigDecimal fee) {
+        SellFee sellFee = mock(SellFeeImpl.class);
+        when(sellFee.getValue()).thenReturn(Money.from(fee));
+        when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
+        SellPriceInfo sellPriceInfo = mock(SellPriceInfoImpl.class);
+        when(sellPriceInfo.getSellPrice()).thenReturn(Money.from(price));
+        when(sellPriceInfo.getFee()).thenReturn(sellFee);
+        SellInfo sellInfo = mock(SellInfoImpl.class);
+        when(sellInfo.getPriceInfo()).thenReturn(sellPriceInfo);
+        when(zonky.getSellInfo(anyLong())).thenReturn(sellInfo);
+    }
+
     @Test
     void atRisk() {
         final Investment i = MockInvestmentBuilder.fresh()
-            .setRating(Rating.D)
-            .setRemainingPrincipal(BigDecimal.TEN)
-            .setPaidInterest(BigDecimal.ZERO)
-            .setPaidPenalty(BigDecimal.ZERO)
+            .set(InvestmentImpl::setRating, Rating.D)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
             .build();
-        final Statistics stats = mock(Statistics.class);
-        final RiskPortfolio r = new RiskPortfolio(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal()
+        final Statistics stats = mock(StatisticsImpl.class);
+        final RiskPortfolio r = new RiskPortfolioImpl(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal()
             .orElseThrow());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
         final Zonky zonky = harmlessZonky();
@@ -67,35 +83,23 @@ class UtilTest extends AbstractZonkyLeveragingTest {
         assertThat(result.get(Rating.D)).isEqualTo(Money.from(10));
     }
 
-    private static void mockSellInfo(Zonky zonky, final BigDecimal price, final BigDecimal fee) {
-        SellFee sellFee = mock(SellFee.class);
-        when(sellFee.getValue()).thenReturn(Money.from(fee));
-        when(sellFee.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.now()));
-        SellPriceInfo sellPriceInfo = mock(SellPriceInfo.class);
-        when(sellPriceInfo.getSellPrice()).thenReturn(Money.from(price));
-        when(sellPriceInfo.getFee()).thenReturn(sellFee);
-        SellInfo sellInfo = mock(SellInfo.class);
-        when(sellInfo.getPriceInfo()).thenReturn(sellPriceInfo);
-        when(zonky.getSellInfo(anyLong())).thenReturn(sellInfo);
-    }
-
     @Test
     void sellable() {
         final Investment i = MockInvestmentBuilder.fresh()
-            .setRating(Rating.D)
-            .setRemainingPrincipal(BigDecimal.TEN)
-            .setLoanHealthInfo(LoanHealth.HEALTHY)
-            .setSmpFee(BigDecimal.ONE)
+            .set(InvestmentImpl::setRating, Rating.D)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
+            .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HEALTHY)
+            .set(InvestmentImpl::setSmpFee, Money.from(BigDecimal.ONE))
             .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .setRating(Rating.A)
-            .setRemainingPrincipal(BigDecimal.ONE)
-            .setLoanHealthInfo(LoanHealth.HISTORICALLY_IN_DUE)
+            .set(InvestmentImpl::setRating, Rating.A)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.ONE))
+            .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HISTORICALLY_IN_DUE)
             .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-            .setRating(Rating.C)
-            .setRemainingPrincipal(BigDecimal.ZERO)
-            .setLoanHealthInfo(LoanHealth.HEALTHY)
+            .set(InvestmentImpl::setRating, Rating.C)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.ZERO))
+            .set(InvestmentImpl::setLoanHealthInfo, LoanHealth.HEALTHY)
             .build();
         final Zonky zonky = harmlessZonky();
         mockSellInfo(zonky, BigDecimal.TEN, BigDecimal.ZERO);

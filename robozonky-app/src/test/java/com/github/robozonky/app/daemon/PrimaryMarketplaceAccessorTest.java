@@ -28,15 +28,17 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyInvestment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -46,13 +48,15 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void eliminatesUselessLoans() {
         final Loan alreadyInvested = new MockLoanBuilder()
-            .setRating(Rating.B)
-            .setNonReservedRemainingInvestment(1)
-            .setMyInvestment(mock(MyInvestment.class))
+            .set(LoanImpl::setRating, Rating.B)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
+            .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final Loan normal = new MockLoanBuilder()
-            .setRating(Rating.A)
-            .setNonReservedRemainingInvestment(1)
+            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setRemainingInvestment, Money.from(1))
+            .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();
         final Zonky zonky = harmlessZonky();
         when(zonky.getAvailableLoans(any())).thenReturn(Stream.of(alreadyInvested, normal));
@@ -69,9 +73,9 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void detectsUpdates() {
         final Zonky z = harmlessZonky();
-        when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedLoan.class));
+        when(z.getLastPublishedLoanInfo()).thenReturn(mock(LastPublishedItemImpl.class));
         final Tenant t = mockTenant(z);
-        final AtomicReference<LastPublishedLoan> state = new AtomicReference<>(null);
+        final AtomicReference<LastPublishedItem> state = new AtomicReference<>(null);
         final AbstractMarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue(); // detect update, store present state
         assertThat(a.hasUpdates()).isFalse(); // state stays the same, no update
@@ -82,7 +86,7 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         when(z.getLastPublishedLoanInfo()).thenThrow(IllegalStateException.class);
         final Tenant t = mockTenant(z);
-        final AtomicReference<LastPublishedLoan> state = new AtomicReference<>(null);
+        final AtomicReference<LastPublishedItem> state = new AtomicReference<>(null);
         final AbstractMarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(t, state::getAndSet);
         assertThat(a.hasUpdates()).isTrue();
         assertThat(a.hasUpdates()).isTrue();

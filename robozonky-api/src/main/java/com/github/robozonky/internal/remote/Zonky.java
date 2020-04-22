@@ -16,10 +16,9 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.util.Collections;
-import java.util.Currency;
+import static java.util.Collections.singleton;
+
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -30,30 +29,33 @@ import javax.ws.rs.ClientErrorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.remote.ControlApi;
-import com.github.robozonky.api.remote.LoanApi;
-import com.github.robozonky.api.remote.ParticipationApi;
-import com.github.robozonky.api.remote.PortfolioApi;
-import com.github.robozonky.api.remote.ReservationApi;
 import com.github.robozonky.api.remote.entities.Consents;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
-import com.github.robozonky.api.remote.entities.LastPublishedParticipation;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.PurchaseRequest;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
-import com.github.robozonky.api.remote.entities.ResolutionRequest;
-import com.github.robozonky.api.remote.entities.Resolutions;
 import com.github.robozonky.api.remote.entities.Restrictions;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.entities.SellRequest;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.Resolution;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
+import com.github.robozonky.internal.remote.endpoints.ControlApi;
+import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
+import com.github.robozonky.internal.remote.endpoints.LoanApi;
+import com.github.robozonky.internal.remote.endpoints.ParticipationApi;
+import com.github.robozonky.internal.remote.endpoints.PortfolioApi;
+import com.github.robozonky.internal.remote.endpoints.ReservationApi;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.internal.remote.entities.PurchaseRequestImpl;
+import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
+import com.github.robozonky.internal.remote.entities.ResolutionRequestImpl;
+import com.github.robozonky.internal.remote.entities.ResolutionsImpl;
+import com.github.robozonky.internal.remote.entities.SellRequestImpl;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 
 /**
@@ -79,9 +81,9 @@ public class Zonky {
 
     private final Api<ControlApi> controlApi;
     private final Api<ReservationApi> reservationApi;
-    private final PaginatedApi<Loan, LoanApi> loanApi;
-    private final PaginatedApi<Participation, ParticipationApi> participationApi;
-    private final PaginatedApi<Investment, PortfolioApi> portfolioApi;
+    private final PaginatedApi<LoanImpl, LoanApi> loanApi;
+    private final PaginatedApi<ParticipationImpl, ParticipationApi> participationApi;
+    private final PaginatedApi<InvestmentImpl, PortfolioApi> portfolioApi;
 
     Zonky(final ApiProvider api, final Supplier<ZonkyApiToken> tokenSupplier) {
         this.controlApi = api.control(tokenSupplier);
@@ -92,24 +94,21 @@ public class Zonky {
         this.portfolioApi = api.portfolio(tokenSupplier);
     }
 
-    private static <T, S> Stream<T> getStream(final PaginatedApi<T, S> api, final Function<S, List<T>> function,
+    private static <X, T extends X, S extends EntityCollectionApi<T>> Stream<X> getStream(final PaginatedApi<T, S> api,
+            final Function<S, List<T>> function,
             final Select select) {
         var pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, function, select, pageSize))
             .pageSize(pageSize)
-            .build();
-    }
-
-    private static <T> Stream<T> excludeNonCZK(final Stream<T> data,
-            final Function<T, Currency> extractor) {
-        return data.filter(i -> Objects.equals(extractor.apply(i), Defaults.CURRENCY));
+            .build()
+            .map(x -> x);
     }
 
     /**
      * @param investment
      * @return Success or one of known investment failures.
      */
-    public InvestmentResult invest(final Investment investment) {
+    public InvestmentResult invest(final InvestmentImpl investment) {
         LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
         try {
             controlApi.run(api -> api.invest(investment));
@@ -128,7 +127,7 @@ public class Zonky {
     public PurchaseResult purchase(final Participation participation) {
         LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
         try {
-            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
+            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequestImpl(participation)));
             return PurchaseResult.success();
         } catch (final ClientErrorException ex) {
             LOGGER.debug("Caught API exception during purchasing.", ex);
@@ -136,18 +135,18 @@ public class Zonky {
         }
     }
 
-    private void sell(final Investment investment, final SellRequest request) {
+    private void sell(final Investment investment, final SellRequestImpl request) {
         LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoanId(), request);
         controlApi.run(api -> api.offer(request));
     }
 
     public void sell(final Investment investment, final SellInfo sellInfo) {
-        SellRequest request = new SellRequest(investment.getId(), sellInfo);
+        SellRequestImpl request = new SellRequestImpl(investment.getId(), sellInfo);
         sell(investment, request);
     }
 
     public void sell(final Investment investment) {
-        SellRequest request = new SellRequest(investment);
+        SellRequestImpl request = new SellRequestImpl(investment);
         sell(investment, request);
     }
 
@@ -160,9 +159,9 @@ public class Zonky {
     }
 
     public void accept(final Reservation reservation) {
-        final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation()
+        final ResolutionRequestImpl r = new ResolutionRequestImpl(reservation.getMyReservation()
             .getId(), Resolution.ACCEPTED);
-        final Resolutions rs = new Resolutions(Collections.singleton(r));
+        final ResolutionsImpl rs = new ResolutionsImpl(singleton(r));
         controlApi.run(c -> c.accept(rs));
     }
 
@@ -172,12 +171,9 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Reservation> getPendingReservations() {
-        return excludeNonCZK(reservationApi.call(ReservationApi::items)
+        return reservationApi.call(ReservationApi::items)
             .getReservations()
-            .stream(),
-                Reservation::getCurrency)
-                    .filter(r -> r.getCurrency()
-                        .equals(Defaults.CURRENCY));
+            .stream();
     }
 
     /**
@@ -187,7 +183,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        return excludeNonCZK(getStream(portfolioApi, PortfolioApi::items, select), Investment::getCurrency);
+        return getStream(portfolioApi, PortfolioApi::items, select);
     }
 
     public Stream<Investment> getSoldInvestments() {
@@ -217,11 +213,11 @@ public class Zonky {
         return getInvestments(s).findFirst();
     }
 
-    public LastPublishedLoan getLastPublishedLoanInfo() {
+    public LastPublishedItem getLastPublishedLoanInfo() {
         return loanApi.execute(LoanApi::lastPublished, false);
     }
 
-    public LastPublishedParticipation getLastPublishedParticipationInfo() {
+    public LastPublishedItem getLastPublishedParticipationInfo() {
         return participationApi.execute(ParticipationApi::lastPublished, false);
     }
 
@@ -232,7 +228,7 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Loan> getAvailableLoans(final Select select) {
-        return excludeNonCZK(getStream(loanApi, LoanApi::items, select), Loan::getCurrency);
+        return getStream(loanApi, LoanApi::items, select);
     }
 
     /**
@@ -242,14 +238,14 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Participation> getAvailableParticipations(final Select select) {
-        return excludeNonCZK(getStream(participationApi, ParticipationApi::items, select), Participation::getCurrency);
+        return getStream(participationApi, ParticipationApi::items, select);
     }
 
     public ReservationPreferences getReservationPreferences() {
         return reservationApi.call(ReservationApi::preferences);
     }
 
-    public void setReservationPreferences(final ReservationPreferences preferences) {
+    public void setReservationPreferences(final ReservationPreferencesImpl preferences) {
         controlApi.run(c -> c.setReservationPreferences(preferences));
     }
 

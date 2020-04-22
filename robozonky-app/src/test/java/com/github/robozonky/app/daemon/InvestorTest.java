@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.RecommendedLoan;
@@ -42,6 +41,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Either;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -49,9 +49,10 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class InvestorTest extends AbstractZonkyLeveragingTest {
 
-    private static final Loan LOAN = new MockLoanBuilder()
-        .setRating(Rating.A)
-        .setNonReservedRemainingInvestment(100_000)
+    private static final LoanImpl LOAN = new MockLoanBuilder()
+        .set(LoanImpl::setRating, Rating.A)
+        .set(LoanImpl::setRemainingInvestment, Money.from(100_000))
+        .set(LoanImpl::setReservedAmount, Money.from(0))
         .build();
     private static final LoanDescriptor DESCRIPTOR = new LoanDescriptor(LOAN);
 

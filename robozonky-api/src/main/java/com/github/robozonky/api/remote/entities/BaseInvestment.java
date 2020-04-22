@@ -19,84 +19,21 @@ package com.github.robozonky.api.remote.entities;
 import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.Optional;
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.test.DateUtil;
 
-/**
- * Do not use instances of this class directly. Instead, use {@link Investment}. Otherwise you may be bitten by
- * various quirks of the Zonky API, returning null in unexpected places.
- */
-abstract class BaseInvestment extends BaseEntity {
+public interface BaseInvestment {
 
-    private long id;
-    private int loanId;
-    private Currency currency = Defaults.CURRENCY;
-    @XmlElement
-    private String amount;
-    private InvestmentStatus status;
-    @XmlElement
-    private OffsetDateTime timeCreated = DateUtil.offsetNow();
+    Optional<OffsetDateTime> getTimeCreated();
 
-    BaseInvestment() {
-        // for JAXB
-    }
+    InvestmentStatus getStatus();
 
-    BaseInvestment(final Loan loan, final Money amount) {
-        this.currency = amount.getCurrency();
-        this.loanId = loan.getId();
-        this.amount = amount.getValue()
-            .toPlainString();
-        this.status = InvestmentStatus.ACTIVE;
-    }
+    int getLoanId();
 
-    @XmlTransient
-    public Optional<OffsetDateTime> getTimeCreated() {
-        return Optional.ofNullable(timeCreated);
-    }
+    Currency getCurrency();
 
-    @XmlElement
-    public InvestmentStatus getStatus() {
-        return status;
-    }
+    long getId();
 
-    @XmlElement
-    public int getLoanId() {
-        return loanId;
-    }
-
-    @XmlElement
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    @XmlElement
-    public long getId() {
-        return id;
-    }
-
-    // Money types are all transient.
-
-    @XmlTransient
-    public Money getAmount() {
-        return Money.from(amount, currency);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", BaseInvestment.class.getSimpleName() + "[", "]")
-            .add("id=" + id)
-            .add("loanId=" + loanId)
-            .add("amount='" + amount + "'")
-            .add("currency=" + currency)
-            .add("status=" + status)
-            .add("timeCreated=" + timeCreated)
-            .toString();
-    }
+    Money getAmount();
 }

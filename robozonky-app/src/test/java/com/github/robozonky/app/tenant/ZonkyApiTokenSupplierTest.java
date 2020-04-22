@@ -40,6 +40,7 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -48,7 +49,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
     private final SecretProvider secrets = SecretProvider.inMemory("someone", "password".toCharArray());
 
     private static ZonkyApiToken getTokenExpiringIn(final Duration duration) {
-        return new ZonkyApiToken(UUID.randomUUID()
+        return new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),
@@ -85,7 +86,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
             .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
-        secrets.setToken(new ZonkyApiToken(UUID.randomUUID()
+        secrets.setToken(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),
@@ -102,7 +103,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
             .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
-        secrets.setToken(new ZonkyApiToken(UUID.randomUUID()
+        secrets.setToken(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),
@@ -118,7 +119,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
             .refresh(any());
         final ApiProvider api = mockApi(oAuth, zonky);
         final ZonkyApiTokenSupplier t = new ZonkyApiTokenSupplier(api, secrets);
-        secrets.setToken(new ZonkyApiToken(UUID.randomUUID()
+        secrets.setToken(new ZonkyApiTokenImpl(UUID.randomUUID()
             .toString(),
                 UUID.randomUUID()
                     .toString(),

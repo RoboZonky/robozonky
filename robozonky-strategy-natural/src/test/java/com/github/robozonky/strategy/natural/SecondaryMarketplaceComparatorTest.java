@@ -27,6 +27,8 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class SecondaryMarketplaceComparatorTest {
@@ -34,7 +36,7 @@ class SecondaryMarketplaceComparatorTest {
     private final Comparator<ParticipationDescriptor> c = new SecondaryMarketplaceComparator(Rating::compareTo);
 
     private static ParticipationDescriptor mockParticipationDescriptor(final Loan loan) {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         Rating r = loan.getRating();
         when(p.getRating()).thenReturn(r);
         return new ParticipationDescriptor(p, () -> loan);
@@ -43,10 +45,10 @@ class SecondaryMarketplaceComparatorTest {
     @Test
     void sortByRating() {
         final Loan l1 = new MockLoanBuilder()
-            .setRating(Rating.D)
+            .set(LoanImpl::setRating, Rating.D)
             .build();
         final Loan l2 = new MockLoanBuilder()
-            .setRating(Rating.A)
+            .set(LoanImpl::setRating, Rating.A)
             .build();
         final ParticipationDescriptor pd1 = mockParticipationDescriptor(l1),
                 pd2 = mockParticipationDescriptor(l2);

@@ -37,6 +37,8 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
@@ -46,15 +48,15 @@ class ParsedStrategyTest {
 
     private static final PortfolioOverview FOLIO = mock(PortfolioOverview.class);
 
-    private static Loan mockLoan(final int amount) {
+    private static LoanImpl mockLoan(final int amount) {
         return new MockLoanBuilder()
-            .setRating(Rating.A)
-            .setAmount(amount)
+            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setAmount, Money.from(amount))
             .build();
     }
 
     private static ParticipationDescriptor mockParticipationDescriptor(final Loan loan) {
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         doReturn(loan.getTermInMonths()).when(p)
             .getRemainingInstalmentCount();
         return new ParticipationDescriptor(p, () -> loan);
@@ -93,7 +95,7 @@ class ParsedStrategyTest {
             .plusMonths(2)));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList());
         // no loan or participation should be bought; every investment should be sold
-        final Loan l = ParsedStrategyTest.mockLoan(1000);
+        final LoanImpl l = ParsedStrategyTest.mockLoan(1000);
         final LoanDescriptor ld = new LoanDescriptor(l);
         final ParticipationDescriptor pd = ParsedStrategyTest.mockParticipationDescriptor(l);
         final Investment i = MockInvestmentBuilder.fresh(l, 200)
@@ -125,10 +127,10 @@ class ParsedStrategyTest {
                         Collections.emptySet(),
                         Collections.emptySet()));
         // no loan or participation should be bought; every investment should be sold
-        final Loan loanUnder = ParsedStrategyTest.mockLoan(1000);
-        final Loan loanOver = new MockLoanBuilder()
-            .setAmount(2000)
-            .setTermInMonths(84)
+        final LoanImpl loanUnder = ParsedStrategyTest.mockLoan(1000);
+        final LoanImpl loanOver = new MockLoanBuilder()
+            .set(LoanImpl::setAmount, Money.from(2_000))
+            .set(LoanImpl::setTermInMonths, 84)
             .build();
         final LoanDescriptor ldOver = new LoanDescriptor(loanOver);
         final LoanDescriptor ldUnder = new LoanDescriptor(loanUnder);
@@ -160,7 +162,7 @@ class ParsedStrategyTest {
         final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
         assertThat(strategy.getApplicableLoans(Stream.empty(), FOLIO)).isEmpty();
         // add loan; without filters, should be applicable
-        final Loan loan = ParsedStrategyTest.mockLoan(2);
+        final LoanImpl loan = ParsedStrategyTest.mockLoan(2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
         assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO)).contains(ld);
         // now add a filter and see no loans applicable
@@ -219,10 +221,10 @@ class ParsedStrategyTest {
         final FilterSupplier s = new FilterSupplier(v, Collections.emptySet(), Collections.emptySet(), filters);
         final ParsedStrategy ps = new ParsedStrategy(v, Collections.emptyList(), Collections.emptyMap(),
                 Collections.emptyMap(), s);
-        final Loan l = ParsedStrategyTest.mockLoan(200_000);
+        final LoanImpl l = ParsedStrategyTest.mockLoan(200_000);
         final LoanDescriptor ld = new LoanDescriptor(l);
         assertThat(ps.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
-        final Participation p = mock(Participation.class);
+        final Participation p = mock(ParticipationImpl.class);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         assertThat(ps.getApplicableParticipations(Stream.of(pd), FOLIO)).isEmpty();
     }

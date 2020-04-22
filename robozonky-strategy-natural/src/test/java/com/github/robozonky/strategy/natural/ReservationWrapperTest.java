@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 
 class ReservationWrapperTest {
@@ -40,12 +41,12 @@ class ReservationWrapperTest {
     @Test
     void fromReservation() {
         final Reservation reservation = new MockReservationBuilder()
-            .setAnnuity(BigDecimal.ONE)
-            .setRating(Rating.D)
-            .setAmount(100_000)
-            .setRegion(Region.JIHOCESKY)
-            .setRevenueRate(Ratio.ZERO)
-            .setInterestRate(Ratio.ONE)
+            .set(ReservationImpl::setAnnuity, Money.from(BigDecimal.ONE))
+            .set(ReservationImpl::setRating, Rating.D)
+            .set(ReservationImpl::setAmount, Money.from(100_000))
+            .set(ReservationImpl::setRegion, Region.JIHOCESKY)
+            .set(ReservationImpl::setRevenueRate, Ratio.ZERO)
+            .set(ReservationImpl::setInterestRate, Ratio.ONE)
             .build();
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),
                 FOLIO);
@@ -84,7 +85,7 @@ class ReservationWrapperTest {
     @Test
     void fromReservationWithoutRevenueRate() {
         final Reservation reservation = new MockReservationBuilder()
-            .setRating(Rating.B)
+            .set(ReservationImpl::setRating, Rating.B)
             .build();
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),
                 FOLIO);

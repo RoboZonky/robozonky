@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
@@ -68,7 +69,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLoanId(2)
+            .set(InvestmentImpl::setLoanId, 2)
             .build();
         when(zonky.getSoldInvestments()).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
@@ -84,7 +85,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLoanId(1)
+            .set(InvestmentImpl::setLoanId, 2)
             .build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);

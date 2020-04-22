@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.LastPublishedLoan;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -31,7 +31,7 @@ import com.github.robozonky.internal.tenant.Tenant;
 
 class InvestingOperationDescriptor implements OperationDescriptor<LoanDescriptor, InvestmentStrategy, Loan> {
 
-    private final AtomicReference<LastPublishedLoan> lastChecked = new AtomicReference<>(null);
+    private final AtomicReference<LastPublishedItem> lastChecked = new AtomicReference<>(null);
 
     @Override
     public boolean isEnabled(final Tenant tenant) {

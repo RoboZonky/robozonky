@@ -32,6 +32,7 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 
 class SelingThrottleTest extends AbstractZonkyLeveragingTest {
@@ -40,16 +41,16 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
     void picksSmallestOneIfAllOverThreshold() {
         final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setRating(rating)
-            .setRemainingPrincipal(BigDecimal.TEN)
+            .set(InvestmentImpl::setRating, rating)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
             .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .setRating(rating)
-            .setRemainingPrincipal(BigDecimal.TEN.pow(2))
+            .set(InvestmentImpl::setRating, rating)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN.pow(2)))
             .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-            .setRating(rating)
-            .setRemainingPrincipal(BigDecimal.ONE)
+            .set(InvestmentImpl::setRating, rating)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.ONE))
             .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getInvested(eq(rating))).thenReturn(Money.from(10));
@@ -71,16 +72,16 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
     void picksAllBelowThreshold() {
         final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setRating(rating)
-            .setRemainingPrincipal(BigDecimal.TEN)
+            .set(InvestmentImpl::setRating, rating)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
             .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .setRating(rating)
-            .setRemainingPrincipal(BigDecimal.TEN.pow(2))
+            .set(InvestmentImpl::setRating, rating)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN.pow(2)))
             .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-            .setRating(rating)
-            .setRemainingPrincipal(BigDecimal.ONE)
+            .set(InvestmentImpl::setRating, rating)
+            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.ONE))
             .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getInvested()).thenReturn(Money.from(2200));

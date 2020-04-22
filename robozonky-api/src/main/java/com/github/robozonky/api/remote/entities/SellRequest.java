@@ -17,84 +17,16 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.math.BigDecimal;
-import java.util.StringJoiner;
 
-import javax.xml.bind.annotation.XmlElement;
+public interface SellRequest {
 
-import com.github.robozonky.api.Money;
+    long getInvestmentId();
 
-public class SellRequest extends BaseEntity {
+    BigDecimal getRemainingPrincipal();
 
-    private long investmentId;
-    private BigDecimal remainingPrincipal;
-    private BigDecimal price;
-    private BigDecimal discount;
-    private BigDecimal feeAmount;
+    BigDecimal getPrice();
 
-    public SellRequest(final long investmentId, final SellInfo sellInfo) {
-        this.investmentId = investmentId;
-        this.remainingPrincipal = sellInfo.getPriceInfo()
-            .getRemainingPrincipal()
-            .getValue();
-        this.feeAmount = sellInfo.getPriceInfo()
-            .getFee()
-            .getValue()
-            .getValue();
-        this.discount = sellInfo.getPriceInfo()
-            .getDiscount()
-            .bigDecimalValue();
-        this.price = sellInfo.getPriceInfo()
-            .getSellPrice()
-            .getValue();
-    }
+    BigDecimal getDiscount();
 
-    public SellRequest(final Investment investment) {
-        this.investmentId = investment.getId();
-        this.remainingPrincipal = investment.getRemainingPrincipal()
-            .orElseThrow()
-            .getValue();
-        this.feeAmount = investment.getSmpFee()
-            .orElse(Money.ZERO)
-            .getValue();
-        this.discount = BigDecimal.ZERO;
-        this.price = investment.getSmpPrice()
-            .map(Money::getValue)
-            .orElse(remainingPrincipal);
-    }
-
-    @XmlElement
-    public long getInvestmentId() {
-        return investmentId;
-    }
-
-    @XmlElement
-    public BigDecimal getRemainingPrincipal() {
-        return remainingPrincipal;
-    }
-
-    @XmlElement
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    @XmlElement
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    @XmlElement
-    public BigDecimal getFeeAmount() {
-        return feeAmount;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SellRequest.class.getSimpleName() + "[", "]")
-            .add("discount=" + discount)
-            .add("feeAmount=" + feeAmount)
-            .add("investmentId=" + investmentId)
-            .add("price=" + price)
-            .add("remainingPrincipal=" + remainingPrincipal)
-            .toString();
-    }
+    BigDecimal getFeeAmount();
 }

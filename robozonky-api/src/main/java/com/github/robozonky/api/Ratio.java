@@ -16,12 +16,17 @@
 
 package com.github.robozonky.api;
 
-import java.math.BigDecimal;
-import java.util.Objects;
-
 import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static com.github.robozonky.internal.util.BigDecimalCalculator.toScale;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
+import javax.json.bind.annotation.JsonbTypeAdapter;
+
+import com.github.robozonky.internal.util.json.RatioAdapter;
+
+@JsonbTypeAdapter(RatioAdapter.class)
 public final class Ratio extends Number implements Comparable<Ratio> {
 
     public static final Ratio ZERO = new Ratio(BigDecimal.ZERO);

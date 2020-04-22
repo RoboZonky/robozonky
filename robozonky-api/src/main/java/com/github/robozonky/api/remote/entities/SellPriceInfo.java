@@ -16,68 +16,18 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.StringJoiner;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 
-public class SellPriceInfo extends BaseEntity {
+public interface SellPriceInfo {
 
-    @XmlElement
-    private String sellPrice;
+    SellFee getFee();
 
-    @XmlElement
-    private SellFee fee;
+    Money getSellPrice();
 
-    // Strings to be represented as money.
-    @XmlElement
-    private String boughtFor;
+    Money getBoughtFor();
 
-    @XmlElement
-    private String remainingPrincipal;
+    Money getRemainingPrincipal();
 
-    @XmlElement
-    private String discount;
-
-    SellPriceInfo() {
-        // For JAXB.
-    }
-
-    public SellFee getFee() {
-        return fee;
-    }
-
-    @XmlTransient
-    public Money getSellPrice() {
-        return Money.from(sellPrice);
-    }
-
-    @XmlTransient
-    public Money getBoughtFor() {
-        return Money.from(boughtFor);
-    }
-
-    @XmlTransient
-    public Money getRemainingPrincipal() {
-        return Money.from(remainingPrincipal);
-    }
-
-    @XmlTransient
-    public Ratio getDiscount() {
-        return Ratio.fromRaw(discount);
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SellPriceInfo.class.getSimpleName() + "[", "]")
-            .add("boughtFor='" + boughtFor + "'")
-            .add("sellPrice='" + sellPrice + "'")
-            .add("discount='" + discount + "'")
-            .add("fee=" + fee)
-            .add("remainingPrincipal='" + remainingPrincipal + "'")
-            .toString();
-    }
+    Ratio getDiscount();
 }

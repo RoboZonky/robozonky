@@ -39,6 +39,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -53,25 +54,25 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void initializesWithoutTriggeringEvents() {
         final Investment i0 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(0)
+            .set(InvestmentImpl::setLegalDpd, 0)
             .build();
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
+            .set(InvestmentImpl::setLegalDpd, 1)
             .build();
         final Investment i10 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(10)
+            .set(InvestmentImpl::setLegalDpd, 10)
             .build();
         final Investment i30 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(30)
+            .set(InvestmentImpl::setLegalDpd, 30)
             .build();
         final Investment i60 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(60)
+            .set(InvestmentImpl::setLegalDpd, 60)
             .build();
         final Investment i90 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(90)
+            .set(InvestmentImpl::setLegalDpd, 90)
             .build();
         final Investment defaulted = MockInvestmentBuilder.fresh()
-            .setPaymentStatus(PaymentStatus.PAID_OFF)
+            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.PAID_OFF)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i0, i1, i10, i30, i60, i90, defaulted));
         // run test
@@ -103,22 +104,22 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void triggersEventsOnNewDelinquents() {
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
+            .set(InvestmentImpl::setLegalDpd, 1)
             .build();
         final Investment i10 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(10)
+            .set(InvestmentImpl::setLegalDpd, 10)
             .build();
         final Investment i30 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(30)
+            .set(InvestmentImpl::setLegalDpd, 30)
             .build();
         final Investment i60 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(60)
+            .set(InvestmentImpl::setLegalDpd, 60)
             .build();
         final Investment i90 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(90)
+            .set(InvestmentImpl::setLegalDpd, 90)
             .build();
         final Investment defaulted = MockInvestmentBuilder.fresh()
-            .setPaymentStatus(PaymentStatus.PAID_OFF)
+            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.PAID_OFF)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
@@ -138,14 +139,14 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void handlesRegularHealing() {
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
+            .set(InvestmentImpl::setLegalDpd, 1)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
-            .setPaymentStatus(PaymentStatus.OK)
+            .set(InvestmentImpl::setLegalDpd, 1)
+            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.OK)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
@@ -168,14 +169,14 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void handlesLoss() {
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
+            .set(InvestmentImpl::setLegalDpd, 1)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
-            .setPaymentStatus(PaymentStatus.WRITTEN_OFF)
+            .set(InvestmentImpl::setLegalDpd, 1)
+            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.WRITTEN_OFF)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
@@ -198,14 +199,14 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void handlesRepayment() {
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
+            .set(InvestmentImpl::setLegalDpd, 1)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .setLegalDpd(1)
-            .setPaymentStatus(PaymentStatus.PAID)
+            .set(InvestmentImpl::setLegalDpd, 1)
+            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.PAID)
             .build();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
