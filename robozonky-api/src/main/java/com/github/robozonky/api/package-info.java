@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 
 /**
- * This package contains public-facing APIs of RoboZonky. These APIs are guaranteed to not change across minor and
- * micro versions of RoboZonky, and we will do our best not to change them in major versions either. The code in this
- * package is checked for compatibility with previous versions by Revapi.
+ * This package contains public-facing APIs of RoboZonky.
+ * These APIs are guaranteed to not change across micro versions of RoboZonky, and we will do our best not to change
+ * them in minor versions either.
+ * Keep in mind that these promises may have to be broken if/when Zonky delivers a breaking API change on their side.
+ * The code in this package is checked for compatibility with previous versions by Revapi.
  */
 package com.github.robozonky.api;

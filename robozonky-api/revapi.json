@@ -4528,6 +4528,11 @@
         "new": "method java.util.OptionalInt com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
         "annotation": "@javax.xml.bind.annotation.XmlElement",
         "justification": "Replaced JAXB with JSON-B and remove unused fields."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.InvestmentType",
+        "justification": "Replaced JAXB with JSON-B and remove unused fields."
       }
     ]
   }
