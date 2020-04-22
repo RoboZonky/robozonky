@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

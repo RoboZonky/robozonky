@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
+
+import java.util.Currency;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.Ratio;
+import com.github.robozonky.internal.Defaults;
 
-public class RatioAdapterTest {
+public class CurrencyAdapterTest {
 
-    private final RatioAdapter adapter = new RatioAdapter();
+    private final CurrencyAdapter adapter = new CurrencyAdapter();
 
     @Test
     void marshalAndUnmarshal() {
-        String json = adapter.adaptToJson(Ratio.fromPercentage(11.1));
-        Ratio ratio = adapter.adaptFromJson(json);
-        Assertions.assertThat(ratio)
-            .isEqualTo(Ratio.fromRaw("0.111"));
-    }
-
-    @Test
-    void marshalAndUnmarshalZero() {
-        String json = adapter.adaptToJson(Ratio.ZERO);
-        Ratio ratio = adapter.adaptFromJson(json);
-        Assertions.assertThat(ratio)
-            .isSameAs(Ratio.ZERO);
+        String json = adapter.adaptToJson(Defaults.CURRENCY);
+        Currency currency = adapter.adaptFromJson(json);
+        Assertions.assertThat(currency)
+            .isSameAs(Defaults.CURRENCY);
     }
 
 }

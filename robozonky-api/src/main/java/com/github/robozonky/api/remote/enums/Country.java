@@ -21,12 +21,14 @@ import java.util.stream.Stream;
 
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 
+import com.github.robozonky.internal.util.json.CountryDeserializer;
+
 /**
  * {@link #UNKNOWN} must always come last - it is an internal value, not in the Zonky API, and therefore must only get
  * its integer ID after all other values already got one. Never change the value of {@link #getCode()}, as that will be
  * used throughout the strategies etc.
  */
-@JsonbTypeDeserializer(Country.CountryDeserializer.class)
+@JsonbTypeDeserializer(CountryDeserializer.class)
 public enum Country implements BaseEnum {
 
     CZECHIA("CZ"),
@@ -48,12 +50,5 @@ public enum Country implements BaseEnum {
     @Override
     public String getCode() {
         return code;
-    }
-
-    public static final class CountryDeserializer extends AbstractDeserializer<Country> {
-
-        public CountryDeserializer() {
-            super(Country::findByCode, UNKNOWN);
-        }
     }
 }

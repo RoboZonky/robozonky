@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
 
-import javax.json.bind.adapter.JsonbAdapter;
+import com.github.robozonky.api.remote.enums.Country;
 
-import com.github.robozonky.api.Ratio;
+public final class CountryDeserializer extends AbstractDeserializer<Country> {
 
-public final class RatioAdapter implements JsonbAdapter<Ratio, String> {
-
-    @Override
-    public String adaptToJson(Ratio obj) {
-        return obj.bigDecimalValue()
-            .toPlainString();
-    }
-
-    @Override
-    public Ratio adaptFromJson(String obj) {
-        return Ratio.fromRaw(obj);
+    public CountryDeserializer() {
+        super(Country::findByCode, Country.UNKNOWN);
     }
 }

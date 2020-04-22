@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
+import com.github.robozonky.internal.util.json.CurrencyAdapter;
 
 public abstract class BaseLoanImpl implements BaseLoan {
 

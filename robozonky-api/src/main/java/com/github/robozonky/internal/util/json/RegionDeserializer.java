@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.internal.util.json;
 
-import javax.json.bind.annotation.JsonbTypeDeserializer;
+import com.github.robozonky.api.remote.enums.Region;
 
-import com.github.robozonky.internal.util.json.LoanHealthInfoDeserializer;
+public final class RegionDeserializer extends AbstractDeserializer<Region> {
 
-/**
- * {@link #UNKNOWN} is an internal value, not in the Zonky API, and therefore should only ever go last.
- */
-@JsonbTypeDeserializer(LoanHealthInfoDeserializer.class)
-public enum LoanHealth {
-
-    HEALTHY,
-    CURRENTLY_IN_DUE,
-    HISTORICALLY_IN_DUE,
-    UNKNOWN;
+    public RegionDeserializer() {
+        super(s -> {
+            final int actualId = Integer.parseInt(s) - 1; // regions in Zonky API are indexed from 1
+            return Region.values()[actualId];
+        }, Region.UNKNOWN);
+    }
 }

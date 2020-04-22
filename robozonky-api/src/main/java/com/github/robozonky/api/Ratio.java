@@ -24,7 +24,7 @@ import java.util.Objects;
 
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
-import com.github.robozonky.internal.remote.adapters.RatioAdapter;
+import com.github.robozonky.internal.util.json.RatioAdapter;
 
 @JsonbTypeAdapter(RatioAdapter.class)
 public final class Ratio extends Number implements Comparable<Ratio> {

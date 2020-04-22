@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
 
 import javax.json.bind.adapter.JsonbAdapter;
 
-public final class CharArrayAdapter implements JsonbAdapter<char[], String> {
+import com.github.robozonky.api.Money;
+
+public final class MoneyAdapter implements JsonbAdapter<Money, String> {
 
     @Override
-    public String adaptToJson(char[] obj) {
-        return String.valueOf(obj);
+    public String adaptToJson(Money obj) {
+        return obj.getValue()
+            .stripTrailingZeros()
+            .toPlainString();
     }
 
     @Override
-    public char[] adaptFromJson(String obj) {
-        return obj.toCharArray();
+    public Money adaptFromJson(String obj) {
+        return Money.from(obj);
     }
 }

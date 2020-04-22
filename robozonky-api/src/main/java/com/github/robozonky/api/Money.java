@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.adapters.MoneyAdapter;
 import com.github.robozonky.internal.util.functional.Memoizer;
+import com.github.robozonky.internal.util.json.MoneyAdapter;
 
 /**
  * Represents a monetary amount of any size, in any currency. Rounds to 2 decimal points. Two instances equal if their

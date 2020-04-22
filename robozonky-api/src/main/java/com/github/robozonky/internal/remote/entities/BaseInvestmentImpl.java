@@ -28,8 +28,8 @@ import com.github.robozonky.api.remote.entities.BaseInvestment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.json.CurrencyAdapter;
 
 /**
  * Do not use instances of this class directly. Instead, use {@link InvestmentImpl}. Otherwise you may be bitten by

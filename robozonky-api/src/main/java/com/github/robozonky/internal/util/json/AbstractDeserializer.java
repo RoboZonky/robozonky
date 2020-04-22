@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.internal.util.json;
 
 import java.lang.reflect.Type;
 import java.util.function.Function;

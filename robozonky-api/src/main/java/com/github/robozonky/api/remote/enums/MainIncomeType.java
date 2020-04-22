@@ -21,7 +21,9 @@ import java.util.stream.Stream;
 
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 
-@JsonbTypeDeserializer(MainIncomeType.MainIncomeTypeDeserializer.class)
+import com.github.robozonky.internal.util.json.MainIncomeTypeDeserializer;
+
+@JsonbTypeDeserializer(MainIncomeTypeDeserializer.class)
 public enum MainIncomeType implements BaseEnum {
 
     EMPLOYMENT("zaměstnanec"),
@@ -52,13 +54,4 @@ public enum MainIncomeType implements BaseEnum {
     public String getCode() {
         return code;
     }
-
-    public static final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
-
-        public MainIncomeTypeDeserializer() {
-            super(MainIncomeType::valueOf, OTHERS_MAIN);
-        }
-
-    }
-
 }

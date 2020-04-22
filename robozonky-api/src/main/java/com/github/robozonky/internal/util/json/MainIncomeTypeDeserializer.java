@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
 
-import java.util.Currency;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
 
-import javax.json.bind.adapter.JsonbAdapter;
+public final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
 
-public final class CurrencyAdapter implements JsonbAdapter<Currency, String> {
-
-    @Override
-    public String adaptToJson(Currency obj) {
-        return obj.getCurrencyCode();
+    public MainIncomeTypeDeserializer() {
+        super(MainIncomeType::valueOf, MainIncomeType.OTHERS_MAIN);
     }
 
-    @Override
-    public Currency adaptFromJson(String obj) {
-        return Currency.getInstance(obj);
-    }
 }

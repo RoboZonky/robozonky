@@ -31,7 +31,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
+import com.github.robozonky.internal.util.json.CurrencyAdapter;
 
 public class ParticipationImpl implements Participation {
 

@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
 
-import static org.assertj.core.api.Assertions.*;
-
-import java.util.UUID;
-
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class CharArrayAdapterTest {
+import com.github.robozonky.api.Ratio;
 
-    private final CharArrayAdapter adapter = new CharArrayAdapter();
+public class RatioAdapterTest {
+
+    private final RatioAdapter adapter = new RatioAdapter();
 
     @Test
     void marshalAndUnmarshal() {
-        final String s = UUID.randomUUID()
-            .toString();
-        final char[] array = adapter.adaptFromJson(s);
-        final String newS = adapter.adaptToJson(array);
-        assertThat(newS).isEqualTo(s);
+        String json = adapter.adaptToJson(Ratio.fromPercentage(11.1));
+        Ratio ratio = adapter.adaptFromJson(json);
+        Assertions.assertThat(ratio)
+            .isEqualTo(Ratio.fromRaw("0.111"));
+    }
+
+    @Test
+    void marshalAndUnmarshalZero() {
+        String json = adapter.adaptToJson(Ratio.ZERO);
+        Ratio ratio = adapter.adaptFromJson(json);
+        Assertions.assertThat(ratio)
+            .isSameAs(Ratio.ZERO);
     }
 
 }

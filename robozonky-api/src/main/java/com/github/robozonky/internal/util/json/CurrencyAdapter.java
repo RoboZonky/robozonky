@@ -14,25 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote.adapters;
+package com.github.robozonky.internal.util.json;
 
 import java.util.Currency;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import javax.json.bind.adapter.JsonbAdapter;
 
-import com.github.robozonky.internal.Defaults;
+public final class CurrencyAdapter implements JsonbAdapter<Currency, String> {
 
-public class CurrencyAdapterTest {
-
-    private final CurrencyAdapter adapter = new CurrencyAdapter();
-
-    @Test
-    void marshalAndUnmarshal() {
-        String json = adapter.adaptToJson(Defaults.CURRENCY);
-        Currency currency = adapter.adaptFromJson(json);
-        Assertions.assertThat(currency)
-            .isSameAs(Defaults.CURRENCY);
+    @Override
+    public String adaptToJson(Currency obj) {
+        return obj.getCurrencyCode();
     }
 
+    @Override
+    public Currency adaptFromJson(String obj) {
+        return Currency.getInstance(obj);
+    }
 }

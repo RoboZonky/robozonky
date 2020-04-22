@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.internal.util.json;
 
-import javax.json.bind.annotation.JsonbTypeDeserializer;
+import static org.assertj.core.api.Assertions.*;
 
-import com.github.robozonky.internal.util.json.LoanHealthInfoDeserializer;
+import java.util.UUID;
 
-/**
- * {@link #UNKNOWN} is an internal value, not in the Zonky API, and therefore should only ever go last.
- */
-@JsonbTypeDeserializer(LoanHealthInfoDeserializer.class)
-public enum LoanHealth {
+import org.junit.jupiter.api.Test;
 
-    HEALTHY,
-    CURRENTLY_IN_DUE,
-    HISTORICALLY_IN_DUE,
-    UNKNOWN;
+class CharArrayAdapterTest {
+
+    private final CharArrayAdapter adapter = new CharArrayAdapter();
+
+    @Test
+    void marshalAndUnmarshal() {
+        final String s = UUID.randomUUID()
+            .toString();
+        final char[] array = adapter.adaptFromJson(s);
+        final String newS = adapter.adaptToJson(array);
+        assertThat(newS).isEqualTo(s);
+    }
+
 }

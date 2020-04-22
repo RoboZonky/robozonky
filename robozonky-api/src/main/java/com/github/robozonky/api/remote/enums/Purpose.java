@@ -22,7 +22,9 @@ import java.util.stream.Stream;
 
 import javax.json.bind.annotation.JsonbTypeDeserializer;
 
-@JsonbTypeDeserializer(Purpose.PurposeDeserializer.class)
+import com.github.robozonky.internal.util.json.PurposeDeserializer;
+
+@JsonbTypeDeserializer(PurposeDeserializer.class)
 public enum Purpose implements BaseEnum {
 
     AUTO_MOTO("auto-moto"),
@@ -54,12 +56,5 @@ public enum Purpose implements BaseEnum {
     @Override
     public String getCode() {
         return code;
-    }
-
-    public static final class PurposeDeserializer extends AbstractDeserializer<Purpose> {
-
-        public PurposeDeserializer() {
-            super(Purpose::valueOf, OTHER);
-        }
     }
 }

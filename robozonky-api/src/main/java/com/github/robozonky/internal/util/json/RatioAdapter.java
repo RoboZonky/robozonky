@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.internal.util.json;
 
-import javax.json.bind.annotation.JsonbTypeDeserializer;
+import javax.json.bind.adapter.JsonbAdapter;
 
-import com.github.robozonky.internal.util.json.LoanHealthInfoDeserializer;
+import com.github.robozonky.api.Ratio;
 
-/**
- * {@link #UNKNOWN} is an internal value, not in the Zonky API, and therefore should only ever go last.
- */
-@JsonbTypeDeserializer(LoanHealthInfoDeserializer.class)
-public enum LoanHealth {
+public final class RatioAdapter implements JsonbAdapter<Ratio, String> {
 
-    HEALTHY,
-    CURRENTLY_IN_DUE,
-    HISTORICALLY_IN_DUE,
-    UNKNOWN;
+    @Override
+    public String adaptToJson(Ratio obj) {
+        return obj.bigDecimalValue()
+            .toPlainString();
+    }
+
+    @Override
+    public Ratio adaptFromJson(String obj) {
+        return Ratio.fromRaw(obj);
+    }
 }

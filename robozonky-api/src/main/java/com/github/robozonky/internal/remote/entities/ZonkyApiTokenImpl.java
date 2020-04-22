@@ -31,8 +31,8 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.remote.adapters.CharArrayAdapter;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.json.CharArrayAdapter;
 
 /**
  * OAuth access token for Zonky API.
