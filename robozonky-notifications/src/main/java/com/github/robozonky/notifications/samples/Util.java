@@ -108,8 +108,6 @@ final class Util {
             loan.setInsuranceActive(false);
             loan.setAnnuityWithInsurance(Money.from(annuity));
         }
-        loan.setAdditionallyInsured(false);
-        loan.setInsuredInFuture(false);
         // set rating and infer other dependent properties
         loan.setRating(randomize(Rating.values()));
         loan.setInterestRate(loan.getRating()
@@ -119,8 +117,6 @@ final class Util {
         // set various dates
         loan.setDatePublished(OffsetDateTime.now()
             .minusDays(3));
-        loan.setDeadline(loan.getDatePublished()
-            .plusDays(2));
         // set textual properties
         loan.setUrl("https://app.zonky.cz/#/marketplace/detail/" + loan.getId() + "/");
         loan.setStory(LOREM_IPSUM);

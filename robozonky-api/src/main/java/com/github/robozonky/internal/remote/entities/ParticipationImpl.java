@@ -16,8 +16,6 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Currency;
 import java.util.StringJoiner;
 
@@ -37,11 +35,9 @@ import com.github.robozonky.internal.remote.adapters.CurrencyAdapter;
 
 public class ParticipationImpl implements Participation {
 
-    protected long borrowerNo;
     protected int loanId;
     protected int originalInstalmentCount;
     protected int remainingInstalmentCount;
-    protected int userId;
     protected long id;
     protected long investmentId;
     protected MainIncomeType incomeType;
@@ -52,11 +48,6 @@ public class ParticipationImpl implements Participation {
     protected Rating rating;
     protected boolean willExceedLoanInvestmentLimit;
     protected boolean insuranceActive;
-    protected boolean additionallyInsured;
-
-    // Dates and times are expensive to parse, and Participations are on the hot path. Only do it when needed.
-    protected String deadline;
-    protected String nextPaymentDate;
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
     @JsonbTypeAdapter(CurrencyAdapter.class)
@@ -71,7 +62,6 @@ public class ParticipationImpl implements Participation {
 
     public ParticipationImpl(final Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {
         this.loanId = loan.getId();
-        this.borrowerNo = loan.getBorrowerNo();
         this.countryOfOrigin = loan.getCountryOfOrigin();
         this.currency = loan.getCurrency();
         this.incomeType = loan.getMainIncomeType();
@@ -80,8 +70,6 @@ public class ParticipationImpl implements Participation {
         this.originalInstalmentCount = loan.getTermInMonths();
         this.purpose = loan.getPurpose();
         this.rating = loan.getRating();
-        this.userId = loan.getUserId();
-        this.additionallyInsured = loan.isAdditionallyInsured();
         this.insuranceActive = loan.isInsuranceActive();
         this.remainingPrincipal = remainingPrincipal;
         this.remainingInstalmentCount = remainingInstalmentCount;
@@ -103,11 +91,6 @@ public class ParticipationImpl implements Participation {
     }
 
     @Override
-    public long getBorrowerNo() {
-        return borrowerNo;
-    }
-
-    @Override
     public int getOriginalInstalmentCount() {
         return originalInstalmentCount;
     }
@@ -115,11 +98,6 @@ public class ParticipationImpl implements Participation {
     @Override
     public int getRemainingInstalmentCount() {
         return remainingInstalmentCount;
-    }
-
-    @Override
-    public int getUserId() {
-        return userId;
     }
 
     @Override
@@ -158,11 +136,6 @@ public class ParticipationImpl implements Participation {
     }
 
     @Override
-    public boolean isAdditionallyInsured() {
-        return additionallyInsured;
-    }
-
-    @Override
     public LoanHealth getLoanHealthInfo() {
         return loanHealthInfo;
     }
@@ -175,16 +148,6 @@ public class ParticipationImpl implements Participation {
     @Override
     public Currency getCurrency() {
         return currency;
-    }
-
-    @Override
-    public OffsetDateTime getDeadline() {
-        return OffsetDateTime.parse(deadline);
-    }
-
-    @Override
-    public LocalDate getNextPaymentDate() {
-        return LocalDate.parse(nextPaymentDate);
     }
 
     @Override
@@ -202,10 +165,6 @@ public class ParticipationImpl implements Participation {
         return price;
     }
 
-    public void setBorrowerNo(final long borrowerNo) {
-        this.borrowerNo = borrowerNo;
-    }
-
     public void setLoanId(final int loanId) {
         this.loanId = loanId;
     }
@@ -216,10 +175,6 @@ public class ParticipationImpl implements Participation {
 
     public void setRemainingInstalmentCount(final int remainingInstalmentCount) {
         this.remainingInstalmentCount = remainingInstalmentCount;
-    }
-
-    public void setUserId(final int userId) {
-        this.userId = userId;
     }
 
     public void setId(final long id) {
@@ -262,18 +217,6 @@ public class ParticipationImpl implements Participation {
         this.insuranceActive = insuranceActive;
     }
 
-    public void setAdditionallyInsured(final boolean additionallyInsured) {
-        this.additionallyInsured = additionallyInsured;
-    }
-
-    public void setDeadline(final OffsetDateTime deadline) {
-        this.deadline = deadline.toString();
-    }
-
-    public void setNextPaymentDate(final LocalDate nextPaymentDate) {
-        this.nextPaymentDate = nextPaymentDate.toString();
-    }
-
     public void setCountryOfOrigin(final Country countryOfOrigin) {
         this.countryOfOrigin = countryOfOrigin;
     }
@@ -299,11 +242,8 @@ public class ParticipationImpl implements Participation {
         return new StringJoiner(", ", ParticipationImpl.class.getSimpleName() + "[", "]")
             .add("id=" + id)
             .add("loanId=" + loanId)
-            .add("additionallyInsured=" + additionallyInsured)
-            .add("borrowerNo=" + borrowerNo)
             .add("countryOfOrigin=" + countryOfOrigin)
             .add("currency=" + currency)
-            .add("deadline='" + deadline + "'")
             .add("discount='" + discount + "'")
             .add("incomeType=" + incomeType)
             .add("insuranceActive=" + insuranceActive)
@@ -311,14 +251,12 @@ public class ParticipationImpl implements Participation {
             .add("investmentId=" + investmentId)
             .add("loanHealthInfo=" + loanHealthInfo)
             .add("loanName='" + loanName + "'")
-            .add("nextPaymentDate='" + nextPaymentDate + "'")
             .add("originalInstalmentCount=" + originalInstalmentCount)
             .add("price='" + price + "'")
             .add("purpose=" + purpose)
             .add("rating=" + rating)
             .add("remainingInstalmentCount=" + remainingInstalmentCount)
             .add("remainingPrincipal='" + remainingPrincipal + "'")
-            .add("userId=" + userId)
             .add("willExceedLoanInvestmentLimit=" + willExceedLoanInvestmentLimit)
             .toString();
     }

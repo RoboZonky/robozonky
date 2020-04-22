@@ -36,23 +36,15 @@ public interface BaseLoan {
 
     MainIncomeType getMainIncomeType();
 
-    Ratio getInvestmentRate();
-
     Region getRegion();
 
     Purpose getPurpose();
 
     int getId();
 
-    long getPublicIdentifier();
-
-    long getBorrowerNo();
-
     String getName();
 
     String getStory();
-
-    String getNickName();
 
     int getTermInMonths();
 
@@ -60,41 +52,14 @@ public interface BaseLoan {
 
     Rating getRating();
 
-    boolean isTopped();
-
-    boolean isCovered();
-
-    boolean isPublished();
-
-    int getInvestmentsCount();
-
-    int getActiveLoansCount();
-
     /**
-     * @return True if the loan is insured at this very moment. Uninsured loans will have both this and
-     *         {@link #isAdditionallyInsured()} return false.
+     * @return True if the loan is insured at this very moment. Uninsured loans will have it return false.
      */
     boolean isInsuranceActive();
-
-    /**
-     * @return True if the loan will become insured at some later point in time. False when {@link #isInsuranceActive()}
-     *         is true.
-     */
-    boolean isInsuredInFuture();
-
-    /**
-     * @return If the loan is insured, but did not start this way. Uninsured loans will have both this and
-     *         {@link #isInsuranceActive()} return false.
-     */
-    boolean isAdditionallyInsured();
-
-    int getUserId();
 
     Optional<Ratio> getRevenueRate();
 
     OffsetDateTime getDatePublished();
-
-    OffsetDateTime getDeadline();
 
     Money getAmount();
 

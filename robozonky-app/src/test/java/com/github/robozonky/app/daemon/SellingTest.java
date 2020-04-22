@@ -70,8 +70,6 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.valueOf(100)))
             .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
             .set(InvestmentImpl::setOnSmp, false)
-            .set(InvestmentImpl::setCanBeOffered, true)
-            .set(InvestmentImpl::setInWithdrawal, false)
             .build();
     }
 

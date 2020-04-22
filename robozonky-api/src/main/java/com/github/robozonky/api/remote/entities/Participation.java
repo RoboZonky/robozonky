@@ -16,8 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.Currency;
 
 import com.github.robozonky.api.Money;
@@ -36,13 +34,9 @@ public interface Participation {
 
     int getLoanId();
 
-    long getBorrowerNo();
-
     int getOriginalInstalmentCount();
 
     int getRemainingInstalmentCount();
-
-    int getUserId();
 
     MainIncomeType getIncomeType();
 
@@ -63,22 +57,11 @@ public interface Participation {
      */
     boolean isInsuranceActive();
 
-    /**
-     * Semantics is identical to {@link BaseLoan#isAdditionallyInsured()}.
-     *
-     * @return
-     */
-    boolean isAdditionallyInsured();
-
     LoanHealth getLoanHealthInfo();
 
     Country getCountryOfOrigin();
 
     Currency getCurrency();
-
-    OffsetDateTime getDeadline();
-
-    LocalDate getNextPaymentDate();
 
     Money getRemainingPrincipal();
 

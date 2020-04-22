@@ -31,7 +31,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
-import com.github.robozonky.api.remote.enums.InvestmentType;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -46,39 +45,22 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @JsonbProperty(nillable = true)
     private LoanHealth loanHealthInfo;
     private boolean onSmp;
-    private boolean canBeOffered;
-    private boolean inWithdrawal;
-    private boolean hasCollectionHistory;
     private boolean insuranceActive;
-    private boolean additionallyInsured;
     private boolean instalmentPostponement;
     private int legalDpd;
-    private int loanInvestmentsCount = 0;
     private int loanTermInMonth = 84;
     private int currentTerm = 0;
     private int remainingMonths = loanTermInMonth - currentTerm;
-    private long borrowerNo = 0;
-    private long loanPublicIdentifier = 0;
     private String loanName;
-    private String nickname;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
     private Ratio interestRate;
     @JsonbProperty(nillable = true)
     private Ratio revenueRate;
     private Rating rating;
-    private InvestmentType investmentType;
 
     // OffsetDateTime is expensive to parse, and Investments are on the hot path. Only do it when needed.
     @JsonbProperty(nillable = true)
     private String investmentDate;
-    @JsonbProperty(nillable = true)
-    private String nextPaymentDate;
-    @JsonbProperty(nillable = true)
-    private String activeFrom;
-    @JsonbProperty(nillable = true)
-    private String activeTo;
-    @JsonbProperty(nillable = true)
-    private String smpFeeExpirationDate;
 
     private Money loanAnnuity = Money.ZERO;
     private Money loanAmount = Money.ZERO;
@@ -110,7 +92,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     public InvestmentImpl(final Loan loan, final Money amount) {
         super(loan, amount);
-        this.loanPublicIdentifier = loan.getPublicIdentifier();
         this.rating = loan.getRating();
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
@@ -119,7 +100,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.remainingMonths = loan.getTermInMonths();
         this.loanTermInMonth = loan.getTermInMonths();
         this.insuranceActive = loan.isInsuranceActive();
-        this.additionallyInsured = loan.isAdditionallyInsured();
     }
 
     @Override
@@ -138,11 +118,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    public int getLoanInvestmentsCount() {
-        return loanInvestmentsCount;
-    }
-
-    @Override
     public int getLoanTermInMonth() {
         return loanTermInMonth;
     }
@@ -158,38 +133,13 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    public boolean isCanBeOffered() {
-        return canBeOffered;
-    }
-
-    @Override
-    public boolean isInWithdrawal() {
-        return inWithdrawal;
-    }
-
-    @Override
     public int getRemainingMonths() {
         return remainingMonths;
     }
 
     @Override
-    public long getBorrowerNo() {
-        return borrowerNo;
-    }
-
-    @Override
-    public long getLoanPublicIdentifier() {
-        return loanPublicIdentifier;
-    }
-
-    @Override
     public String getLoanName() {
         return loanName;
-    }
-
-    @Override
-    public String getNickname() {
-        return nickname;
     }
 
     @Override
@@ -208,30 +158,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
                 LOGGER.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
                 return d;
             });
-    }
-
-    @Override
-    public Optional<OffsetDateTime> getNextPaymentDate() {
-        return Optional.ofNullable(nextPaymentDate)
-            .map(OffsetDateTime::parse);
-    }
-
-    @Override
-    public Optional<OffsetDateTime> getActiveFrom() {
-        return Optional.ofNullable(activeFrom)
-            .map(OffsetDateTime::parse);
-    }
-
-    @Override
-    public Optional<OffsetDateTime> getActiveTo() {
-        return Optional.ofNullable(activeTo)
-            .map(OffsetDateTime::parse);
-    }
-
-    @Override
-    public Optional<OffsetDateTime> getSmpFeeExpirationDate() {
-        return Optional.ofNullable(smpFeeExpirationDate)
-            .map(OffsetDateTime::parse);
     }
 
     @Override
@@ -255,23 +181,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    public boolean isAdditionallyInsured() {
-        return additionallyInsured;
-    }
-
-    @Override
     public boolean isInstalmentPostponement() {
         return instalmentPostponement;
-    }
-
-    @Override
-    public boolean hasCollectionHistory() {
-        return hasCollectionHistory;
-    }
-
-    @Override
-    public InvestmentType getInvestmentType() {
-        return investmentType;
     }
 
     @Override
@@ -366,24 +277,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.onSmp = onSmp;
     }
 
-    public void setCanBeOffered(final boolean canBeOffered) {
-        this.canBeOffered = canBeOffered;
-    }
-
-    public void setInWithdrawal(final boolean inWithdrawal) {
-        this.inWithdrawal = inWithdrawal;
-    }
-
-    public void setHasCollectionHistory(final boolean hasCollectionHistory) {
-        this.hasCollectionHistory = hasCollectionHistory;
-    }
-
     public void setInsuranceActive(final boolean insuranceActive) {
         this.insuranceActive = insuranceActive;
-    }
-
-    public void setAdditionallyInsured(final boolean additionallyInsured) {
-        this.additionallyInsured = additionallyInsured;
     }
 
     public void setInstalmentPostponement(final boolean instalmentPostponement) {
@@ -392,10 +287,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     public void setLegalDpd(final int legalDpd) {
         this.legalDpd = legalDpd;
-    }
-
-    public void setLoanInvestmentsCount(final int loanInvestmentsCount) {
-        this.loanInvestmentsCount = loanInvestmentsCount;
     }
 
     public void setLoanTermInMonth(final int loanTermInMonth) {
@@ -410,20 +301,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.remainingMonths = remainingMonths;
     }
 
-    public void setBorrowerNo(final long borrowerNo) {
-        this.borrowerNo = borrowerNo;
-    }
-
-    public void setLoanPublicIdentifier(final long loanPublicIdentifier) {
-        this.loanPublicIdentifier = loanPublicIdentifier;
-    }
-
     public void setLoanName(final String loanName) {
         this.loanName = loanName;
-    }
-
-    public void setNickname(final String nickname) {
-        this.nickname = nickname;
     }
 
     public void setInsuranceStatus(final InsuranceStatus insuranceStatus) {
@@ -442,10 +321,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.rating = rating;
     }
 
-    public void setInvestmentType(final InvestmentType investmentType) {
-        this.investmentType = investmentType;
-    }
-
     private static String toOptionalString(final OffsetDateTime dateTime) {
         return Optional.ofNullable(dateTime)
             .map(OffsetDateTime::toString)
@@ -454,22 +329,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     public void setInvestmentDate(final OffsetDateTime investmentDate) {
         this.investmentDate = toOptionalString(investmentDate);
-    }
-
-    public void setNextPaymentDate(final OffsetDateTime nextPaymentDate) {
-        this.nextPaymentDate = toOptionalString(nextPaymentDate);
-    }
-
-    public void setActiveFrom(final OffsetDateTime activeFrom) {
-        this.activeFrom = toOptionalString(activeFrom);
-    }
-
-    public void setActiveTo(final OffsetDateTime activeTo) {
-        this.activeTo = toOptionalString(activeTo);
-    }
-
-    public void setSmpFeeExpirationDate(final OffsetDateTime smpFeeExpirationDate) {
-        this.smpFeeExpirationDate = toOptionalString(smpFeeExpirationDate);
     }
 
     public void setLoanAnnuity(final Money loanAnnuity) {
@@ -540,34 +399,22 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     public String toString() {
         return new StringJoiner(", ", InvestmentImpl.class.getSimpleName() + "[", "]")
             .add("super=" + super.toString())
-            .add("activeFrom='" + activeFrom + "'")
-            .add("activeTo='" + activeTo + "'")
-            .add("additionallyInsured=" + additionallyInsured)
             .add("amountDue='" + amountDue + "'")
-            .add("borrowerNo=" + borrowerNo)
-            .add("canBeOffered=" + canBeOffered)
             .add("currentTerm=" + currentTerm)
             .add("dueInterest='" + dueInterest + "'")
             .add("duePrincipal='" + duePrincipal + "'")
             .add("expectedInterest='" + expectedInterest + "'")
-            .add("hasCollectionHistory=" + hasCollectionHistory)
             .add("instalmentPostponement=" + instalmentPostponement)
             .add("insuranceActive=" + insuranceActive)
             .add("insuranceStatus=" + insuranceStatus)
             .add("interestRate=" + interestRate)
             .add("investmentDate='" + investmentDate + "'")
-            .add("investmentType=" + investmentType)
-            .add("inWithdrawal=" + inWithdrawal)
             .add("legalDpd=" + legalDpd)
             .add("loanAmount='" + loanAmount + "'")
             .add("loanAnnuity='" + loanAnnuity + "'")
             .add("loanHealthInfo=" + loanHealthInfo)
-            .add("loanInvestmentsCount=" + loanInvestmentsCount)
             .add("loanName='" + loanName + "'")
-            .add("loanPublicIdentifier='" + loanPublicIdentifier + "'")
             .add("loanTermInMonth=" + loanTermInMonth)
-            .add("nextPaymentDate='" + nextPaymentDate + "'")
-            .add("nickname='" + nickname + "'")
             .add("onSmp=" + onSmp)
             .add("paid='" + paid + "'")
             .add("paidInterest='" + paidInterest + "'")
@@ -580,7 +427,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
             .add("remainingPrincipal='" + remainingPrincipal + "'")
             .add("revenueRate=" + revenueRate)
             .add("smpFee='" + smpFee + "'")
-            .add("smpFeeExpirationDate='" + smpFeeExpirationDate + "'")
             .add("smpPrice='" + smpPrice + "'")
             .add("smpSoldFor='" + smpSoldFor + "'")
             .add("toPay='" + toPay + "'")

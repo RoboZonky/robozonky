@@ -22,7 +22,6 @@ import java.util.Optional;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
-import com.github.robozonky.api.remote.enums.InvestmentType;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -37,8 +36,6 @@ public interface Investment extends BaseInvestment {
     Optional<LoanHealth> getLoanHealthInfo();
 
     int getLegalDpd();
-
-    int getLoanInvestmentsCount();
 
     /**
      * The original term.
@@ -57,29 +54,15 @@ public interface Investment extends BaseInvestment {
 
     boolean isOnSmp();
 
-    boolean isCanBeOffered();
-
     /**
-     * The client terminated the loan contract. The investment can therefore not be sold on secondary marketplace.
-     *
-     * @return
-     */
-    boolean isInWithdrawal();
-
-    /**
+     * /**
      * How many monthly payments are now remaining. Also see {@link #getCurrentTerm()}.
      *
      * @return
      */
     int getRemainingMonths();
 
-    long getBorrowerNo();
-
-    long getLoanPublicIdentifier();
-
     String getLoanName();
-
-    String getNickname();
 
     Optional<PaymentStatus> getPaymentStatus();
 
@@ -87,24 +70,6 @@ public interface Investment extends BaseInvestment {
      * @return This appears to always be null, so we guess from other fields.
      */
     OffsetDateTime getInvestmentDate();
-
-    /**
-     * In case of a presently delinquent loan, this always shows the date of the least recent instalment that is
-     * delinquent.
-     *
-     * @return Empty for loans where no payments are expected anymore.
-     */
-    Optional<OffsetDateTime> getNextPaymentDate();
-
-    /**
-     * @return If bought on SMP, then the timestamp of purchase. If invested from primary marketplace, then timestamp of
-     *         settlement (= empty when not yet settled).
-     */
-    Optional<OffsetDateTime> getActiveFrom();
-
-    Optional<OffsetDateTime> getActiveTo();
-
-    Optional<OffsetDateTime> getSmpFeeExpirationDate();
 
     Ratio getInterestRate();
 
@@ -119,18 +84,7 @@ public interface Investment extends BaseInvestment {
      */
     boolean isInsuranceActive();
 
-    /**
-     * Semantics is identical to {@link BaseLoan#isAdditionallyInsured()}.
-     *
-     * @return
-     */
-    boolean isAdditionallyInsured();
-
     boolean isInstalmentPostponement();
-
-    boolean hasCollectionHistory();
-
-    InvestmentType getInvestmentType();
 
     Money getLoanAnnuity();
 
