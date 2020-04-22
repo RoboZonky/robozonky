@@ -96,7 +96,8 @@ class InvestmentImplTest {
                     .isEqualTo(InsuranceStatus.NOT_INSURED);
                 softly.assertThat(investment.getStatus())
                     .isEqualTo(InvestmentStatus.ACTIVE);
-                softly.assertThat(investment.getLegalDpd()).hasValue(0);
+                softly.assertThat(investment.getLegalDpd())
+                    .hasValue(0);
             });
         }
     }
@@ -107,11 +108,11 @@ class InvestmentImplTest {
             Investment investment = jsonb.fromJson(SOLD_INVESTMENT_JSON, InvestmentImpl.class);
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(investment.getId())
-                        .isEqualTo(10232546);
+                    .isEqualTo(10232546);
                 softly.assertThat(investment.getLoanId())
-                        .isEqualTo(193181);
+                    .isEqualTo(193181);
                 softly.assertThat(investment.getLegalDpd())
-                        .isEmpty();
+                    .isEmpty();
             });
         }
     }

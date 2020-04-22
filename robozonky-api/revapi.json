@@ -4509,6 +4509,25 @@
         "new": "enum com.github.robozonky.api.remote.enums.Region",
         "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.RegionDeserializer.class)",
         "justification": "Replaced JAXB with JSON-B and remove unused fields."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method int com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
+        "new": "method java.util.OptionalInt com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
+        "justification": "Replaced JAXB with JSON-B and remove unused fields."
+      },
+      {
+        "code": "java.method.nowAbstract",
+        "old": "method int com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
+        "new": "method java.util.OptionalInt com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
+        "justification": "Replaced JAXB with JSON-B and remove unused fields."
+      },
+      {
+        "code": "java.annotation.removed",
+        "old": "method int com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
+        "new": "method java.util.OptionalInt com.github.robozonky.api.remote.entities.Investment::getLegalDpd()",
+        "annotation": "@javax.xml.bind.annotation.XmlElement",
+        "justification": "Replaced JAXB with JSON-B and remove unused fields."
       }
     ]
   }
