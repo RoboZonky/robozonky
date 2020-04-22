@@ -113,7 +113,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
             .get();
         final Exception thrown = new ServiceUnavailableException();
         doThrow(thrown).when(z)
-            .invest(any());
+            .invest(notNull(), anyInt());
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
         assertThatThrownBy(() -> t.accept(r)).isSameAs(thrown);
         verify(auth, never()).setKnownBalanceUpperBound(any());
@@ -130,7 +130,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
                 .get())
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
-        when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
+        when(z.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(thrown));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
         assertThatThrownBy(() -> t.accept(r)).isInstanceOf(IllegalStateException.class);
         verify(auth, never()).setKnownBalanceUpperBound(any());
@@ -147,7 +147,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
                 .get())
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
-        when(z.invest(any())).thenReturn(InvestmentResult.failure(thrown));
+        when(z.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(thrown));
         final InvestingSession t = new InvestingSession(Collections.emptySet(), auth);
         assertThat(t.accept(r)).isFalse();
         assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(Money.from(199));

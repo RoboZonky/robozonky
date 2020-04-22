@@ -72,7 +72,7 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     protected static Zonky harmlessZonky() {
         final Zonky zonky = mock(Zonky.class);
-        when(zonky.invest(any())).thenReturn(InvestmentResult.success());
+        when(zonky.invest(notNull(), anyInt())).thenReturn(InvestmentResult.success());
         when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
         when(zonky.getRestrictions()).thenReturn(new RestrictionsImpl(true));
         when(zonky.getConsents()).thenReturn(new ConsentsImpl());

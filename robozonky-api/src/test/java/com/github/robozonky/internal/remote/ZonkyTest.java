@@ -37,7 +37,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
 import com.github.robozonky.internal.remote.endpoints.LoanApi;
@@ -49,6 +48,7 @@ import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
+import com.github.robozonky.internal.remote.entities.ResolutionRequest;
 import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
@@ -195,8 +195,7 @@ class ZonkyTest {
         when(la.execute(any())).thenReturn(loan);
         final Zonky z = mockZonky(ca, la);
         final Loan l = z.getLoan(loanId);
-        final InvestmentImpl i = mockInvestment(l, 200);
-        assertThat(z.invest(i)).isEqualTo(InvestmentResult.success());
+        assertThat(z.invest(l, 200)).isEqualTo(InvestmentResult.success());
     }
 
     @Test
@@ -215,7 +214,7 @@ class ZonkyTest {
         final Zonky z = mockZonky(ca, la);
         final Loan l = z.getLoan(loanId);
         final InvestmentImpl i = mockInvestment(l, 200);
-        assertThat(z.invest(i)
+        assertThat(z.invest(l, 200)
             .getFailureType()).contains(InvestmentFailureType.UNKNOWN);
     }
 

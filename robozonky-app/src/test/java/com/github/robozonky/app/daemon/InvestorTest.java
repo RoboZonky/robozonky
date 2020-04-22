@@ -78,7 +78,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
             .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason()
                 .get())
             .build();
-        when(zonky.invest(notNull())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
+        when(zonky.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
         final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
             .orElse(null);
@@ -98,7 +98,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         final Tenant t = mockTenant(zonky, isDryRun);
         final Response failure = Response.status(400)
             .build();
-        when(zonky.invest(any())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
+        when(zonky.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
         final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
             .orElse(null);
@@ -116,7 +116,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         final boolean isDryRun = sessionType.isDryRun();
         final Tenant t = mockTenant(zonky, isDryRun);
         doThrow(IllegalStateException.class).when(zonky)
-            .invest(any());
+            .invest(notNull(), anyInt());
         final Investor i = Investor.build(t);
         final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
             .orElse(null);

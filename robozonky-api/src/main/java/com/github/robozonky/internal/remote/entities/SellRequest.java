@@ -22,9 +22,8 @@ import java.util.StringJoiner;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.entities.SellRequest;
 
-public class SellRequestImpl implements SellRequest {
+public class SellRequest {
 
     private long investmentId;
     private BigDecimal remainingPrincipal;
@@ -32,7 +31,7 @@ public class SellRequestImpl implements SellRequest {
     private BigDecimal discount;
     private BigDecimal feeAmount;
 
-    public SellRequestImpl(final long investmentId, final SellInfo sellInfo) {
+    public SellRequest(final long investmentId, final SellInfo sellInfo) {
         this.investmentId = investmentId;
         this.remainingPrincipal = sellInfo.getPriceInfo()
             .getRemainingPrincipal()
@@ -49,7 +48,7 @@ public class SellRequestImpl implements SellRequest {
             .getValue();
     }
 
-    public SellRequestImpl(final Investment investment) {
+    public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
         this.remainingPrincipal = investment.getRemainingPrincipal()
             .orElseThrow()
@@ -63,27 +62,22 @@ public class SellRequestImpl implements SellRequest {
             .orElse(remainingPrincipal);
     }
 
-    @Override
     public long getInvestmentId() {
         return investmentId;
     }
 
-    @Override
     public BigDecimal getRemainingPrincipal() {
         return remainingPrincipal;
     }
 
-    @Override
     public BigDecimal getPrice() {
         return price;
     }
 
-    @Override
     public BigDecimal getDiscount() {
         return discount;
     }
 
-    @Override
     public BigDecimal getFeeAmount() {
         return feeAmount;
     }
@@ -110,7 +104,7 @@ public class SellRequestImpl implements SellRequest {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", SellRequestImpl.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", SellRequest.class.getSimpleName() + "[", "]")
             .add("discount=" + discount)
             .add("feeAmount=" + feeAmount)
             .add("investmentId=" + investmentId)

@@ -16,34 +16,36 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.StringJoiner;
 
-import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.PurchaseRequest;
+public class Resolutions {
 
-public class PurchaseRequestImpl implements PurchaseRequest {
+    private List<ResolutionRequest> resolutions = Collections.emptyList();
 
-    private BigDecimal amount;
-
-    public PurchaseRequestImpl(final Participation participation) {
-        this.amount = participation.getRemainingPrincipal()
-            .getValue();
+    public Resolutions(final Collection<ResolutionRequest> resolutions) {
+        this.resolutions = new ArrayList<>(resolutions);
     }
 
-    @Override
-    public BigDecimal getAmount() {
-        return amount;
+    public Resolutions() {
+        // For JSON-B.
     }
 
-    public void setAmount(final BigDecimal amount) {
-        this.amount = amount;
+    public List<ResolutionRequest> getResolutions() {
+        return Collections.unmodifiableList(resolutions);
+    }
+
+    public void setResolutions(final List<ResolutionRequest> resolutions) {
+        this.resolutions = resolutions;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", PurchaseRequestImpl.class.getSimpleName() + "[", "]")
-            .add("amount=" + amount)
+        return new StringJoiner(", ", Resolutions.class.getSimpleName() + "[", "]")
+            .add("resolutions=" + resolutions)
             .toString();
     }
 }

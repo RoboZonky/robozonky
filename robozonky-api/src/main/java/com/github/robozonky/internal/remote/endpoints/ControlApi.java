@@ -27,12 +27,12 @@ import javax.ws.rs.Produces;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.entities.ConsentsImpl;
-import com.github.robozonky.internal.remote.entities.InvestmentImpl;
-import com.github.robozonky.internal.remote.entities.PurchaseRequestImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentRequest;
+import com.github.robozonky.internal.remote.entities.PurchaseRequest;
 import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
-import com.github.robozonky.internal.remote.entities.ResolutionsImpl;
+import com.github.robozonky.internal.remote.entities.Resolutions;
 import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
-import com.github.robozonky.internal.remote.entities.SellRequestImpl;
+import com.github.robozonky.internal.remote.entities.SellRequest;
 
 @Produces(Defaults.MEDIA_TYPE)
 @Consumes(Defaults.MEDIA_TYPE)
@@ -52,15 +52,15 @@ public interface ControlApi {
 
     @POST
     @Path("/marketplace/investment")
-    void invest(InvestmentImpl investment);
+    void invest(InvestmentRequest investmentRequest);
 
     @POST
     @Path(ApiConstants.ME + "/traded-investments")
-    void offer(SellRequestImpl sellRequest);
+    void offer(SellRequest sellRequest);
 
     @POST
     @Path(ApiConstants.SMP_INVESTMENTS + "/{id}/shares")
-    void purchase(@PathParam("id") long id, PurchaseRequestImpl purchaseRequest);
+    void purchase(@PathParam("id") long id, PurchaseRequest purchaseRequest);
 
     @DELETE
     @Path("/traded-investments/{id}")
@@ -68,7 +68,7 @@ public interface ControlApi {
 
     @PATCH
     @Path(ApiConstants.RESERVATIONS)
-    void accept(ResolutionsImpl resolutions);
+    void accept(Resolutions resolutions);
 
     @PATCH
     @Path(ApiConstants.RESERVATION_PREFERENCES)

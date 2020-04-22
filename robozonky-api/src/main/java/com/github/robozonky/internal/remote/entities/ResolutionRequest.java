@@ -18,29 +18,26 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.util.StringJoiner;
 
-import com.github.robozonky.api.remote.entities.ResolutionRequest;
 import com.github.robozonky.api.remote.enums.Resolution;
 
-public class ResolutionRequestImpl implements ResolutionRequest {
+public class ResolutionRequest {
 
     private long reservationId;
     private Resolution resolution;
 
-    public ResolutionRequestImpl(final long reservationId, final Resolution resolution) {
+    public ResolutionRequest(final long reservationId, final Resolution resolution) {
         this.reservationId = reservationId;
         this.resolution = resolution;
     }
 
-    public ResolutionRequestImpl() {
+    public ResolutionRequest() {
         // For JSON-B.
     }
 
-    @Override
     public long getReservationId() {
         return reservationId;
     }
 
-    @Override
     public Resolution getResolution() {
         return resolution;
     }
@@ -55,7 +52,7 @@ public class ResolutionRequestImpl implements ResolutionRequest {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ResolutionRequestImpl.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", ResolutionRequest.class.getSimpleName() + "[", "]")
             .add("reservationId=" + reservationId)
             .add("resolution=" + resolution)
             .toString();

@@ -49,13 +49,14 @@ import com.github.robozonky.internal.remote.endpoints.ParticipationApi;
 import com.github.robozonky.internal.remote.endpoints.PortfolioApi;
 import com.github.robozonky.internal.remote.endpoints.ReservationApi;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentRequest;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
-import com.github.robozonky.internal.remote.entities.PurchaseRequestImpl;
+import com.github.robozonky.internal.remote.entities.PurchaseRequest;
 import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
-import com.github.robozonky.internal.remote.entities.ResolutionRequestImpl;
-import com.github.robozonky.internal.remote.entities.ResolutionsImpl;
-import com.github.robozonky.internal.remote.entities.SellRequestImpl;
+import com.github.robozonky.internal.remote.entities.ResolutionRequest;
+import com.github.robozonky.internal.remote.entities.Resolutions;
+import com.github.robozonky.internal.remote.entities.SellRequest;
 import com.github.rutledgepaulv.pagingstreams.PagingStreams;
 
 /**
@@ -105,13 +106,13 @@ public class Zonky {
     }
 
     /**
-     * @param investment
      * @return Success or one of known investment failures.
      */
-    public InvestmentResult invest(final InvestmentImpl investment) {
-        LOGGER.debug("Investing into loan #{}.", investment.getLoanId());
+    public InvestmentResult invest(final Loan loan, final int amount) {
+        LOGGER.debug("Investing into loan #{}.", loan.getId());
         try {
-            controlApi.run(api -> api.invest(investment));
+            var request = new InvestmentRequest(loan.getId(), amount);
+            controlApi.run(api -> api.invest(request));
             return InvestmentResult.success();
         } catch (final ClientErrorException ex) {
             LOGGER.debug("Caught API exception during investment.", ex);
@@ -127,7 +128,7 @@ public class Zonky {
     public PurchaseResult purchase(final Participation participation) {
         LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
         try {
-            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequestImpl(participation)));
+            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
             return PurchaseResult.success();
         } catch (final ClientErrorException ex) {
             LOGGER.debug("Caught API exception during purchasing.", ex);
@@ -135,18 +136,18 @@ public class Zonky {
         }
     }
 
-    private void sell(final Investment investment, final SellRequestImpl request) {
+    private void sell(final Investment investment, final SellRequest request) {
         LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoanId(), request);
         controlApi.run(api -> api.offer(request));
     }
 
     public void sell(final Investment investment, final SellInfo sellInfo) {
-        SellRequestImpl request = new SellRequestImpl(investment.getId(), sellInfo);
+        SellRequest request = new SellRequest(investment.getId(), sellInfo);
         sell(investment, request);
     }
 
     public void sell(final Investment investment) {
-        SellRequestImpl request = new SellRequestImpl(investment);
+        SellRequest request = new SellRequest(investment);
         sell(investment, request);
     }
 
@@ -159,9 +160,9 @@ public class Zonky {
     }
 
     public void accept(final Reservation reservation) {
-        final ResolutionRequestImpl r = new ResolutionRequestImpl(reservation.getMyReservation()
+        final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation()
             .getId(), Resolution.ACCEPTED);
-        final ResolutionsImpl rs = new ResolutionsImpl(singleton(r));
+        final Resolutions rs = new Resolutions(singleton(r));
         controlApi.run(c -> c.accept(rs));
     }
 

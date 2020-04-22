@@ -316,7 +316,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy, Loan> exec = new StrategyExecutor<>(tenant, d);
         final Collection<Loan> result = exec.get();
-        verify(z, never()).invest(any()); // dry run
+        verify(z, never()).invest(any(), anyInt()); // dry run
         assertThat(result)
             .extracting(Loan::getId)
             .isEqualTo(Collections.singletonList(loanId));

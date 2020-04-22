@@ -22,7 +22,6 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
-import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Either;
 
@@ -32,11 +31,6 @@ abstract class Investor {
 
     private Investor() {
         // no external instances
-    }
-
-    static InvestmentImpl convertToInvestment(final RecommendedLoan r) {
-        return new InvestmentImpl(r.descriptor()
-            .item(), r.amount());
     }
 
     public static Investor build(final Tenant auth) {
@@ -63,8 +57,12 @@ abstract class Investor {
     private static Either<InvestmentFailureType, Money> invest(final Tenant auth,
             final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
-        final InvestmentImpl i = convertToInvestment(recommendedLoan);
-        final InvestmentResult r = auth.call(zonky -> zonky.invest(i));
+        var loan = recommendedLoan.descriptor()
+            .item();
+        var amount = recommendedLoan.amount()
+            .getValue()
+            .intValue();
+        final InvestmentResult r = auth.call(zonky -> zonky.invest(loan, amount));
         if (r.isSuccess()) {
             return Either.right(recommendedLoan.amount());
         } else {
