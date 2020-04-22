@@ -50,8 +50,9 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private boolean instalmentPostponement;
     @JsonbProperty(nillable = true)
     private Integer legalDpd;
+    @JsonbProperty(nillable = true)
+    private Integer currentTerm = 0;
     private int loanTermInMonth = 84;
-    private int currentTerm = 0;
     private int remainingMonths = loanTermInMonth - currentTerm;
     private String loanName;
     private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
@@ -125,8 +126,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    public int getCurrentTerm() {
-        return currentTerm;
+    public OptionalInt getCurrentTerm() {
+        return currentTerm == null ? OptionalInt.empty() : OptionalInt.of(currentTerm);
     }
 
     @Override
@@ -295,7 +296,7 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.loanTermInMonth = loanTermInMonth;
     }
 
-    public void setCurrentTerm(final int currentTerm) {
+    public void setCurrentTerm(final Integer currentTerm) {
         this.currentTerm = currentTerm;
     }
 

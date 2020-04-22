@@ -48,10 +48,11 @@ public interface Investment extends BaseInvestment {
     /**
      * How many monthly payments were remaining to be made from {@link #getLoanTermInMonth()}.
      * May be less than {@link #getRemainingMonths()} in case of early payments.
+     * May be missing in case of defaulted loans.
      *
      * @return
      */
-    int getCurrentTerm();
+    OptionalInt getCurrentTerm();
 
     boolean isOnSmp();
 

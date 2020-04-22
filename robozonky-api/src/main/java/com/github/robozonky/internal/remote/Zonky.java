@@ -194,8 +194,9 @@ public class Zonky {
     public Stream<Investment> getDelinquentInvestments() {
         final Select s = new Select()
             .in("loan.status", "ACTIVE", "PAID_OFF")
-            .equals("loan.unpaidLastInst", "true")
-            .equals("status", "ACTIVE");
+            .equals("status", "ACTIVE")
+            .equalsPlain("delinquent", "true")
+            .equalsPlain("loanHealthInfo", "CURRENTLY_IN_DUE");
         return getInvestments(s);
     }
 
