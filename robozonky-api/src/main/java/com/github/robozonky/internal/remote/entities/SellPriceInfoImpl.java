@@ -27,7 +27,7 @@ public class SellPriceInfoImpl implements SellPriceInfo {
 
     private Money sellPrice;
 
-    private SellFee fee;
+    private SellFeeImpl fee;
 
     private Money boughtFor;
 
@@ -68,7 +68,7 @@ public class SellPriceInfoImpl implements SellPriceInfo {
         this.sellPrice = sellPrice;
     }
 
-    public void setFee(final SellFee fee) {
+    public void setFee(final SellFeeImpl fee) {
         this.fee = fee;
     }
 
