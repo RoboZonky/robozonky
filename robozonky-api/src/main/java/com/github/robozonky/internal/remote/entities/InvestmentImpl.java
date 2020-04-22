@@ -19,6 +19,7 @@ package com.github.robozonky.internal.remote.entities;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.StringJoiner;
 
 import javax.json.bind.annotation.JsonbProperty;
@@ -47,7 +48,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     private boolean onSmp;
     private boolean insuranceActive;
     private boolean instalmentPostponement;
-    private int legalDpd;
+    @JsonbProperty(nillable = true)
+    private Integer legalDpd;
     private int loanTermInMonth = 84;
     private int currentTerm = 0;
     private int remainingMonths = loanTermInMonth - currentTerm;
@@ -113,8 +115,8 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
-    public int getLegalDpd() {
-        return legalDpd;
+    public OptionalInt getLegalDpd() {
+        return legalDpd == null ? OptionalInt.empty() : OptionalInt.of(legalDpd);
     }
 
     @Override
@@ -285,7 +287,7 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.instalmentPostponement = instalmentPostponement;
     }
 
-    public void setLegalDpd(final int legalDpd) {
+    public void setLegalDpd(final Integer legalDpd) {
         this.legalDpd = legalDpd;
     }
 

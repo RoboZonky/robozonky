@@ -18,6 +18,7 @@ package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -35,7 +36,7 @@ public interface Investment extends BaseInvestment {
      */
     Optional<LoanHealth> getLoanHealthInfo();
 
-    int getLegalDpd();
+    OptionalInt getLegalDpd();
 
     /**
      * The original term.

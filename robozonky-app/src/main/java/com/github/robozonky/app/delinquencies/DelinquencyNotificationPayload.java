@@ -99,7 +99,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             LOGGER.debug("Investment #{} may not be promoted anymore.", investmentId);
             return;
         }
-        final int daysPastDue = currentDelinquent.getLegalDpd();
+        final int daysPastDue = currentDelinquent.getLegalDpd().orElse(0);
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
             .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
@@ -136,7 +136,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
-            .filter(i -> i.getLegalDpd() > 0)
+            .filter(i -> i.getLegalDpd().orElse(0) > 0)
             .filter(i -> !isDefaulted(i));
     }
 
@@ -161,7 +161,8 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
             getNonDefaulted(delinquents).forEach(d -> {
                 for (final Category cat : Category.values()) {
-                    if (cat.getThresholdInDays() > d.getLegalDpd() || cat.getThresholdInDays() < 0) {
+                    int dpd = d.getLegalDpd().orElse(Integer.MAX_VALUE);
+                    if (cat.getThresholdInDays() > dpd || cat.getThresholdInDays() < 0) {
                         continue;
                     }
                     registry.addCategory(d, cat);

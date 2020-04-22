@@ -49,6 +49,22 @@ class InvestmentImplTest {
             "\"instalmentPostponement\":false,\"insuranceHistory\":[],\"additionallyInsured\":false," +
             "\"loanInvestmentsCount\":68,\"loanAnnuity\":942.00,\"loanAmount\":40000.00,\"additionalAmount\":0.00}";
 
+    private static final String SOLD_INVESTMENT_JSON = "{\"id\":10232546,\"loanId\":193181,\"loanName\":\"SEN\"," +
+            "\"investmentDate\":null,\"amount\":200.00,\"firstAmount\":200.00,\"purchasePrice\":122.23," +
+            "\"interestRate\":0.049900,\"revenueRate\":0.0449,\"nickname\":\"zonky224808\",\"firstName\":null," +
+            "\"surname\":null,\"rating\":\"AAAA\",\"paid\":null,\"toPay\":null,\"nextPaymentDate\":null," +
+            "\"paymentStatus\":null,\"legalDpd\":null,\"amountDue\":null,\"loanTermInMonth\":60,\"paidInterest\":0" +
+            ".48,\"dueInterest\":0.00,\"paidPrincipal\":3.33,\"duePrincipal\":0.00,\"remainingPrincipal\":null," +
+            "\"paidPenalty\":0.00,\"smpSoldFor\":118.90,\"expectedInterest\":9.29,\"smpPrice\":null," +
+            "\"currentTerm\":60,\"canBeOffered\":false,\"onSmp\":false,\"insuranceStatus\":\"NOT_INSURED\"," +
+            "\"inWithdrawal\":false,\"smpRelated\":null,\"smpFeeExpirationDate\":null,\"investmentType\":\"N\"," +
+            "\"currency\":\"CZK\",\"loanHealthInfo\":null,\"loanHealthStats\":null,\"borrowerNo\":\"1000187368\"," +
+            "\"loanPublicIdentifier\":\"1610255\",\"hasCollectionHistory\":false,\"remainingMonths\":34," +
+            "\"status\":\"SOLD\",\"timeCreated\":null,\"activeFrom\":\"2020-03-14T17:08:46.159+01:00\"," +
+            "\"activeTo\":\"2020-04-07T17:51:30.330+02:00\",\"smpFee\":1.78,\"insuranceActive\":false," +
+            "\"instalmentPostponement\":false,\"insuranceHistory\":[],\"additionallyInsured\":false," +
+            "\"loanInvestmentsCount\":27,\"loanAnnuity\":3973.00,\"loanAmount\":210000.00,\"additionalAmount\":0.00}";
+
     @Test
     void deserialize() throws Exception {
         try (Jsonb jsonb = JsonbBuilder.create()) {
@@ -80,6 +96,22 @@ class InvestmentImplTest {
                     .isEqualTo(InsuranceStatus.NOT_INSURED);
                 softly.assertThat(investment.getStatus())
                     .isEqualTo(InvestmentStatus.ACTIVE);
+                softly.assertThat(investment.getLegalDpd()).hasValue(0);
+            });
+        }
+    }
+
+    @Test
+    void deserializeSold() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(SOLD_INVESTMENT_JSON, InvestmentImpl.class);
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                        .isEqualTo(10232546);
+                softly.assertThat(investment.getLoanId())
+                        .isEqualTo(193181);
+                softly.assertThat(investment.getLegalDpd())
+                        .isEmpty();
             });
         }
     }

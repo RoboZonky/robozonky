@@ -107,7 +107,7 @@ enum Category {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
         final LocalDate since = DateUtil.localNow()
             .toLocalDate()
-            .minusDays(investment.getLegalDpd());
+            .minusDays(investment.getLegalDpd().orElse(0));
         final int loanId = investment.getLoanId();
         final Loan loan = tenant.getLoan(loanId);
         final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since);
