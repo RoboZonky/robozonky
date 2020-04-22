@@ -89,7 +89,7 @@ class EmailHandlerTest extends AbstractMinimalRoboZonkyTest {
         assertThat(EMAIL.getReceivedMessages()).hasSize(originalMessages + 1);
         final MimeMessage m = EMAIL.getReceivedMessages()[originalMessages];
         assertThat(m.getSubject())
-            .isNotNull()
+            .isNotBlank()
             .isEqualTo(subject);
         assertThat(m.getFrom()[0].toString())
             .contains("user@seznam.cz")

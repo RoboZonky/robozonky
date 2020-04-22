@@ -30,6 +30,6 @@ class TargetTest {
             .map(Target::getId)
             .distinct())
                 .hasSize(Target.values().length)
-                .doesNotContainNull();
+                .contains("email");
     }
 }
