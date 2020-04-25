@@ -19,28 +19,45 @@ package com.github.robozonky.internal.state;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Stream;
+
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ini4j.Ini;
+
+import com.github.robozonky.internal.Defaults;
 
 class FileBackedStateStorage implements StateStorage {
 
     private static final Logger LOGGER = LogManager.getLogger(FileBackedStateStorage.class);
 
+    private final JsonbConfig jsonbConfig = new JsonbConfig().withFormatting(true);
     private final File stateLocation;
-    private final AtomicReference<Ini> state = new AtomicReference<>();
+    private final AtomicReference<Map<String, Map<String, String>>> state = new AtomicReference<>();
 
     public FileBackedStateStorage(final File file) {
         this.stateLocation = file;
     }
 
+    private <T> T applyJsonb(Function<Jsonb, T> operation) throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create(jsonbConfig)) {
+            return operation.apply(jsonb);
+        }
+    }
+
     synchronized void destroy() {
         try {
             Files.deleteIfExists(stateLocation.toPath());
+            LOGGER.debug("State destroyed.");
         } catch (final IOException ex) {
             LOGGER.debug("Failed deleting state file.", ex);
         } finally {
@@ -48,17 +65,30 @@ class FileBackedStateStorage implements StateStorage {
         }
     }
 
-    private synchronized Ini getState() {
+    private synchronized Map<String, Map<String, String>> getState() {
         if (state.get() == null) {
+            if (!stateLocation.exists()) {
+                state.set(new ConcurrentHashMap<>(0));
+                return state.get();
+            }
             try {
-                if (!stateLocation.exists()) {
-                    final boolean created = stateLocation.createNewFile();
-                    LOGGER.debug("Created state file '{}': {}.", stateLocation, created);
+                LOGGER.trace("Reading state: '{}'.", stateLocation.getAbsolutePath());
+                String json = new String(Files.readAllBytes(stateLocation.toPath()));
+                Map<String, Map<String, String>> deserialized = applyJsonb(jsonb -> jsonb.fromJson(json, Map.class));
+                state.set(new ConcurrentHashMap<>(deserialized));
+            } catch (final Exception ex) {
+                Path oldStateLocation = stateLocation.toPath();
+                Path corruptedStateLocation = Path.of(oldStateLocation.toAbsolutePath() + ".corrupted");
+                try {
+                    LOGGER.debug("State file corruption detected.", ex);
+                    Files.move(oldStateLocation, corruptedStateLocation);
+                    LOGGER.warn("Using clean state, old state moved to {}.",
+                            corruptedStateLocation.toAbsolutePath());
+                    return getState();
+                } catch (final IOException ex2) {
+                    throw new IllegalStateException(
+                            "State file corrupted and could not be fixed: " + oldStateLocation.toAbsolutePath(), ex2);
                 }
-                LOGGER.trace("Reading state: '{}'.", stateLocation);
-                state.set(new Ini(stateLocation));
-            } catch (final IOException ex) {
-                throw new IllegalStateException("Failed initializing state.", ex);
             }
         }
         return state.get();
@@ -74,9 +104,10 @@ class FileBackedStateStorage implements StateStorage {
     @Override
     public Optional<String> getValue(final String section, final String key) {
         if (this.containskey(section, key)) {
-            final String value = getState().get(section, key, String.class);
-            if (value.trim()
-                .length() == 0) {
+            final String value = getState().get(section)
+                .get(key)
+                .trim();
+            if (value.length() == 0) {
                 return Optional.empty();
             }
             return Optional.of(value);
@@ -87,7 +118,7 @@ class FileBackedStateStorage implements StateStorage {
 
     @Override
     public Stream<String> getKeys(final String section) {
-        final Ini internalState = getState();
+        var internalState = getState();
         if (internalState.containsKey(section)) {
             return internalState.get(section)
                 .keySet()
@@ -106,7 +137,8 @@ class FileBackedStateStorage implements StateStorage {
     @Override
     public void setValue(final String section, final String key, final String value) {
         LOGGER.trace("Setting '{}' in '{}' to '{}'.", key, section, value);
-        getState().put(section, key, value);
+        getState().computeIfAbsent(section, __ -> new ConcurrentHashMap<>(1))
+            .put(key, value);
     }
 
     @Override
@@ -129,11 +161,11 @@ class FileBackedStateStorage implements StateStorage {
     @Override
     public synchronized boolean store() {
         try {
-            this.getState()
-                .store(stateLocation);
-            LOGGER.debug("Stored state: '{}'.", stateLocation);
+            String json = applyJsonb(jsonb -> jsonb.toJson(this.getState()));
+            Files.write(stateLocation.toPath(), json.getBytes(Defaults.CHARSET));
+            LOGGER.debug("Stored state: '{}'.", stateLocation.getAbsolutePath());
             return true;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             LOGGER.warn("Failed storing state.", e);
             return false;
         }
