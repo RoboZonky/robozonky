@@ -18,13 +18,12 @@ package com.github.robozonky.internal.state;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
 import com.github.robozonky.internal.test.DateUtil;
 
 final class StateModifierImpl<T> implements StateModifier<T>,
-        Callable<Boolean> {
+        Runnable {
 
     private final Collection<BiConsumer<StateStorage, String>> actions = new ArrayList<>(0);
     private final InstanceStateImpl<T> instanceState;
@@ -50,12 +49,12 @@ final class StateModifierImpl<T> implements StateModifier<T>,
     }
 
     @Override
-    public Boolean call() {
+    public void run() {
         final String sectionName = instanceState.getSectionName();
         final StateStorage backend = instanceState.getStorage();
         actions.forEach(a -> a.accept(backend, sectionName));
         backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.offsetNow()
             .toString());
-        return backend.store();
+        backend.store();
     }
 }

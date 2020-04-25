@@ -35,7 +35,7 @@ final class InstanceStateImpl<T> implements InstanceState<T> {
 
     private void execute(final StateModifierImpl<T> modifier) {
         synchronized (parent) {
-            modifier.call();
+            modifier.run();
         }
     }
 

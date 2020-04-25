@@ -20,6 +20,9 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,12 +33,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.internal.Defaults;
+
 class FileBackedStateStorageTest {
 
     private static final Logger LOGGER = LogManager.getLogger(FileBackedStateStorageTest.class);
 
     private final File f = new File(UUID.randomUUID()
-        .toString());
+        .toString() + ".state");
     private final FileBackedStateStorage s = new FileBackedStateStorage(f);
 
     @Test
@@ -87,7 +92,31 @@ class FileBackedStateStorageTest {
     @BeforeEach
     void deleteState() {
         s.destroy();
-        LOGGER.info("State destroyed.");
+    }
+
+    @Nested
+    @DisplayName("When the JSON file is corrupted")
+    class CorruptionTesting {
+
+        private final Path corrupted = Path.of(f.getAbsolutePath() + ".corrupted");
+
+        @BeforeEach
+        void corruptStateFile() throws IOException {
+            Files.write(f.toPath(), "This is not a valid JSON.".getBytes(Defaults.CHARSET));
+        }
+
+        @Test
+        @DisplayName("check that corruption is detected and the file moved out of the way.")
+        void detectsAndFixesCorruption() {
+            assertThat(s.getSections()).isEmpty(); // New empty state is read.
+            assertThat(corrupted).exists(); // Old state file was moved to an old location.
+        }
+
+        @AfterEach
+        void deleteCorruptStateFile() throws IOException {
+            Files.deleteIfExists(corrupted);
+        }
+
     }
 
     @Nested
@@ -197,5 +226,24 @@ class FileBackedStateStorageTest {
                 });
             }
         }
+
+        @Nested
+        @DisplayName("when the file can not be written")
+        class ExceptionTesting {
+
+            @BeforeEach
+            void makeFileNotWritable() throws IOException {
+                Files.write(f.toPath(), "{}".getBytes(Defaults.CHARSET));
+                f.setReadOnly();
+            }
+
+            @Test
+            @DisplayName("storing catches and processes the exception.")
+            void handlesException() { // strings are not reused to ensure that this typical use case works
+                s.setValue("section", "key2", "value2");
+                assertThat(s.store()).isFalse();
+            }
+        }
+
     }
 }

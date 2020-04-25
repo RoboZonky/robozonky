@@ -49,6 +49,7 @@ class FileBackedStateStorage implements StateStorage {
     synchronized void destroy() {
         try {
             Files.deleteIfExists(stateLocation.toPath());
+            LOGGER.debug("State destroyed.");
         } catch (final IOException ex) {
             LOGGER.debug("Failed deleting state file.", ex);
         } finally {
@@ -62,7 +63,7 @@ class FileBackedStateStorage implements StateStorage {
                 state.set(new ConcurrentHashMap<>(0));
             } else {
                 try (Jsonb jsonb = JsonbBuilder.create()) {
-                    LOGGER.trace("Reading state: '{}'.", stateLocation);
+                    LOGGER.trace("Reading state: '{}'.", stateLocation.getAbsolutePath());
                     String json = new String(Files.readAllBytes(stateLocation.toPath()));
                     Map<String, Map<String, String>> deserialized = jsonb.fromJson(json, Map.class);
                     state.set(new ConcurrentHashMap<>(deserialized));
@@ -72,11 +73,12 @@ class FileBackedStateStorage implements StateStorage {
                     try {
                         LOGGER.debug("State file corruption detected.", ex);
                         Files.move(oldStateLocation, corruptedStateLocation);
-                        LOGGER.warn("Using clean state, old state moved to {}.", corruptedStateLocation);
+                        LOGGER.warn("Using clean state, old state moved to {}.",
+                                corruptedStateLocation.toAbsolutePath());
                         return getState();
                     } catch (final IOException ex2) {
                         throw new IllegalStateException(
-                                "State file corrupted and could not be fixed: " + oldStateLocation,
+                                "State file corrupted and could not be fixed: " + oldStateLocation.toAbsolutePath(),
                                 ex2);
                     }
                 }
@@ -156,7 +158,7 @@ class FileBackedStateStorage implements StateStorage {
         try (Jsonb jsonb = JsonbBuilder.create(config)) {
             String json = jsonb.toJson(this.getState());
             Files.write(stateLocation.toPath(), json.getBytes(Defaults.CHARSET));
-            LOGGER.debug("Stored state: '{}'.", stateLocation);
+            LOGGER.debug("Stored state: '{}'.", stateLocation.getAbsolutePath());
             return true;
         } catch (final Exception e) {
             LOGGER.warn("Failed storing state.", e);
