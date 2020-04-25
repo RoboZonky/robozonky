@@ -18,8 +18,6 @@ package com.github.robozonky.internal.state;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -64,14 +62,9 @@ class FileBackedStateStorage implements StateStorage {
                 state.set(new ConcurrentHashMap<>(0));
             } else {
                 try (Jsonb jsonb = JsonbBuilder.create()) {
-                    // Figure out the generic type of the state container.
-                    ParameterizedType containerType = (ParameterizedType) getClass().getDeclaredField("state")
-                        .getGenericType();
-                    Type mapType = containerType.getActualTypeArguments()[0];
                     LOGGER.trace("Reading state: '{}'.", stateLocation);
-                    // Read the state JSON file.
                     String json = new String(Files.readAllBytes(stateLocation.toPath()));
-                    Map<String, Map<String, String>> deserialized = jsonb.fromJson(json, mapType);
+                    Map<String, Map<String, String>> deserialized = jsonb.fromJson(json, Map.class);
                     state.set(new ConcurrentHashMap<>(deserialized));
                 } catch (final Exception ex) {
                     Path oldStateLocation = stateLocation.toPath();
