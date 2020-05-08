@@ -42,9 +42,23 @@ class RequestCounterImplTest {
     void marking() {
         DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
         final RequestCounter counter = new RequestCounterImpl();
-        assertThat(counter.count()).isEqualTo(0);
-        assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
+        assertSoftly(softly -> {
+            softly.assertThat(counter.count())
+                .isEqualTo(0);
+            softly.assertThat(counter.count(Duration.ZERO))
+                .isEqualTo(0);
+            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+                .isFalse();
+        });
         counter.mark();
+        assertSoftly(softly -> {
+            softly.assertThat(counter.count())
+                .isEqualTo(1);
+            softly.assertThat(counter.count(Duration.ZERO))
+                .isEqualTo(1);
+            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+                .isFalse();
+        });
         DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONE_ID));
         counter.mark();
         assertSoftly(softly -> {
@@ -54,12 +68,11 @@ class RequestCounterImplTest {
                 .isEqualTo(2);
             softly.assertThat(counter.count(Duration.ZERO))
                 .isEqualTo(1);
+            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+                .isTrue();
         });
         counter.keepOnly(Duration.ZERO); // clear everything
-        assertSoftly(softly -> {
-            softly.assertThat(counter.count())
-                .isEqualTo(1);
-        });
+        assertThat(counter.count()).isEqualTo(1);
         counter.cut(1);
         assertThat(counter.count()).isEqualTo(0);
     }

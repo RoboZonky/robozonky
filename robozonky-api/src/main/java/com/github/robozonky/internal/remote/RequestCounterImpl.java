@@ -30,7 +30,7 @@ final class RequestCounterImpl implements RequestCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(RequestCounterImpl.class);
 
-    private SortedSet<Instant> requests = new ConcurrentSkipListSet<>();
+    private final SortedSet<Instant> requests = new ConcurrentSkipListSet<>();
 
     @Override
     public void mark() {
@@ -75,6 +75,6 @@ final class RequestCounterImpl implements RequestCounter {
         LOGGER.trace("Resetting to within the last interval: {}.", interval);
         var threshold = DateUtil.now()
             .minus(interval);
-        requests = requests.tailSet(threshold);
+        requests.removeIf(current -> current.isBefore(threshold));
     }
 }
