@@ -44,12 +44,10 @@ class RequestCounterImplTest {
         final RequestCounter counter = new RequestCounterImpl();
         assertThat(counter.count()).isEqualTo(0);
         assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
-        assertThat(counter.mark()).isEqualTo(0);
+        counter.mark();
         DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONE_ID));
-        assertThat(counter.mark()).isEqualTo(1);
+        counter.mark();
         assertSoftly(softly -> {
-            softly.assertThat(counter.current())
-                .isEqualTo(1);
             softly.assertThat(counter.count())
                 .isEqualTo(2);
             softly.assertThat(counter.count(Duration.ofMinutes(1)))
@@ -59,8 +57,6 @@ class RequestCounterImplTest {
         });
         counter.keepOnly(Duration.ZERO); // clear everything
         assertSoftly(softly -> {
-            softly.assertThat(counter.mark())
-                .isEqualTo(2); // id still continues where it started
             softly.assertThat(counter.count())
                 .isEqualTo(1);
         });

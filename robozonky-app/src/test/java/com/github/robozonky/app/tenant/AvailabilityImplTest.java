@@ -128,7 +128,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         assertThat(a.isAvailable()).isFalse();
         // move time and increase the request counter
         setClock(Clock.fixed(now.plus(Duration.ofMinutes(2)), Defaults.ZONE_ID));
-        when(counter.current()).thenReturn(2L);
+        when(counter.hasMoreRecent(notNull())).thenReturn(true);
         assertThat(a.registerSuccess()).contains(now);
         assertThat(a.isAvailable()).isTrue();
     }

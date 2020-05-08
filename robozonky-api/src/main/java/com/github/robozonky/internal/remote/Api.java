@@ -54,12 +54,6 @@ class Api<T> {
         }
     }
 
-    private static String assembleLogMessage(final long id, final RequestCounter counter) {
-        final int count1 = counter.count(ONE_MINUTE);
-        final int count5 = counter.count(FIVE_MINUTES);
-        return "... done. (Request #" + id + ", " + count1 + " in last 60 sec., " + count5 + " in last 5 min.)";
-    }
-
     private static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter,
             final int attemptNo) {
         LOGGER.trace("Executing...");
@@ -75,8 +69,9 @@ class Api<T> {
             return call(function, proxy, counter, attemptNo + 1);
         } finally {
             if (counter != null) {
-                final long id = counter.mark();
-                LOGGER.trace(() -> assembleLogMessage(id, counter));
+                counter.mark();
+                LOGGER.trace("... done. (Request counts: {} in last 60 sec., {} in last 5 min.)",
+                        () -> counter.count(ONE_MINUTE), () -> counter.count(FIVE_MINUTES));
             } else {
                 LOGGER.trace("... done. (Not counting towards the API quota.)");
             }
