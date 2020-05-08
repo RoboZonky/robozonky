@@ -18,10 +18,9 @@ package com.github.robozonky.internal.remote;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.SortedMap;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,55 +31,54 @@ final class RequestCounterImpl implements RequestCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(RequestCounterImpl.class);
 
-    private final AtomicLong counter = new AtomicLong();
-    private final AtomicReference<SortedMap<Instant, Long>> requests = new AtomicReference<>(
-            new ConcurrentSkipListMap<>());
+    private SortedSet<Instant> requests = new ConcurrentSkipListSet<>();
 
     @Override
-    public long mark() {
-        final long id = counter.getAndIncrement();
-        requests.get()
-            .put(DateUtil.now(), id);
-        return id;
+    public void mark() {
+        requests.add(DateUtil.now());
     }
 
     @Override
-    public long current() {
-        final SortedMap<Instant, Long> actual = requests.get();
-        return actual.get(actual.lastKey());
+    public boolean hasMoreRecent(final Instant request) {
+        var thisRequestOrNewer = requests.tailSet(request);
+        if (thisRequestOrNewer.isEmpty()) {
+            return false;
+        } else if (thisRequestOrNewer.size() == 1) {
+            return !thisRequestOrNewer.contains(request);
+        } else {
+            return true;
+        }
     }
 
     @Override
     public int count() {
-        return requests.get()
-            .size();
+        return requests.size();
     }
 
     @Override
     public int count(final Duration interval) {
-        final Instant threshold = DateUtil.now()
+        var threshold = DateUtil.now()
             .minus(interval);
-        return requests.get()
-            .tailMap(threshold)
+        return requests.tailSet(threshold)
             .size();
     }
 
     @Override
     public void cut(final int count) {
-        final SortedMap<Instant, Long> actualRequests = requests.get();
-        actualRequests.keySet()
-            .stream()
+        LOGGER.trace("Requesting to remove {} requests.", count);
+        var removed = requests.stream()
+            .flatMap(i -> requests.remove(i) ? Stream.of(i) : Stream.empty())
             .limit(count)
-            .forEach(actualRequests::remove);
-        LOGGER.trace("Removed {} request(s), new total is {}.", count, count());
+            .count();
+        LOGGER.trace("Removed {} request(s), new total is {}.", () -> removed, this::count);
     }
 
     @Override
     public void keepOnly(final Duration interval) {
-        LOGGER.trace("Resetting within the last interval: {}.", interval);
-        final Instant threshold = DateUtil.now()
+        LOGGER.trace("Resetting to within the last interval: {}.", interval);
+        var threshold = DateUtil.now()
             .minus(interval);
-        requests.set(requests.get()
-            .tailMap(threshold));
+        // Copy the tail set into a new collection, preventing leaking of the stale data.
+        requests = new ConcurrentSkipListSet<>(requests.tailSet(threshold));
     }
 }

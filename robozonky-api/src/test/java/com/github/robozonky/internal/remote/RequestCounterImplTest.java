@@ -42,28 +42,37 @@ class RequestCounterImplTest {
     void marking() {
         DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
         final RequestCounter counter = new RequestCounterImpl();
-        assertThat(counter.count()).isEqualTo(0);
-        assertThat(counter.count(Duration.ZERO)).isEqualTo(0);
-        assertThat(counter.mark()).isEqualTo(0);
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONE_ID));
-        assertThat(counter.mark()).isEqualTo(1);
         assertSoftly(softly -> {
-            softly.assertThat(counter.current())
+            softly.assertThat(counter.count())
+                .isEqualTo(0);
+            softly.assertThat(counter.count(Duration.ZERO))
+                .isEqualTo(0);
+            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+                .isFalse();
+        });
+        counter.mark();
+        assertSoftly(softly -> {
+            softly.assertThat(counter.count())
                 .isEqualTo(1);
+            softly.assertThat(counter.count(Duration.ZERO))
+                .isEqualTo(1);
+            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+                .isFalse();
+        });
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONE_ID));
+        counter.mark();
+        assertSoftly(softly -> {
             softly.assertThat(counter.count())
                 .isEqualTo(2);
             softly.assertThat(counter.count(Duration.ofMinutes(1)))
                 .isEqualTo(2);
             softly.assertThat(counter.count(Duration.ZERO))
                 .isEqualTo(1);
+            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+                .isTrue();
         });
         counter.keepOnly(Duration.ZERO); // clear everything
-        assertSoftly(softly -> {
-            softly.assertThat(counter.mark())
-                .isEqualTo(2); // id still continues where it started
-            softly.assertThat(counter.count())
-                .isEqualTo(1);
-        });
+        assertThat(counter.count()).isEqualTo(1);
         counter.cut(1);
         assertThat(counter.count()).isEqualTo(0);
     }
