@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.internal.util.functional.Either;
+
 public final class FileUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(FileUtil.class);
@@ -49,15 +51,15 @@ public final class FileUtil {
             .endsWith(".jar");
     }
 
-    public static Optional<File> findFolder(final String folderName) {
+    public static Either<Exception, Optional<File>> findFolder(final String folderName) {
         final Path root = new File(System.getProperty("user.dir")).toPath();
         try (var folders = Files.find(root, 1, (path, attr) -> attr.isDirectory())) {
-            return folders.map(Path::toFile)
+            return Either.right(folders.map(Path::toFile)
                 .filter(f -> Objects.equals(f.getName(), folderName))
-                .findFirst();
+                .findFirst());
         } catch (Exception ex) {
             LOGGER.warn("Exception while walking file tree.", ex);
-            return Optional.empty();
+            return Either.left(ex);
         }
     }
 

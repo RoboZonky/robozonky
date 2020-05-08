@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
@@ -53,6 +54,7 @@ enum ExtensionsManager {
 
     ClassLoader retrieveExtensionClassLoader(final String folderName) {
         return FileUtil.findFolder(folderName)
+            .getOrElse(Optional.empty())
             .map(this::retrieveExtensionClassLoader)
             .orElseGet(() -> {
                 logger.debug("Extensions folder not found.");

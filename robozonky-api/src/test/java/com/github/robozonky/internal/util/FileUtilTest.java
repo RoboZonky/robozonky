@@ -46,11 +46,20 @@ class FileUtilTest {
         }
     }
 
+    private static File createTempFile() throws IOException {
+        Path path = Files.createTempFile("robozonky-", ".tmp");
+        File file = path.toFile();
+        file.setWritable(false, false);
+        file.setReadable(false, false);
+        file.setExecutable(false, false);
+        return file;
+    }
+
     @DisabledOnOs(OS.WINDOWS)
     @Test
     void permissions() throws IOException {
-        Path path = Files.createTempFile("robozonky-", ".tmp");
-        File file = path.toFile();
+        File file = createTempFile();
+        Path path = file.toPath();
         boolean result = FileUtil.configurePermissions(file, true);
         assertSoftly(softly -> {
             softly.assertThat(path.toFile())
@@ -105,43 +114,54 @@ class FileUtilTest {
 
     @Test
     void lookupExistingFolder() {
-        assertThat(FileUtil.findFolder("target")).isPresent();
+        assertThat(FileUtil.findFolder("target")
+            .get()).isPresent();
     }
 
     @Test
     void lookupNonExistentFolder() {
         assertThat(FileUtil.findFolder(UUID.randomUUID()
-            .toString())).isEmpty();
+            .toString())
+            .get()).isEmpty();
     }
 
     @Test
     void lookupExistingFolderIncludingNonWritableFolder() {
         SOME_DIR.mkdir();
         SOME_DIR.setReadable(false);
-        assertThat(FileUtil.findFolder(UUID.randomUUID()
-            .toString())).isEmpty();
+        String folderName = UUID.randomUUID()
+            .toString();
+        assertThat(FileUtil.findFolder(folderName)
+            .isRight()).isTrue();
+        assertThat(FileUtil.findFolder(folderName)
+            .get()).isEmpty();
     }
 
     @Test
     void lookupNonExistentFolderIncludingNonWritableFolder() {
         SOME_DIR.mkdir();
         SOME_DIR.setReadable(false);
-        assertThat(FileUtil.findFolder("target")).isPresent();
+        assertThat(FileUtil.findFolder("target")
+            .isRight()).isTrue();
+        assertThat(FileUtil.findFolder("target")
+            .get()).isPresent();
     }
 
     @Test
     void lookupSomethingPureWrong() {
         final String old = System.getProperty("user.dir");
-        System.setProperty("user.dir", UUID.randomUUID()
-            .toString());
-        assertThat(FileUtil.findFolder(UUID.randomUUID()
-            .toString())).isEmpty();
+        String folderName = UUID.randomUUID()
+            .toString();
+        System.setProperty("user.dir", folderName);
+        assertThat(FileUtil.findFolder(folderName)
+            .isLeft()).isTrue();
         System.setProperty("user.dir", old);
     }
 
     @Test
     void lookupExistingFileAsFolder() {
-        assertThat(FileUtil.findFolder("pom.xml")).isEmpty();
+        assertThat(FileUtil.findFolder("pom.xml")
+            .get()).isEmpty();
     }
 
     @Test
