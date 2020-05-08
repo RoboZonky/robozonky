@@ -18,7 +18,6 @@ package com.github.robozonky.internal.remote;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -52,14 +51,11 @@ final class RequestCounterImpl implements RequestCounter {
 
     @Override
     public int count() {
-        return count(Duration.ZERO);
+        return requests.size();
     }
 
     @Override
     public int count(final Duration interval) {
-        if (Objects.equals(interval, Duration.ZERO)) {
-            return requests.size();
-        }
         var threshold = DateUtil.now()
             .minus(interval);
         return requests.tailSet(threshold)
