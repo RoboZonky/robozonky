@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,10 +65,12 @@ final class RequestCounterImpl implements RequestCounter {
 
     @Override
     public void cut(final int count) {
-        requests.stream()
+        LOGGER.trace("Requesting to remove {} requests.", count);
+        var removed = requests.stream()
+            .flatMap(i -> requests.remove(i) ? Stream.of(i) : Stream.empty())
             .limit(count)
-            .forEach(requests::remove);
-        LOGGER.trace("Removed {} request(s), new total is {}.", count, count());
+            .count();
+        LOGGER.trace("Removed {} request(s), new total is {}.", () -> removed, this::count);
     }
 
     @Override
