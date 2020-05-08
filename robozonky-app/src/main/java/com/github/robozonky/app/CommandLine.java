@@ -63,7 +63,7 @@ public class CommandLine implements Callable<Optional<Function<Lifecycle, Invest
             "--dry" }, description = "RoboZonky will simulate investments, but never actually spend money.")
     private boolean dryRunEnabled = false;
     @Option(names = { "-g",
-            "--guarded" }, description = "Path to secure storage file that contains username, password etc.", required = true)
+            "--guarded" }, description = "Path to secure storage file that contains various secrets.", required = true)
     private File keystore = null;
 
     public CommandLine() {
