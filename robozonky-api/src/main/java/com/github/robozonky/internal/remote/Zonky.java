@@ -57,7 +57,7 @@ import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
 import com.github.robozonky.internal.remote.entities.ResolutionRequest;
 import com.github.robozonky.internal.remote.entities.Resolutions;
 import com.github.robozonky.internal.remote.entities.SellRequest;
-import com.github.rutledgepaulv.pagingstreams.PagingStreams;
+import com.github.robozonky.internal.util.stream.PagingStreams;
 
 /**
  * Represents an instance of Zonky API that is fully authenticated and ready to perform operations on behalf of the
@@ -99,9 +99,7 @@ public class Zonky {
             final Function<S, List<T>> function,
             final Select select) {
         var pageSize = Settings.INSTANCE.getDefaultApiPageSize();
-        return PagingStreams.streamBuilder(new EntityCollectionPageSource<>(api, function, select, pageSize))
-            .pageSize(pageSize)
-            .build()
+        return PagingStreams.build(new EntityCollectionPageSource<>(api, function, select, pageSize))
             .map(x -> x);
     }
 

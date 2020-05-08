@@ -240,11 +240,6 @@
         <version>${version.org.codehaus.izpack}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.rutledgepaulv</groupId>
-        <artifactId>paging-streams</artifactId>
-        <version>0.8</version>
-      </dependency>
-      <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
         <version>${version.org.antlr}</version>

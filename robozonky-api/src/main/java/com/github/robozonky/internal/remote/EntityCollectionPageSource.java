@@ -23,7 +23,7 @@ import java.util.function.LongConsumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.rutledgepaulv.pagingstreams.PageSource;
+import com.github.robozonky.internal.util.stream.PageSource;
 
 class EntityCollectionPageSource<T, S> implements PageSource<T> {
 
