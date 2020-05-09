@@ -711,7 +711,7 @@
               </filter>
             </filters>
             <transformers>
-              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
               <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                 <manifestEntries>
                   <Main-Class>${com.github.robozonky.distribution.main}</Main-Class>
@@ -720,6 +720,11 @@
               </transformer>
             </transformers>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.7.0.1746</version>
         </plugin>
       </plugins>
     </pluginManagement>
