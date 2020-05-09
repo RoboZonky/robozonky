@@ -84,7 +84,8 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
         try {
             var url = hostname + "/solrsearch/select?q=g:%22" + groupId + "%22+AND+a:%22" + artifactId
                     + "%22&core=gav&rows=100&wt=json";
-            return UrlUtil.open(new URL(url));
+            return UrlUtil.open(new URL(url))
+                .getInputStream();
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }

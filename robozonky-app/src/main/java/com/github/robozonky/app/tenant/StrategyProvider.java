@@ -60,7 +60,8 @@ class StrategyProvider implements ReloadListener<String> {
     }
 
     private static String readStrategy(final String strategyLocation) {
-        try (var inputStream = UrlUtil.open(UrlUtil.toURL(strategyLocation))) {
+        try (var inputStream = UrlUtil.open(UrlUtil.toURL(strategyLocation))
+            .getInputStream()) {
             return StringUtil.toString(inputStream);
         } catch (Exception ex) {
             LOGGER.error("Failed reading strategy source.", ex);

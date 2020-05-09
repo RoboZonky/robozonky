@@ -58,7 +58,8 @@ public final class NotificationListenerService implements ListenerService {
 
     private static String retrieve(final URL source) {
         LOGGER.debug("Reading notification configuration from '{}'.", source);
-        try (var reader = new BufferedReader(new InputStreamReader(UrlUtil.open(source), CHARSET))) {
+        try (var reader = new BufferedReader(new InputStreamReader(UrlUtil.open(source)
+            .getInputStream(), CHARSET))) {
             return reader.lines()
                 .collect(Collectors.joining(System.lineSeparator()));
         } catch (Exception ex) {

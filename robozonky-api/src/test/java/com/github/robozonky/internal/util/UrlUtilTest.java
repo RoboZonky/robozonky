@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,16 @@
 
 package com.github.robozonky.internal.util;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.Settings;
 
 class UrlUtilTest {
 
@@ -40,15 +42,16 @@ class UrlUtilTest {
     }
 
     @Test
-    void openWrongUrl() {
-        assertThatThrownBy(() -> UrlUtil.open(new URL("http://" + UUID.randomUUID()))).isInstanceOf(IOException.class);
-    }
-
-    @Test
     void openCorrectUrl() throws IOException {
-        try (final InputStream s = UrlUtil.open(new URL("http://www.google.com"))) {
-            assertThat(s).isNotNull();
-        }
+        var connection = UrlUtil.open(new URL("http://www.google.com"));
+        assertSoftly(softly -> {
+            softly.assertThat(connection.getReadTimeout())
+                .isEqualTo(Settings.INSTANCE.getSocketTimeout()
+                    .toMillis());
+            softly.assertThat(connection.getConnectTimeout())
+                .isEqualTo(Settings.INSTANCE.getConnectionTimeout()
+                    .toMillis());
+        });
     }
 
 }

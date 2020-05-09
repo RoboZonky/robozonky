@@ -18,7 +18,6 @@ package com.github.robozonky.internal.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -53,13 +52,13 @@ public final class UrlUtil {
         }
     }
 
-    public static InputStream open(final URL url) throws IOException {
+    public static URLConnection open(final URL url) throws IOException {
         LOGGER.trace("Opening {}.", url);
         final URLConnection con = url.openConnection();
         con.setConnectTimeout((int) Settings.INSTANCE.getConnectionTimeout()
             .toMillis());
         con.setReadTimeout((int) Settings.INSTANCE.getSocketTimeout()
             .toMillis());
-        return con.getInputStream();
+        return con;
     }
 }

@@ -64,7 +64,8 @@ public final class StrategyValidationFeature extends AbstractFeature {
 
     @Override
     public void setup() throws SetupFailedException {
-        try (var inputStream = new BufferedInputStream(UrlUtil.open(location))) {
+        try (var inputStream = new BufferedInputStream(UrlUtil.open(location)
+            .getInputStream())) {
             text = StringUtil.toString(inputStream);
         } catch (Exception ex) {
             throw new SetupFailedException(ex);
