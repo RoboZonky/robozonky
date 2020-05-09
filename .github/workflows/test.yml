@@ -24,7 +24,7 @@ jobs:
     - name: Test all modules incl. PITest and JaCoCo
       run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
     - name: Trigger SonarCloud
-      run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky
+      run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky -Dsonar.java.source=11
   quick:
     name: Cross-platform sanity check
     strategy:
