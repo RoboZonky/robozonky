@@ -16,6 +16,7 @@
 
 package com.github.robozonky.internal;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.util.UUID;
@@ -28,6 +29,28 @@ import com.github.robozonky.internal.remote.entities.ConsentsImpl;
 import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 
 class SessionInfoImplTest {
+
+    @Test
+    void restrictionsFail() {
+        var sessionInfo = new SessionInfoImpl(() -> {
+            throw new NullPointerException();
+        }, () -> {
+            throw new NullPointerException();
+        }, "someone@somewhere.cz", "Something", false);
+        assertThatThrownBy(sessionInfo::canAccessSmp)
+            .isInstanceOf(IllegalStateException.class)
+            .hasCauseInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void restrictionsOkConsentsFail() {
+        var sessionInfo = new SessionInfoImpl(() -> {
+            throw new NullPointerException();
+        }, () -> new RestrictionsImpl(true), "someone@somewhere.cz", "Something", false);
+        assertThatThrownBy(sessionInfo::canAccessSmp)
+            .isInstanceOf(IllegalStateException.class)
+            .hasCauseInstanceOf(NullPointerException.class);
+    }
 
     @Test
     void constructorDryRun() {

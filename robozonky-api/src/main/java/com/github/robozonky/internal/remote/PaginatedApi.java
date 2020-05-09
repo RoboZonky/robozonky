@@ -51,10 +51,6 @@ class PaginatedApi<S, T> {
         this.counter = counter;
     }
 
-    public String getSortString() {
-        return sortString;
-    }
-
     public void setSortString(final String sortString) {
         this.sortString = sortString;
     }
