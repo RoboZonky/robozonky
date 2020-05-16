@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 /**
  * Individual condition that may then be aggregated within {@link MarketplaceFilter}.

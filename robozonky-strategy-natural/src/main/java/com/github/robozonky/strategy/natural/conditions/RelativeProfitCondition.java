@@ -21,7 +21,7 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.minus;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class RelativeProfitCondition extends AbstractRelativeRangeCondition {
 

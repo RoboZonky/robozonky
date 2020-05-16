@@ -16,12 +16,12 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import static org.mockito.Mockito.*;
+
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.enums.LoanHealth;
-import com.github.robozonky.strategy.natural.Wrapper;
-
-import static org.mockito.Mockito.*;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class HealthConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<LoanHealth> {
 

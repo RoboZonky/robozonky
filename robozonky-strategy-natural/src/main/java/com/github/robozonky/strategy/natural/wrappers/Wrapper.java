@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -81,7 +81,7 @@ public interface Wrapper<T> {
 
     OptionalInt getCurrentDpd();
 
-    OptionalInt getMaxDpd();
+    OptionalInt getLongestDpd();
 
     OptionalInt getDaysSinceDpd();
 

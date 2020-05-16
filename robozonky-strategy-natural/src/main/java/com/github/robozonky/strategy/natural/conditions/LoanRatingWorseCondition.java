@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.util.Optional;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class LoanRatingWorseCondition extends MarketplaceFilterConditionImpl {
 

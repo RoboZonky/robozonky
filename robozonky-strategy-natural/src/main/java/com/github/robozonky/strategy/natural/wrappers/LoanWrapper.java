@@ -14,95 +14,95 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
 
-final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
+final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
 
-    private final Reservation reservation;
+    private final Loan loan;
 
-    public ReservationWrapper(final ReservationDescriptor original, final PortfolioOverview portfolioOverview) {
+    public LoanWrapper(final LoanDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
-        this.reservation = original.item();
+        this.loan = original.item();
     }
 
     @Override
     public long getId() {
-        return reservation.getId();
+        return loan.getId();
     }
 
     @Override
     public boolean isInsuranceActive() {
-        return reservation.isInsuranceActive();
+        return loan.isInsuranceActive();
     }
 
     @Override
     public Region getRegion() {
-        return reservation.getRegion();
+        return loan.getRegion();
     }
 
     @Override
     public String getStory() {
-        return reservation.getStory();
+        return loan.getStory();
     }
 
     @Override
     public MainIncomeType getMainIncomeType() {
-        return reservation.getMainIncomeType();
+        return loan.getMainIncomeType();
     }
 
     @Override
     public Ratio getInterestRate() {
-        return reservation.getInterestRate();
+        return loan.getInterestRate();
     }
 
     @Override
     public Ratio getRevenueRate() {
-        return reservation.getRevenueRate()
+        return loan.getRevenueRate()
             .orElseGet(this::estimateRevenueRate);
     }
 
     @Override
     public Purpose getPurpose() {
-        return reservation.getPurpose();
+        return loan.getPurpose();
     }
 
     @Override
     public Rating getRating() {
-        return reservation.getRating();
+        return loan.getRating();
     }
 
     @Override
     public int getOriginalTermInMonths() {
-        return reservation.getTermInMonths();
+        return loan.getTermInMonths();
     }
 
     @Override
     public int getRemainingTermInMonths() {
-        return reservation.getTermInMonths();
+        return loan.getTermInMonths();
     }
 
     @Override
     public int getOriginalAmount() {
-        return reservation.getAmount()
+        return loan.getAmount()
             .getValue()
             .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return reservation.getAnnuity()
+        return loan.getAnnuity()
             .getValue()
             .intValue();
     }
@@ -113,7 +113,7 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
     }
 
     @Override
-    public OptionalInt getMaxDpd() {
+    public OptionalInt getLongestDpd() {
         return OptionalInt.empty();
     }
 
@@ -129,6 +129,6 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
 
     @Override
     public String toString() {
-        return "Wrapper for reservation #" + getId();
+        return "Wrapper for loan #" + getId();
     }
 }

@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class LoanTermCondition extends AbstractRangeCondition<Integer> {
 

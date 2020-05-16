@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 

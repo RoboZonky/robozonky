@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -110,7 +110,7 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     }
 
     @Override
-    public OptionalInt getMaxDpd() {
+    public OptionalInt getLongestDpd() {
         return OptionalInt.of(detail.get()
             .map(d -> d.getLoanHealthStats()
                 .getLongestDaysDue())

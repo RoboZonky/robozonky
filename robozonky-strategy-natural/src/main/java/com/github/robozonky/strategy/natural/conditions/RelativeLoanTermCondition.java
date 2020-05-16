@@ -17,7 +17,7 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class RelativeLoanTermCondition extends AbstractRelativeRangeCondition {
 

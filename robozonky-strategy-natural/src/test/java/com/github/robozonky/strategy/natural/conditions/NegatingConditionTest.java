@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class NegatingConditionTest {

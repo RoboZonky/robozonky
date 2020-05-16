@@ -19,41 +19,43 @@ package com.github.robozonky.strategy.natural.conditions;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.OptionalInt;
+
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
-class LoanTermConditionTest {
+class DaysSinceLastPastDueConditionTest {
 
     @Test
     void lessThan() {
-        final MarketplaceFilterCondition condition = LoanTermCondition.lessThan(1);
+        final MarketplaceFilterCondition condition = DaysSinceLastPastDueCondition.lessThan(1);
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getRemainingTermInMonths()).thenReturn(0);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(0));
         assertThat(condition).accepts(w);
-        when(w.getRemainingTermInMonths()).thenReturn(1);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(1));
         assertThat(condition).rejects(w);
     }
 
     @Test
     void moreThan() {
-        final MarketplaceFilterCondition condition = LoanTermCondition.moreThan(0);
+        final MarketplaceFilterCondition condition = DaysSinceLastPastDueCondition.moreThan(0);
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getRemainingTermInMonths()).thenReturn(0);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(0));
         assertThat(condition).rejects(w);
-        when(w.getRemainingTermInMonths()).thenReturn(1);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(1));
         assertThat(condition).accepts(w);
     }
 
     @Test
     void exact() {
-        final MarketplaceFilterCondition condition = LoanTermCondition.exact(0, 1);
+        final MarketplaceFilterCondition condition = DaysSinceLastPastDueCondition.exact(0, 1);
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getRemainingTermInMonths()).thenReturn(0);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(0));
         assertThat(condition).accepts(w);
-        when(w.getRemainingTermInMonths()).thenReturn(1);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(1));
         assertThat(condition).accepts(w);
-        when(w.getRemainingTermInMonths()).thenReturn(2);
+        when(w.getDaysSinceDpd()).thenReturn(OptionalInt.of(2));
         assertThat(condition).rejects(w);
     }
 }

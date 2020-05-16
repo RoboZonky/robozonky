@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -182,7 +182,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
-    public OptionalInt getMaxDpd() {
+    public OptionalInt getLongestDpd() {
         var maxDpd = investment.getLegalDpd()
             .orElseGet(() -> sellInfo.get()
                 .map(si -> si.getLoanHealthStats()

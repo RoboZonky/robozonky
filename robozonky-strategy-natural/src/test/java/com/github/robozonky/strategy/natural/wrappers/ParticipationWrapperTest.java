@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -73,6 +73,8 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             .getRating();
         doReturn(loan.getMainIncomeType()).when(p)
             .getIncomeType();
+        doReturn(loan.isInsuranceActive()).when(p)
+            .isInsuranceActive();
         return p;
     }
 
@@ -109,6 +111,8 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             .getRating();
         doReturn(loan.getMainIncomeType()).when(participation)
             .getIncomeType();
+        doReturn(true).when(participation)
+            .isInsuranceActive();
         final ParticipationDescriptor pd = new ParticipationDescriptor(participation, () -> loan);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd, FOLIO);
         assertSoftly(softly -> {
@@ -161,6 +165,12 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
                 .isEqualTo(loan.getAnnuity()
                     .getValue()
                     .intValue());
+            softly.assertThat(w.getCurrentDpd())
+                .hasValue(0);
+            softly.assertThat(w.getLongestDpd())
+                .hasValue(0);
+            softly.assertThat(w.getDaysSinceDpd())
+                .hasValue(0);
         });
     }
 
@@ -168,6 +178,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
     void fromParticipationWithoutRevenueRate() {
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setRating, Rating.C)
+            .set(LoanImpl::setInsuranceActive, false)
             .build();
         final int invested = 200;
         final Participation p = mock(ParticipationImpl.class);
@@ -177,6 +188,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(new ParticipationDescriptor(p, () -> loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
         assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("11.49"));
+        assertThat(w.isInsuranceActive()).isFalse();
     }
 
     @Test
