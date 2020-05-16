@@ -22,7 +22,7 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 public class RelativeElapsedLoanTermCondition extends AbstractRelativeRangeCondition {
 
     private RelativeElapsedLoanTermCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+        super(condition, false);
     }
 
     private static int getElapsedTerm(final Wrapper<?> w) {

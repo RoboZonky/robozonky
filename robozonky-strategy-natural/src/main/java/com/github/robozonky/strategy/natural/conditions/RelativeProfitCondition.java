@@ -26,7 +26,7 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 public class RelativeProfitCondition extends AbstractRelativeRangeCondition {
 
     private RelativeProfitCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+        super(condition, true);
     }
 
     private static BigDecimal getProfit(final Wrapper<?> w) {

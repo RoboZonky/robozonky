@@ -22,7 +22,7 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 public final class LoanInterestRateCondition extends AbstractRangeCondition<Ratio> {
 
     private LoanInterestRateCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+        super(condition, false);
     }
 
     public static LoanInterestRateCondition lessThan(final Ratio threshold) {

@@ -31,10 +31,6 @@ abstract class AbstractRangeCondition<T extends Number & Comparable<T>> extends 
     protected static final Domain<Ratio> RATE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, null);
     private final RangeCondition<T> rangeCondition;
 
-    protected AbstractRangeCondition(final RangeCondition<T> condition) {
-        this(condition, false);
-    }
-
     protected AbstractRangeCondition(final RangeCondition<T> condition, final boolean mayRequireRemoteRequests) {
         super(mayRequireRemoteRequests);
         this.rangeCondition = condition;

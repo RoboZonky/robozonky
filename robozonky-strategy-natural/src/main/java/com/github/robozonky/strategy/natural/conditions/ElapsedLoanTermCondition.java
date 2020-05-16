@@ -21,7 +21,7 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 public final class ElapsedLoanTermCondition extends AbstractRangeCondition<Integer> {
 
     private ElapsedLoanTermCondition(final RangeCondition<Integer> condition) {
-        super(condition);
+        super(condition, false);
     }
 
     private static int getElapsedTerm(final Wrapper<?> w) {

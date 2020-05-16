@@ -28,10 +28,6 @@ class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl impl
     private final Function<Wrapper<?>, T> fieldRetriever;
     private final Collection<T> possibleValues = new HashSet<>(0);
 
-    protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever) {
-        this(fieldRetriever, false);
-    }
-
     protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever,
             final boolean mayRequireRemoteRequests) {
         super(mayRequireRemoteRequests);

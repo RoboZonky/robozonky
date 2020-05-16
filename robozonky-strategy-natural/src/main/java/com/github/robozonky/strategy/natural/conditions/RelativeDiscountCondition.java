@@ -24,7 +24,7 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
 
     private RelativeDiscountCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+        super(condition, true);
     }
 
     private static BigDecimal getDiscount(final Wrapper<?> w) {

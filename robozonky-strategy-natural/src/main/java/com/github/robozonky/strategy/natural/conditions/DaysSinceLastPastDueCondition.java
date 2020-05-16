@@ -21,7 +21,7 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 public final class DaysSinceLastPastDueCondition extends AbstractRangeCondition<Integer> {
 
     private DaysSinceLastPastDueCondition(final RangeCondition<Integer> condition) {
-        super(condition);
+        super(condition, true);
     }
 
     private static int getDelinquentDays(Wrapper<?> w) {

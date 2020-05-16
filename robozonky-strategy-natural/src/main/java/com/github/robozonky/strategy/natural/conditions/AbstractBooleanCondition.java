@@ -25,7 +25,9 @@ class AbstractBooleanCondition extends MarketplaceFilterConditionImpl {
     private final Predicate<Wrapper<?>> predicate;
     protected final boolean expected;
 
-    protected AbstractBooleanCondition(final Predicate<Wrapper<?>> predicate, final boolean expected) {
+    protected AbstractBooleanCondition(final Predicate<Wrapper<?>> predicate, final boolean expected,
+            final boolean mayRequireRemoteRequest) {
+        super(mayRequireRemoteRequest);
         this.predicate = predicate;
         this.expected = expected;
     }
