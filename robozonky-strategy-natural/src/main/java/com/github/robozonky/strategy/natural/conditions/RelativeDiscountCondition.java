@@ -19,12 +19,12 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
 
     private RelativeDiscountCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+        super(condition, true);
     }
 
     private static BigDecimal getDiscount(final Wrapper<?> w) {

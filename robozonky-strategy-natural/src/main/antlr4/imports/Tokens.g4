@@ -202,6 +202,7 @@ OR_COMMA  : COMMA ' ';
 LESS_THAN : 'nedosahuje ';
 MORE_THAN : 'přesahuje ';
 OTHER     : 'jiné';
+DAYS      : ' dnů';
 MONTHS    : ' měsíců';
 
 // basic types

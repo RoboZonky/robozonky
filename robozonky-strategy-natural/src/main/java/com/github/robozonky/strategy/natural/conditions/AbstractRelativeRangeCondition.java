@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@ abstract class AbstractRelativeRangeCondition extends AbstractRangeCondition<Rat
 
     protected static final Domain<Ratio> RELATIVE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, Ratio.ONE);
 
-    protected AbstractRelativeRangeCondition(final RangeCondition<Ratio> condition) {
-        super(condition);
+    protected AbstractRelativeRangeCondition(final RangeCondition<Ratio> condition,
+            final boolean mayRequireRemoteRequests) {
+        super(condition, mayRequireRemoteRequests);
     }
 
 }

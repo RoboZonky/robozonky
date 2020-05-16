@@ -35,6 +35,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class ParsedStrategy {
 

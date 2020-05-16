@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.function.Predicate;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 abstract class AbstractStoryCondition extends MarketplaceFilterConditionImpl {
 

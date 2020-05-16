@@ -33,10 +33,14 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
 import com.github.robozonky.internal.remote.endpoints.LoanApi;
@@ -137,11 +141,37 @@ class ZonkyTest {
         when(loan.getAmount()).thenReturn(Money.from(200.0));
         when(loan.getRemainingInvestment()).thenReturn(Money.from(200.0));
         when(la.execute(any())).thenReturn(loan);
+        when(la.execute(any(), anyBoolean())).thenReturn(mock(LastPublishedItem.class));
         final ApiProvider p = spy(new ApiProvider());
         when(p.marketplace(any())).thenReturn(la);
         final Zonky z = new Zonky(p, () -> mock(ZonkyApiTokenImpl.class));
         assertThat(z.getLoan(loanId)
             .getId()).isEqualTo(loanId);
+        assertThat(z.getLastPublishedLoanInfo()).isNotNull();
+    }
+
+    @Test
+    void portfolioApi() {
+        final PaginatedApi<InvestmentImpl, PortfolioApi> pa = mockApi();
+        when(pa.execute(notNull())).thenReturn(mock(SellInfo.class));
+        final ApiProvider p = spy(new ApiProvider());
+        when(p.portfolio(any())).thenReturn(pa);
+        final Zonky z = new Zonky(p, () -> mock(ZonkyApiTokenImpl.class));
+        assertThat(z.getSellInfo(new InvestmentImpl())).isNotNull();
+        when(pa.execute(notNull())).thenReturn(mock(Statistics.class));
+        assertThat(z.getStatistics()).isNotNull();
+    }
+
+    @Test
+    void participationApi() {
+        final PaginatedApi<ParticipationImpl, ParticipationApi> pa = mockApi();
+        when(pa.execute(notNull())).thenReturn(mock(ParticipationDetail.class));
+        when(pa.execute(notNull(), anyBoolean())).thenReturn(mock(LastPublishedItem.class));
+        final ApiProvider p = spy(new ApiProvider());
+        when(p.secondaryMarketplace(any())).thenReturn(pa);
+        final Zonky z = new Zonky(p, () -> mock(ZonkyApiTokenImpl.class));
+        assertThat(z.getParticipationDetail(1)).isNotNull();
+        assertThat(z.getLastPublishedParticipationInfo()).isNotNull();
     }
 
     @Test

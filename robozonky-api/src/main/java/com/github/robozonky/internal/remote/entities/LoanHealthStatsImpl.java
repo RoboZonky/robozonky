@@ -30,6 +30,7 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
     private int dueInstalments;
     @JsonbProperty(nillable = true)
     private Integer instalmentsCurrentlyInDue;
+    private int currentDaysInDue;
     private int longestDaysDue;
     private int daysSinceLastInDue;
     private LoanHealth loanHealthInfo = LoanHealth.HISTORICALLY_IN_DUE;
@@ -43,9 +44,17 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
         return paidInstalments;
     }
 
+    public void setPaidInstalments(final int paidInstalments) {
+        this.paidInstalments = paidInstalments;
+    }
+
     @Override
     public int getDueInstalments() {
         return dueInstalments;
+    }
+
+    public void setDueInstalments(final int dueInstalments) {
+        this.dueInstalments = dueInstalments;
     }
 
     @Override
@@ -53,9 +62,22 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
         return instalmentsCurrentlyInDue == null ? OptionalInt.empty() : OptionalInt.of(instalmentsCurrentlyInDue);
     }
 
+    public void setInstalmentsCurrentlyInDue(final Integer instalmentsCurrentlyInDue) {
+        this.instalmentsCurrentlyInDue = instalmentsCurrentlyInDue;
+    }
+
+    @Override
+    public int getCurrentDaysDue() {
+        return 0;
+    }
+
     @Override
     public int getLongestDaysDue() {
         return longestDaysDue;
+    }
+
+    public void setLongestDaysDue(final int longestDaysDue) {
+        this.longestDaysDue = longestDaysDue;
     }
 
     @Override
@@ -63,33 +85,21 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
         return daysSinceLastInDue;
     }
 
+    public void setDaysSinceLastInDue(final int daysSinceLastInDue) {
+        this.daysSinceLastInDue = daysSinceLastInDue;
+    }
+
     @Override
     public LoanHealth getLoanHealthInfo() {
         return loanHealthInfo;
     }
 
-    public void setPaidInstalments(final int paidInstalments) {
-        this.paidInstalments = paidInstalments;
-    }
-
-    public void setDueInstalments(final int dueInstalments) {
-        this.dueInstalments = dueInstalments;
-    }
-
-    public void setInstalmentsCurrentlyInDue(final Integer instalmentsCurrentlyInDue) {
-        this.instalmentsCurrentlyInDue = instalmentsCurrentlyInDue;
-    }
-
-    public void setLongestDaysDue(final int longestDaysDue) {
-        this.longestDaysDue = longestDaysDue;
-    }
-
-    public void setDaysSinceLastInDue(final int daysSinceLastInDue) {
-        this.daysSinceLastInDue = daysSinceLastInDue;
-    }
-
     public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
         this.loanHealthInfo = loanHealthInfo;
+    }
+
+    public void setCurrentDaysInDue(final int currentDaysInDue) {
+        this.currentDaysInDue = currentDaysInDue;
     }
 
     @Override
@@ -99,6 +109,7 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
             .add("dueInstalments=" + dueInstalments)
             .add("instalmentsCurrentlyInDue=" + instalmentsCurrentlyInDue)
             .add("loanHealthInfo=" + loanHealthInfo)
+            .add("currentDaysInDue=" + currentDaysInDue)
             .add("longestDaysDue=" + longestDaysDue)
             .add("paidInstalments=" + paidInstalments)
             .toString();

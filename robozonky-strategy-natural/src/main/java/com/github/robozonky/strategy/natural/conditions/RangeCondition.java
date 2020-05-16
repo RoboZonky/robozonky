@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 final class RangeCondition<T extends Number & Comparable<T>> implements Predicate<Wrapper<?>> {
 

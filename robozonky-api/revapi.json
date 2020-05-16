@@ -4112,6 +4112,21 @@
         "new": "enum com.github.robozonky.api.remote.enums.Region",
         "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.RegionDeserializer.class)",
         "justification": "Replaced JAXB with JSON-B and removed unused fields."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.remote.enums.MainIncomeIndustry com.github.robozonky.api.remote.entities.BaseLoan::getMainIncomeIndustry()",
+        "justification": "Implemented Zonky API for main income type industry."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method int com.github.robozonky.api.remote.entities.LoanHealthStats::getCurrentDaysDue()",
+        "justification": "Implemented Zonky API for tracking days past due."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method com.github.robozonky.api.remote.enums.MainIncomeIndustry com.github.robozonky.api.remote.entities.Participation::getMainIncomeIndustry()",
+        "justification": "Implemented Zonky API for main income type industry."
       }
     ]
   }

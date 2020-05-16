@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.util.function.Predicate;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class AbstractBooleanCondition extends MarketplaceFilterConditionImpl {
 
     private final Predicate<Wrapper<?>> predicate;
     protected final boolean expected;
 
-    protected AbstractBooleanCondition(final Predicate<Wrapper<?>> predicate, final boolean expected) {
+    protected AbstractBooleanCondition(final Predicate<Wrapper<?>> predicate, final boolean expected,
+            final boolean mayRequireRemoteRequest) {
+        super(mayRequireRemoteRequest);
         this.predicate = predicate;
         this.expected = expected;
     }

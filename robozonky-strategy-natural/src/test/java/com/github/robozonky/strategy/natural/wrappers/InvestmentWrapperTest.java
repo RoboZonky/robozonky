@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -75,7 +75,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
     @Test
     void fromInvestment() {
         final Loan loan = new MockLoanBuilder()
-            .set(LoanImpl::setInsuranceActive, true)
+            .set(LoanImpl::setInsuranceActive, false)
             .set(LoanImpl::setAmount, Money.from(100_000))
             .set(LoanImpl::setRating, Rating.D)
             .set(LoanImpl::setInterestRate, Ratio.ONE)
@@ -146,6 +146,12 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
                 .isEqualTo(loan.getAnnuity()
                     .getValue()
                     .intValue());
+            softly.assertThat(w.getCurrentDpd())
+                .hasValue(0);
+            softly.assertThat(w.getLongestDpd())
+                .hasValue(0);
+            softly.assertThat(w.getDaysSinceDpd())
+                .hasValue(0);
             softly.assertThat(w.toString())
                 .isNotNull();
         });

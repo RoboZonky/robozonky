@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -30,10 +33,12 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescriptor> {
 
     private final Participation participation;
+    private final Supplier<Optional<ParticipationDetail>> detail;
 
     public ParticipationWrapper(final ParticipationDescriptor descriptor, final PortfolioOverview portfolioOverview) {
         super(descriptor, portfolioOverview);
         this.participation = descriptor.item();
+        this.detail = descriptor::detail;
     }
 
     @Override
@@ -94,6 +99,30 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
         return getLoan().getAnnuity()
             .getValue()
             .intValue();
+    }
+
+    @Override
+    public OptionalInt getCurrentDpd() {
+        return OptionalInt.of(detail.get()
+            .map(d -> d.getLoanHealthStats()
+                .getCurrentDaysDue())
+            .orElse(0));
+    }
+
+    @Override
+    public OptionalInt getLongestDpd() {
+        return OptionalInt.of(detail.get()
+            .map(d -> d.getLoanHealthStats()
+                .getLongestDaysDue())
+            .orElse(0));
+    }
+
+    @Override
+    public OptionalInt getDaysSinceDpd() {
+        return OptionalInt.of(detail.get()
+            .map(d -> d.getLoanHealthStats()
+                .getDaysSinceLastInDue())
+            .orElse(0));
     }
 
     @Override

@@ -21,16 +21,12 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class AbstractEnumeratedCondition<T> extends MarketplaceFilterConditionImpl implements MarketplaceFilterCondition {
 
     private final Function<Wrapper<?>, T> fieldRetriever;
     private final Collection<T> possibleValues = new HashSet<>(0);
-
-    protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever) {
-        this(fieldRetriever, false);
-    }
 
     protected AbstractEnumeratedCondition(final Function<Wrapper<?>, T> fieldRetriever,
             final boolean mayRequireRemoteRequests) {

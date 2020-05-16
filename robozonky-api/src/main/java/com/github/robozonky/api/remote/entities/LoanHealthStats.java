@@ -28,6 +28,8 @@ public interface LoanHealthStats {
 
     OptionalInt getInstalmentsCurrentlyInDue();
 
+    int getCurrentDaysDue();
+
     int getLongestDaysDue();
 
     int getDaysSinceLastInDue();

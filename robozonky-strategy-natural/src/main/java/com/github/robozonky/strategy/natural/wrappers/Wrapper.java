@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.LoanHealth;
@@ -77,6 +78,12 @@ public interface Wrapper<T> {
     int getOriginalAmount();
 
     int getOriginalAnnuity();
+
+    OptionalInt getCurrentDpd();
+
+    OptionalInt getLongestDpd();
+
+    OptionalInt getDaysSinceDpd();
 
     BigDecimal getRemainingPrincipal();
 

@@ -217,6 +217,9 @@ secondaryMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c18=relativeSaleDiscountCondition { $result = $c18.result; }
     | c19=originalTermCondition { $result = $c19.result; }
     | c20=healthCondition { $result = $c20.result; }
+    | c21=currentDaysPastDueCondition { $result = $c21.result; }
+    | c22=longestDaysPastDueCondition { $result = $c22.result; }
+    | c23=daysSinceLastPastDueCondition { $result = $c23.result; }
 ;
 
 sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
@@ -239,4 +242,7 @@ sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c18=relativeSaleDiscountCondition { $result = $c18.result; }
     | c19=originalTermCondition { $result = $c19.result; }
     | c20=healthCondition { $result = $c20.result; }
+    | c21=currentDaysPastDueCondition { $result = $c21.result; }
+    | c22=longestDaysPastDueCondition { $result = $c22.result; }
+    | c23=daysSinceLastPastDueCondition { $result = $c23.result; }
 ;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.strategy.natural;
+package com.github.robozonky.strategy.natural.wrappers;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -41,6 +41,7 @@ class ReservationWrapperTest {
     @Test
     void fromReservation() {
         final Reservation reservation = new MockReservationBuilder()
+            .set(ReservationImpl::setInsuranceActive, true)
             .set(ReservationImpl::setAnnuity, Money.from(BigDecimal.ONE))
             .set(ReservationImpl::setRating, Rating.D)
             .set(ReservationImpl::setAmount, Money.from(100_000))
@@ -77,6 +78,14 @@ class ReservationWrapperTest {
                 .isEqualTo(BigDecimal.valueOf(w.getOriginalAmount()));
             softly.assertThat(w.getSellFee())
                 .isEmpty();
+            softly.assertThat(w.getCurrentDpd())
+                .isEmpty();
+            softly.assertThat(w.getLongestDpd())
+                .isEmpty();
+            softly.assertThat(w.getDaysSinceDpd())
+                .isEmpty();
+            softly.assertThat(w.isInsuranceActive())
+                .isTrue();
             softly.assertThat(w.toString())
                 .isNotNull();
         });
@@ -86,11 +95,13 @@ class ReservationWrapperTest {
     void fromReservationWithoutRevenueRate() {
         final Reservation reservation = new MockReservationBuilder()
             .set(ReservationImpl::setRating, Rating.B)
+            .set(ReservationImpl::setInsuranceActive, false)
             .build();
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),
                 FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
         assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("9.99"));
+        assertThat(w.isInsuranceActive()).isFalse();
     }
 
 }

@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class AverageStoryConditionTest {
 

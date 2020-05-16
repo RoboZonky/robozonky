@@ -27,6 +27,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
 import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -43,6 +44,7 @@ public abstract class BaseLoanImpl implements BaseLoan {
     protected String story;
     protected Rating rating;
     protected MainIncomeType mainIncomeType;
+    protected MainIncomeIndustry mainIncomeIndustry;
     protected Region region;
     protected Purpose purpose;
 
@@ -70,9 +72,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return countryOfOrigin;
     }
 
+    public void setCountryOfOrigin(final Country countryOfOrigin) {
+        this.countryOfOrigin = countryOfOrigin;
+    }
+
     @Override
     public Currency getCurrency() {
         return currency;
+    }
+
+    public void setCurrency(final Currency currency) {
+        this.currency = currency;
     }
 
     @Override
@@ -80,9 +90,26 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return mainIncomeType;
     }
 
+    public void setMainIncomeType(final MainIncomeType mainIncomeType) {
+        this.mainIncomeType = mainIncomeType;
+    }
+
+    @Override
+    public MainIncomeIndustry getMainIncomeIndustry() {
+        return mainIncomeIndustry;
+    }
+
+    public void setMainIncomeIndustry(final MainIncomeIndustry mainIncomeIndustry) {
+        this.mainIncomeIndustry = mainIncomeIndustry;
+    }
+
     @Override
     public Region getRegion() {
         return region;
+    }
+
+    public void setRegion(final Region region) {
+        this.region = region;
     }
 
     @Override
@@ -90,9 +117,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return purpose;
     }
 
+    public void setPurpose(final Purpose purpose) {
+        this.purpose = purpose;
+    }
+
     @Override
     public int getId() {
         return id;
+    }
+
+    public void setId(final int id) {
+        this.id = id;
     }
 
     @Override
@@ -100,9 +135,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return name;
     }
 
+    public void setName(final String name) {
+        this.name = name;
+    }
+
     @Override
     public String getStory() {
         return story;
+    }
+
+    public void setStory(final String story) {
+        this.story = story;
     }
 
     @Override
@@ -110,9 +153,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return termInMonths;
     }
 
+    public void setTermInMonths(final int termInMonths) {
+        this.termInMonths = termInMonths;
+    }
+
     @Override
     public Ratio getInterestRate() {
         return interestRate;
+    }
+
+    public void setInterestRate(final Ratio interestRate) {
+        this.interestRate = interestRate;
     }
 
     @Override
@@ -120,9 +171,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return rating;
     }
 
+    public void setRating(final Rating rating) {
+        this.rating = rating;
+    }
+
     @Override
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    public void setInsuranceActive(final boolean insuranceActive) {
+        this.insuranceActive = insuranceActive;
     }
 
     @Override
@@ -130,9 +189,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return Optional.ofNullable(revenueRate);
     }
 
+    public void setRevenueRate(final Ratio revenueRate) {
+        this.revenueRate = revenueRate;
+    }
+
     @Override
     public OffsetDateTime getDatePublished() {
         return OffsetDateTime.parse(datePublished);
+    }
+
+    public void setDatePublished(final OffsetDateTime datePublished) {
+        this.datePublished = datePublished.toString();
     }
 
     @Override
@@ -140,9 +207,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return amount;
     }
 
+    public void setAmount(final Money amount) {
+        this.amount = amount;
+    }
+
     @Override
     public Money getRemainingInvestment() {
         return remainingInvestment;
+    }
+
+    public void setRemainingInvestment(final Money remainingInvestment) {
+        this.remainingInvestment = remainingInvestment;
     }
 
     @Override
@@ -155,9 +230,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return reservedAmount;
     }
 
+    public void setReservedAmount(final Money reservedAmount) {
+        this.reservedAmount = reservedAmount;
+    }
+
     @Override
     public Money getZonkyPlusAmount() {
         return zonkyPlusAmount;
+    }
+
+    public void setZonkyPlusAmount(final Money zonkyPlusAmount) {
+        this.zonkyPlusAmount = zonkyPlusAmount;
     }
 
     @Override
@@ -165,9 +248,17 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return annuity;
     }
 
+    public void setAnnuity(final Money annuity) {
+        this.annuity = annuity;
+    }
+
     @Override
     public Money getPremium() {
         return premium;
+    }
+
+    public void setPremium(final Money premium) {
+        this.premium = premium;
     }
 
     @Override
@@ -175,88 +266,8 @@ public abstract class BaseLoanImpl implements BaseLoan {
         return annuityWithInsurance;
     }
 
-    public void setInsuranceActive(final boolean insuranceActive) {
-        this.insuranceActive = insuranceActive;
-    }
-
-    public void setId(final int id) {
-        this.id = id;
-    }
-
-    public void setTermInMonths(final int termInMonths) {
-        this.termInMonths = termInMonths;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setStory(final String story) {
-        this.story = story;
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
-    public void setMainIncomeType(final MainIncomeType mainIncomeType) {
-        this.mainIncomeType = mainIncomeType;
-    }
-
-    public void setRegion(final Region region) {
-        this.region = region;
-    }
-
-    public void setPurpose(final Purpose purpose) {
-        this.purpose = purpose;
-    }
-
-    public void setInterestRate(final Ratio interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public void setRevenueRate(final Ratio revenueRate) {
-        this.revenueRate = revenueRate;
-    }
-
-    public void setDatePublished(final OffsetDateTime datePublished) {
-        this.datePublished = datePublished.toString();
-    }
-
-    public void setCountryOfOrigin(final Country countryOfOrigin) {
-        this.countryOfOrigin = countryOfOrigin;
-    }
-
-    public void setCurrency(final Currency currency) {
-        this.currency = currency;
-    }
-
-    public void setAmount(final Money amount) {
-        this.amount = amount;
-    }
-
-    public void setRemainingInvestment(final Money remainingInvestment) {
-        this.remainingInvestment = remainingInvestment;
-    }
-
-    public void setReservedAmount(final Money reservedAmount) {
-        this.reservedAmount = reservedAmount;
-    }
-
-    public void setAnnuity(final Money annuity) {
-        this.annuity = annuity;
-    }
-
     public void setAnnuityWithInsurance(final Money annuityWithInsurance) {
         this.annuityWithInsurance = annuityWithInsurance;
-    }
-
-    public void setPremium(final Money premium) {
-        this.premium = premium;
-    }
-
-    public void setZonkyPlusAmount(final Money zonkyPlusAmount) {
-        this.zonkyPlusAmount = zonkyPlusAmount;
     }
 
     @Override
@@ -272,6 +283,7 @@ public abstract class BaseLoanImpl implements BaseLoan {
             .add("insuranceActive=" + insuranceActive)
             .add("interestRate=" + interestRate)
             .add("mainIncomeType=" + mainIncomeType)
+            .add("mainIncomeIndustry=" + mainIncomeIndustry)
             .add("name='" + name + "'")
             .add("premium='" + premium + "'")
             .add("purpose=" + purpose)

@@ -34,7 +34,7 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 import com.github.robozonky.test.mock.MockReservationBuilder;
 
 class ReservationWrapperTest {

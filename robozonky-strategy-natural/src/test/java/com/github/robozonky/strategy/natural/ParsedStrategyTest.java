@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -41,6 +42,7 @@ import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -167,7 +169,7 @@ class ParsedStrategyTest {
         assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO)).contains(ld);
         // now add a filter and see no loans applicable
         final MarketplaceFilter f = mock(MarketplaceFilter.class);
-        when(f.test(eq(Wrapper.wrap(ld, FOLIO)))).thenReturn(true);
+        when(f.test(ArgumentMatchers.eq(Wrapper.wrap(ld, FOLIO)))).thenReturn(true);
         final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
         assertThat(strategy2.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
     }

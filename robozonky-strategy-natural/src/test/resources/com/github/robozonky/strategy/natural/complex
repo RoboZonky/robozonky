@@ -86,3 +86,6 @@ Ignorovat vše, kde: délka přesahuje 36 měsíců.
 
 Prodat participaci, kde: délka přesahuje 36 měsíců; prodej není zpoplatněn.
 Prodat participaci, kde: úrok přesahuje 10 % p.a.; prodej je zpoplatněn.
+Prodat participaci, kde: nejdelší doba po splatnosti přesahuje 10 dnů.
+Prodat participaci, kde: aktuální doba po splatnosti nedosahuje 5 dnů.
+Prodat participaci, kde: doba od posledního dne po splatnosti je 6 až 666 dnů.

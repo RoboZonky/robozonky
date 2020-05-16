@@ -92,7 +92,12 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
             LOGGER.trace("Enforcing read limit of {} latest items.", limit);
             participations = participations.limit(limit);
         }
-        return participations.map(p -> new ParticipationDescriptor(p, () -> tenant.getLoan(p.getLoanId())))
+        return participations
+            .map(p -> {
+                var loanId = p.getLoanId();
+                return new ParticipationDescriptor(p, () -> tenant.getLoan(loanId),
+                        () -> tenant.call(a -> a.getParticipationDetail(loanId)));
+            })
             .collect(Collectors.toList());
     }
 

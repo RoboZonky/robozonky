@@ -19,7 +19,7 @@ package com.github.robozonky.strategy.natural.conditions;
 import org.mockito.Mockito;
 
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 class BorrowerRegionConditionSpec implements AbstractEnumeratedConditionTest.ConditionSpec<Region> {
 

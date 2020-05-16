@@ -27,7 +27,7 @@ public final class SmpFeePresenceCondition extends AbstractBooleanCondition {
     private SmpFeePresenceCondition(final boolean expectPresent) {
         super(w -> w.getSellFee()
             .orElse(BigDecimal.ZERO)
-            .signum() > 0, expectPresent);
+            .signum() > 0, expectPresent, true);
     }
 
     @Override

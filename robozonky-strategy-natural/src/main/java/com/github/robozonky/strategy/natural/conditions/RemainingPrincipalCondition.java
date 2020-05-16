@@ -18,12 +18,12 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import java.math.BigDecimal;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public final class RemainingPrincipalCondition extends AbstractRangeCondition<BigDecimal> {
 
     private RemainingPrincipalCondition(final RangeCondition<BigDecimal> condition) {
-        super(condition);
+        super(condition, false);
     }
 
     public static RemainingPrincipalCondition lessThan(final int threshold) {

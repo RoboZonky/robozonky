@@ -16,29 +16,29 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import com.github.robozonky.strategy.natural.Wrapper;
+import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class OriginalLoanTermCondition extends AbstractRangeCondition<Integer> {
 
     private OriginalLoanTermCondition(final RangeCondition<Integer> condition) {
-        super(condition);
+        super(condition, false);
     }
 
     public static OriginalLoanTermCondition lessThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.lessThan(Wrapper::getOriginalTermInMonths,
-                LOAN_TERM_DOMAIN, threshold);
+                LOAN_TERM_IN_MONTHS_DOMAIN, threshold);
         return new OriginalLoanTermCondition(c);
     }
 
     public static OriginalLoanTermCondition moreThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.moreThan(Wrapper::getOriginalTermInMonths,
-                LOAN_TERM_DOMAIN, threshold);
+                LOAN_TERM_IN_MONTHS_DOMAIN, threshold);
         return new OriginalLoanTermCondition(c);
     }
 
     public static OriginalLoanTermCondition exact(final int minimumThreshold, final int maximumThreshold) {
         final RangeCondition<Integer> c = RangeCondition.exact(Wrapper::getOriginalTermInMonths,
-                LOAN_TERM_DOMAIN, minimumThreshold,
+                LOAN_TERM_IN_MONTHS_DOMAIN, minimumThreshold,
                 maximumThreshold);
         return new OriginalLoanTermCondition(c);
     }
