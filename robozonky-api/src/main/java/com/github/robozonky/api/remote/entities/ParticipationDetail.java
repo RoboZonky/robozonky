@@ -16,70 +16,50 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.net.URL;
 import java.time.OffsetDateTime;
-import java.util.Currency;
-import java.util.Optional;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 
-public interface BaseLoan {
+public interface ParticipationDetail {
 
-    Country getCountryOfOrigin();
+    long getId();
 
-    Currency getCurrency();
-
-    MainIncomeType getMainIncomeType();
+    MainIncomeType getIncomeType();
 
     MainIncomeIndustry getMainIncomeIndustry();
 
-    Region getRegion();
+    Ratio getInterestRate();
 
-    Purpose getPurpose();
-
-    int getId();
+    Ratio getRevenueRate();
 
     String getName();
 
-    String getStory();
-
-    int getTermInMonths();
-
-    Ratio getInterestRate();
-
-    Rating getRating();
-
-    /**
-     * @return True if the loan is insured at this very moment. Uninsured loans will have it return false.
-     */
     boolean isInsuranceActive();
 
-    Optional<Ratio> getRevenueRate();
+    String getStory();
 
-    OffsetDateTime getDatePublished();
+    Purpose getPurpose();
+
+    URL getUrl();
+
+    Region getRegion();
+
+    LoanHealthStats getLoanHealthStats();
+
+    OffsetDateTime getNextPaymentDate();
 
     Money getAmount();
 
-    Money getRemainingInvestment();
-
-    Money getNonReservedRemainingInvestment();
-
-    Money getReservedAmount();
-
-    Money getZonkyPlusAmount();
-
     Money getAnnuity();
 
-    Money getPremium();
+    int getActiveLoansCount();
 
-    /**
-     * @return {@link #getAnnuity()} + {@link #getPremium()}
-     */
-    Money getAnnuityWithInsurance();
+    int getDueInstalmentsCount();
+
 }

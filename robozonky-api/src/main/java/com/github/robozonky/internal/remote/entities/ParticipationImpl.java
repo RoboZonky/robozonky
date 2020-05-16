@@ -27,6 +27,7 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -41,6 +42,7 @@ public class ParticipationImpl implements Participation {
     protected long id;
     protected long investmentId;
     protected MainIncomeType incomeType;
+    protected MainIncomeIndustry mainIncomeIndustry;
     protected Ratio interestRate;
     protected LoanHealth loanHealthInfo;
     protected String loanName;
@@ -80,9 +82,17 @@ public class ParticipationImpl implements Participation {
         return id;
     }
 
+    public void setId(final long id) {
+        this.id = id;
+    }
+
     @Override
     public long getInvestmentId() {
         return investmentId;
+    }
+
+    public void setInvestmentId(final long investmentId) {
+        this.investmentId = investmentId;
     }
 
     @Override
@@ -90,9 +100,17 @@ public class ParticipationImpl implements Participation {
         return loanId;
     }
 
+    public void setLoanId(final int loanId) {
+        this.loanId = loanId;
+    }
+
     @Override
     public int getOriginalInstalmentCount() {
         return originalInstalmentCount;
+    }
+
+    public void setOriginalInstalmentCount(final int originalInstalmentCount) {
+        this.originalInstalmentCount = originalInstalmentCount;
     }
 
     @Override
@@ -100,9 +118,22 @@ public class ParticipationImpl implements Participation {
         return remainingInstalmentCount;
     }
 
+    public void setRemainingInstalmentCount(final int remainingInstalmentCount) {
+        this.remainingInstalmentCount = remainingInstalmentCount;
+    }
+
     @Override
     public MainIncomeType getIncomeType() {
         return incomeType;
+    }
+
+    public void setIncomeType(final MainIncomeType incomeType) {
+        this.incomeType = incomeType;
+    }
+
+    @Override
+    public MainIncomeIndustry getMainIncomeIndustry() {
+        return mainIncomeIndustry;
     }
 
     @Override
@@ -110,9 +141,17 @@ public class ParticipationImpl implements Participation {
         return interestRate;
     }
 
+    public void setInterestRate(final Ratio interestRate) {
+        this.interestRate = interestRate;
+    }
+
     @Override
     public String getLoanName() {
         return loanName;
+    }
+
+    public void setLoanName(final String loanName) {
+        this.loanName = loanName;
     }
 
     @Override
@@ -120,9 +159,17 @@ public class ParticipationImpl implements Participation {
         return purpose;
     }
 
+    public void setPurpose(final Purpose purpose) {
+        this.purpose = purpose;
+    }
+
     @Override
     public Rating getRating() {
         return rating;
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
     }
 
     @Override
@@ -130,9 +177,17 @@ public class ParticipationImpl implements Participation {
         return willExceedLoanInvestmentLimit;
     }
 
+    public void setWillExceedLoanInvestmentLimit(final boolean willExceedLoanInvestmentLimit) {
+        this.willExceedLoanInvestmentLimit = willExceedLoanInvestmentLimit;
+    }
+
     @Override
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    public void setInsuranceActive(final boolean insuranceActive) {
+        this.insuranceActive = insuranceActive;
     }
 
     @Override
@@ -140,9 +195,17 @@ public class ParticipationImpl implements Participation {
         return loanHealthInfo;
     }
 
+    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
+        this.loanHealthInfo = loanHealthInfo;
+    }
+
     @Override
     public Country getCountryOfOrigin() {
         return countryOfOrigin;
+    }
+
+    public void setCountryOfOrigin(final Country countryOfOrigin) {
+        this.countryOfOrigin = countryOfOrigin;
     }
 
     @Override
@@ -150,9 +213,17 @@ public class ParticipationImpl implements Participation {
         return currency;
     }
 
+    public void setCurrency(final Currency currency) {
+        this.currency = currency;
+    }
+
     @Override
     public Money getRemainingPrincipal() {
         return remainingPrincipal;
+    }
+
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
     }
 
     @Override
@@ -160,77 +231,13 @@ public class ParticipationImpl implements Participation {
         return discount;
     }
 
+    public void setDiscount(final Money discount) {
+        this.discount = discount;
+    }
+
     @Override
     public Money getPrice() {
         return price;
-    }
-
-    public void setLoanId(final int loanId) {
-        this.loanId = loanId;
-    }
-
-    public void setOriginalInstalmentCount(final int originalInstalmentCount) {
-        this.originalInstalmentCount = originalInstalmentCount;
-    }
-
-    public void setRemainingInstalmentCount(final int remainingInstalmentCount) {
-        this.remainingInstalmentCount = remainingInstalmentCount;
-    }
-
-    public void setId(final long id) {
-        this.id = id;
-    }
-
-    public void setInvestmentId(final long investmentId) {
-        this.investmentId = investmentId;
-    }
-
-    public void setIncomeType(final MainIncomeType incomeType) {
-        this.incomeType = incomeType;
-    }
-
-    public void setInterestRate(final Ratio interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
-        this.loanHealthInfo = loanHealthInfo;
-    }
-
-    public void setLoanName(final String loanName) {
-        this.loanName = loanName;
-    }
-
-    public void setPurpose(final Purpose purpose) {
-        this.purpose = purpose;
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
-    public void setWillExceedLoanInvestmentLimit(final boolean willExceedLoanInvestmentLimit) {
-        this.willExceedLoanInvestmentLimit = willExceedLoanInvestmentLimit;
-    }
-
-    public void setInsuranceActive(final boolean insuranceActive) {
-        this.insuranceActive = insuranceActive;
-    }
-
-    public void setCountryOfOrigin(final Country countryOfOrigin) {
-        this.countryOfOrigin = countryOfOrigin;
-    }
-
-    public void setCurrency(final Currency currency) {
-        this.currency = currency;
-    }
-
-    public void setRemainingPrincipal(final Money remainingPrincipal) {
-        this.remainingPrincipal = remainingPrincipal;
-    }
-
-    public void setDiscount(final Money discount) {
-        this.discount = discount;
     }
 
     public void setPrice(final Money price) {
@@ -246,6 +253,7 @@ public class ParticipationImpl implements Participation {
             .add("currency=" + currency)
             .add("discount='" + discount + "'")
             .add("incomeType=" + incomeType)
+            .add("mainIncomeIndustry=" + mainIncomeIndustry)
             .add("insuranceActive=" + insuranceActive)
             .add("interestRate=" + interestRate)
             .add("investmentId=" + investmentId)
