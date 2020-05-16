@@ -40,7 +40,7 @@ public class ParticipationDetailImpl implements ParticipationDetail {
     protected Ratio revenueRate;
     protected URL url;
     protected Region region;
-    protected LoanHealthStats loanHealthStats;
+    protected LoanHealthStatsImpl loanHealthStats;
     protected String nextPaymentDate;
     protected Money amount;
     protected Money annuity;
@@ -173,7 +173,7 @@ public class ParticipationDetailImpl implements ParticipationDetail {
         this.region = region;
     }
 
-    public void setLoanHealthStats(final LoanHealthStats loanHealthStats) {
+    public void setLoanHealthStats(final LoanHealthStatsImpl loanHealthStats) {
         this.loanHealthStats = loanHealthStats;
     }
 
