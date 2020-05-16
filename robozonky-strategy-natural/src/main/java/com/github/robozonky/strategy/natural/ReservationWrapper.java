@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
+import java.util.OptionalInt;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Reservation;
@@ -104,6 +105,21 @@ final class ReservationWrapper extends AbstractWrapper<ReservationDescriptor> {
         return reservation.getAnnuity()
             .getValue()
             .intValue();
+    }
+
+    @Override
+    public OptionalInt getCurrentDpd() {
+        return OptionalInt.empty();
+    }
+
+    @Override
+    public OptionalInt getMaxDpd() {
+        return OptionalInt.empty();
+    }
+
+    @Override
+    public OptionalInt getDaysSinceDpd() {
+        return OptionalInt.empty();
     }
 
     @Override

@@ -18,6 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,7 +32,6 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.util.functional.Memoizer;
 
 final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
@@ -41,7 +41,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     public InvestmentWrapper(final InvestmentDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.investment = original.item();
-        this.sellInfo = Memoizer.memoize(original::sellInfo);
+        this.sellInfo = original::sellInfo;
     }
 
     @Override
@@ -169,6 +169,35 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
             .orElse(Ratio.ZERO);
         var result = discount.apply(Money.from(getRemainingPrincipal()));
         return Optional.of(result.getValue());
+    }
+
+    @Override
+    public OptionalInt getCurrentDpd() {
+        var currentDpd = investment.getLegalDpd()
+            .orElseGet(() -> sellInfo.get()
+                .map(si -> si.getLoanHealthStats()
+                    .getCurrentDaysDue())
+                .orElse(0));
+        return OptionalInt.of(currentDpd);
+    }
+
+    @Override
+    public OptionalInt getMaxDpd() {
+        var maxDpd = investment.getLegalDpd()
+            .orElseGet(() -> sellInfo.get()
+                .map(si -> si.getLoanHealthStats()
+                    .getLongestDaysDue())
+                .orElse(0));
+        return OptionalInt.of(maxDpd);
+    }
+
+    @Override
+    public OptionalInt getDaysSinceDpd() {
+        var daysSinceLastDpd = sellInfo.get()
+            .map(si -> si.getLoanHealthStats()
+                .getDaysSinceLastInDue())
+            .orElse(0);
+        return OptionalInt.of(daysSinceLastDpd);
     }
 
     @Override
