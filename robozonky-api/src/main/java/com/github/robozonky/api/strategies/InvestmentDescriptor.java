@@ -39,8 +39,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
      *
      * @param investment
      * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
-     *                   remote)
-     *                   entity on-demand.
+     *                   remote) entity on-demand.
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related) {
         this(investment, related, null);
@@ -50,11 +49,9 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
      *
      * @param investment
      * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
-     *                   remote)
-     *                   entity on-demand.
+     *                   remote) entity on-demand.
      * @param sellInfo   Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
-     *                   remote)
-     *                   entity on-demand. Null means no such information exists.
+     *                   remote) entity on-demand. Null means no such information exists.
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related,
             final Supplier<SellInfo> sellInfo) {

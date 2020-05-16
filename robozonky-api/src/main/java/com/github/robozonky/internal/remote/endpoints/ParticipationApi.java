@@ -22,10 +22,12 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.entities.LastPublishedItemImpl;
+import com.github.robozonky.internal.remote.entities.ParticipationDetailImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 
 @Produces(Defaults.MEDIA_TYPE)
@@ -35,6 +37,10 @@ public interface ParticipationApi extends EntityCollectionApi<ParticipationImpl>
     @GET
     @Path(ApiConstants.LOANS + "/smp-last-published")
     LastPublishedItemImpl lastPublished();
+
+    @GET
+    @Path(ApiConstants.LOANS + "/{loanId}/smpDetail")
+    ParticipationDetailImpl getDetail(@QueryParam("loanId") int loanId);
 
     @GET
     @Path(ApiConstants.SMP_INVESTMENTS)

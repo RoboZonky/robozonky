@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
 public final class ParticipationDescriptor
@@ -30,17 +31,31 @@ public final class ParticipationDescriptor
 
     private final Participation participation;
     private final Supplier<Loan> related;
+    private final Supplier<ParticipationDetail> detail;
 
     /**
      *
      * @param participation
      * @param related       Provided as a Supplier in order to allow the calling code to retrieve the (likely remote)
-     *                      entity
-     *                      on-demand.
+     *                      entity on-demand.
      */
     public ParticipationDescriptor(final Participation participation, final Supplier<Loan> related) {
+        this(participation, related, null);
+    }
+
+    /**
+     *
+     * @param participation
+     * @param related       Provided as a Supplier in order to allow the calling code to retrieve the (likely remote)
+     *                      entity on-demand.
+     * @param detail        Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
+     *                      remote) entity on-demand. Null means no such information exists.
+     */
+    public ParticipationDescriptor(final Participation participation, final Supplier<Loan> related,
+            final Supplier<ParticipationDetail> detail) {
         this.participation = participation;
         this.related = Memoizer.memoize(related);
+        this.detail = detail == null ? null : Memoizer.memoize(detail);
     }
 
     @Override
@@ -51,6 +66,11 @@ public final class ParticipationDescriptor
     @Override
     public Loan related() {
         return related.get();
+    }
+
+    public Optional<ParticipationDetail> detail() {
+        return Optional.ofNullable(detail)
+            .map(Supplier::get);
     }
 
     public Optional<RecommendedParticipation> recommend() {

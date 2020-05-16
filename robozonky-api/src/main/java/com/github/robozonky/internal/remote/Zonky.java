@@ -34,6 +34,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.Restrictions;
@@ -219,6 +220,10 @@ public class Zonky {
 
     public LastPublishedItem getLastPublishedParticipationInfo() {
         return participationApi.execute(ParticipationApi::lastPublished, false);
+    }
+
+    public ParticipationDetail getParticipationDetail(final int loanId) {
+        return participationApi.execute(pa -> pa.getDetail(loanId));
     }
 
     /**
