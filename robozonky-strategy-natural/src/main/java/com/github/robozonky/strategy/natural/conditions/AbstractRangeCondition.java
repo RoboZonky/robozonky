@@ -25,7 +25,14 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 abstract class AbstractRangeCondition<T extends Number & Comparable<T>> extends MarketplaceFilterConditionImpl
         implements MarketplaceFilterCondition {
 
-    protected static final Domain<Integer> LOAN_TERM_DOMAIN = new Domain<>(Integer.class, 0, 84);
+    /**
+     * 8 years. Maximum 7 years, plus an estimated 1 year of possible delinquency on top.
+     */
+    protected static final Domain<Integer> LOAN_LIFE_IN_DAYS_DOMAIN = new Domain<>(Integer.class, 0, 8 * 365);
+    /**
+     * All loans on Zonky are for a term of up to 7 years.
+     */
+    protected static final Domain<Integer> LOAN_TERM_IN_MONTHS_DOMAIN = new Domain<>(Integer.class, 0, 84);
     protected static final Domain<Integer> AMOUNT_DOMAIN = new Domain<>(Integer.class, 0, null);
     protected static final Domain<BigDecimal> PRINCIPAL_DOMAIN = new Domain<>(BigDecimal.class, BigDecimal.ZERO, null);
     protected static final Domain<Ratio> RATE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, null);

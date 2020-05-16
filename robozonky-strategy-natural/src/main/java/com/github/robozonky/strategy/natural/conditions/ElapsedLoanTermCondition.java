@@ -30,19 +30,19 @@ public final class ElapsedLoanTermCondition extends AbstractRangeCondition<Integ
 
     public static ElapsedLoanTermCondition lessThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.lessThan(ElapsedLoanTermCondition::getElapsedTerm,
-                LOAN_TERM_DOMAIN, threshold);
+                LOAN_TERM_IN_MONTHS_DOMAIN, threshold);
         return new ElapsedLoanTermCondition(c);
     }
 
     public static ElapsedLoanTermCondition moreThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.moreThan(ElapsedLoanTermCondition::getElapsedTerm,
-                LOAN_TERM_DOMAIN, threshold);
+                LOAN_TERM_IN_MONTHS_DOMAIN, threshold);
         return new ElapsedLoanTermCondition(c);
     }
 
     public static ElapsedLoanTermCondition exact(final int minimumThreshold, final int maximumThreshold) {
         final RangeCondition<Integer> c = RangeCondition.exact(ElapsedLoanTermCondition::getElapsedTerm,
-                LOAN_TERM_DOMAIN, minimumThreshold,
+                LOAN_TERM_IN_MONTHS_DOMAIN, minimumThreshold,
                 maximumThreshold);
         return new ElapsedLoanTermCondition(c);
     }

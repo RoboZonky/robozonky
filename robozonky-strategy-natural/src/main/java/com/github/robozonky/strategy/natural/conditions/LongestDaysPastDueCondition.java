@@ -31,19 +31,19 @@ public final class LongestDaysPastDueCondition extends AbstractRangeCondition<In
 
     public static LongestDaysPastDueCondition lessThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.lessThan(LongestDaysPastDueCondition::getDelinquentDays,
-                LOAN_TERM_DOMAIN, threshold);
+                LOAN_LIFE_IN_DAYS_DOMAIN, threshold);
         return new LongestDaysPastDueCondition(c);
     }
 
     public static LongestDaysPastDueCondition moreThan(final int threshold) {
         final RangeCondition<Integer> c = RangeCondition.moreThan(LongestDaysPastDueCondition::getDelinquentDays,
-                LOAN_TERM_DOMAIN, threshold);
+                LOAN_LIFE_IN_DAYS_DOMAIN, threshold);
         return new LongestDaysPastDueCondition(c);
     }
 
     public static LongestDaysPastDueCondition exact(final int minimumThreshold, final int maximumThreshold) {
         final RangeCondition<Integer> c = RangeCondition.exact(LongestDaysPastDueCondition::getDelinquentDays,
-                LOAN_TERM_DOMAIN, minimumThreshold, maximumThreshold);
+                LOAN_LIFE_IN_DAYS_DOMAIN, minimumThreshold, maximumThreshold);
         return new LongestDaysPastDueCondition(c);
     }
 }

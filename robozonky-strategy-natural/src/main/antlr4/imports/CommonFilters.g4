@@ -345,11 +345,11 @@ revenueRateConditionRangeClosedRight returns [MarketplaceFilterCondition result]
 ;
 
 currentDaysPastDueCondition returns [MarketplaceFilterCondition result]:
-    'nyní po splatnosti ' (
+    'aktuální doba po splatnosti ' (
         (c1 = currentDaysPastDueConditionRangeOpen { $result = $c1.result; })
         | (c2 = currentDaysPastDueConditionRangeClosedLeft { $result = $c2.result; })
         | (c3 = currentDaysPastDueConditionRangeClosedRight { $result = $c3.result; })
-    ) MONTHS
+    ) DAYS
 ;
 
 currentDaysPastDueConditionRangeOpen returns [MarketplaceFilterCondition result]:
@@ -368,11 +368,11 @@ currentDaysPastDueConditionRangeClosedRight returns [MarketplaceFilterCondition 
 ;
 
 longestDaysPastDueCondition returns [MarketplaceFilterCondition result]:
-    'nejdéle po splatnosti ' (
+    'nejdelší doba po splatnosti ' (
         (c1 = longestDaysPastDueConditionRangeOpen { $result = $c1.result; })
         | (c2 = longestDaysPastDueConditionRangeClosedLeft { $result = $c2.result; })
         | (c3 = longestDaysPastDueConditionRangeClosedRight { $result = $c3.result; })
-    ) MONTHS
+    ) DAYS
 ;
 
 longestDaysPastDueConditionRangeOpen returns [MarketplaceFilterCondition result]:
@@ -391,11 +391,11 @@ longestDaysPastDueConditionRangeClosedRight returns [MarketplaceFilterCondition 
 ;
 
 daysSinceLastPastDueCondition returns [MarketplaceFilterCondition result]:
-    'od posledního dne po splatnosti uplynulo ' (
+    'doba od posledního dne po splatnosti ' (
         (c1 = daysSinceLastPastDueConditionRangeOpen { $result = $c1.result; })
         | (c2 = daysSinceLastPastDueConditionRangeClosedLeft { $result = $c2.result; })
         | (c3 = daysSinceLastPastDueConditionRangeClosedRight { $result = $c3.result; })
-    ) MONTHS
+    ) DAYS
 ;
 
 daysSinceLastPastDueConditionRangeOpen returns [MarketplaceFilterCondition result]:
