@@ -343,3 +343,72 @@ revenueRateConditionRangeClosedRight returns [MarketplaceFilterCondition result]
     LESS_THAN max=floatExpr
     { $result = RevenueRateCondition.lessThan(Ratio.fromPercentage($max.result)); }
 ;
+
+currentDaysPastDueCondition returns [MarketplaceFilterCondition result]:
+    'nyní po splatnosti ' (
+        (c1 = currentDaysPastDueConditionRangeOpen { $result = $c1.result; })
+        | (c2 = currentDaysPastDueConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = currentDaysPastDueConditionRangeClosedRight { $result = $c3.result; })
+    ) MONTHS
+;
+
+currentDaysPastDueConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = CurrentDaysPastDueCondition.exact($min.result, $max.result); }
+;
+
+currentDaysPastDueConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = CurrentDaysPastDueCondition.moreThan($min.result); }
+;
+
+currentDaysPastDueConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = CurrentDaysPastDueCondition.lessThan($max.result); }
+;
+
+longestDaysPastDueCondition returns [MarketplaceFilterCondition result]:
+    'nejdéle po splatnosti ' (
+        (c1 = longestDaysPastDueConditionRangeOpen { $result = $c1.result; })
+        | (c2 = longestDaysPastDueConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = longestDaysPastDueConditionRangeClosedRight { $result = $c3.result; })
+    ) MONTHS
+;
+
+longestDaysPastDueConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = LongestDaysPastDueCondition.exact($min.result, $max.result); }
+;
+
+longestDaysPastDueConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = LongestDaysPastDueCondition.moreThan($min.result); }
+;
+
+longestDaysPastDueConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = LongestDaysPastDueCondition.lessThan($max.result); }
+;
+
+daysSinceLastPastDueCondition returns [MarketplaceFilterCondition result]:
+    'od posledního dne po splatnosti uplynulo ' (
+        (c1 = daysSinceLastPastDueConditionRangeOpen { $result = $c1.result; })
+        | (c2 = daysSinceLastPastDueConditionRangeClosedLeft { $result = $c2.result; })
+        | (c3 = daysSinceLastPastDueConditionRangeClosedRight { $result = $c3.result; })
+    ) MONTHS
+;
+
+daysSinceLastPastDueConditionRangeOpen returns [MarketplaceFilterCondition result]:
+    IS min=intExpr UP_TO max=intExpr
+    { $result = DaysSinceLastPastDueCondition.exact($min.result, $max.result); }
+;
+
+daysSinceLastPastDueConditionRangeClosedLeft returns [MarketplaceFilterCondition result]:
+    MORE_THAN min=intExpr
+    { $result = DaysSinceLastPastDueCondition.moreThan($min.result); }
+;
+
+daysSinceLastPastDueConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
+    LESS_THAN max=intExpr
+    { $result = DaysSinceLastPastDueCondition.lessThan($max.result); }
+;

@@ -18,9 +18,9 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public final class AllTimeDelinquencyCondition extends AbstractRangeCondition<Integer> {
+public final class LongestDaysPastDueCondition extends AbstractRangeCondition<Integer> {
 
-    private AllTimeDelinquencyCondition(final RangeCondition<Integer> condition) {
+    private LongestDaysPastDueCondition(final RangeCondition<Integer> condition) {
         super(condition);
     }
 
@@ -29,21 +29,21 @@ public final class AllTimeDelinquencyCondition extends AbstractRangeCondition<In
             .orElse(0);
     }
 
-    public static AllTimeDelinquencyCondition lessThan(final int threshold) {
-        final RangeCondition<Integer> c = RangeCondition.lessThan(AllTimeDelinquencyCondition::getDelinquentDays,
+    public static LongestDaysPastDueCondition lessThan(final int threshold) {
+        final RangeCondition<Integer> c = RangeCondition.lessThan(LongestDaysPastDueCondition::getDelinquentDays,
                 LOAN_TERM_DOMAIN, threshold);
-        return new AllTimeDelinquencyCondition(c);
+        return new LongestDaysPastDueCondition(c);
     }
 
-    public static AllTimeDelinquencyCondition moreThan(final int threshold) {
-        final RangeCondition<Integer> c = RangeCondition.moreThan(AllTimeDelinquencyCondition::getDelinquentDays,
+    public static LongestDaysPastDueCondition moreThan(final int threshold) {
+        final RangeCondition<Integer> c = RangeCondition.moreThan(LongestDaysPastDueCondition::getDelinquentDays,
                 LOAN_TERM_DOMAIN, threshold);
-        return new AllTimeDelinquencyCondition(c);
+        return new LongestDaysPastDueCondition(c);
     }
 
-    public static AllTimeDelinquencyCondition exact(final int minimumThreshold, final int maximumThreshold) {
-        final RangeCondition<Integer> c = RangeCondition.exact(AllTimeDelinquencyCondition::getDelinquentDays,
+    public static LongestDaysPastDueCondition exact(final int minimumThreshold, final int maximumThreshold) {
+        final RangeCondition<Integer> c = RangeCondition.exact(LongestDaysPastDueCondition::getDelinquentDays,
                 LOAN_TERM_DOMAIN, minimumThreshold, maximumThreshold);
-        return new AllTimeDelinquencyCondition(c);
+        return new LongestDaysPastDueCondition(c);
     }
 }

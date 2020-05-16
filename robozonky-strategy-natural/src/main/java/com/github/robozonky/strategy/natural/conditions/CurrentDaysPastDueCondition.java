@@ -18,32 +18,32 @@ package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.strategy.natural.Wrapper;
 
-public final class DaysSinceDelinquencyCondition extends AbstractRangeCondition<Integer> {
+public final class CurrentDaysPastDueCondition extends AbstractRangeCondition<Integer> {
 
-    private DaysSinceDelinquencyCondition(final RangeCondition<Integer> condition) {
+    private CurrentDaysPastDueCondition(final RangeCondition<Integer> condition) {
         super(condition);
     }
 
     private static int getDelinquentDays(Wrapper<?> w) {
-        return w.getDaysSinceDpd()
+        return w.getCurrentDpd()
             .orElse(0);
     }
 
-    public static DaysSinceDelinquencyCondition lessThan(final int threshold) {
-        final RangeCondition<Integer> c = RangeCondition.lessThan(DaysSinceDelinquencyCondition::getDelinquentDays,
+    public static CurrentDaysPastDueCondition lessThan(final int threshold) {
+        final RangeCondition<Integer> c = RangeCondition.lessThan(CurrentDaysPastDueCondition::getDelinquentDays,
                 LOAN_TERM_DOMAIN, threshold);
-        return new DaysSinceDelinquencyCondition(c);
+        return new CurrentDaysPastDueCondition(c);
     }
 
-    public static DaysSinceDelinquencyCondition moreThan(final int threshold) {
-        final RangeCondition<Integer> c = RangeCondition.moreThan(DaysSinceDelinquencyCondition::getDelinquentDays,
+    public static CurrentDaysPastDueCondition moreThan(final int threshold) {
+        final RangeCondition<Integer> c = RangeCondition.moreThan(CurrentDaysPastDueCondition::getDelinquentDays,
                 LOAN_TERM_DOMAIN, threshold);
-        return new DaysSinceDelinquencyCondition(c);
+        return new CurrentDaysPastDueCondition(c);
     }
 
-    public static DaysSinceDelinquencyCondition exact(final int minimumThreshold, final int maximumThreshold) {
-        final RangeCondition<Integer> c = RangeCondition.exact(DaysSinceDelinquencyCondition::getDelinquentDays,
+    public static CurrentDaysPastDueCondition exact(final int minimumThreshold, final int maximumThreshold) {
+        final RangeCondition<Integer> c = RangeCondition.exact(CurrentDaysPastDueCondition::getDelinquentDays,
                 LOAN_TERM_DOMAIN, minimumThreshold, maximumThreshold);
-        return new DaysSinceDelinquencyCondition(c);
+        return new CurrentDaysPastDueCondition(c);
     }
 }
