@@ -23,26 +23,37 @@ import javax.json.bind.annotation.JsonbTypeDeserializer;
 
 import com.github.robozonky.internal.util.json.MainIncomeIndustryDeserializer;
 
+/**
+ * See <a href="http://www.nace.cz/" />NACE</a>.
+ */
 @JsonbTypeDeserializer(MainIncomeIndustryDeserializer.class)
 public enum MainIncomeIndustry implements BaseEnum {
 
-    AUTOMOTIVE_INDUSTRY("Automobilový průmysl"),
-    TRANSPORTATION_AND_STORAGE("Doprava a skladování"),
-    IT("IT"),
-    FINANCIAL_AND_INSURANCE_ACTIVITIES("Peněžnictví a pojišťovnictví"),
-    SERVICE_ACTIVITIES("Služby"),
+    AGRICULTURE_FORESTRY_AND_FISHING("Zemědělství, lesnictví, rybářství"),
+    MINING_AND_QUARRYING("Těžba a dobývání"),
+    MANUFACTURING("Zpracovatelský průmysl"),
+    ELECTRICITY_GAS_STEAM_AND_AIR_CONDITIONING_SUPPLY(
+            "Výroba a rozvod elektřiny, plynu, tepla a klimatizovaného vzduchu"),
+    WATER_SUPPLY_AND_WASTE_MANAGEMENT("Zásobování vodou; činnosti související s odpadními vodami, odpady a sanacemi"),
     CONSTRUCTION("Stavebnictví"),
-    TELECOMMUNICATION_MEDIA("Telekomunikace, Média"),
+    WHOLESALE_AND_RETAIL_TRADE_AND_VEHICLE_REPAIR("Velkoobchod a maloobchod; opravy a údržba motorových vozidel"),
+    TRANSPORTATION_AND_STORAGE("Doprava a skladování"),
     ACCOMMODATION_AND_FOOD_SERVICE_ACTIVITIES("Ubytování, stravování a pohostinství"),
-    WHOLESALE_AND_RETAIL_TRADE("Velkoobchod a maloobchod"),
-    PUBLIC_ADMINISTRATION_AND_DEFENCE_COMPULSORY_SOCIAL_SECURITY("Veřejná správa a obrana; povin. sociál. zabezpečení"),
-    ELECTRICITY_GAS_STEAM_AND_AIR_CONDITIONING_SUPPLY("Výroba a rozvod elektřiny, plynu, tepla"),
+    IT_AND_TELCO("Informační a komunikační činnosti"),
+    FINANCIAL_AND_INSURANCE_ACTIVITIES("Peněžnictví a pojišťovnictví"),
+    REAL_ESTATE_ACTIVITIES("Činnosti v oblasti nemovitostí"),
+    SCIENTIFIC_AND_TECHNICAL_ACTIVITIES("Profesní, vědecké a technické činnosti"),
+    ADMINISTRATIVE_AND_SUPPORT_SERVICE_ACTIVITIES("Administrativní a podpůrné činnosti"),
+    PUBLIC_ADMINISTRATION_AND_DEFENCE_COMPULSORY_SOCIAL_SECURITY(
+            "Veřejná správa a obrana; povinné sociální zabezpečení"),
     EDUCATION("Vzdělávání"),
     HUMAN_HEALTH_AND_SOCIAL_WORK_ACTIVITIES("Zdravotní a sociální péče"),
-    AGRICULTURE_FORESTRY_AND_FISHING("Zemědělství, lesnictví a rybářství"),
-    MANUFACTURING("Zpracovatelský průmysl"),
-    OTHER_SERVICE_ACTIVITIES("Jiné"),
-    UNKNOWN("Neznámý obor");
+    CULTURAL_ENTERTAINMENT_AND_RECREATIONAL_ACTIVITIES("Kulturní, zábavní a rekreační činnosti"),
+    OTHER_SERVICE_ACTIVITIES("Ostatní činnosti"),
+    HOUSEHOLD_ACTIVITIES(
+            "Činnosti domácností jako zaměstnavatelů; činnosti domácností produkujících blíže neurčené výrobky a služby pro vlastní potřebu"),
+    EXTRATERRITORIAL_ORGANIZATIONS_ACTIVITIES("Činnosti exteritoriálních organizací a orgánů"),
+    UNKNOWN("Neznámé");
 
     private final String code;
 
