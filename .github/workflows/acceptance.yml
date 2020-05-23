@@ -18,11 +18,11 @@ jobs:
       with:
         java-version: 11
     - name: Compile all modules without testing
-      run: mvn --batch-mode clean install dependency:go-offline -Dgpg.skip -DskipTests
+      run: mvn --batch-mode clean install dependency:go-offline -DskipTests
     - name: Test all modules
-      run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+      run: mvn --batch-mode install -Dassembly.skipAssembly -Denforcer.skip -Dpit.skip=true
     - name: Test all modules incl. PITest and JaCoCo
-      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report -Dassembly.skipAssembly -Denforcer.skip -Dgpg.skip
+      run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent verify org.jacoco:jacoco-maven-plugin:report -Dassembly.skipAssembly -Denforcer.skip
     - name: Trigger SonarCloud
       run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky -Dsonar.java.source=11
   quick:
@@ -42,4 +42,4 @@ jobs:
         java-version: ${{ matrix.jvm }}
     - name: Compile and test all modules, skipping mutation coverage
       shell: bash
-      run: mvn --batch-mode verify -Denforcer.skip -Dgpg.skip -Dpit.skip=true
+      run: mvn --batch-mode verify -Denforcer.skip -Dpit.skip=true
