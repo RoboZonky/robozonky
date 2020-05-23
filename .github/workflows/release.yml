@@ -63,19 +63,19 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-app.jar
-          path: ./
+          path: ~/
       - name: Run JLink for the Main JAR
         run: |
-          .github/workflows/jlink.sh robozonky-app.jar app-jre
+          .github/workflows/jlink.sh ~/robozonky-app.jar app-jre
           zip -r robozonky-app-jre.zip app-jre
       - name: Download CLI JAR for JLink
         uses: actions/download-artifact@v1
         with:
           name: robozonky-cli.jar
-          path: ./
+          path: ~/
       - name: Run JLink for the CLI JAR
         run: |
-          .github/workflows/jlink.sh robozonky-cli.jar cli-jre
+          .github/workflows/jlink.sh ~/robozonky-cli.jar cli-jre
           zip -r robozonky-cli-jre.zip cli-jre
       - name: Determine OS shorthand # Avoid proliferation of Ubuntu and remove the -latest suffix
         run:
