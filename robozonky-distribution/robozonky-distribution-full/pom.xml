@@ -73,7 +73,6 @@
               <descriptors>
                 <descriptor>src/main/assembly/standard.xml</descriptor>
               </descriptors>
-              <finalName>${pom.artifactId}-${pom.version}</finalName>
               <formats>
                 <format>zip</format>
               </formats>
@@ -91,6 +90,16 @@
 
   <profiles>
     <profile>
+      <!--
+        During a release, three other distributions are built - each one including a JRE for a given platform.
+        (Windows, MacOS, Linux.)
+        Since Maven is making it difficult, this profile is ugly.
+        It does the same thing three times, once for each platform:
+        - Assumes that the JREs have been externally provided by some CI somewhere.
+        - Takes the JRE for a platform and packages it together with the platform-independent JAR.
+        - Builds and attaches the platform-specific JAR.
+        This JAR then needs to be taken by robozonky-installer to create platform-specific installers.
+        -->
       <id>release</id>
       <activation>
         <activeByDefault>false</activeByDefault>
