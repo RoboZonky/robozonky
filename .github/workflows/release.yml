@@ -22,7 +22,7 @@ jobs:
       - name: Set up the JDK
         uses: actions/setup-java@v1
         with:
-          java-version: $JDK_VERSION
+          java-version: ${{ env.JDK_VERSION }}
       - name: Import GPG secrets
         shell: bash
         run: echo ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}|gpg --allow-secret-key-import
