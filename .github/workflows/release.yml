@@ -4,6 +4,7 @@ on: [pull_request]
 
 env:
   JDK_VERSION: 14
+  JLINK_SCRIPT_FILENAME: ".github/workflows/jlink.sh"
   PRENATIVE_REPO_FILENAME: "robozonky-build-prenative.zip"
 
 defaults:
@@ -53,17 +54,8 @@ jobs:
             --non-recursive \
             org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
           )
+          echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
           echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
-      - name: Check RoboZonky version
-        run: echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
-      - name: Run JLink for the Main JAR
-        run: |
-          .github/workflows/jlink.sh robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/app-jre
-          zip -r ${{ github.workspace }}/robozonky-app-jre.zip ${{ github.workspace }}/app-jre
-      - name: Run JLink for the CLI JAR
-        run: |
-          .github/workflows/jlink.sh robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/cli-jre
-          zip -r ${{ github.workspace }}/robozonky-cli-jre.zip ${{ github.workspace }}/cli-jre
       - name: Determine OS shorthand # Avoid proliferation of Ubuntu and remove the -latest suffix
         run:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
@@ -73,11 +65,18 @@ jobs:
           else
           echo "::set-env name=ROBOZONKY_OS::linux"
           fi
+      - name: Run JLink for the JARs
+        run: |
+          chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/app/jre
+          zip -r ${{ github.workspace }}/robozonky-app-jre-$ROBOZONKY_OS.zip ${{ github.workspace }}/app/jre
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/cli/jre
+          zip -r ${{ github.workspace }}/robozonky-cli-jre-$ROBOZONKY_OS.zip ${{ github.workspace }}/cli/jre
       - name: Upload JLinked JREs
         uses: actions/upload-artifact@v2
         with:
           name: robozonky-jre-$ROBOZONKY_OS
-          path: ${{ github.workspace }}/robozonky-*-jre.zip
+          path: ${{ github.workspace }}/robozonky-*jre*.zip
   distributions1:
     name: Prepare distribution archives for Main daemon and CLI
     needs: jlink1
@@ -98,17 +97,17 @@ jobs:
       - name: Download Linux JREs
         uses: actions/download-artifact@v2
         with:
-          name: robozonky-jre-linux.zip
+          name: robozonky-jre-linux
           path: robozonky-distributions/robozonky-distributions-full/target/
       - name: Download MacOS JREs
         uses: actions/download-artifact@v2
         with:
-          name: robozonky-jre-macos.zip
+          name: robozonky-jre-macos
           path: robozonky-distributions/robozonky-distributions-full/target/
       - name: Download Windows JREs
         uses: actions/download-artifact@v2
         with:
-          name: robozonky-jre-windows.zip
+          name: robozonky-jre-windows
           path: robozonky-distributions/robozonky-distributions-full/target/
 
 #jobs:
