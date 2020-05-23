@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: robozonky-build.zip
-          path: $GITHUB_WORKSPACE/robozonky-build.zip
+          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
   jlink1:
     name: JLink the Main app and CLI binaries
     needs: build_project
@@ -43,7 +43,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-build.zip
-          path: $GITHUB_WORKSPACE/robozonky-build.zip
+          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
       - name: Unzip the build directory
         run:
           unzip $GITHUB_WORKSPACE/robozonky-build.zip .
@@ -83,12 +83,12 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: robozonky-app-jre-$ROBOZONKY_OS.zip
-          path: $GITHUB_WORKSPACE/robozonky-app-jre.zip
+          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-app-jre.zip
       - name: Upload JLinked JRE for CLI JAR
         uses: actions/upload-artifact@v1
         with:
           name: robozonky-cli-jre-$ROBOZONKY_OS.zip
-          path: $GITHUB_WORKSPACE/robozonky-cli-jre.zip
+          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-cli-jre.zip
   distributions1:
     name: Prepare distribution archives for Main daemon and CLI
     needs: jlink1
@@ -98,7 +98,7 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-build.zip
-          path: $GITHUB_WORKSPACE/robozonky-build.zip
+          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
       - name: Unzip the build directory
         run:
           unzip $GITHUB_WORKSPACE/robozonky-build.zip .
