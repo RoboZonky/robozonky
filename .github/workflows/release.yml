@@ -4,6 +4,7 @@ on: [pull_request]
 
 env:
   JDK_VERSION: 14
+  BUILD_ROOT_PATH: "${{ env.GITHUB_WORKSPACE }}/checkout"
 
 defaults:
   run:
@@ -16,6 +17,8 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
+        with:
+          path: ${{ env.BUILD_ROOT_PATH }}
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
@@ -24,7 +27,7 @@ jobs:
         run: mvn clean install --batch-mode -DskipTests
       - name: Compress the build directory
         run: |
-          zip -r ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip .
+          zip -r ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip ${{ env.BUILD_ROOT_PATH }}
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v1
         with:
@@ -64,11 +67,11 @@ jobs:
         run: echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
       - name: Run JLink for the Main JAR
         run: |
-          .github/workflows/jlink.sh robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ env.GITHUB_WORKSPACE }}/app-jre
+          .github/workflows/jlink.sh ${{ env.BUILD_ROOT_PATH}}/robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ env.GITHUB_WORKSPACE }}/app-jre
           zip -r ${{ env.GITHUB_WORKSPACE }}/robozonky-app-jre.zip ${{ env.GITHUB_WORKSPACE }}/app-jre
       - name: Run JLink for the CLI JAR
         run: |
-          .github/workflows/jlink.sh robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar ${{ env.GITHUB_WORKSPACE }}/cli-jre
+          .github/workflows/jlink.sh ${{ env.BUILD_ROOT_PATH}}/robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar ${{ env.GITHUB_WORKSPACE }}/cli-jre
           zip -r ${{ env.GITHUB_WORKSPACE }}/robozonky-cli-jre.zip ${{ env.GITHUB_WORKSPACE }}/cli-jre
       - name: Determine OS shorthand # Avoid proliferation of Ubuntu and remove the -latest suffix
         run:
@@ -94,8 +97,14 @@ jobs:
     needs: jlink1
     runs-on: ubuntu-latest
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
+      - name: Download the build directory
+        uses: actions/download-artifact@v1
+        with:
+          name: robozonky-build.zip
+          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
+      - name: Unzip the build directory
+        run:
+          unzip ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip .
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
@@ -104,32 +113,32 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-app-jre-ubuntu-latest.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-linux.zip
+          path: ${{ env.BUILD_ROOT_PATH}}/robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-linux.zip
       - name: Download MacOS JREs for Main JAR
         uses: actions/download-artifact@v1
         with:
           name: robozonky-app-jre-macos-latest.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-macos.zip
+          path: ${{ env.BUILD_ROOT_PATH}}/robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-macos.zip
       - name: Download Windows JREs for Main JAR
         uses: actions/download-artifact@v1
         with:
           name: robozonky-app-jre-windows-latest.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-windows.zip
+          path: ${{ env.BUILD_ROOT_PATH}}/robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-windows.zip
       - name: Download Linux JREs for CLI JAR
         uses: actions/download-artifact@v1
         with:
           name: robozonky-cli-jre-linux.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-linux.zip
+          path: ${{ env.BUILD_ROOT_PATH}}/robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-linux.zip
       - name: Download MacOS JREs for CLI JAR
         uses: actions/download-artifact@v1
         with:
           name: robozonky-cli-jre-macos.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-macos.zip
+          path: ${{ env.BUILD_ROOT_PATH}}/robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-macos.zip
       - name: Download Windows JREs for CLI JAR
         uses: actions/download-artifact@v1
         with:
           name: robozonky-cli-jre-windows.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-windows.zip
+          path: ${{ env.BUILD_ROOT_PATH}}/robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-windows.zip
 
 #jobs:
 #  release:
