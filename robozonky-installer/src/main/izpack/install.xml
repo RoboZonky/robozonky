@@ -182,7 +182,7 @@
   <packs>
     <pack id="main" name="Main" required="yes">
       <description>Jádro investičního robota a základní podpůrné soubory</description>
-      <file src="robozonky-distribution-full-@{project.version}.zip"
+      <file src="@REPLACE_BY_FILTERING@"
             targetdir="${INSTALL_PATH}/Dist"
             override="true"
             unpack="true"/>

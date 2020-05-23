@@ -32,6 +32,7 @@
     <project.version>${project.version}</project.version> <!-- Weird IZPack quirk, doesn't read the prop otherwise. -->
     <pit.threshold>80</pit.threshold> <!-- This uses a 3rd party UI app (IZPack), hard to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+    <filtered.izpack.descriptors.target>${project.build.directory}/izpack-descriptors</filtered.izpack.descriptors.target>
   </properties>
 
   <dependencies>
@@ -110,15 +111,39 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
           <excludeTransitive>true</excludeTransitive>
-          <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:zip</artifact>
           <outputDirectory>${project.build.directory}</outputDirectory>
         </configuration>
         <executions>
           <execution>
-            <id>prepare-dependencies</id>
+            <id>prepare-dependencies-noarch</id>
             <phase>prepare-package</phase>
             <goals>
               <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:zip:noarch</artifact>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>antrun-noarch</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <target>
+                <filter token="REPLACE_BY_FILTERING"
+                        value="robozonky-distribution-full-@{project.version}-noarch.zip"/>
+                <copy file="src/main/izpack/install.xml"
+                      tofile="${filtered.izpack.descriptors.target}/install-noarch.xml"
+                      filtering="true"
+                      overwrite="true"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
             </goals>
           </execution>
         </executions>
@@ -148,10 +173,9 @@
               <autoIncludeDevelopers>true</autoIncludeDevelopers>
               <autoIncludeUrl>false</autoIncludeUrl>
               <baseDir>${project.build.directory}</baseDir>
-              <classifier>izpack</classifier>
-              <comprFormat>xz</comprFormat>
+              <classifier>noarch</classifier>
               <enableAttachArtifact>true</enableAttachArtifact>
-              <installFile>${basedir}/src/main/izpack/install.xml</installFile>
+              <installFile>${filtered.izpack.descriptors.target}/install-noarch.xml</installFile>
             </configuration>
           </execution>
         </executions>
@@ -159,4 +183,167 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>release</id>
+      <activation>
+        <property>
+          <name>release</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <configuration>
+              <excludeTransitive>true</excludeTransitive>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-dependencies-arch</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>com.github.robozonky.distribution</groupId>
+                      <artifactId>robozonky-distribution-full</artifactId>
+                      <version>${project.version}</version>
+                      <type>zip</type>
+                      <classifier>windows-amd64</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>com.github.robozonky.distribution</groupId>
+                      <artifactId>robozonky-distribution-full</artifactId>
+                      <version>${project.version}</version>
+                      <type>zip</type>
+                      <classifier>darwin-amd64</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>com.github.robozonky.distribution</groupId>
+                      <artifactId>robozonky-distribution-full</artifactId>
+                      <version>${project.version}</version>
+                      <type>tar.xz</type>
+                      <classifier>linux-amd64</classifier>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>antrun-windows</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <filter token="REPLACE_BY_FILTERING"
+                            value="robozonky-distribution-full-@{project.version}-windows-amd64.zip"/>
+                    <copy file="src/main/izpack/install.xml"
+                          tofile="${filtered.izpack.descriptors.target}/install-windows.xml"
+                          filtering="true"
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>antrun-macos</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <filter token="REPLACE_BY_FILTERING"
+                            value="robozonky-distribution-full-@{project.version}-darwin-amd64.zip"/>
+                    <copy file="src/main/izpack/install.xml"
+                          tofile="${filtered.izpack.descriptors.target}/install-macos.xml"
+                          filtering="true"
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>antrun-linux</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <filter token="REPLACE_BY_FILTERING"
+                            value="robozonky-distribution-full-@{project.version}-linux-amd64.tar.xz"/>
+                    <copy file="src/main/izpack/install.xml"
+                          tofile="${filtered.izpack.descriptors.target}/install-linux.xml"
+                          filtering="true"
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.izpack</groupId>
+            <artifactId>izpack-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>izpack-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+                <configuration>
+                  <autoIncludeDevelopers>true</autoIncludeDevelopers>
+                  <autoIncludeUrl>false</autoIncludeUrl>
+                  <baseDir>${project.build.directory}</baseDir>
+                  <classifier>windows-amd64</classifier>
+                  <enableAttachArtifact>true</enableAttachArtifact>
+                  <installFile>${filtered.izpack.descriptors.target}/install-windows.xml</installFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>izpack-macos</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+                <configuration>
+                  <autoIncludeDevelopers>true</autoIncludeDevelopers>
+                  <autoIncludeUrl>false</autoIncludeUrl>
+                  <baseDir>${project.build.directory}</baseDir>
+                  <classifier>darwin-amd64</classifier>
+                  <enableAttachArtifact>true</enableAttachArtifact>
+                  <installFile>${filtered.izpack.descriptors.target}/install-macos.xml</installFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>izpack-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+                <configuration>
+                  <autoIncludeDevelopers>true</autoIncludeDevelopers>
+                  <autoIncludeUrl>false</autoIncludeUrl>
+                  <baseDir>${project.build.directory}</baseDir>
+                  <classifier>linux-amd64</classifier>
+                  <enableAttachArtifact>true</enableAttachArtifact>
+                  <installFile>${filtered.izpack.descriptors.target}/install-linux.xml</installFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

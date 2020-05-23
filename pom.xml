@@ -709,6 +709,10 @@
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.7.0.1746</version>
         </plugin>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
         <!-- Override to older versions otherwise installer deployment fails. -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
