@@ -109,14 +109,10 @@ jobs:
         with:
           name: robozonky-installer-jre-windows
           path: robozonky-distribution/robozonky-distribution-installer/target/jre-windows
-      - name: Build platform-specific distribution binaries
-        run: |
-          mvn install --batch-mode -Prelease -Dgpg.skip
-      - name: Sign and Deploy
+      - name: Build, sign and deploy
         uses: samuelmeuli/action-maven-publish@v1
         with:
           maven_profiles: release
-          maven_goals_phases: deploy
           gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
           server_id: ossrh
