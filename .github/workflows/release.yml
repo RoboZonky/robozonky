@@ -24,8 +24,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.RUN_TIME_JDK_VERSION }}
-      - name: Run the build
-        run: mvn install --batch-mode
+      - name: Build and test
+        run: mvn install --batch-mode -Dpit.skip=true
   jlink:
     name: Prepare jlink-ed JREs
     needs: test
