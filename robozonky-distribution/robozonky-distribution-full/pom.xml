@@ -74,6 +74,7 @@
               </descriptors>
             </configuration>
             <id>package-standard</id>
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
