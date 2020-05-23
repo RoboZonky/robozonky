@@ -110,7 +110,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <configuration>
           <excludeTransitive>true</excludeTransitive>
-          <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:tar.xz</artifact>
+          <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:zip</artifact>
           <outputDirectory>${project.build.directory}</outputDirectory>
         </configuration>
         <executions>
