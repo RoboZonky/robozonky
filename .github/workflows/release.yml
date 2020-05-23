@@ -6,7 +6,6 @@ env:
   JDK_VERSION: 14
   JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
   PRENATIVE_REPO_FILENAME: robozonky-build-prenative.zip
-  JLINKED_JRE_STORAGE_PATH: ${{ github.workspace }}/robozonky-jre
 
 defaults:
   run:
@@ -74,13 +73,13 @@ jobs:
       - name: Run JLink for the JAR
         run: |
           chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
-          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar ${{ env.JLINKED_JRE_STORAGE_PATH }}
-          ls -Rl ${{ env.JLINKED_JRE_STORAGE_PATH }}
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
+          ls -Rl robozonky-jre
       - name: Upload JLinked JRE
         uses: actions/upload-artifact@v2
         with:
           name: robozonky-jre-${{ env.ROBOZONKY_OS }}
-          path: ${{ env.JLINKED_JRE_STORAGE_PATH }}/**/*
+          path: robozonky-jre/**/*
   distributions1:
     name: Prepare distribution archive for the JLinked JAR
     needs: jlink1
