@@ -1,0 +1,36 @@
+name: Acceptance Criteria
+
+on: [push, pull_request]
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  OSSRH_USERNAME: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
+  OSSRH_PASSWORD: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
+
+jobs:
+  name: Cross-platform release test
+  strategy:
+    fail-fast: false # Always see all results on all platforms.
+    matrix:
+      os: [ubuntu-latest, windows-latest, macos-latest]
+      jvm: 14
+  runs-on: ${{ matrix.os }}
+  steps:
+    - name: Checkout from Github
+      uses: actions/checkout@v1
+    - name: Set up the JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.jvm }}
+    - name: Import GPG secrets
+      shell: bash
+      run: echo ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}|gpg --allow-secret-key-import
+    - name: Do a dry run release
+      shell: bash
+      run: mvn release:prepare \
+        -s .github/workflows/release-settings.xml
+        -Drobozonky.release.ossrh.secret=${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }} \
+        -Dgpg.keyname=311F22A9B179B01EB498253F78CB41E48454CBAC \
+        -Dgpg.passprase=${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }} \
+        -DdryRun=true \
+        -Darguments="-DskipTests=true"
