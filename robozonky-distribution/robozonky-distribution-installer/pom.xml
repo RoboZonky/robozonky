@@ -112,7 +112,7 @@
           <groupId>com.github.robozonky</groupId>
           <artifactId>robozonky-installer</artifactId>
           <version>${project.version}</version>
-          <classifier>darwin-x64</classifier>
+          <classifier>macos-x64</classifier>
         </dependency>
         <dependency>
           <groupId>com.github.robozonky</groupId>
