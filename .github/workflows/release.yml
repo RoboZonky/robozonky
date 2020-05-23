@@ -26,6 +26,7 @@ jobs:
         run: mvn clean install --batch-mode -DskipTests
       - name: Compress the build directory
         run: |
+          mkdir ${{ env.BYPRODUCT_DIR }}/
           zip -r ${{ env.BYPRODUCT_DIR }}/robozonky-build.zip .
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v1
