@@ -1,6 +1,6 @@
 name: Release
 
-on: [push, pull_request]
+on: [pull_request]
 
 env:
   JDK_VERSION: 14
