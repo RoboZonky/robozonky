@@ -56,15 +56,20 @@ jobs:
           )
           echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
           echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
-      - name: Determine OS shorthand # Avoid proliferation of Ubuntu and remove the -latest suffix
-        run:
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          echo "::set-env name=ROBOZONKY_OS::windows"
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-          echo "::set-env name=ROBOZONKY_OS::macos"
-          else
-          echo "::set-env name=ROBOZONKY_OS::linux"
-          fi
+      # Avoid proliferation of Ubuntu and remove the -latest suffix.
+      - name: This is Mac OS X
+          - if: startsWith(matrix.os, 'macos')
+            run: |
+              echo "::set-env name=ROBOZONKY_OS::macos"
+      - name: This is Windows
+          - if: startsWith(matrix.os, 'windows')
+            run: |
+              echo "::set-env name=ROBOZONKY_OS::windows"
+      - name: This is Linux
+          - if: !startsWith(matrix.os, 'windows') && !startsWith(matrix.os, 'macos')
+            run: |
+              echo "::set-env name=ROBOZONKY_OS::linux"
+      # Build and publish the JLinked JREs.
       - name: Run JLink for the JARs
         run: |
           chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
