@@ -24,12 +24,12 @@ jobs:
         run: mvn clean install --batch-mode -DskipTests
       - name: Compress the build directory
         run: |
-          zip -r $GITHUB_WORKSPACE/robozonky-build.zip .
+          zip -r ${{ github.workspace }}/robozonky-build.zip .
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v1
         with:
           name: robozonky-build.zip
-          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
+          path: ${{ github.workspace }}/robozonky-build.zip
   jlink1:
     name: JLink the Main app and CLI binaries
     needs: build_project
@@ -43,10 +43,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-build.zip
-          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
+          path: ${{ github.workspace }}/robozonky-build.zip
       - name: Unzip the build directory
         run:
-          unzip $GITHUB_WORKSPACE/robozonky-build.zip .
+          unzip ${{ github.workspace }}/robozonky-build.zip .
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
@@ -64,12 +64,12 @@ jobs:
         run: echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
       - name: Run JLink for the Main JAR
         run: |
-          .github/workflows/jlink.sh robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar $GITHUB_WORKSPACE/app-jre
-          zip -r $GITHUB_WORKSPACE/robozonky-app-jre.zip $GITHUB_WORKSPACE/app-jre
+          .github/workflows/jlink.sh robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/app-jre
+          zip -r ${{ github.workspace }}/robozonky-app-jre.zip ${{ github.workspace }}/app-jre
       - name: Run JLink for the CLI JAR
         run: |
-          .github/workflows/jlink.sh robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar $GITHUB_WORKSPACE/cli-jre
-          zip -r $GITHUB_WORKSPACE/robozonky-cli-jre.zip $GITHUB_WORKSPACE/cli-jre
+          .github/workflows/jlink.sh robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/cli-jre
+          zip -r ${{ github.workspace }}/robozonky-cli-jre.zip ${{ github.workspace }}/cli-jre
       - name: Determine OS shorthand # Avoid proliferation of Ubuntu and remove the -latest suffix
         run:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
@@ -83,12 +83,12 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: robozonky-app-jre-$ROBOZONKY_OS.zip
-          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-app-jre.zip
+          path: ${{ github.workspace }}/robozonky-app-jre.zip
       - name: Upload JLinked JRE for CLI JAR
         uses: actions/upload-artifact@v1
         with:
           name: robozonky-cli-jre-$ROBOZONKY_OS.zip
-          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-cli-jre.zip
+          path: ${{ github.workspace }}/robozonky-cli-jre.zip
   distributions1:
     name: Prepare distribution archives for Main daemon and CLI
     needs: jlink1
@@ -98,10 +98,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-build.zip
-          path: ${{ env.GITHUB_WORKSPACE }}/robozonky-build.zip
+          path: ${{ github.workspace }}/robozonky-build.zip
       - name: Unzip the build directory
         run:
-          unzip $GITHUB_WORKSPACE/robozonky-build.zip .
+          unzip ${{ github.workspace }}/robozonky-build.zip .
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
