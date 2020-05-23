@@ -1,6 +1,6 @@
 name: Acceptance Criteria
 
-on: []
+on: [pull_request]
 
 env:
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
