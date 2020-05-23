@@ -15,8 +15,6 @@ env:
   COMPILE_TIME_JDK_VERSION: 11
   RUNTIME_JDK_VERSION: 14
   JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
-  PRENATIVE_REPO_FILENAME: robozonky-build-prenative.zip
-  POSTNATIVE_REPO_FILENAME: robozonky-build-postnative.zip
 
 defaults:
   run:
