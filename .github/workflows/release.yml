@@ -24,7 +24,7 @@ jobs:
         with:
           java-version: ${{ env.JDK_VERSION }}
       - name: Run the build
-        run: mvn clean install --batch-mode -DskipTests
+        run: mvn install --batch-mode -Prelease -Pgpg.skip
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v2
         with:
@@ -95,24 +95,24 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-linux
-          path: robozonky-distributions/robozonky-distributions-full/target/jre-linux
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-linux
       - name: Download MacOS main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-macos
-          path: robozonky-distributions/robozonky-distributions-full/target/jre-macos
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-macos
       - name: Download Windows main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-windows
-          path: robozonky-distributions/robozonky-distributions-full/target/jre-windows
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-windows
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JDK_VERSION }}
       - name: Build platform-specific distributions # Don't run "clean", otherwise would have lost the pre-built artifacts.
         run: |
-          mvn install --batch-mode -Prelease -Dgpg.skip -DskipTests
+          mvn install --batch-mode -Prelease -Dgpg.skip
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v2
         with:

@@ -617,7 +617,8 @@
               <goal>test-jar</goal>
             </goals>
             <configuration>
-                <skip>${com.github.robozonky.distribution}</skip>
+              <forceCreation>false</forceCreation>
+              <skip>${com.github.robozonky.distribution}</skip>
             </configuration>
           </execution>
         </executions>
@@ -738,6 +739,9 @@
       <activation>
         <activeByDefault>false</activeByDefault>
       </activation>
+      <properties>
+        <skipTests>true</skipTests>
+      </properties>
       <build>
         <plugins>
           <plugin>
