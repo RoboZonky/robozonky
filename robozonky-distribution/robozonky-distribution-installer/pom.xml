@@ -96,7 +96,10 @@
         -->
       <id>release</id>
       <activation>
-        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>${maven.release.property}</name>
+          <value>true</value>
+        </property>
       </activation>
       <dependencies>
         <dependency>
