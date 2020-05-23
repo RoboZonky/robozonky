@@ -24,7 +24,7 @@ jobs:
         with:
           java-version: ${{ env.JDK_VERSION }}
       - name: Run the build
-        run: mvn install --batch-mode -Prelease -Pgpg.skip
+        run: mvn install --batch-mode -Prelease -Dgpg.skip
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v2
         with:
