@@ -58,17 +58,17 @@ jobs:
           echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
       # Avoid proliferation of Ubuntu and remove the -latest suffix.
       - name: This is Mac OS X
-          - if: startsWith(matrix.os, 'macos')
-            run: |
-              echo "::set-env name=ROBOZONKY_OS::macos"
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          echo "::set-env name=ROBOZONKY_OS::macos"
       - name: This is Windows
-          - if: startsWith(matrix.os, 'windows')
-            run: |
-              echo "::set-env name=ROBOZONKY_OS::windows"
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          echo "::set-env name=ROBOZONKY_OS::windows"
       - name: This is Linux
-          - if: !startsWith(matrix.os, 'windows') && !startsWith(matrix.os, 'macos')
-            run: |
-              echo "::set-env name=ROBOZONKY_OS::linux"
+        if: !startsWith(matrix.os, 'windows') && !startsWith(matrix.os, 'macos')
+        run: |
+          echo "::set-env name=ROBOZONKY_OS::linux"
       # Build and publish the JLinked JREs.
       - name: Run JLink for the JARs
         run: |
