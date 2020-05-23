@@ -13,21 +13,8 @@ defaults:
     shell: bash
 
 jobs:
-  build_project:
-    name: Build the project
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Install Java and Maven
-        uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.JDK_VERSION }}
-      - name: Run the build
-        run: mvn install --batch-mode -DskipTests
-  jlink1:
-    name: JLink the main binary
-    needs: build_project
+  jlink:
+    name: Build the project and prepare jlink-ed JREs for the binaries
     strategy:
       fail-fast: false # Always see all results on all platforms.
       matrix:
@@ -40,6 +27,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JDK_VERSION }}
+      - name: Run the build
+        run: mvn install --batch-mode -DskipTests
       - name: Determine RoboZonky version
         run: |
           ROBOZONKY_VERSION=$(mvn -q \
@@ -79,9 +68,9 @@ jobs:
         with:
           name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
           path: robozonky-installer-jre/**/*
-  distributions1:
+  distributions:
     name: Prepare distribution archive for the JLinked JAR
-    needs: jlink1
+    needs: jlink
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
