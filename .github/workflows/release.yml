@@ -20,13 +20,13 @@ jobs:
           java-version: ${{ env.JDK_VERSION }}
       - name: Import GPG secrets
         shell: bash
-        run: echo ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}|gpg --allow-secret-key-import
+        run: echo "${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}" >> secret.gpg
       - name: Compile all modules without testing
         run: mvn --batch-mode clean install dependency:go-offline -Dgpg.skip -DskipTests
       - name: Deploy Maven package
         uses: samuelmeuli/action-maven-publish@v1
         with:
-          gpg_private_key: 311F22A9B179B01EB498253F78CB41E48454CBAC
+          gpg_private_key: secret.gpg
           gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
           nexus_username: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
           nexus_password: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
