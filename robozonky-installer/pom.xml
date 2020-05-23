@@ -25,9 +25,11 @@
 
   <artifactId>robozonky-installer</artifactId>
 
-  <name>RoboZonky: Custom panels for the installer</name>
+  <name>RoboZonky: Executable installer package</name>
+  <packaging>izpack-jar</packaging>
 
   <properties>
+    <project.version>${project.version}</project.version> <!-- Weird IZPack quirk, doesn't read the prop otherwise. -->
     <pit.threshold>80</pit.threshold> <!-- This uses a 3rd party UI app (IZPack), hard to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
@@ -101,5 +103,64 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <excludeTransitive>true</excludeTransitive>
+          <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:tar.xz</artifact>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <!-- Prepare single JAR with dependencies of installer panels to be used as dependency in IZPack JAR. -->
+            <configuration>
+              <attach>false</attach>
+              <descriptors>
+                <!--
+                  By default, jar-with-dependencies will overwrite META-INF/services when there's more than 1 for each
+                  kind of service. This descriptor will merge them instead.
+                -->
+                <descriptor>src/main/assembly/installer.xml</descriptor>
+              </descriptors>
+            </configuration>
+            <id>merge-installer-jars</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-maven-plugin</artifactId>
+        <version>${version.org.codehaus.izpack}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <baseDir>${project.build.directory}</baseDir>
+          <installFile>${basedir}/src/main/izpack/install.xml</installFile>
+          <classifier>full</classifier>
+          <autoIncludeUrl>false</autoIncludeUrl>
+          <autoIncludeDevelopers>true</autoIncludeDevelopers>
+          <comprFormat>xz</comprFormat>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

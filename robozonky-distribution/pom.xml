@@ -28,10 +28,6 @@
 
   <name>RoboZonky Distribution: User-facing deliverables</name>
 
-  <properties>
-    <com.github.robozonky.distribution.main>override.this.in.child.poms</com.github.robozonky.distribution.main>
-  </properties>
-
   <modules> <!-- other components are only enabled conditionally -->
     <module>robozonky-distribution-full</module>
   </modules>
@@ -46,7 +42,6 @@
       </activation>
       <modules>
         <module>robozonky-distribution-aggregate</module>
-        <module>robozonky-distribution-installer</module>
       </modules>
     </profile>
   </profiles>
