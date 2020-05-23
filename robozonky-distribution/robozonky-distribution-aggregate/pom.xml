@@ -26,7 +26,7 @@
   <groupId>com.github.robozonky.distribution</groupId>
   <artifactId>robozonky-distribution-aggregate</artifactId>
 
-  <name>RoboZonky Distributions: Aggregate</name>
+  <name>RoboZonky Distribution: Aggregate</name>
   <description>Exists for the purposes of generating aggregate reports such as JaCoCo.</description>
 
   <properties>

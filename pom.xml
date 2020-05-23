@@ -715,17 +715,6 @@
           <artifactId>maven-antrun-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-        <!-- Override to older versions otherwise installer deployment fails. -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.5.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
-        </plugin>
       </plugins>
     </pluginManagement>
   </build>

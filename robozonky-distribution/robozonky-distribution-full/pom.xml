@@ -27,7 +27,7 @@
   <artifactId>robozonky-distribution-full</artifactId>
   <packaging>pom</packaging>
 
-  <name>RoboZonky Distribution: Full binary archive</name>
+  <name>RoboZonky Distribution: Standalone archives</name>
 
   <properties>
     <com.github.robozonky.distribution>true</com.github.robozonky.distribution>

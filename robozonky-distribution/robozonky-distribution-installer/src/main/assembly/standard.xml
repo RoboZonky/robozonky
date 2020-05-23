@@ -61,7 +61,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../robozonky-distribution-full/src/main/assembly/resources</directory>
+      <directory>src/main/assembly/resources</directory>
       <lineEnding>dos</lineEnding>
       <filtered>false</filtered>
       <outputDirectory/>
