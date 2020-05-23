@@ -4,8 +4,9 @@ on: [pull_request]
 
 env:
   JDK_VERSION: 14
-  JLINK_SCRIPT_FILENAME: ".github/workflows/jlink.sh"
-  PRENATIVE_REPO_FILENAME: "robozonky-build-prenative.zip"
+  JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
+  PRENATIVE_REPO_FILENAME: robozonky-build-prenative.zip
+  JLINKED_JRE_STORAGE_PATH: ${{ github.workspace }}/robozonky-jre
 
 defaults:
   run:
@@ -73,12 +74,13 @@ jobs:
       - name: Run JLink for the JAR
         run: |
           chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
-          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/robozonky-jre
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar ${{ env.JLINKED_JRE_STORAGE_PATH }}
+          ls -Rl ${{ env.JLINKED_JRE_STORAGE_PATH }}
       - name: Upload JLinked JRE
         uses: actions/upload-artifact@v2
         with:
-          name: robozonky-jre-$ROBOZONKY_OS
-          path: ${{ github.workspace }}/robozonky-jre/**/*
+          name: robozonky-jre-${{ env.ROBOZONKY_OS }}
+          path: ${{ env.JLINKED_JRE_STORAGE_PATH }}/**/*
   distributions1:
     name: Prepare distribution archive for the JLinked JAR
     needs: jlink1
@@ -87,15 +89,8 @@ jobs:
       - name: Download the build directory
         uses: actions/download-artifact@v2
         with:
-          name: robozonky-build.zip
+          name: ${{ env.PRENATIVE_REPO_FILENAME }}
           path: ${{ github.workspace }}/.
-      - name: Unzip the build directory
-        run:
-          unzip ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }} .
-      - name: Install Java and Maven
-        uses: actions/setup-java@v1
-        with:
-          java-version: ${{ env.JDK_VERSION }}
       - name: Download Linux main app JRE
         uses: actions/download-artifact@v2
         with:
@@ -111,6 +106,10 @@ jobs:
         with:
           name: robozonky-jre-windows
           path: robozonky-distributions/robozonky-distributions-full/target/jre-windows
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JDK_VERSION }}
 
 #jobs:
 #  release:
