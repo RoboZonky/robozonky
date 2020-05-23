@@ -70,11 +70,10 @@
           <execution>
             <!-- Prepare compressed distributions of the executable app. -->
             <configuration>
-              <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
                 <descriptor>src/main/assembly/standard.xml</descriptor>
               </descriptors>
-              <finalName>${pom.artifactId}-${pom.version}-noarch</finalName>
+              <finalName>${pom.artifactId}-${pom.version}</finalName>
               <formats>
                 <format>zip</format>
               </formats>
@@ -127,7 +126,6 @@
             <executions>
               <execution>
                 <configuration>
-                  <appendAssemblyId>true</appendAssemblyId>
                   <descriptors>
                     <descriptor>src/main/assembly/native-linux.xml</descriptor>
                   </descriptors>
@@ -140,7 +138,6 @@
               </execution>
               <execution>
                 <configuration>
-                  <appendAssemblyId>true</appendAssemblyId>
                   <descriptors>
                     <descriptor>src/main/assembly/native-windows.xml</descriptor>
                   </descriptors>
@@ -153,7 +150,6 @@
               </execution>
               <execution>
                 <configuration>
-                  <appendAssemblyId>true</appendAssemblyId>
                   <descriptors>
                     <descriptor>src/main/assembly/native-macos.xml</descriptor>
                   </descriptors>
