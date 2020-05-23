@@ -8,8 +8,6 @@ env:
 defaults:
   run:
     shell: bash
-    working-directory:
-
 
 jobs:
   build_project:
