@@ -24,10 +24,10 @@ jobs:
       - name: Run the build
         run: mvn clean install --batch-mode -DskipTests
       - name: Share the build directory # So that all subsequent steps use identical binaries.
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PRENATIVE_REPO_FILENAME }}
-          path: "**/*"
+          path: '**/*'
   jlink1:
     name: JLink the Main app and CLI binaries
     needs: build_project
@@ -38,7 +38,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Download the build directory
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: ${{ env.PRENATIVE_REPO_FILENAME }}
       - name: Install Java and Maven
@@ -74,7 +74,7 @@ jobs:
           echo "::set-env name=ROBOZONKY_OS::linux"
           fi
       - name: Upload JLinked JREs
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: robozonky-jre-$ROBOZONKY_OS
           path: ${{ github.workspace }}/robozonky-*-jre.zip
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download the build directory
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: robozonky-build.zip
           path: ${{ github.workspace }}/.
@@ -96,17 +96,17 @@ jobs:
         with:
           java-version: ${{ env.JDK_VERSION }}
       - name: Download Linux JREs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-linux.zip
           path: robozonky-distributions/robozonky-distributions-full/target/
       - name: Download MacOS JREs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-macos.zip
           path: robozonky-distributions/robozonky-distributions-full/target/
       - name: Download Windows JREs
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-windows.zip
           path: robozonky-distributions/robozonky-distributions-full/target/
