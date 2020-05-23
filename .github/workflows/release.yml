@@ -32,7 +32,7 @@ jobs:
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ env.RUN_TIME_JDK_VERSION }}
+          java-version: ${{ env.RUNTIME_JDK_VERSION }}
       - name: Build and test
         run: mvn install --batch-mode -Dpit.skip=true
   jlink:
