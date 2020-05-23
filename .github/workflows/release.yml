@@ -30,7 +30,7 @@ jobs:
           name: ${{ env.PRENATIVE_REPO_FILENAME }}
           path: '**/*'
   jlink1:
-    name: JLink the Main app and CLI binaries
+    name: JLink the main binary
     needs: build_project
     strategy:
       fail-fast: false # Always see all results on all platforms.
@@ -69,21 +69,18 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: |
           echo "::set-env name=ROBOZONKY_OS::linux"
-      # Build and publish the JLinked JREs.
-      - name: Run JLink for the JARs
+      # Build and publish the JLinked JRE.
+      - name: Run JLink for the JAR
         run: |
           chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
-          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/app/jre
-          zip -r ${{ github.workspace }}/robozonky-app-jre-$ROBOZONKY_OS.zip ${{ github.workspace }}/app/jre
-          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-cli/target/robozonky-cli-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/cli/jre
-          zip -r ${{ github.workspace }}/robozonky-cli-jre-$ROBOZONKY_OS.zip ${{ github.workspace }}/cli/jre
-      - name: Upload JLinked JREs
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar ${{ github.workspace }}/robozonky-jre
+      - name: Upload JLinked JRE
         uses: actions/upload-artifact@v2
         with:
           name: robozonky-jre-$ROBOZONKY_OS
-          path: ${{ github.workspace }}/robozonky-*jre*.zip
+          path: ${{ github.workspace }}/robozonky-jre/**/*
   distributions1:
-    name: Prepare distribution archives for Main daemon and CLI
+    name: Prepare distribution archive for the JLinked JAR
     needs: jlink1
     runs-on: ubuntu-latest
     steps:
@@ -99,21 +96,21 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JDK_VERSION }}
-      - name: Download Linux JREs
+      - name: Download Linux main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-linux
-          path: robozonky-distributions/robozonky-distributions-full/target/
-      - name: Download MacOS JREs
+          path: robozonky-distributions/robozonky-distributions-full/target/jre-linux
+      - name: Download MacOS main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-macos
-          path: robozonky-distributions/robozonky-distributions-full/target/
-      - name: Download Windows JREs
+          path: robozonky-distributions/robozonky-distributions-full/target/jre-macos
+      - name: Download Windows main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-windows
-          path: robozonky-distributions/robozonky-distributions-full/target/
+          path: robozonky-distributions/robozonky-distributions-full/target/jre-windows
 
 #jobs:
 #  release:
