@@ -139,6 +139,7 @@
                   </descriptors>
                 </configuration>
                 <id>package-native-linux</id>
+                <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
@@ -150,6 +151,7 @@
                   </descriptors>
                 </configuration>
                 <id>package-native-windows</id>
+                <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
@@ -161,6 +163,7 @@
                   </descriptors>
                 </configuration>
                 <id>package-native-macos</id>
+                <phase>package</phase>
                 <goals>
                   <goal>single</goal>
                 </goals>
