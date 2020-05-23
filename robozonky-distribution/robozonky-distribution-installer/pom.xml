@@ -106,19 +106,19 @@
           <groupId>com.github.robozonky</groupId>
           <artifactId>robozonky-installer</artifactId>
           <version>${project.version}</version>
-          <classifier>windows-amd64</classifier>
+          <classifier>windows-x64</classifier>
         </dependency>
         <dependency>
           <groupId>com.github.robozonky</groupId>
           <artifactId>robozonky-installer</artifactId>
           <version>${project.version}</version>
-          <classifier>darwin-amd64</classifier>
+          <classifier>darwin-x64</classifier>
         </dependency>
         <dependency>
           <groupId>com.github.robozonky</groupId>
           <artifactId>robozonky-installer</artifactId>
           <version>${project.version}</version>
-          <classifier>linux-amd64</classifier>
+          <classifier>linux-x64</classifier>
         </dependency>
       </dependencies>
       <build>
