@@ -23,14 +23,11 @@ jobs:
           java-version: ${{ env.JDK_VERSION }}
       - name: Run the build
         run: mvn clean install --batch-mode -DskipTests
-      - name: Compress the build directory
-        run: |
-          zip -r ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }} .
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v1
         with:
           name: ${{ env.PRENATIVE_REPO_FILENAME }}
-          path: ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }}
+          path: "**/*"
   jlink1:
     name: JLink the Main app and CLI binaries
     needs: build_project
@@ -44,10 +41,6 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: ${{ env.PRENATIVE_REPO_FILENAME }}
-          path: ${{ github.workspace }}/.
-      - name: Unzip the build directory
-        run:
-          unzip ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }} .
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
@@ -80,16 +73,11 @@ jobs:
           else
           echo "::set-env name=ROBOZONKY_OS::linux"
           fi
-      - name: Upload JLinked JRE for Main JAR
+      - name: Upload JLinked JREs
         uses: actions/upload-artifact@v1
         with:
-          name: robozonky-app-jre-$ROBOZONKY_OS.zip
-          path: ${{ github.workspace }}/robozonky-app-jre.zip
-      - name: Upload JLinked JRE for CLI JAR
-        uses: actions/upload-artifact@v1
-        with:
-          name: robozonky-cli-jre-$ROBOZONKY_OS.zip
-          path: ${{ github.workspace }}/robozonky-cli-jre.zip
+          name: robozonky-jre-$ROBOZONKY_OS
+          path: ${{ github.workspace }}/robozonky-*-jre.zip
   distributions1:
     name: Prepare distribution archives for Main daemon and CLI
     needs: jlink1
@@ -107,36 +95,21 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JDK_VERSION }}
-      - name: Download Linux JREs for Main JAR
+      - name: Download Linux JREs
         uses: actions/download-artifact@v1
         with:
-          name: robozonky-app-jre-ubuntu-latest.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-linux.zip
-      - name: Download MacOS JREs for Main JAR
+          name: robozonky-jre-linux.zip
+          path: robozonky-distributions/robozonky-distributions-full/target/
+      - name: Download MacOS JREs
         uses: actions/download-artifact@v1
         with:
-          name: robozonky-app-jre-macos-latest.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-macos.zip
-      - name: Download Windows JREs for Main JAR
+          name: robozonky-jre-macos.zip
+          path: robozonky-distributions/robozonky-distributions-full/target/
+      - name: Download Windows JREs
         uses: actions/download-artifact@v1
         with:
-          name: robozonky-app-jre-windows-latest.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-windows.zip
-      - name: Download Linux JREs for CLI JAR
-        uses: actions/download-artifact@v1
-        with:
-          name: robozonky-cli-jre-linux.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-linux.zip
-      - name: Download MacOS JREs for CLI JAR
-        uses: actions/download-artifact@v1
-        with:
-          name: robozonky-cli-jre-macos.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-macos.zip
-      - name: Download Windows JREs for CLI JAR
-        uses: actions/download-artifact@v1
-        with:
-          name: robozonky-cli-jre-windows.zip
-          path: robozonky-distributions/robozonky-distributions-full/target/robozonky-app-jre-windows.zip
+          name: robozonky-jre-windows.zip
+          path: robozonky-distributions/robozonky-distributions-full/target/
 
 #jobs:
 #  release:
