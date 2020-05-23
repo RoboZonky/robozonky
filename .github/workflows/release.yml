@@ -34,16 +34,13 @@ jobs:
         run: echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
       - name: Run the build
         run: mvn clean install --batch-mode -DskipTests
-      - name: Share Main JAR for JLink
+      - name: Upload JARs for JLink
         uses: actions/upload-artifact@v1
         with:
-          name: robozonky-app
-          path: robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar
-      - name: Share CLI JAR for JLink
-        uses: actions/upload-artifact@v1
-        with:
-          name: robozonky-cli
-          path: robozonky-cli/target/robozonky-cli-${{ env.ROBOZONKY_VERSION }}-full.jar
+          - name: robozonky-app.jar
+            path: robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar
+          - name: robozonky-cli.jar
+            path: robozonky-cli/target/robozonky-cli-${{ env.ROBOZONKY_VERSION }}-full.jar
   jlink1:
     name: JLink the Main app and CLI binaries
     needs: build_project
@@ -59,15 +56,22 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JDK_VERSION }}
-      - name: Download Main JAR for JLink
+      - name: Download JARs for JLink
         uses: actions/download-artifact@v1
         with:
-          name: robozonky-app
+          - name: robozonky-cli.jar
+            path: ./
+          - name: robozonky-app.jar
+            path: ./
       - name: Run JLink for the Main JAR
         run: |
-          .github/workflows/jlink.sh robozonky-app jre
-          zip -r robozonky-app-jre.zip jre
-      - name: Determine OS shorthand
+          .github/workflows/jlink.sh robozonky-app.jar app-jre
+          zip -r robozonky-app-jre.zip app-jre
+      - name: Run JLink for the CLI JAR
+        run: |
+          .github/workflows/jlink.sh robozonky-cli.jar cli-jre
+          zip -r robozonky-cli-jre.zip cli-jre
+      - name: Determine OS shorthand # Avoid proliferation of Ubuntu and remove the -latest suffix
         run:
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
           echo "::set-env name=ROBOZONKY_OS::windows"
@@ -76,11 +80,13 @@ jobs:
           else
           echo "::set-env name=ROBOZONKY_OS::linux"
           fi
-      - name: Upload JLinked JRE for Main JAR
+      - name: Upload JLinked JREs
         uses: actions/upload-artifact@v1
         with:
-          name: robozonky-app-jre-$ROBOZONKY_OS.zip
-          path: robozonky-app-jre.zip
+          - name: robozonky-app-jre-$ROBOZONKY_OS.zip
+            path: robozonky-app-jre.zip
+          - name: robozonky-cli-jre-$ROBOZONKY_OS.zip
+            path: robozonky-cli-jre.zip
   distributions1:
     name: Prepare distribution archives for Main daemon and CLI
     needs: jlink1
