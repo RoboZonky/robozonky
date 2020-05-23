@@ -1,4 +1,4 @@
-name: Acceptance Criteria
+name: Acceptance
 
 on: [pull_request]
 
