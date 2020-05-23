@@ -112,9 +112,7 @@ jobs:
           java-version: ${{ env.JDK_VERSION }}
       - name: Build platform-specific distributions # Don't run "clean", otherwise would have lost the pre-built artifacts.
         run: |
-          cd robozonky-distributions/robozonky-distributions-full/
           mvn install --batch-mode -Prelease -Dgpg.skip -DskipTests
-          cd ../../
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v2
         with:
