@@ -4,7 +4,7 @@ on: [pull_request]
 
 env:
   JDK_VERSION: 14
-  BUILD_ROOT_PATH: "${{ env.GITHUB_WORKSPACE }}/checkout"
+  BUILD_ROOT_PATH: "${{ GITHUB_WORKSPACE }}/checkout"
 
 defaults:
   run:
