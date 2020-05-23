@@ -24,12 +24,7 @@ jobs:
         with:
           java-version: ${{ env.JDK_VERSION }}
       - name: Run the build
-        run: mvn install --batch-mode -Prelease -Dgpg.skip
-      - name: Share the build directory # So that all subsequent steps use identical binaries.
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.PRENATIVE_REPO_FILENAME }}
-          path: '**/*'
+        run: mvn install --batch-mode -DskipTests
   jlink1:
     name: JLink the main binary
     needs: build_project
@@ -39,10 +34,8 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Download the build directory
-        uses: actions/download-artifact@v2
-        with:
-          name: ${{ env.PRENATIVE_REPO_FILENAME }}
+      - name: Check out Git repository
+        uses: actions/checkout@v2
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
@@ -71,26 +64,32 @@ jobs:
         run: |
           echo "::set-env name=ROBOZONKY_OS::linux"
       # Build and publish the JLinked JRE.
-      - name: Run JLink for the JAR
+      - name: Run JLink for the JARs
         run: |
           chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
           ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
-          ls -Rl robozonky-jre
-      - name: Upload JLinked JRE
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-installer-jre
+      - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
         with:
           name: robozonky-jre-${{ env.ROBOZONKY_OS }}
           path: robozonky-jre/**/*
+      - name: Upload JLinked installer JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
+          path: robozonky-installer-jre/**/*
   distributions1:
     name: Prepare distribution archive for the JLinked JAR
     needs: jlink1
     runs-on: ubuntu-latest
     steps:
-      - name: Download the build directory
-        uses: actions/download-artifact@v2
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
         with:
-          name: ${{ env.PRENATIVE_REPO_FILENAME }}
-          path: ${{ github.workspace }}/.
+          java-version: ${{ env.JDK_VERSION }}
       - name: Download Linux main app JRE
         uses: actions/download-artifact@v2
         with:
@@ -106,18 +105,24 @@ jobs:
         with:
           name: robozonky-jre-windows
           path: robozonky-distribution/robozonky-distribution-full/target/jre-windows
-      - name: Install Java and Maven
-        uses: actions/setup-java@v1
+      - name: Download Linux installer JRE
+        uses: actions/download-artifact@v2
         with:
-          java-version: ${{ env.JDK_VERSION }}
-      - name: Build platform-specific distributions # Don't run "clean", otherwise would have lost the pre-built artifacts.
+          name: robozonky-installer-jre-linux
+          path: robozonky-instaler/robozonky-distribution-installer/target/jre-linux
+      - name: Download MacOS installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-macos
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-macos
+      - name: Download Windows installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-windows
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-windows
+      - name: Build platform-specific distribution binaries
         run: |
           mvn install --batch-mode -Prelease -Dgpg.skip
-      - name: Share the build directory # So that all subsequent steps use identical binaries.
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.POSTNATIVE_REPO_FILENAME }}
-          path: '**/*'
 
 #jobs:
 #  release:
