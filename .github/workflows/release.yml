@@ -3,6 +3,7 @@ name: Release
 on: [push, pull_request]
 
 env:
+  JDK_VERSION: 14
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   OSSRH_USERNAME: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
   OSSRH_PASSWORD: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
@@ -14,7 +15,6 @@ jobs:
       fail-fast: false # Always see all results on all platforms.
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        jvm: 14
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout from Github
@@ -22,7 +22,7 @@ jobs:
       - name: Set up the JDK
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ matrix.jvm }}
+          java-version: $JDK_VERSION
       - name: Import GPG secrets
         shell: bash
         run: echo ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}|gpg --allow-secret-key-import
