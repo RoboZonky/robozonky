@@ -18,7 +18,7 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 
-  <id>noarch</id>
+  <id>windows-amd64</id>
   <formats>
     <format>zip</format>
   </formats>
@@ -27,42 +27,34 @@
 
   <fileSets>
     <fileSet>
+      <directory>${project.build.directory}/jre-windows/</directory>
+      <outputDirectory>jre</outputDirectory>
+    </fileSet>
+    <fileSet>
       <directory>${project.build.directory}/shaded/</directory>
       <includes>
-        <include>robozonky-app-${project.version}-full.jar</include>
-        <include>robozonky-cli-${project.version}-full.jar</include>
+        <include>robozonky-installer-${project.version}-windows-amd64.jar</include>
       </includes>
-      <outputDirectory />
+      <outputDirectory/>
     </fileSet>
     <fileSet><!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
       <directory>../../</directory>
       <includes>
         <include>LICENSE</include>
       </includes>
-      <outputDirectory />
-    </fileSet>
-    <fileSet>
-      <directory>src/main/assembly/filtered-resources</directory>
-      <lineEnding>unix</lineEnding>
-      <filtered>true</filtered>
-      <includes>
-        <include>*.sh</include>
-      </includes>
-      <fileMode>755</fileMode>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>src/main/assembly/filtered-resources</directory>
+      <directory>../robozonky-distribution-full/src/main/assembly/filtered-resources</directory>
       <lineEnding>dos</lineEnding>
       <filtered>true</filtered>
       <includes>
         <include>*.bat</include>
-        <include>logback.xml</include>
       </includes>
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>src/main/assembly/resources</directory>
+      <directory>../robozonky-distribution-full/src/main/assembly/resources</directory>
       <lineEnding>dos</lineEnding>
       <filtered>false</filtered>
       <outputDirectory/>

@@ -29,20 +29,19 @@
     <fileSet>
       <directory>${project.build.directory}/shaded/</directory>
       <includes>
-        <include>robozonky-app-${project.version}-full.jar</include>
-        <include>robozonky-cli-${project.version}-full.jar</include>
+        <include>robozonky-installer-${project.version}-noarch.jar</include>
       </includes>
-      <outputDirectory />
+      <outputDirectory/>
     </fileSet>
     <fileSet><!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
       <directory>../../</directory>
       <includes>
         <include>LICENSE</include>
       </includes>
-      <outputDirectory />
+      <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>src/main/assembly/filtered-resources</directory>
+      <directory>../robozonky-distribution-full/src/main/assembly/filtered-resources</directory>
       <lineEnding>unix</lineEnding>
       <filtered>true</filtered>
       <includes>
@@ -52,7 +51,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>src/main/assembly/filtered-resources</directory>
+      <directory>../robozonky-distribution-full/src/main/assembly/filtered-resources</directory>
       <lineEnding>dos</lineEnding>
       <filtered>true</filtered>
       <includes>
@@ -62,7 +61,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>src/main/assembly/resources</directory>
+      <directory>../robozonky-distribution-full/src/main/assembly/resources</directory>
       <lineEnding>dos</lineEnding>
       <filtered>false</filtered>
       <outputDirectory/>

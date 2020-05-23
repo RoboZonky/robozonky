@@ -41,6 +41,7 @@
         </property>
       </activation>
       <modules>
+        <module>robozonky-distribution-installer</module>
         <module>robozonky-distribution-aggregate</module>
       </modules>
     </profile>

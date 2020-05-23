@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2020 The RoboZonky Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>robozonky-distribution</artifactId>
+    <groupId>com.github.robozonky</groupId>
+    <version>5.9.0-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.github.robozonky.distribution</groupId>
+  <artifactId>robozonky-distribution-installer</artifactId>
+  <packaging>pom</packaging>
+
+  <name>RoboZonky Distribution: Installer archives</name>
+
+  <properties>
+    <com.github.robozonky.distribution>true</com.github.robozonky.distribution>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.robozonky</groupId>
+      <artifactId>robozonky-installer</artifactId>
+      <version>${project.version}</version>
+      <classifier>noarch</classifier>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-shaded-jars</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/shaded</outputDirectory>
+              <excludeTransitive>true</excludeTransitive>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <configuration>
+              <descriptors>
+                <descriptor>src/main/assembly/standard.xml</descriptor>
+              </descriptors>
+              <formats>
+                <format>zip</format>
+              </formats>
+            </configuration>
+            <id>package-standard</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <!--
+        During a release, three other distributions are built - each one including a JRE for a given platform.
+        (Windows, MacOS, Linux.)
+        Since Maven is making it difficult, this profile is ugly.
+        It does the same thing three times, once for each platform:
+        - Takes platform-dependent installer packages from robozonky-installer.
+        - Takes the JRE for a platform and packages it together with the platform-dependent JAR.
+        - Builds and attaches the resulting JAR.
+        -->
+      <id>release</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>windows-amd64</classifier>
+        </dependency>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>darwin-amd64</classifier>
+        </dependency>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>linux-amd64</classifier>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-files-exist</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireFilesExist>
+                      <files>
+                        <file>${project.build.directory}/jre-linux</file>
+                        <file>${project.build.directory}/jre-windows</file>
+                        <file>${project.build.directory}/jre-macos</file>
+                      </files>
+                    </requireFilesExist>
+                  </rules>
+                  <fail>true</fail> <!-- Release profile in invalid state. -->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <configuration>
+                  <descriptors>
+                    <descriptor>src/main/assembly/native-linux.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-native-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <descriptors>
+                    <descriptor>src/main/assembly/native-windows.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-native-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <descriptors>
+                    <descriptor>src/main/assembly/native-macos.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-native-macos</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
