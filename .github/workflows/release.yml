@@ -4,6 +4,7 @@ on: [pull_request]
 
 env:
   JDK_VERSION: 14
+  PRENATIVE_REPO_FILENAME: "robozonky-build-prenative.zip"
 
 defaults:
   run:
@@ -24,12 +25,12 @@ jobs:
         run: mvn clean install --batch-mode -DskipTests
       - name: Compress the build directory
         run: |
-          zip -r ${{ github.workspace }}/robozonky-build.zip .
+          zip -r ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }} .
       - name: Share the build directory # So that all subsequent steps use identical binaries.
         uses: actions/upload-artifact@v1
         with:
-          name: robozonky-build.zip
-          path: ${{ github.workspace }}/robozonky-build.zip
+          name: ${{ env.PRENATIVE_REPO_FILENAME }}
+          path: ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }}
   jlink1:
     name: JLink the Main app and CLI binaries
     needs: build_project
@@ -42,11 +43,11 @@ jobs:
       - name: Download the build directory
         uses: actions/download-artifact@v1
         with:
-          name: robozonky-build.zip
-          path: ${{ github.workspace }}/robozonky-build.zip
+          name: ${{ env.PRENATIVE_REPO_FILENAME }}
+          path: ${{ github.workspace }}/.
       - name: Unzip the build directory
         run:
-          unzip ${{ github.workspace }}/robozonky-build.zip .
+          unzip ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }} .
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
@@ -98,10 +99,10 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: robozonky-build.zip
-          path: ${{ github.workspace }}/robozonky-build.zip
+          path: ${{ github.workspace }}/.
       - name: Unzip the build directory
         run:
-          unzip ${{ github.workspace }}/robozonky-build.zip .
+          unzip ${{ github.workspace }}/${{ env.PRENATIVE_REPO_FILENAME }} .
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
