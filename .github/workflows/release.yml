@@ -24,7 +24,9 @@ jobs:
       - name: Compile all modules without testing
         run: mvn --batch-mode clean install dependency:go-offline -DskipTests
       - name: Fix GPG plugin
-        run: echo 'export GPG_TTY=$(tty)' >> ~/.profile
+        run: |
+          test -r ~/.bash_profile && echo 'export GPG_TTY=$(tty)' >> ~/.bash_profile
+          echo 'export GPG_TTY=$(tty)' >> ~/.profile
       - name: Deploy Maven package
         uses: samuelmeuli/action-maven-publish@v1
         with:
