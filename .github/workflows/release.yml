@@ -6,6 +6,7 @@ env:
   JDK_VERSION: 14
   JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
   PRENATIVE_REPO_FILENAME: robozonky-build-prenative.zip
+  POSTNATIVE_REPO_FILENAME: robozonky-build-postnative.zip
 
 defaults:
   run:
@@ -109,6 +110,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ env.JDK_VERSION }}
+      - name: Build platform-specific distributions # Don't run "clean", otherwise would have lost the pre-built artifacts.
+        run: mvn install --batch-mode -Prelease -DskipTests
+      - name: Share the build directory # So that all subsequent steps use identical binaries.
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.POSTNATIVE_REPO_FILENAME }}
+          path: '**/*'
 
 #jobs:
 #  release:
