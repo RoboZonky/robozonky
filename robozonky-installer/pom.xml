@@ -142,6 +142,7 @@
                         value="robozonky-distribution-full-@{project.version}-noarch.zip"/>
                 <copy file="src/main/izpack/install.xml"
                       tofile="${filtered.izpack.descriptors.target}/install-noarch.xml"
+                      encoding="${project.build.sourceEncoding}"
                       filtering="true"
                       overwrite="true"/>
               </target>
@@ -261,6 +262,7 @@
                             value="robozonky-distribution-full-@{project.version}-windows-amd64.zip"/>
                     <copy file="src/main/izpack/install.xml"
                           tofile="${filtered.izpack.descriptors.target}/install-windows.xml"
+                          encoding="${project.build.sourceEncoding}"
                           filtering="true"
                           overwrite="true"/>
                   </target>
@@ -278,6 +280,7 @@
                             value="robozonky-distribution-full-@{project.version}-darwin-amd64.zip"/>
                     <copy file="src/main/izpack/install.xml"
                           tofile="${filtered.izpack.descriptors.target}/install-macos.xml"
+                          encoding="${project.build.sourceEncoding}"
                           filtering="true"
                           overwrite="true"/>
                   </target>
@@ -295,6 +298,7 @@
                             value="robozonky-distribution-full-@{project.version}-linux-amd64.tar.xz"/>
                     <copy file="src/main/izpack/install.xml"
                           tofile="${filtered.izpack.descriptors.target}/install-linux.xml"
+                          encoding="${project.build.sourceEncoding}"
                           filtering="true"
                           overwrite="true"/>
                   </target>
