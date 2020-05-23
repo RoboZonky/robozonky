@@ -2,6 +2,10 @@ name: Release
 
 on: [pull_request]
 
+defaults:
+  run:
+    shell: bash
+
 env:
   JDK_VERSION: 14
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -14,9 +18,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
