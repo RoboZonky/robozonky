@@ -3,7 +3,8 @@ name: Release
 on: [pull_request]
 
 env:
-  JDK_VERSION: 14
+  COMPILE_TIME_JDK_VERSION: 11
+  RUN_TIME_JDK_VERSION: 14
   JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
   PRENATIVE_REPO_FILENAME: robozonky-build-prenative.zip
   POSTNATIVE_REPO_FILENAME: robozonky-build-postnative.zip
@@ -13,8 +14,21 @@ defaults:
     shell: bash
 
 jobs:
+  test:
+    name: Ensure that the tests pass
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ RUN_TIME_JDK_VERSION }}
+      - name: Run the build
+        run: mvn install --batch-mode
   jlink:
     name: Prepare jlink-ed JREs
+    needs: test
     strategy:
       fail-fast: false # Always see all results on all platforms.
       matrix:
@@ -26,9 +40,9 @@ jobs:
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ env.JDK_VERSION }}
+          java-version: ${{ env.RUNTIME_JDK_VERSION }}
       - name: Run the build
-        run: mvn install --batch-mode
+        run: mvn install --batch-mode -DskipTests
       - name: Determine RoboZonky version
         run: |
           ROBOZONKY_VERSION=$(mvn -q \
@@ -78,7 +92,7 @@ jobs:
       - name: Install Java and Maven
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ env.JDK_VERSION }}
+          java-version: ${{ env.RUNTIME_JDK_VERSION }}
       - name: Download Linux main app JRE
         uses: actions/download-artifact@v2
         with:
