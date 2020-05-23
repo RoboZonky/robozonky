@@ -119,7 +119,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: robozonky-installer-jre-linux
-          path: robozonky-instaler/robozonky-distribution-installer/target/jre-linux
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-linux
       - name: Download MacOS installer JRE
         uses: actions/download-artifact@v2
         with:
