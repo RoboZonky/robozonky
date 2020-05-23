@@ -130,9 +130,6 @@ jobs:
         with:
           name: robozonky-installer-jre-windows
           path: robozonky-distribution/robozonky-distribution-installer/target/jre-windows
-      - name: List structure of the Distribution directory
-        run:
-          ls -Rl robozonky-distribution/
       - name: Build, sign and deploy
         uses: samuelmeuli/action-maven-publish@v1
         with:
