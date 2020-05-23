@@ -26,7 +26,8 @@ jobs:
       - name: Deploy Maven package
         uses: samuelmeuli/action-maven-publish@v1
         with:
-          gpg_private_key: secret.gpg
+          maven_profiles: release
+          gpg_private_key: "secret.gpg"
           gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
           nexus_username: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
           nexus_password: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
