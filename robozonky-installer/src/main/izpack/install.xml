@@ -37,7 +37,7 @@
     <variable name="selectDryRunByDefault" value="false" condition="!isDryRunSelectedByDefault" />
   </dynamicvariables>
 
-  <jar src="robozonky-installer-@{project.version}-jar-with-dependencies.jar"/>
+  <jar src="robozonky-installer-@{project.version}-full.jar"/>
 
   <locale>
     <langpack iso3="ces"/>

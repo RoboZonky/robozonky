@@ -617,7 +617,6 @@
               <goal>test-jar</goal>
             </goals>
             <configuration>
-              <forceCreation>false</forceCreation>
               <skip>${com.github.robozonky.distribution}</skip>
             </configuration>
           </execution>
@@ -688,6 +687,9 @@
                 <artifact>*:*</artifact>
                 <excludes>
                   <exclude>**/*module-info*</exclude>
+                  <excludes>META-INF/*.SF</excludes>
+                  <excludes>META-INF/*.DSA</excludes>
+                  <excludes>META-INF/*.RSA</excludes>
                 </excludes>
               </filter>
             </filters>

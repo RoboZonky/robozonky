@@ -14,7 +14,7 @@ defaults:
 
 jobs:
   jlink:
-    name: Build the project and prepare jlink-ed JREs for the binaries
+    name: Prepare jlink-ed JREs
     strategy:
       fail-fast: false # Always see all results on all platforms.
       matrix:
@@ -68,8 +68,8 @@ jobs:
         with:
           name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
           path: robozonky-installer-jre/**/*
-  distributions:
-    name: Prepare distribution archive for the JLinked JAR
+  build:
+    name: Build and deploy
     needs: jlink
     runs-on: ubuntu-latest
     steps:
@@ -112,24 +112,13 @@ jobs:
       - name: Build platform-specific distribution binaries
         run: |
           mvn install --batch-mode -Prelease -Dgpg.skip
-
-#jobs:
-#  release:
-#    name: Release
-#    strategy:
-#      fail-fast: false # Always see all results on all platforms.
-#      matrix:
-#        os: [ubuntu-latest, windows-latest, macos-latest]
-#    runs-on: ${{ matrix.os }}
-#    steps:
-#      - name: Deploy Maven package
-#        uses: samuelmeuli/action-maven-publish@v1
-#        with:
-#          maven_args: "-DskipTests"
-#          maven_profiles: release
-#          maven_goals_phases: deploy
-#          gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
-#          gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
-#          server_id: ossrh
-#          nexus_username: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
-#          nexus_password: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
+      - name: Sign and Deploy
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          maven_profiles: release
+          maven_goals_phases: deploy
+          gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
+          server_id: ossrh
+          nexus_username: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
+          nexus_password: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
