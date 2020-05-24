@@ -23,8 +23,7 @@
     <format>tar.xz</format>
   </formats>
 
-  <baseDirectory>robozonky-installer-${project.version}</baseDirectory>
-  <includeBaseDirectory>true</includeBaseDirectory>
+  <includeBaseDirectory>false</includeBaseDirectory>
 
   <fileSets>
     <fileSet>

@@ -23,8 +23,7 @@
     <format>zip</format>
   </formats>
 
-  <baseDirectory>robozonky-${project.version}</baseDirectory>
-  <includeBaseDirectory>true</includeBaseDirectory>
+  <includeBaseDirectory>false</includeBaseDirectory>
 
   <fileSets>
     <fileSet>
