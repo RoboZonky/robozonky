@@ -25,11 +25,18 @@
 
   <artifactId>robozonky-installer</artifactId>
 
-  <name>RoboZonky: Custom panels for the installer</name>
+  <name>RoboZonky: Executable installer package</name>
+  <packaging>jar</packaging>
 
   <properties>
+    <project.version>${project.version}</project.version> <!-- Weird IZPack quirk, doesn't read the prop otherwise. -->
     <pit.threshold>80</pit.threshold> <!-- This uses a 3rd party UI app (IZPack), hard to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
+    <!--
+      Each platform-specific installer requires its own descriptor.
+      In order to not have to duplicate a lot of code, these are filtered and copied here using the Maven Antrun Plugin.
+    -->
+    <filtered.izpack.descriptors.target>${project.build.directory}/izpack-descriptors</filtered.izpack.descriptors.target>
   </properties>
 
   <dependencies>
@@ -102,4 +109,259 @@
     </dependency>
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <excludeTransitive>true</excludeTransitive>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>prepare-dependencies-noarch</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:zip:noarch</artifact>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>antrun-noarch</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <target>
+                <filter token="REPLACE_BY_FILTERING"
+                        value="robozonky-distribution-full-@{project.version}-noarch.zip"/>
+                <copy file="src/main/izpack/install.xml"
+                      tofile="${filtered.izpack.descriptors.target}/install-noarch.xml"
+                      encoding="${project.build.sourceEncoding}"
+                      filtering="true"
+                      overwrite="true"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>shade</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>izpack</goal>
+            </goals>
+            <configuration>
+              <autoIncludeDevelopers>true</autoIncludeDevelopers>
+              <autoIncludeUrl>false</autoIncludeUrl>
+              <baseDir>${project.build.directory}</baseDir>
+              <classifier>noarch</classifier>
+              <enableAttachArtifact>true</enableAttachArtifact>
+              <installFile>${filtered.izpack.descriptors.target}/install-noarch.xml</installFile>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <!--
+        During a release, three other installers are built - each one for a different platform.
+        (Windows, MacOS, Linux.)
+        Since Maven and IZPack are making it very difficult, this profile is ugly.
+        It does the same thing three times, once for each platform:
+        - Copy the platform-specific package to be installed, which was previously built by robozonky-distribution.
+        - Copy the IZPack install descriptor, adding the link to this platform-specific package.
+        - Use IZPack Maven plugin to build and attach the platform-specific installer JAR.
+        This JAR then needs to be taken again by robozonky-distributions to bundle it with a platform-specific JRE.
+        -->
+      <id>release</id>
+      <activation>
+        <property>
+          <name>robozonky.release.profile</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <configuration>
+              <excludeTransitive>true</excludeTransitive>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>prepare-dependencies-arch</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>com.github.robozonky.distribution</groupId>
+                      <artifactId>robozonky-distribution-full</artifactId>
+                      <version>${project.version}</version>
+                      <type>zip</type>
+                      <classifier>windows-x64</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>com.github.robozonky.distribution</groupId>
+                      <artifactId>robozonky-distribution-full</artifactId>
+                      <version>${project.version}</version>
+                      <type>tar.gz</type>
+                      <classifier>macos-x64</classifier>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>com.github.robozonky.distribution</groupId>
+                      <artifactId>robozonky-distribution-full</artifactId>
+                      <version>${project.version}</version>
+                      <type>tar.xz</type>
+                      <classifier>linux-x64</classifier>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>antrun-windows</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <filter token="REPLACE_BY_FILTERING"
+                            value="robozonky-distribution-full-@{project.version}-windows-x64.zip"/>
+                    <copy file="src/main/izpack/install.xml"
+                          tofile="${filtered.izpack.descriptors.target}/install-windows.xml"
+                          encoding="${project.build.sourceEncoding}"
+                          filtering="true"
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>antrun-macos</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <filter token="REPLACE_BY_FILTERING"
+                            value="robozonky-distribution-full-@{project.version}-macos-x64.tar.gz"/>
+                    <copy file="src/main/izpack/install.xml"
+                          tofile="${filtered.izpack.descriptors.target}/install-macos.xml"
+                          encoding="${project.build.sourceEncoding}"
+                          filtering="true"
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>antrun-linux</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <target>
+                    <filter token="REPLACE_BY_FILTERING"
+                            value="robozonky-distribution-full-@{project.version}-linux-x64.tar.xz"/>
+                    <copy file="src/main/izpack/install.xml"
+                          tofile="${filtered.izpack.descriptors.target}/install-linux.xml"
+                          encoding="${project.build.sourceEncoding}"
+                          filtering="true"
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.izpack</groupId>
+            <artifactId>izpack-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>izpack-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+                <configuration>
+                  <autoIncludeDevelopers>true</autoIncludeDevelopers>
+                  <autoIncludeUrl>false</autoIncludeUrl>
+                  <baseDir>${project.build.directory}</baseDir>
+                  <classifier>windows-x64</classifier>
+                  <enableAttachArtifact>true</enableAttachArtifact>
+                  <installFile>${filtered.izpack.descriptors.target}/install-windows.xml</installFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>izpack-macos</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+                <configuration>
+                  <autoIncludeDevelopers>true</autoIncludeDevelopers>
+                  <autoIncludeUrl>false</autoIncludeUrl>
+                  <baseDir>${project.build.directory}</baseDir>
+                  <classifier>macos-x64</classifier>
+                  <enableAttachArtifact>true</enableAttachArtifact>
+                  <installFile>${filtered.izpack.descriptors.target}/install-macos.xml</installFile>
+                </configuration>
+              </execution>
+              <execution>
+                <id>izpack-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+                <configuration>
+                  <autoIncludeDevelopers>true</autoIncludeDevelopers>
+                  <autoIncludeUrl>false</autoIncludeUrl>
+                  <baseDir>${project.build.directory}</baseDir>
+                  <classifier>linux-x64</classifier>
+                  <enableAttachArtifact>true</enableAttachArtifact>
+                  <installFile>${filtered.izpack.descriptors.target}/install-linux.xml</installFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

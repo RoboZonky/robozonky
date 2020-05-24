@@ -617,21 +617,8 @@
               <goal>test-jar</goal>
             </goals>
             <configuration>
-                <skip>${com.github.robozonky.distribution}</skip>
+              <skip>${com.github.robozonky.distribution}</skip>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.6</version>
-        <executions>
-          <execution>
-            <id>sign-artifacts</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>sign</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
@@ -656,19 +643,12 @@
           </compilerArgs>
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.0-M1</version>
-        <configuration>
-          <autoVersionSubmodules>true</autoVersionSubmodules>
-        </configuration>
-      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <artifactId>maven-source-plugin</artifactId>
@@ -707,6 +687,9 @@
                 <artifact>*:*</artifact>
                 <excludes>
                   <exclude>**/*module-info*</exclude>
+                  <excludes>META-INF/*.SF</excludes>
+                  <excludes>META-INF/*.DSA</excludes>
+                  <excludes>META-INF/*.RSA</excludes>
                 </excludes>
               </filter>
             </filters>
@@ -726,6 +709,10 @@
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.7.0.1746</version>
         </plugin>
+        <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>
@@ -741,6 +728,41 @@
       <modules>
         <module>robozonky-installer</module>
       </modules>
+    </profile>
+    <profile> <!-- Top-level release profile disables tests and enables GPG signing. -->
+      <id>release</id>
+      <activation>
+        <property>
+          <name>robozonky.release.profile</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <properties>
+        <skipTests>true</skipTests>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <gpgArguments>
+                    <arg>--pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 

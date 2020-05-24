@@ -25,12 +25,11 @@
 
   <groupId>com.github.robozonky.distribution</groupId>
   <artifactId>robozonky-distribution-installer</artifactId>
-  <packaging>izpack-jar</packaging>
+  <packaging>pom</packaging>
 
-  <name>RoboZonky Distribution: Executable installer package</name>
+  <name>RoboZonky Distribution: Installer archives</name>
 
   <properties>
-    <project.version>${project.version}</project.version> <!-- Weird IZPack quirk, doesn't read the prop otherwise. -->
     <com.github.robozonky.distribution>true</com.github.robozonky.distribution>
   </properties>
 
@@ -38,6 +37,8 @@
     <dependency>
       <groupId>com.github.robozonky</groupId>
       <artifactId>robozonky-installer</artifactId>
+      <version>${project.version}</version>
+      <classifier>noarch</classifier>
     </dependency>
   </dependencies>
 
@@ -45,18 +46,17 @@
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
-        <configuration>
-          <excludeTransitive>true</excludeTransitive>
-          <artifact>com.github.robozonky.distribution:robozonky-distribution-full:${project.version}:tar.xz</artifact>
-          <outputDirectory>${project.build.directory}</outputDirectory>
-        </configuration>
         <executions>
           <execution>
-            <id>prepare-dependencies</id>
-            <phase>prepare-package</phase>
+            <id>copy-shaded-jars</id>
+            <phase>package</phase>
             <goals>
-              <goal>copy</goal>
+              <goal>copy-dependencies</goal>
             </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/shaded</outputDirectory>
+              <excludeTransitive>true</excludeTransitive>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -64,40 +64,142 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <!-- Prepare single JAR with dependencies of installer panels to be used as dependency in IZPack JAR. -->
             <configuration>
-              <attach>false</attach>
+              <filters>
+                <filter>src/main/assembly/noarch.properties</filter>
+              </filters>
               <descriptors>
-                <!--
-                  By default, jar-with-dependencies will overwrite META-INF/services when there's more than 1 for each
-                  kind of service. This descriptor will merge them instead.
-                -->
-                <descriptor>src/main/assembly/installer.xml</descriptor>
+                <descriptor>src/main/assembly/noarch.xml</descriptor>
               </descriptors>
             </configuration>
-            <id>merge-installer-jars</id>
-            <phase>prepare-package</phase>
+            <id>package-noarch</id>
+            <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.codehaus.izpack</groupId>
-        <artifactId>izpack-maven-plugin</artifactId>
-        <version>${version.org.codehaus.izpack}</version>
-        <extensions>true</extensions>
-        <configuration>
-          <baseDir>${project.build.directory}</baseDir>
-          <installFile>${basedir}/src/main/izpack/install.xml</installFile>
-          <classifier>full</classifier>
-          <autoIncludeUrl>false</autoIncludeUrl>
-          <autoIncludeDevelopers>true</autoIncludeDevelopers>
-          <comprFormat>xz</comprFormat>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <!--
+        During a release, three other distributions are built - each one including a JRE for a given platform.
+        (Windows, MacOS, Linux.)
+        Since Maven is making it difficult, this profile is ugly.
+        It does the same thing three times, once for each platform:
+        - Takes platform-dependent installer packages from robozonky-installer.
+        - Takes the JRE for a platform and packages it together with the platform-dependent JAR.
+        - Builds and attaches the resulting JAR.
+        -->
+      <id>release</id>
+      <activation>
+        <property>
+          <name>robozonky.release.profile</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>windows-x64</classifier>
+        </dependency>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>macos-x64</classifier>
+        </dependency>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>linux-x64</classifier>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-files-exist</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireFilesExist>
+                      <files>
+                        <file>${project.build.directory}/jre-linux</file>
+                        <file>${project.build.directory}/jre-windows</file>
+                        <file>${project.build.directory}/jre-macos</file>
+                      </files>
+                    </requireFilesExist>
+                  </rules>
+                  <fail>true</fail> <!-- Release profile in invalid state. -->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/jlink-linux.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-linux.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/jlink-windows.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-windows.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/jlink-macos.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-macos.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-macos</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

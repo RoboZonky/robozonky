@@ -24,7 +24,6 @@ echo "$DEPENDENCIES"
 # Call JLink with these dependencies; add locales and crypto, also JMX and JFR on top, as those are runtime monitoring dependencies.
 # We could use --bind-services instead, but that makes the runtime huge and includes stuff like javac etc.
 JLINK_CMD="$JAVA_HOME/bin/jlink --compress=2 --no-header-files --no-man-pages
-   --strip-native-debug-symbols=exclude-debuginfo-files
    --dedup-legal-notices=error-if-not-same-content
    --include-locales=en,cs
    --add-modules $DEPENDENCIES,jdk.management.jfr,jdk.management.agent,jdk.crypto.ec,jdk.localedata

@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2019 The RoboZonky Project
+  ~ Copyright 2020 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@
     <variable name="selectDryRunByDefault" value="false" condition="!isDryRunSelectedByDefault" />
   </dynamicvariables>
 
-  <jar src="robozonky-distribution-installer-@{project.version}-jar-with-dependencies.jar"/>
+  <jar src="robozonky-installer-@{project.version}-full.jar"/>
 
   <locale>
     <langpack iso3="ces"/>
@@ -48,7 +48,7 @@
   </guiprefs>
 
   <resources>
-    <res id="LicencePanel.licence" src="../../../LICENSE"/>
+    <res id="LicencePanel.licence" src="../../LICENSE"/>
     <res id="userInputSpec.xml" src="../src/main/izpack/userInputSpec.xml"/>
   </resources>
 
@@ -182,10 +182,10 @@
   <packs>
     <pack id="main" name="Main" required="yes">
       <description>Jádro investičního robota a základní podpůrné soubory</description>
-      <file src="robozonky-distribution-full-@{project.version}.tar.xz"
+      <file src="@REPLACE_BY_FILTERING@"
             targetdir="${INSTALL_PATH}/Dist"
             override="true"
-            unpack="true" />
+            unpack="true"/>
       <updatecheck> <!-- Delete existing modules, otherwise JVM may refuse to start due to duplicate JPMS modules. -->
         <include name="Dist/**" />
       </updatecheck>

@@ -5,16 +5,16 @@ ENV SOURCE_DIRECTORY=/usr/src/robozonky \
     BINARY_DIRECTORY=/tmp/robozonky
 COPY . $SOURCE_DIRECTORY
 WORKDIR $SOURCE_DIRECTORY
-RUN mvn install -B -Dgpg.skip -DskipTests -Ddocker
+RUN mvn install -B -DskipTests -Ddocker
 RUN ROBOZONKY_VERSION=$(mvn -q \
             -Dexec.executable="echo" \
             -Dexec.args='${project.version}' \
             --non-recursive \
             org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
         ) \
-    && ROBOZONKY_TAR_XZ=robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-$ROBOZONKY_VERSION.tar.xz \
+    && ROBOZONKY_NOARCH=robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-$ROBOZONKY_VERSION-noarch.zip \
     && mkdir -vp $BINARY_DIRECTORY \
-    && tar -C $BINARY_DIRECTORY -xvf $ROBOZONKY_TAR_XZ \
+    && unzip $ROBOZONKY_NOARCH -d $BINARY_DIRECTORY \
     && chmod +x $BINARY_DIRECTORY/robozonky.sh
 
 # ... then build a minimalistic JRE using jlink ...
@@ -41,9 +41,9 @@ COPY --from=jlink /tmp/robozonky $INSTALL_DIRECTORY
 ENV JAVA_OPTS="$JAVA_OPTS \
     -Drobozonky.properties.file=$CONFIG_DIRECTORY/robozonky.properties \
     -Dlog4j.configurationFile=$CONFIG_DIRECTORY/log4j2.xml"
-# Copied from https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/13/jre/alpine/Dockerfile.hotspot.releases.full.
+# Copied from https://github.com/AdoptOpenJDK/openjdk-docker/blob/master/14/jre/alpine/Dockerfile.hotspot.releases.full
 RUN apk add --no-cache --virtual .build-deps curl binutils \
-    && GLIBC_VER="2.30-r0" \
+    && GLIBC_VER="2.31-r0" \
     && ALPINE_GLIBC_REPO="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" \
     && GCC_LIBS_URL="https://archive.archlinux.org/packages/g/gcc-libs/gcc-libs-9.1.0-2-x86_64.pkg.tar.xz" \
     && GCC_LIBS_SHA256="91dba90f3c20d32fcf7f1dbe91523653018aa0b8d2230b00f822f6722804cf08" \

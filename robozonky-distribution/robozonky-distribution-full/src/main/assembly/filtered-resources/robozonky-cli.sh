@@ -1,5 +1,5 @@
 #!/bin/sh
-ROBOZONKY_EXECUTABLE="${com.github.robozonky.distribution.jar}"
+ROBOZONKY_EXECUTABLE="${com.github.robozonky.distribution.jar.cli}"
 
 # Find the correct installation directory, regardless of whether it's from the ZIP or from the installer.
 SCRIPT=$(realpath $0)
@@ -20,6 +20,6 @@ fi
 echo "Will use '$JAVA_EXECUTABLE' as the Java executable."
 echo "JAVA_HOME set to '$JAVA_HOME'."
 
-ROBOZONKY_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
+ROBOZONKY_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
 # Added exec to propagate signals when Docker stop is issued, see https://github.com/RoboZonky/robozonky/pull/305.
 exec $JAVA_EXECUTABLE $ROBOZONKY_OPTS -jar $HERE/$ROBOZONKY_EXECUTABLE "$@"

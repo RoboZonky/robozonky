@@ -27,7 +27,7 @@
   <artifactId>robozonky-distribution-full</artifactId>
   <packaging>pom</packaging>
 
-  <name>RoboZonky Distribution: Full binary archive</name>
+  <name>RoboZonky Distribution: Standalone archives</name>
 
   <properties>
     <com.github.robozonky.distribution>true</com.github.robozonky.distribution>
@@ -56,7 +56,6 @@
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
-            <phase>package</phase>
             <configuration>
               <outputDirectory>${project.build.directory}/shaded</outputDirectory>
               <excludeTransitive>true</excludeTransitive>
@@ -70,12 +69,14 @@
           <execution>
             <!-- Prepare compressed distributions of the executable app. -->
             <configuration>
-              <appendAssemblyId>false</appendAssemblyId>
+              <filters>
+                <filter>src/main/assembly/filter.properties</filter>
+              </filters>
               <descriptors>
-                <descriptor>src/main/assembly/standard.xml</descriptor>
+                <descriptor>src/main/assembly/noarch.xml</descriptor>
               </descriptors>
             </configuration>
-            <id>package-standard</id>
+            <id>package-noarch</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -85,5 +86,105 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <!--
+        During a release, three other distributions are built - each one including a JRE for a given platform.
+        (Windows, MacOS, Linux.)
+        Since Maven is making it difficult, this profile is ugly.
+        It does the same thing three times, once for each platform:
+        - Assumes that the JREs have been externally provided by some CI somewhere.
+        - Takes the JRE for a platform and packages it together with the platform-independent JAR.
+        - Builds and attaches the platform-specific JAR.
+        This JAR then needs to be taken by robozonky-installer to create platform-specific installers.
+        -->
+      <id>release</id>
+      <activation>
+        <property>
+          <name>robozonky.release.profile</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-files-exist</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireFilesExist>
+                      <files>
+                        <file>${project.build.directory}/jre-linux</file>
+                        <file>${project.build.directory}/jre-windows</file>
+                        <file>${project.build.directory}/jre-macos</file>
+                      </files>
+                    </requireFilesExist>
+                  </rules>
+                  <fail>true</fail> <!-- Release profile in invalid state. -->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <executions>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/filter.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-linux.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/filter.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-windows.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-windows</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/filter.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-macos.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-macos</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

@@ -1,0 +1,143 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - master
+      - '[0-9]+.[0-9]+.x'
+    tags:
+      - robozonky-[0-9]+.[0-9]+.[0-9]+*
+  # Uncomment below to debug this workflow in CI.
+  # pull_request:
+  #   branches:
+  #     - master
+
+env:
+  COMPILE_TIME_JDK_VERSION: 11
+  RUNTIME_JDK_VERSION: 14
+  JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Ensure that the tests pass
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.RUNTIME_JDK_VERSION }}
+      - name: Build and test
+        run: mvn install --batch-mode -Dpit.skip=true
+  jlink:
+    name: Prepare JREs
+    needs: test
+    strategy:
+      fail-fast: false # Always see all results on all platforms.
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.RUNTIME_JDK_VERSION }}
+      - name: Run the build
+        run: mvn install --batch-mode -DskipTests
+      - name: Determine RoboZonky version
+        run: |
+          ROBOZONKY_VERSION=$(mvn -q \
+            -Dexec.executable="echo" \
+            -Dexec.args='${project.version}' \
+            --non-recursive \
+            org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+          )
+          echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
+          echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
+      # Avoid proliferation of Ubuntu and remove the -latest suffix.
+      - name: This is Mac OS X
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          echo "::set-env name=ROBOZONKY_OS::macos"
+      - name: This is Windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          echo "::set-env name=ROBOZONKY_OS::windows"
+      - name: This is Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          echo "::set-env name=ROBOZONKY_OS::linux"
+      # Build and publish the JLinked JRE.
+      - name: Run JLink for the JARs
+        run: |
+          chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
+          ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-installer-jre
+      - name: Upload JLinked app JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-jre-${{ env.ROBOZONKY_OS }}
+          path: robozonky-jre/**/*
+      - name: Upload JLinked installer JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
+          path: robozonky-installer-jre/**/*
+  build:
+    name: Build and deploy
+    needs: jlink
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Java and Maven
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.RUNTIME_JDK_VERSION }}
+      - name: Download Linux main app JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-jre-linux
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-linux
+      - name: Download MacOS main app JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-jre-macos
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-macos
+      - name: Download Windows main app JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-jre-windows
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-windows
+      - name: Download Linux installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-linux
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-linux
+      - name: Download MacOS installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-macos
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-macos
+      - name: Download Windows installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-windows
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-windows
+      - name: Build, sign and deploy
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          maven_goals_phases: deploy # Don't call "clean", or else all the downloaded JREs would disappear.
+          maven_args: "-Drobozonky.release.profile=true" # Activate the release profiles.
+          gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
+          server_id: ossrh
+          nexus_username: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
+          nexus_password: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
