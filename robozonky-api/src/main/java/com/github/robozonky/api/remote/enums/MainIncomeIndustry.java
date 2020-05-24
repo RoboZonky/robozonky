@@ -24,7 +24,7 @@ import javax.json.bind.annotation.JsonbTypeDeserializer;
 import com.github.robozonky.internal.util.json.MainIncomeIndustryDeserializer;
 
 /**
- * See <a href="http://www.nace.cz/" />NACE</a>.
+ * See <a href="http://www.nace.cz/">NACE</a>.
  */
 @JsonbTypeDeserializer(MainIncomeIndustryDeserializer.class)
 public enum MainIncomeIndustry implements BaseEnum {
