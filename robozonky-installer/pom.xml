@@ -203,7 +203,7 @@
       <id>release</id>
       <activation>
         <property>
-          <name>${maven.release.property}</name>
+          <name>robozonky.release.profile</name>
           <value>true</value>
         </property>
       </activation>

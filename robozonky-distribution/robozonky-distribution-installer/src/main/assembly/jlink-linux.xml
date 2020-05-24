@@ -26,8 +26,22 @@
   <includeBaseDirectory>false</includeBaseDirectory>
 
   <fileSets>
+  <fileSets>
     <fileSet>
       <directory>${project.build.directory}/jre-linux/</directory>
+      <filtered>false</filtered>
+      <excludes>
+        <exclude>bin/*</exclude>
+      </excludes>
+      <outputDirectory>jre</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/jre-linux/</directory>
+      <filtered>false</filtered>
+      <includes>
+        <include>bin/*</include>
+      </includes>
+      <fileMode>744</fileMode>
       <outputDirectory>jre</outputDirectory>
     </fileSet>
     <fileSet>

@@ -61,8 +61,6 @@
     <!-- Mutation coverage details. -->
     <pit.skip>${skipTests}</pit.skip>
     <pit.threshold>90</pit.threshold>
-    <!-- Property that will trigger the release profile. -->
-    <maven.release.property>release</maven.release.property>
   </properties>
 
   <dependencies> <!-- Libraries required for logging. Enforce this on project-level, otherwise it'd too tedious. -->
@@ -735,7 +733,7 @@
       <id>release</id>
       <activation>
         <property>
-          <name>${maven.release.property}</name>
+          <name>robozonky.release.profile</name>
           <value>true</value>
         </property>
       </activation>

@@ -8,9 +8,9 @@ on:
     tags:
       - robozonky-[0-9]+.[0-9]+.[0-9]+*
   # Uncomment below to debug this workflow in CI.
-  # pull_request:
-  #   branches:
-  #     - master
+  pull_request:
+    branches:
+      - master
 
 env:
   COMPILE_TIME_JDK_VERSION: 11
@@ -134,9 +134,8 @@ jobs:
       - name: Build, sign and deploy
         uses: samuelmeuli/action-maven-publish@v1
         with:
-          maven_profiles: release
           maven_goals_phases: deploy # Don't call "clean", or else all the downloaded JREs would disappear.
-          maven_args: "-Drelease=true" # Activate the release module.
+          maven_args: "-robozonky.release.profile=true" # Activate the release profiles.
           gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
           server_id: ossrh
