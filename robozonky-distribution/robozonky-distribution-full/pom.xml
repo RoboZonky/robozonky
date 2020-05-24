@@ -69,6 +69,9 @@
           <execution>
             <!-- Prepare compressed distributions of the executable app. -->
             <configuration>
+              <filters>
+                <filter>src/main/assembly/filter.properties</filter>
+              </filters>
               <descriptors>
                 <descriptor>src/main/assembly/standard.xml</descriptor>
               </descriptors>
@@ -134,6 +137,9 @@
             <executions>
               <execution>
                 <configuration>
+                  <filters>
+                    <filter>src/main/assembly/filter.properties</filter>
+                  </filters>
                   <descriptors>
                     <descriptor>src/main/assembly/native-linux.xml</descriptor>
                   </descriptors>
@@ -146,6 +152,9 @@
               </execution>
               <execution>
                 <configuration>
+                  <filters>
+                    <filter>src/main/assembly/filter.properties</filter>
+                  </filters>
                   <descriptors>
                     <descriptor>src/main/assembly/native-windows.xml</descriptor>
                   </descriptors>
@@ -158,6 +167,9 @@
               </execution>
               <execution>
                 <configuration>
+                  <filters>
+                    <filter>src/main/assembly/filter.properties</filter>
+                  </filters>
                   <descriptors>
                     <descriptor>src/main/assembly/native-macos.xml</descriptor>
                   </descriptors>

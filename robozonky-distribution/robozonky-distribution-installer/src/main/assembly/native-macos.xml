@@ -25,6 +25,7 @@
 
   <includeBaseDirectory>false</includeBaseDirectory>
 
+  <!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}/jre-macos/</directory>
@@ -37,7 +38,7 @@
       </includes>
       <outputDirectory/>
     </fileSet>
-    <fileSet><!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
+    <fileSet>
       <directory>../../</directory>
       <includes>
         <include>LICENSE</include>

@@ -33,8 +33,7 @@
     <fileSet>
       <directory>${project.build.directory}/shaded/</directory>
       <includes>
-        <include>robozonky-app-${project.version}-full.jar</include>
-        <include>robozonky-cli-${project.version}-full.jar</include>
+        <include>robozonky-*-${project.version}-full.jar</include>
       </includes>
       <outputDirectory/>
     </fileSet>

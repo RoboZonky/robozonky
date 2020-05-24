@@ -1,4 +1,4 @@
-set "ROBOZONKY_EXECUTABLE=${com.github.robozonky.distribution.jar}"
+set "ROBOZONKY_EXECUTABLE=${com.github.robozonky.distribution.jar.cli}"
 
 rem Find the correct installation directory, regardless of whether it's from the ZIP or from the installer.
 set "HERE=%~dp0%"
