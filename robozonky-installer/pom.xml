@@ -186,6 +186,15 @@
         </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.izpack</groupId>
+          <artifactId>izpack-maven-plugin</artifactId>
+          <version>${version.org.codehaus.izpack}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>
