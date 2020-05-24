@@ -152,9 +152,9 @@ jobs:
           )
           echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
           echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
-      - name: Create Release
+      - name: Create Github Release
         id: create_release
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/create-release@v1
         with:
           tag_name: ${{ github.ref }}
@@ -162,7 +162,7 @@ jobs:
           draft: true
           prerelease: false
       - name: Upload Main app (Windows, x64)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -170,7 +170,7 @@ jobs:
           asset_name: RoboZonky pro Windows
           asset_content_type: application/zip
       - name: Upload Main app (MacOS, x64)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -178,7 +178,7 @@ jobs:
           asset_name: RoboZonky pro MacOS
           asset_content_type: application/x-gtar
       - name: Upload Main app (Linux, x64)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -186,7 +186,7 @@ jobs:
           asset_name: RoboZonky pro Linux
           asset_content_type: application/x-gtar
       - name: Upload Main app (noarch)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -194,7 +194,7 @@ jobs:
           asset_name: RoboZonky (bez JRE)
           asset_content_type: application/zip
       - name: Upload Installer (Windows, x64)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -202,7 +202,7 @@ jobs:
           asset_name: RoboZonky instalátor pro Windows
           asset_content_type: application/zip
       - name: Upload Installer (MacOS, x64)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -210,7 +210,7 @@ jobs:
           asset_name: RoboZonky instalátor pro MacOS
           asset_content_type: application/x-gtar
       - name: Upload Installer (Linux, x64)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -218,7 +218,7 @@ jobs:
           asset_name: RoboZonky instalátor pro Linux
           asset_content_type: application/x-gtar
       - name: Upload Installer (noarch)
-        if: !contains(env.ROBOZONKY_VERSION, "SNAPSHOT")
+        if: !contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
