@@ -20,15 +20,14 @@
 
   <id>macos-x64</id>
   <formats>
-    <format>zip</format>
+    <format>tar.gz</format>
   </formats>
 
   <includeBaseDirectory>false</includeBaseDirectory>
 
   <fileSets>
-  <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/jre-linux/</directory>
+      <directory>${project.build.directory}/jre-macos/</directory>
       <filtered>false</filtered>
       <excludes>
         <exclude>bin/*</exclude>
@@ -36,7 +35,7 @@
       <outputDirectory>jre</outputDirectory>
     </fileSet>
     <fileSet>
-      <directory>${project.build.directory}/jre-linux/</directory>
+      <directory>${project.build.directory}/jre-macos/</directory>
       <filtered>false</filtered>
       <includes>
         <include>bin/*</include>
@@ -65,7 +64,7 @@
       <includes>
         <include>*.sh</include>
       </includes>
-      <fileMode>755</fileMode>
+      <fileMode>744</fileMode>
       <outputDirectory/>
     </fileSet>
     <fileSet>

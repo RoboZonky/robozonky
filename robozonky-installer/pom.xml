@@ -235,7 +235,7 @@
                       <groupId>com.github.robozonky.distribution</groupId>
                       <artifactId>robozonky-distribution-full</artifactId>
                       <version>${project.version}</version>
-                      <type>zip</type>
+                      <type>tar.gz</type>
                       <classifier>macos-x64</classifier>
                     </artifactItem>
                     <artifactItem>
@@ -277,7 +277,7 @@
                 <configuration>
                   <target>
                     <filter token="REPLACE_BY_FILTERING"
-                            value="robozonky-distribution-full-@{project.version}-macos-x64.zip"/>
+                            value="robozonky-distribution-full-@{project.version}-macos-x64.tar.gz"/>
                     <copy file="src/main/izpack/install.xml"
                           tofile="${filtered.izpack.descriptors.target}/install-macos.xml"
                           encoding="${project.build.sourceEncoding}"
