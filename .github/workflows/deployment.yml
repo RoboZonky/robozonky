@@ -152,6 +152,7 @@ jobs:
           )
           echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
           echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
+      # If this is not a SNAPSHOT, create a Github Release and upload all the artifacts there.
       - name: Create Github Release
         id: create_release
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
