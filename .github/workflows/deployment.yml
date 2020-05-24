@@ -8,9 +8,9 @@ on:
     tags:
       - robozonky-[0-9]+.[0-9]+.[0-9]+*
   # Uncomment below to debug this workflow in CI.
-  pull_request:
-    branches:
-      - master
+  # pull_request:
+  #   branches:
+  #     - master
 
 env:
   COMPILE_TIME_JDK_VERSION: 11
@@ -176,7 +176,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-macos-x64.tar.gz
           asset_name: RoboZonky pro MacOS
-          asset_content_type: application/x-gtar
+          asset_content_type: application/gzip
       - name: Upload Main app (Linux, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
@@ -184,7 +184,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_name: RoboZonky pro Linux
-          asset_content_type: application/x-gtar
+          asset_content_type: application/x-xz
       - name: Upload Main app (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
@@ -208,7 +208,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-macos-x64.tar.gz
           asset_name: RoboZonky instalátor pro MacOS
-          asset_content_type: application/x-gtar
+          asset_content_type: application/gzip
       - name: Upload Installer (Linux, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
@@ -216,7 +216,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_name: RoboZonky instalátor pro Linux
-          asset_content_type: application/x-gtar
+          asset_content_type: application/x-xz
       - name: Upload Installer (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
