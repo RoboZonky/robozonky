@@ -16,6 +16,7 @@ env:
   COMPILE_TIME_JDK_VERSION: 11
   RUNTIME_JDK_VERSION: 14
   JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 defaults:
   run:
@@ -131,6 +132,16 @@ jobs:
         with:
           name: robozonky-installer-jre-windows
           path: robozonky-distribution/robozonky-distribution-installer/target/jre-windows
+      - name: Determine RoboZonky version
+        run: |
+          ROBOZONKY_VERSION=$(mvn -q \
+            -Dexec.executable="echo" \
+            -Dexec.args='${project.version}' \
+            --non-recursive \
+            org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+          )
+          echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
+          echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
       - name: Build, sign and deploy
         uses: samuelmeuli/action-maven-publish@v1
         with:
@@ -141,3 +152,77 @@ jobs:
           server_id: ossrh
           nexus_username: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_NAME }}
           nexus_password: ${{ secrets.MAVEN_CENTRAL_ACCOUNT_PASSWORD }}
+      - name: Determine RoboZonky version
+        run: |
+          ROBOZONKY_VERSION=$(mvn -q \
+            -Dexec.executable="echo" \
+            -Dexec.args='${project.version}' \
+            --non-recursive \
+            org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+          )
+          echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
+          echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
+      - name: Create a Github Release
+          id: create_release
+          uses: actions/create-release@v1
+          with:
+            tag_name: ${{ github.ref }}
+            release_name: ${{ github.ref }}
+            draft: true
+            prerelease: false
+      - name: Upload Main app (Windows, x64)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-windows-x64.zip
+            asset_name: RoboZonky pro Windows
+            asset_content_type: application/zip
+      - name: Upload Main app (MacOS, x64)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-macos-x64.zip
+            asset_name: RoboZonky pro MacOS
+            asset_content_type: application/x-gtar
+      - name: Upload Main app (Linux, x64)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-x64.zip
+            asset_name: RoboZonky pro Linux
+            asset_content_type: application/x-gtar
+      - name: Upload Main app (noarch)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-noarch.zip
+            asset_name: RoboZonky (bez JRE)
+            asset_content_type: application/zip
+      - name: Upload Installer (Windows, x64)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-windows-x64.zip
+            asset_name: RoboZonky instalátor pro Windows
+            asset_content_type: application/zip
+      - name: Upload Installer (MacOS, x64)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-macos-x64.zip
+            asset_name: RoboZonky instalátor pro MacOS
+            asset_content_type: application/x-gtar
+      - name: Upload Installer (Linux, x64)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.zip
+            asset_name: RoboZonky instalátor pro Linux
+            asset_content_type: application/x-gtar
+      - name: Upload Installer (noarch)
+          uses: actions/upload-release-asset@v1
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-noarch.zip
+            asset_name: RoboZonky instalátor (bez JRE)
+            asset_content_type: application/zip
