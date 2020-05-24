@@ -66,13 +66,13 @@
           <execution>
             <configuration>
               <filters>
-                <filter>src/main/assembly/standard.properties</filter>
+                <filter>src/main/assembly/noarch.properties</filter>
               </filters>
               <descriptors>
-                <descriptor>src/main/assembly/standard.xml</descriptor>
+                <descriptor>src/main/assembly/noarch.xml</descriptor>
               </descriptors>
             </configuration>
-            <id>package-standard</id>
+            <id>package-noarch</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -153,13 +153,13 @@
               <execution>
                 <configuration>
                   <filters>
-                    <filter>src/main/assembly/native-linux.properties</filter>
+                    <filter>src/main/assembly/jlink-linux.properties</filter>
                   </filters>
                   <descriptors>
-                    <descriptor>src/main/assembly/native-linux.xml</descriptor>
+                    <descriptor>src/main/assembly/jlink-linux.xml</descriptor>
                   </descriptors>
                 </configuration>
-                <id>package-native-linux</id>
+                <id>package-jlink-linux</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -168,13 +168,13 @@
               <execution>
                 <configuration>
                   <filters>
-                    <filter>src/main/assembly/native-windows.properties</filter>
+                    <filter>src/main/assembly/jlink-windows.properties</filter>
                   </filters>
                   <descriptors>
-                    <descriptor>src/main/assembly/native-windows.xml</descriptor>
+                    <descriptor>src/main/assembly/jlink-windows.xml</descriptor>
                   </descriptors>
                 </configuration>
-                <id>package-native-windows</id>
+                <id>package-jlink-windows</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -183,13 +183,13 @@
               <execution>
                 <configuration>
                   <filters>
-                    <filter>src/main/assembly/native-macos.properties</filter>
+                    <filter>src/main/assembly/jlink-macos.properties</filter>
                   </filters>
                   <descriptors>
-                    <descriptor>src/main/assembly/native-macos.xml</descriptor>
+                    <descriptor>src/main/assembly/jlink-macos.xml</descriptor>
                   </descriptors>
                 </configuration>
-                <id>package-native-macos</id>
+                <id>package-jlink-macos</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>

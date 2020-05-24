@@ -18,27 +18,26 @@
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
 
-  <id>windows-x64</id>
+  <id>linux-x64</id>
   <formats>
-    <format>zip</format>
+    <format>tar.xz</format>
   </formats>
 
   <includeBaseDirectory>false</includeBaseDirectory>
 
-  <!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/jre-windows/</directory>
+      <directory>${project.build.directory}/jre-linux/</directory>
       <outputDirectory>jre</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/shaded/</directory>
       <includes>
-        <include>robozonky-installer-${project.version}-windows-x64.jar</include>
+        <include>robozonky-installer-${project.version}-linux-x64.jar</include>
       </includes>
       <outputDirectory/>
     </fileSet>
-    <fileSet><!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
+    <fileSet>
       <directory>../../</directory>
       <includes>
         <include>LICENSE</include>
@@ -46,17 +45,18 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../robozonky-distribution-full/src/main/assembly/filtered-resources</directory>
-      <lineEnding>dos</lineEnding>
+      <directory>src/main/assembly/filtered-resources</directory>
+      <lineEnding>unix</lineEnding>
       <filtered>true</filtered>
       <includes>
-        <include>*.bat</include>
+        <include>*.sh</include>
       </includes>
+      <fileMode>755</fileMode>
       <outputDirectory/>
     </fileSet>
     <fileSet>
       <directory>src/main/assembly/resources</directory>
-      <lineEnding>dos</lineEnding>
+      <lineEnding>unix</lineEnding>
       <filtered>false</filtered>
       <outputDirectory/>
     </fileSet>

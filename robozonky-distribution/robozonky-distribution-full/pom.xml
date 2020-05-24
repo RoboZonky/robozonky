@@ -73,10 +73,10 @@
                 <filter>src/main/assembly/filter.properties</filter>
               </filters>
               <descriptors>
-                <descriptor>src/main/assembly/standard.xml</descriptor>
+                <descriptor>src/main/assembly/noarch.xml</descriptor>
               </descriptors>
             </configuration>
-            <id>package-standard</id>
+            <id>package-noarch</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
@@ -141,10 +141,10 @@
                     <filter>src/main/assembly/filter.properties</filter>
                   </filters>
                   <descriptors>
-                    <descriptor>src/main/assembly/native-linux.xml</descriptor>
+                    <descriptor>src/main/assembly/jlink-linux.xml</descriptor>
                   </descriptors>
                 </configuration>
-                <id>package-native-linux</id>
+                <id>package-jlink-linux</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -156,10 +156,10 @@
                     <filter>src/main/assembly/filter.properties</filter>
                   </filters>
                   <descriptors>
-                    <descriptor>src/main/assembly/native-windows.xml</descriptor>
+                    <descriptor>src/main/assembly/jlink-windows.xml</descriptor>
                   </descriptors>
                 </configuration>
-                <id>package-native-windows</id>
+                <id>package-jlink-windows</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
@@ -171,10 +171,10 @@
                     <filter>src/main/assembly/filter.properties</filter>
                   </filters>
                   <descriptors>
-                    <descriptor>src/main/assembly/native-macos.xml</descriptor>
+                    <descriptor>src/main/assembly/jlink-macos.xml</descriptor>
                   </descriptors>
                 </configuration>
-                <id>package-native-macos</id>
+                <id>package-jlink-macos</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>

@@ -42,7 +42,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../robozonky-distribution-full/src/main/assembly/filtered-resources</directory>
+      <directory>src/main/assembly/filtered-resources</directory>
       <lineEnding>unix</lineEnding>
       <filtered>true</filtered>
       <includes>
@@ -52,7 +52,7 @@
       <outputDirectory/>
     </fileSet>
     <fileSet>
-      <directory>../robozonky-distribution-full/src/main/assembly/filtered-resources</directory>
+      <directory>src/main/assembly/filtered-resources</directory>
       <lineEnding>dos</lineEnding>
       <filtered>true</filtered>
       <includes>
