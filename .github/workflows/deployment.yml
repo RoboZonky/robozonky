@@ -8,9 +8,9 @@ on:
     tags:
       - robozonky-[0-9]+.[0-9]+.[0-9]+*
   # Uncomment below to debug this workflow in CI.
-  # pull_request:
-  #   branches:
-  #     - master
+  pull_request:
+    branches:
+      - master
 
 env:
   COMPILE_TIME_JDK_VERSION: 11
@@ -136,7 +136,9 @@ jobs:
         uses: samuelmeuli/action-maven-publish@v1
         with:
           maven_goals_phases: deploy # Don't call "clean", or else all the downloaded JREs would disappear.
-          maven_args: "-Drobozonky.release.profile=true" # Activate the release profiles.
+          # Enable release profile; attempt to resolve intermittent connection issues.
+          # See https://stackoverflow.com/questions/55899091/maven-retry-dependency-download-if-failed.
+          maven_args: "-Drobozonky.release.profile=true -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false"
           gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
           server_id: ossrh
