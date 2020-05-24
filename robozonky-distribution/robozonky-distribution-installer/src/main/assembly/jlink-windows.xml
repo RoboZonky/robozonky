@@ -23,7 +23,8 @@
     <format>zip</format>
   </formats>
 
-  <includeBaseDirectory>false</includeBaseDirectory>
+  <baseDirectory>robozonky-installer-${project.version}</baseDirectory>
+  <includeBaseDirectory>true</includeBaseDirectory>
 
   <!-- Note: going outside the module dir is bad, but it is not fetching generated files -->
   <fileSets>
