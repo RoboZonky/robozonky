@@ -165,11 +165,11 @@ jobs:
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
-          with:
-            tag_name: ${{ github.ref }}
-            release_name: ${{ github.ref }}
-            draft: true
-            prerelease: false
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: true
+          prerelease: false
       - name: Upload Main app (Windows, x64)
         uses: actions/upload-release-asset@v1
         with:
