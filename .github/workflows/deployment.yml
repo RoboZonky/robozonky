@@ -170,7 +170,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-windows-x64.zip
-          asset_name: RoboZonky pro Windows
+          asset_name: 'RoboZonky pro Windows'
           asset_content_type: application/zip
       - name: Upload Main app (MacOS, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -178,7 +178,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-macos-x64.tar.gz
-          asset_name: RoboZonky pro MacOS
+          asset_name: 'RoboZonky pro MacOS'
           asset_content_type: application/gzip
       - name: Upload Main app (Linux, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -186,7 +186,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
-          asset_name: RoboZonky pro Linux
+          asset_name: 'RoboZonky pro Linux'
           asset_content_type: application/x-xz
       - name: Upload Main app (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -194,7 +194,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-noarch.zip
-          asset_name: RoboZonky (bez JRE)
+          asset_name: 'RoboZonky (bez JRE)'
           asset_content_type: application/zip
       - name: Upload Installer (Windows, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -202,7 +202,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-windows-x64.zip
-          asset_name: RoboZonky instalátor pro Windows
+          asset_name: 'RoboZonky instalátor pro Windows'
           asset_content_type: application/zip
       - name: Upload Installer (MacOS, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -210,7 +210,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-macos-x64.tar.gz
-          asset_name: RoboZonky instalátor pro MacOS
+          asset_name: 'RoboZonky instalátor pro MacOS'
           asset_content_type: application/gzip
       - name: Upload Installer (Linux, x64)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -218,7 +218,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
-          asset_name: RoboZonky instalátor pro Linux
+          asset_name: 'RoboZonky instalátor pro Linux'
           asset_content_type: application/x-xz
       - name: Upload Installer (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
@@ -226,5 +226,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-noarch.zip
-          asset_name: RoboZonky instalátor (bez JRE)
+          asset_name: 'RoboZonky instalátor (bez JRE)'
           asset_content_type: application/zip
