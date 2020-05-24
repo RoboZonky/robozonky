@@ -1,4 +1,4 @@
-name: Deploy
+name: Deployment
 
 on:
   push:
@@ -8,9 +8,9 @@ on:
     tags:
       - robozonky-[0-9]+.[0-9]+.[0-9]+*
   # Uncomment below to debug this workflow in CI.
-  pull_request:
-    branches:
-      - master
+  # pull_request:
+  #   branches:
+  #     - master
 
 env:
   COMPILE_TIME_JDK_VERSION: 11
@@ -35,7 +35,7 @@ jobs:
       - name: Build and test
         run: mvn install --batch-mode -Dpit.skip=true
   jlink:
-    name: Prepare jlink-ed JREs
+    name: Prepare JREs
     needs: test
     strategy:
       fail-fast: false # Always see all results on all platforms.
@@ -135,7 +135,7 @@ jobs:
         uses: samuelmeuli/action-maven-publish@v1
         with:
           maven_profiles: release
-          maven_goals_phases: deploy # Don't call "clean", or else all the JREs would be gone.
+          maven_goals_phases: deploy # Don't call "clean", or else all the downloaded JREs would disappear.
           maven_args: "-Drelease=true" # Activate the release module.
           gpg_private_key: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.MAVEN_CENTRAL_PRIVATE_KEY_PASSWORD }}
