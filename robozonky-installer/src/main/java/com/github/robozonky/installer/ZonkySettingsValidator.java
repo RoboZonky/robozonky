@@ -63,12 +63,12 @@ public class ZonkySettingsValidator extends AbstractValidator {
             final char[] password = Variables.KEYSTORE_PASSWORD.getValue(installData)
                 .toCharArray();
             try {
+                RoboZonkyInstallerListener.setKeystoreInformation(f, password);
                 Files.copy(Path.of(keystorePath), f.toPath());
                 final KeyStoreHandler k = KeyStoreHandler.open(f, password);
                 logger.debug("Keystore open, attempting token refresh.");
                 ZonkyCredentialsFeature.refreshToken(k, apiSupplier.get());
                 logger.debug("Over and out.");
-                RoboZonkyInstallerListener.setKeystoreInformation(f, password);
                 return DataValidator.Status.OK;
             } catch (final Exception t) {
                 logger.warn("Failed obtaining Zonky API token.", t);
