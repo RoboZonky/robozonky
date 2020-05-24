@@ -12,9 +12,9 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
             --non-recursive \
             org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
         ) \
-    && ROBOZONKY_TAR_XZ=robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-$ROBOZONKY_VERSION.tar.xz \
+    && ROBOZONKY_NOARCH=robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-$ROBOZONKY_VERSION-noarch.zip \
     && mkdir -vp $BINARY_DIRECTORY \
-    && tar -C $BINARY_DIRECTORY -xvf $ROBOZONKY_TAR_XZ \
+    && unzip $ROBOZONKY_NOARCH -d $BINARY_DIRECTORY \
     && chmod +x $BINARY_DIRECTORY/robozonky.sh
 
 # ... then build a minimalistic JRE using jlink ...
