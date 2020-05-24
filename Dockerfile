@@ -5,7 +5,7 @@ ENV SOURCE_DIRECTORY=/usr/src/robozonky \
     BINARY_DIRECTORY=/tmp/robozonky
 COPY . $SOURCE_DIRECTORY
 WORKDIR $SOURCE_DIRECTORY
-RUN mvn install -B -Dgpg.skip -DskipTests -Ddocker
+RUN mvn install -B -DskipTests -Ddocker
 RUN ROBOZONKY_VERSION=$(mvn -q \
             -Dexec.executable="echo" \
             -Dexec.args='${project.version}' \
