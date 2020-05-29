@@ -792,8 +792,8 @@
     </license>
   </licenses>
   <ciManagement>
-    <system>travis</system>
-    <url>https://travis-ci.org/RoboZonky/robozonky</url>
+    <system>github</system>
+    <url>https://github.com/RoboZonky/robozonky/actions</url>
   </ciManagement>
   <distributionManagement>
     <snapshotRepository>
