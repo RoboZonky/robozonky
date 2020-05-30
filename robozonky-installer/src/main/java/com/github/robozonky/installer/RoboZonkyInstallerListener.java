@@ -35,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.installer.scripts.RunScriptGenerator;
 import com.github.robozonky.installer.scripts.ServiceGenerator;
 import com.github.robozonky.internal.Settings;
-import com.github.robozonky.internal.util.FileUtil;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
@@ -149,7 +148,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
             final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
             try {
                 Util.copyFile(new File(content), strategyFile);
-                FileUtil.configurePermissions(strategyFile, false);
                 return new CommandLinePart().setOption("-s", strategyFile.getAbsolutePath());
             } catch (final IOException ex) {
                 throw new IllegalStateException("Failed copying strategy file.", ex);
