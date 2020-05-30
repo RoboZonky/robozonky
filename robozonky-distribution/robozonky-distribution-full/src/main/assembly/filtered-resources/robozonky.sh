@@ -16,9 +16,9 @@ JAVA_EXECUTABLE="java"
 if [ -f $CUSTOM_JRE_LOCATION/bin/$JAVA_EXECUTABLE ]; then
     JAVA_EXECUTABLE=$CUSTOM_JRE_LOCATION/bin/$JAVA_EXECUTABLE
     JAVA_HOME=$CUSTOM_JRE_LOCATION
+    echo "JAVA_HOME set to '$JAVA_HOME'."
 fi
 echo "Will use '$JAVA_EXECUTABLE' as the Java executable."
-echo "JAVA_HOME set to '$JAVA_HOME'."
 
 ROBOZONKY_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
 # Added exec to propagate signals when Docker stop is issued, see https://github.com/RoboZonky/robozonky/pull/305.

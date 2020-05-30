@@ -683,10 +683,21 @@
             <shadedArtifactAttached>true</shadedArtifactAttached>
             <shadedClassifierName>full</shadedClassifierName>
             <filters>
+              <filter> <!-- No internal log4j configuration file. -->
+                <artifact>*:*</artifact>
+                <excludes>
+                  <exclude>**/log4j2.xml</exclude>
+                </excludes>
+              </filter>
               <filter> <!-- Disable modularity for all dependencies, in order to not confuse JLink later. -->
                 <artifact>*:*</artifact>
                 <excludes>
                   <exclude>**/*module-info*</exclude>
+                </excludes>
+              </filter>
+              <filter> <!-- Disable JAR signing as only some of the JARs would be signed, creating problems. -->
+                <artifact>*:*</artifact>
+                <excludes>
                   <excludes>META-INF/*.SF</excludes>
                   <excludes>META-INF/*.DSA</excludes>
                   <excludes>META-INF/*.RSA</excludes>

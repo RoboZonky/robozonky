@@ -18,16 +18,16 @@ package com.github.robozonky.installer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -251,11 +251,18 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
 
     private static CommandLinePart prepareLogging() {
         try {
-            final InputStream log4j2config = RoboZonkyInstallerListener.class.getResourceAsStream("/log4j2.xml");
-            FileUtils.copyInputStreamToFile(log4j2config, LOG4J2_CONFIG_FILE);
-            FileUtil.configurePermissions(LOG4J2_CONFIG_FILE, false);
-            return new CommandLinePart()
-                .setProperty("log4j.configurationFile", LOG4J2_CONFIG_FILE.getAbsolutePath());
+            final File log4j2config = new File(DIST_PATH, "log4j2.xml");
+            if (log4j2config.exists()) {
+                final Path target = Files
+                    .move(log4j2config.toPath(), LOG4J2_CONFIG_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                    .toAbsolutePath();
+                LOGGER.info("Will read logging configuration from '{}'.", target);
+                return new CommandLinePart()
+                    .setProperty("log4j.configurationFile", target.toString());
+            } else {
+                LOGGER.warn("Logging configuration file '{}' not found, not setting up logging.", log4j2config);
+                return new CommandLinePart();
+            }
         } catch (final IOException ex) {
             throw new IllegalStateException("Failed copying Log4j configuration file.", ex);
         }
