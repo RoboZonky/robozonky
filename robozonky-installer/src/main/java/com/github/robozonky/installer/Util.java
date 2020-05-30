@@ -41,12 +41,12 @@ final class Util {
         // no instances
     }
 
-    private static String toBoolean(final String string) {
+    static String toBoolean(final String string) {
         return Boolean.valueOf(string)
             .toString();
     }
 
-    private static String toInt(final String string) {
+    static String toInt(final String string) {
         if (string == null) {
             return "-1";
         }

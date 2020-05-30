@@ -44,6 +44,10 @@ import com.izforge.izpack.api.event.ProgressListener;
 public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
     private static final Logger LOGGER = LogManager.getLogger(RoboZonkyInstallerListener.class);
+    static File INSTALL_PATH;
+    static File JMX_PROPERTIES_FILE;
+    static File EMAIL_CONFIG_FILE;
+    static File CLI_CONFIG_FILE;
     private static File DIST_PATH;
     private static File SETTINGS_FILE;
     private static File LOG4J2_CONFIG_FILE;
@@ -51,11 +55,6 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     private static File KEYSTORE_TARGET;
     private static char[] KEYSTORE_SECRET;
     private static InstallData DATA;
-    static File INSTALL_PATH;
-    static File JMX_PROPERTIES_FILE;
-    static File EMAIL_CONFIG_FILE;
-    static File CLI_CONFIG_FILE;
-
     private RoboZonkyInstallerListener.OS operatingSystem = RoboZonkyInstallerListener.OS.OTHER;
 
     public RoboZonkyInstallerListener() {
@@ -267,16 +266,23 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     }
 
     private void prepareRunScript(final CommandLinePart commandLine) {
-        final RunScriptGenerator generator = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS
+        boolean isWindows = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS;
+        final RunScriptGenerator generator = isWindows
                 ? RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
                 : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
         final File runScript = generator.apply(commandLine);
         final File distRunScript = generator.getChildRunScript();
-        Stream.of(runScript, distRunScript)
-            .forEach(script -> {
-                final boolean success = script.setExecutable(true);
-                LOGGER.info("Made '{}' executable: {}.", script, success);
-            });
+        Stream<File> toMakeExecutable = Stream.of(runScript, distRunScript);
+        final File javaExecutable = new File(DIST_PATH, isWindows ? "jre/bin/java.exe" : "jre/bin/java");
+        if (javaExecutable.exists()) {
+            toMakeExecutable = Stream.concat(Stream.of(javaExecutable), toMakeExecutable);
+        } else {
+            LOGGER.info("Bundled Java binary not found, not making it executable.");
+        }
+        toMakeExecutable.forEach(file -> {
+            final boolean success = file.setExecutable(true);
+            LOGGER.info("Made '{}' executable: {}.", file, success);
+        });
         if (operatingSystem == RoboZonkyInstallerListener.OS.LINUX) {
             prepareLinuxServices(runScript);
         }

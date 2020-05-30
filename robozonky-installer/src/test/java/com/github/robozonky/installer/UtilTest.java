@@ -17,6 +17,7 @@
 package com.github.robozonky.installer;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,26 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class UtilTest {
+
+    @Test
+    void toInt() {
+        assertSoftly(softly -> {
+            softly.assertThat(Util.toInt("-1"))
+                .isEqualTo("-1");
+            softly.assertThat(Util.toInt(null))
+                .isEqualTo("-1");
+        });
+    }
+
+    @Test
+    void toBoolean() {
+        assertSoftly(softly -> {
+            softly.assertThat(Util.toBoolean("true"))
+                .isEqualTo("true");
+            softly.assertThat(Util.toBoolean("false"))
+                .isEqualTo("false");
+        });
+    }
 
     @Test
     void testCopyOptions() {
