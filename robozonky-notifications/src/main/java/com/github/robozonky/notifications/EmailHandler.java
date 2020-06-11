@@ -82,7 +82,7 @@ final class EmailHandler extends AbstractTargetHandler {
         } else {
             LOGGER.debug("Will contact SMTP server anonymously.");
         }
-        email.setFrom(getSender(), session.getName());
+        email.setFrom(getSender(), "RoboZonky '" + session.getName() + "'");
         email.addTo(getRecipient());
         return email;
     }
