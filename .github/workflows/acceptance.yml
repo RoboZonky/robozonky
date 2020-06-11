@@ -46,7 +46,7 @@ jobs:
         with:
           java-version: ${{ env.DEFAULT_JDK_VERSION }}
       - name: Compile all modules without testing
-        run: mvn --batch-mode clean install -DskipTests ${{ env.STABILIZING_PROPERTIES }} ${{ env.STREAMLINING_PROPERTIES }}
+        run: mvn --batch-mode clean install -DskipTests ${{ env.STABILIZING_PROPERTIES }}
       - name: Run mutation coverage on a single module
         run: |
           cd ${{ matrix.module }}
@@ -67,4 +67,4 @@ jobs:
         with:
           java-version: ${{ matrix.jvm }}
       - name: Compile and test all modules, skipping mutation coverage
-        run: mvn --batch-mode verify -Dpit.skip=true ${{ env.STABILIZING_PROPERTIES }} ${{ env.STREAMLINING_PROPERTIES }}
+        run: mvn --batch-mode verify -Dpit.skip=true ${{ env.STABILIZING_PROPERTIES }}
