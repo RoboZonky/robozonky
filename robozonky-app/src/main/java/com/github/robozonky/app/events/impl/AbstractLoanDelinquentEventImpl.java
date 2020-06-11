@@ -29,14 +29,12 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
 
     private final Investment investment;
     private final Loan loan;
-    private final LocalDate since;
     private final Supplier<SellInfo> sellInfoSupplier;
 
-    AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since,
+    AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan,
             final Supplier<SellInfo> sellInfoSupplier) {
         this.investment = investment;
         this.loan = loan;
-        this.since = since;
         this.sellInfoSupplier = sellInfoSupplier;
     }
 
@@ -52,7 +50,11 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
 
     @Override
     public LocalDate getDelinquentSince() {
-        return since;
+        var currentDaysInDue = getSellInfo()
+            .getLoanHealthStats()
+            .getCurrentDaysDue();
+        return LocalDate.now()
+            .minusDays(currentDaysInDue);
     }
 
     @Override
@@ -66,7 +68,6 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
             .add("super=" + super.toString())
             .add("loan=" + loan)
             .add("investment=" + investment)
-            .add("since=" + since)
             .toString();
     }
 }

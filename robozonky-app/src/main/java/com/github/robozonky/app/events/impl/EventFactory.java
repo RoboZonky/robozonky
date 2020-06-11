@@ -113,28 +113,28 @@ public final class EventFactory {
     }
 
     public static LoanNowDelinquentEvent loanNowDelinquent(final Investment investment, final Loan loan,
-            final LocalDate since, final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanNowDelinquentEventImpl(investment, loan, since, sellInfoSupplier);
+            final Supplier<SellInfo> sellInfoSupplier) {
+        return new LoanNowDelinquentEventImpl(investment, loan, sellInfoSupplier);
     }
 
     public static LoanDelinquent10DaysOrMoreEvent loanDelinquent10plus(final Investment investment, final Loan loan,
-            final LocalDate since, final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent10DaysOrMoreEventImpl(investment, loan, since, sellInfoSupplier);
+            final Supplier<SellInfo> sellInfoSupplier) {
+        return new LoanDelinquent10DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
     }
 
     public static LoanDelinquent30DaysOrMoreEvent loanDelinquent30plus(final Investment investment, final Loan loan,
-            final LocalDate since, final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent30DaysOrMoreEventImpl(investment, loan, since, sellInfoSupplier);
+            final Supplier<SellInfo> sellInfoSupplier) {
+        return new LoanDelinquent30DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
     }
 
     public static LoanDelinquent60DaysOrMoreEvent loanDelinquent60plus(final Investment investment, final Loan loan,
-            final LocalDate since, final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent60DaysOrMoreEventImpl(investment, loan, since, sellInfoSupplier);
+            final Supplier<SellInfo> sellInfoSupplier) {
+        return new LoanDelinquent60DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
     }
 
     public static LoanDelinquent90DaysOrMoreEvent loanDelinquent90plus(final Investment investment, final Loan loan,
-            final LocalDate since, final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent90DaysOrMoreEventImpl(investment, loan, since, sellInfoSupplier);
+            final Supplier<SellInfo> sellInfoSupplier) {
+        return new LoanDelinquent90DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
     }
 
     public static LoanLostEvent loanLost(final Investment investment, final Loan loan) {

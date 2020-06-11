@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +73,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         Loan l = MockLoanBuilder.fresh();
         Investment i = MockInvestmentBuilder.fresh(l, 200)
             .build();
-        final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(i, l, LocalDate.now(),
+        final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(i, l,
                 () -> tenant.getSellInfo(i.getId()));
         assertThat(SessionEvents.getImplementingEvent(e.getClass()))
             .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);

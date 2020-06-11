@@ -129,13 +129,13 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         final Investment investment = MockInvestmentBuilder.fresh(loan, BigDecimal.TEN)
             .build();
         final LocalDate now = LocalDate.now();
-        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, now, SellInfoImpl::new);
+        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, SellInfoImpl::new);
         assertCorrectThreshold(e, 90);
-        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, now, SellInfoImpl::new);
+        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, SellInfoImpl::new);
         assertCorrectThreshold(e2, 60);
-        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, now, SellInfoImpl::new);
+        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, SellInfoImpl::new);
         assertCorrectThreshold(e3, 30);
-        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, now, SellInfoImpl::new);
+        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, SellInfoImpl::new);
         assertCorrectThreshold(e4, 10);
     }
 
@@ -238,7 +238,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNowDelinquent() {
         final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder.fresh()
-            .build(), MockLoanBuilder.fresh(), LocalDate.now(), SellInfoImpl::new);
+            .build(), MockLoanBuilder.fresh(), SellInfoImpl::new);
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
