@@ -59,10 +59,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout from Github
-      uses: actions/checkout@v1
-    - name: Set up the JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: ${{ matrix.jvm }}
-    - name: Compile and test all modules, skipping mutation coverage
-      run: mvn --batch-mode verify -Denforcer.skip -Dpit.skip=true
+        uses: actions/checkout@v1
+      - name: Set up the JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.jvm }}
+      - name: Compile and test all modules, skipping mutation coverage
+        run: mvn --batch-mode verify -Denforcer.skip -Dpit.skip=true
