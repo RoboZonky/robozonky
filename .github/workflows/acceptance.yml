@@ -23,13 +23,13 @@ jobs:
         with:
           java-version: ${{ env.DEFAULT_JDK_VERSION }}
       - name: Compile all modules without testing
-        run: mvn --batch-mode clean install dependency:go-offline -DskipTests
+        run: mvn --batch-mode clean install -DskipTests
       - name: Test all modules inc. JaCoCo
         run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report -Dassembly.skipAssembly -Denforcer.skip -Dpit.skip=true
       - name: Trigger SonarCloud
         run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky -Dsonar.java.source=${{ env.DEFAULT_JDK_VERSION }}
   mutation: # Takes a very long time, run all modules in parallel.
-    name: Mutation coverage of individual modules
+    name: Mutation coverage
     needs: full
     strategy:
       fail-fast: false # Always see all results
@@ -44,7 +44,7 @@ jobs:
         with:
           java-version: ${{ env.DEFAULT_JDK_VERSION }}
       - name: Compile all modules without testing
-        run: mvn --batch-mode clean install dependency:go-offline -DskipTests
+        run: mvn --batch-mode clean install -DskipTests -Dassembly.skipAssembly -Denforcer.skip
       - name: Run mutation coverage on a single module
         run: |
           cd ${{ matrix.module }}
