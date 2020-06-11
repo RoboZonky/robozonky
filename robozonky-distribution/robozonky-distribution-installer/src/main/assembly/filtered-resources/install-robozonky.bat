@@ -1,10 +1,6 @@
 set "ROBOZONKY_EXECUTABLE=${com.github.robozonky.distribution.jar}"
 
-rem Find the correct installation directory, regardless of whether it's from the ZIP or from the installer.
 set "HERE=%~dp0%"
-IF EXIST %HERE%Dist\%ROBOZONKY_EXECUTABLE% (
-    set "HERE=%HERE%Dist\"
-)
 echo Will run %ROBOZONKY_EXECUTABLE% from '%HERE%'.
 
 rem Use Java runtime bundled with RoboZonky, if available.

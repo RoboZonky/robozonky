@@ -91,7 +91,7 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
     static void setInstallData(final InstallData data) {
         RoboZonkyInstallerListener.DATA = data;
         INSTALL_PATH = new File(Variables.INSTALL_PATH.getValue(DATA));
-        DIST_PATH = new File(INSTALL_PATH, "Dist/");
+        DIST_PATH = new File(INSTALL_PATH, "dist/");
         KEYSTORE_TARGET = new File(INSTALL_PATH, "robozonky.keystore");
         JMX_PROPERTIES_FILE = new File(INSTALL_PATH, "management.properties");
         EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");

@@ -1,12 +1,8 @@
 #!/bin/sh
 ROBOZONKY_EXECUTABLE="${com.github.robozonky.distribution.jar}"
 
-# Find the correct installation directory, regardless of whether it's from the ZIP or from the installer.
 SCRIPT=$(realpath $0)
 HERE=$(dirname $SCRIPT)
-if [ -f $HERE/Dist/$ROBOZONKY_EXECUTABLE ]; then
-    HERE=$HERE/Dist
-fi
 echo "Will run '$ROBOZONKY_EXECUTABLE' from '$HERE'."
 
 # Use Java runtime bundled with RoboZonky, if available.

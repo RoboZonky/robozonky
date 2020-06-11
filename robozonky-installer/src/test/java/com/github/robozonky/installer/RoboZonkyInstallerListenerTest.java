@@ -113,7 +113,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         if (installDir.exists()) {
             RoboZonkyInstallerListenerTest.deleteDir(installDir);
         }
-        final File distDir = new File(installDir, "Dist/");
+        final File distDir = new File(installDir, "dist/");
         distDir.mkdirs();
         final File loggingConfig = new File(distDir, "log4j2.xml");
         loggingConfig.createNewFile();
