@@ -49,7 +49,7 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     @Override
     protected OptionalInt getMaximumItemsToRead() {
         var max = Settings.INSTANCE.getMaxItemsReadFromPrimaryMarketplace();
-        return max >= 0 ? OptionalInt.of(max) : OptionalInt.empty();
+        return sanitizeMaximumItemCount(max);
     }
 
     @Override

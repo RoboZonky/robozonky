@@ -41,6 +41,10 @@ abstract class AbstractMarketplaceAccessor<T> {
 
     private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
 
+    protected OptionalInt sanitizeMaximumItemCount(int max) {
+        return max >= 0 ? OptionalInt.of(max) : OptionalInt.empty();
+    }
+
     protected Select getIncrementalFilter() {
         Instant lastFullMarketplaceCheck = lastFullMarketplaceCheckReference.get();
         Instant now = DateUtil.now();

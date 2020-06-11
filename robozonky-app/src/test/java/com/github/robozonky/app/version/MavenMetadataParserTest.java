@@ -70,8 +70,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
                 "robozonky-nonexistent");
         final Either<Throwable, Response> result = parser.apply(UUID.randomUUID()
             .toString());
-        assertThat(result.getLeft()).isInstanceOf(IllegalStateException.class)
-            .hasCauseInstanceOf(FileNotFoundException.class);
+        assertThat(result.getLeft()).isInstanceOf(FileNotFoundException.class);
     }
 
     @Test
@@ -209,8 +208,7 @@ class MavenMetadataParserTest extends AbstractRoboZonkyTest {
             final Either<Throwable, Response> result = parser.apply(UUID.randomUUID()
                 .toString());
             assertThat(result.getLeft())
-                .isInstanceOf(IllegalStateException.class)
-                .hasCauseInstanceOf(FileNotFoundException.class);
+                .isInstanceOf(FileNotFoundException.class);
         }
 
     }

@@ -73,7 +73,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS)
             .withApi(api)
-            .build();
+            .build(false);
         try (tenant) {
             final Statistics s = tenant.call(Zonky::getStatistics);
             assertThat(s).isSameAs(StatisticsImpl.empty());
@@ -123,7 +123,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         try (final Tenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(s)
-            .build()) {
+            .build(false)) {
             assertThat(tenant.getAvailability()).isNotNull();
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
             assertThat(tenant.getSellInfo(1)).isSameAs(si);
@@ -136,7 +136,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
     @Test
     void keepsBalance() throws Exception {
         try (final PowerTenant tenant = new TenantBuilder().withSecrets(SECRETS)
-            .build()) {
+            .build(false)) {
             assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(StatefulBoundedBalance.MAXIMUM);
             tenant.setKnownBalanceUpperBound(Money.from(100));
             assertThat(tenant.getKnownBalanceUpperBound()).isEqualTo(Money.from(100));
@@ -150,7 +150,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(SECRETS)
-            .build()) {
+            .build(false)) {
             tenant.fire(roboZonkyDaemonSuspended(new IllegalStateException()))
                 .join();
         }
@@ -167,7 +167,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         try (final PowerTenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(SECRETS)
-            .build()) {
+            .build(false)) {
             tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                     mockPortfolioOverview())))
                 .join();

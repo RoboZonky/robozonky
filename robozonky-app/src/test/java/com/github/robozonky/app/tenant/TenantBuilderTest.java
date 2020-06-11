@@ -45,7 +45,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
         final Tenant t = new TenantBuilder()
             .withApi(a)
             .withSecrets(s)
-            .build();
+            .build(false);
         assertThat(t.getSessionInfo()
             .canAccessSmp()).isTrue();
         verify(o).refresh(eq(token));
@@ -60,8 +60,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
             .withApi(mockApiProvider(s))
             .withSecrets(s)
             .named("name")
-            .dryRun()
-            .build();
+            .build(true);
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {
             softly.assertThat(i.getUsername())
@@ -88,7 +87,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
         final SecretProvider s = mockSecretProvider();
         final Tenant t = new TenantBuilder().withSecrets(s)
             .withApi(mockApiProvider(s))
-            .build();
+            .build(false);
         final SessionInfo i = t.getSessionInfo();
         assertSoftly(softly -> {
             softly.assertThat(i.getUsername())
@@ -102,6 +101,6 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void secretsNotProvided() {
-        assertThatThrownBy(() -> new TenantBuilder().build()).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> new TenantBuilder().build(false)).isInstanceOf(IllegalStateException.class);
     }
 }
