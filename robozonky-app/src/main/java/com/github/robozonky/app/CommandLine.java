@@ -89,14 +89,10 @@ class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMod
     }
 
     private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
-        final TenantBuilder b = new TenantBuilder();
-        if (cli.dryRunEnabled) {
-            b.dryRun();
-        }
-        return b.withSecrets(secrets)
+        return new TenantBuilder().withSecrets(secrets)
             .withStrategy(cli.strategyLocation)
             .named(cli.name)
-            .build();
+            .build(cli.dryRunEnabled);
     }
 
     private static void configureNotifications(final CommandLine cli, final PowerTenant tenant) {

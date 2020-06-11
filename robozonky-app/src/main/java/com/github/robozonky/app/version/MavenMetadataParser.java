@@ -22,10 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -79,20 +77,16 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
      * @return Stream to read the Maven Central metadata from.
      * @throws IOException Network communications failure.
      */
-    private static InputStream getMavenCentralData(final String groupId, final String artifactId,
-            final String hostname) {
-        try {
-            var url = hostname + "/solrsearch/select?q=g:%22" + groupId + "%22+AND+a:%22" + artifactId
-                    + "%22&core=gav&rows=100&wt=json";
-            return UrlUtil.open(new URL(url))
-                .getInputStream();
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
+    private static InputStream getMavenCentralData(final String groupId, final String artifactId, final String hostname)
+            throws IOException {
+        var url = hostname + "/solrsearch/select?q=g:%22" + groupId + "%22+AND+a:%22" + artifactId
+                + "%22&core=gav&rows=100&wt=json";
+        return UrlUtil.open(new URL(url))
+            .getInputStream();
     }
 
     private static boolean isStable(final String version) {
-        return MavenMetadataParser.PATTERN_STABLE_VERSION.matcher(version)
+        return PATTERN_STABLE_VERSION.matcher(version)
             .find();
     }
 
@@ -116,18 +110,9 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
         }
     }
 
-    private static Either<Throwable, List<String>> read(Supplier<InputStream> inputStreamSupplier,
-            Function<InputStream, List<String>> parser) {
-        try (var inputStream = inputStreamSupplier.get()) {
-            return Either.right(parser.apply(inputStream));
-        } catch (Exception ex) {
-            return Either.left(ex);
-        }
-    }
-
-    private static Either<Throwable, List<String>> centralSearchJsonToVersionStrings(final String source) {
-        return read(() -> new ByteArrayInputStream(source.getBytes(Defaults.CHARSET)),
-                MavenMetadataParser::retrieveVersionStrings);
+    private static List<String> centralSearchJsonToVersionStrings(final String source) {
+        var inputStream = new ByteArrayInputStream(source.getBytes(Defaults.CHARSET));
+        return retrieveVersionStrings(inputStream);
     }
 
     private static List<String> subListBefore(final List<String> items, final String item) {
@@ -158,16 +143,13 @@ final class MavenMetadataParser implements Function<String, Either<Throwable, Re
             .orElseGet(() -> Either.right(Response.moreRecentExperimental(newerVersions.get(0))));
     }
 
-    private Either<Throwable, String> getLatestSource() {
-        return read(() -> MavenMetadataParser.getMavenCentralData(this.groupId, this.artifactId,
-                this.mavenCentralHostname),
-                inputStream -> Collections.singletonList(StringUtil.toString(inputStream)))
-                    .mapRight(s -> String.join(System.lineSeparator(), s));
-    }
-
     private Either<Throwable, List<String>> getAvailableVersions() {
-        return getLatestSource()
-            .fold(Either::left, MavenMetadataParser::centralSearchJsonToVersionStrings);
+        try (var inputStream = getMavenCentralData(this.groupId, this.artifactId, this.mavenCentralHostname)) {
+            var mavenMetadata = StringUtil.toString(inputStream);
+            return Either.right(centralSearchJsonToVersionStrings(mavenMetadata));
+        } catch (Exception ex) {
+            return Either.left(ex);
+        }
     }
 
     @Override

@@ -34,12 +34,14 @@ import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
@@ -135,6 +137,11 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         public int getThresholdInDays() {
             return 10;
         }
+
+        @Override
+        public SellInfo getSellInfo() {
+            return new SellInfoImpl();
+        }
     }
 
     private static class MyLoanNoLongerDelinquentEvent implements LoanNoLongerDelinquentEvent {
@@ -152,6 +159,11 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         @Override
         public OffsetDateTime getCreatedOn() {
             return OffsetDateTime.now();
+        }
+
+        @Override
+        public SellInfo getSellInfo() {
+            return new SellInfoImpl();
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,14 @@
 package com.github.robozonky.notifications.samples;
 
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 
 public final class MyLoanNoLongerDelinquentEvent extends AbstractInvestmentBasedEvent
         implements LoanNoLongerDelinquentEvent {
+
+    @Override
+    public SellInfo getSellInfo() {
+        return new SellInfoImpl();
+    }
 }

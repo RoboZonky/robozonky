@@ -37,6 +37,7 @@ import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.SellableBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
@@ -84,16 +85,24 @@ public abstract class AbstractListener<T extends Event> implements EventListener
     public abstract String getTemplateFileName();
 
     private Map<String, Object> getBaseData(final T event) {
+        var data = new HashMap<String, Object>(0);
         if (event instanceof LoanBased) {
             if (event instanceof InvestmentBased) {
-                final InvestmentBased e = (InvestmentBased) event;
-                return Util.getLoanData(e.getInvestment(), e.getLoan());
+                var e = (InvestmentBased) event;
+                Util.getLoanData(e.getInvestment(), e.getLoan())
+                    .forEach(data::put);
             } else {
-                final LoanBased e = (LoanBased) event;
-                return Util.getLoanData(e.getLoan());
+                var e = (LoanBased) event;
+                Util.getLoanData(e.getLoan())
+                    .forEach(data::put);
             }
         }
-        return Collections.emptyMap();
+        if (event instanceof SellableBased) {
+            var e = (SellableBased) event;
+            Util.getSellInfoData(e.getSellInfo())
+                .forEach(data::put);
+        }
+        return data;
     }
 
     protected Map<String, Object> getData(final T event) {

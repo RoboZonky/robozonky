@@ -24,8 +24,8 @@ import com.github.robozonky.api.remote.entities.SellPriceInfo;
 
 public class SellInfoImpl implements SellInfo {
 
-    private LoanHealthStatsImpl loanHealthStats;
-    private SellPriceInfoImpl priceInfo;
+    private LoanHealthStatsImpl loanHealthStats = new LoanHealthStatsImpl();
+    private SellPriceInfoImpl priceInfo = new SellPriceInfoImpl();
 
     public SellInfoImpl() {
         // For JSON-B.
@@ -36,13 +36,13 @@ public class SellInfoImpl implements SellInfo {
         return loanHealthStats;
     }
 
+    public void setLoanHealthStats(final LoanHealthStatsImpl loanHealthStats) {
+        this.loanHealthStats = loanHealthStats;
+    }
+
     @Override
     public SellPriceInfo getPriceInfo() {
         return priceInfo;
-    }
-
-    public void setLoanHealthStats(final LoanHealthStatsImpl loanHealthStats) {
-        this.loanHealthStats = loanHealthStats;
     }
 
     public void setPriceInfo(final SellPriceInfoImpl priceInfo) {

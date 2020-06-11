@@ -45,7 +45,7 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void persistent() {
         final SecretProvider sp = SecretProvider.inMemory("someone@somewhere.cz");
         final Tenant tenant = new TenantBuilder().withSecrets(sp)
-            .build();
+            .build(false);
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         final SoldParticipationCache instance2 = SoldParticipationCache.forTenant(tenant);
         assertThat(instance2).isSameAs(instance);
@@ -55,10 +55,10 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void tenantSpecific() {
         final SecretProvider sp = SecretProvider.inMemory("someone@somewhere.cz");
         final Tenant tenant = new TenantBuilder().withSecrets(sp)
-            .build();
+            .build(false);
         final SecretProvider sp2 = SecretProvider.inMemory("someoneElse@somewhere.cz");
         final Tenant tenant2 = new TenantBuilder().withSecrets(sp2)
-            .build();
+            .build(false);
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         final SoldParticipationCache instance2 = SoldParticipationCache.forTenant(tenant2);
         assertThat(instance2).isNotSameAs(instance);

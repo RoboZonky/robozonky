@@ -16,11 +16,6 @@
 
 package com.github.robozonky.notifications;
 
-import static com.github.robozonky.internal.Defaults.CHARSET;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -28,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -48,20 +42,11 @@ public final class NotificationListenerService implements ListenerService {
 
     private final Map<String, Reloadable<ConfigStorage>> configurations = new HashMap<>(0);
 
-    private static ConfigStorage transform(final String source) {
-        try (var inputStream = new ByteArrayInputStream(source.getBytes(CHARSET))) {
-            return ConfigStorage.create(inputStream);
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed parsing notification configuration.", ex);
-        }
-    }
-
-    private static String retrieve(final URL source) {
+    private static ConfigStorage retrieve(final URL source) {
         LOGGER.debug("Reading notification configuration from '{}'.", source);
-        try (var reader = new BufferedReader(new InputStreamReader(UrlUtil.open(source)
-            .getInputStream(), CHARSET))) {
-            return reader.lines()
-                .collect(Collectors.joining(System.lineSeparator()));
+        try (var inputStream = UrlUtil.open(source)
+            .getInputStream()) {
+            return ConfigStorage.create(inputStream);
         } catch (Exception ex) {
             throw new IllegalStateException("Failed reading notification configuration from " + source, ex);
         }
@@ -70,7 +55,7 @@ public final class NotificationListenerService implements ListenerService {
     private Optional<Reloadable<ConfigStorage>> readConfig(final String configLocation) {
         try {
             var config = new URL(configLocation);
-            var configStorage = Reloadable.with(() -> transform(retrieve(config)))
+            var configStorage = Reloadable.with(() -> retrieve(config))
                 .reloadAfter(Duration.ofHours(1))
                 .async()
                 .build();

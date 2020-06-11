@@ -140,7 +140,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (final TransactionalPowerTenant t = transactional(new TenantBuilder()
             .withApi(api)
             .withSecrets(SECRETS)
-            .build())) {
+            .build(false))) {
             final CompletableFuture<?> f = t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
             t.commit();
             f.join();
@@ -158,7 +158,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         final PowerTenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(SECRETS)
-            .build();
+            .build(false);
         try (final TransactionalPowerTenant t = transactional(tenant)) {
             final CompletableFuture<?> f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
                     mockPortfolioOverview())));
@@ -178,7 +178,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final ApiProvider api = mockApiProvider(a, z);
         final PowerTenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(SECRETS)
-            .build();
+            .build(false);
         try (final TransactionalPowerTenant t = transactional(tenant)) {
             try {
                 t.fire(roboZonkyDaemonSuspended(new IllegalStateException()));
@@ -197,7 +197,7 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (var tenant = transactional(new TenantBuilder()
             .withApi(api)
             .withSecrets(SECRETS)
-            .build())) {
+            .build(false))) {
             // do nothing with the tenant
         }
     }

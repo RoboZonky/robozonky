@@ -76,7 +76,7 @@ class SkippableTest extends AbstractZonkyLeveragingTest {
         final PowerTenant t = new TenantBuilder()
             .withApi(new ApiProvider(null))
             .withSecrets(SecretProvider.inMemory("someone@somewhere.cz"))
-            .build();
+            .build(false);
         final Skippable s = new Skippable(r, t);
         logger.debug("First run.");
         s.run();

@@ -52,7 +52,7 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     @Override
     protected OptionalInt getMaximumItemsToRead() {
         var max = Settings.INSTANCE.getMaxItemsReadFromSecondaryMarketplace();
-        return max >= 0 ? OptionalInt.of(max) : OptionalInt.empty();
+        return sanitizeMaximumItemCount(max);
     }
 
     @Override

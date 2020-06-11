@@ -69,7 +69,7 @@ final class Selling implements TenantPayload {
                 LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
             }
             sold.markAsOffered(loanId);
-            tenant.fire(EventFactory.saleOffered(i, d.related()));
+            tenant.fire(EventFactory.saleOffered(i, d.related(), () -> tenant.getSellInfo(i.getId())));
             LOGGER.info("Offered to sell investment in loan #{}.", loanId);
             return Optional.of(i);
         } catch (final InternalServerErrorException ex) { // The sell endpoint has been seen to throw these.
@@ -105,7 +105,8 @@ final class Selling implements TenantPayload {
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
         var recommended = strategy.recommend(eligible, overview, tenant.getSessionInfo())
-            .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
+            .peek(r -> tenant.fire(EventFactory.saleRecommended(r, r.descriptor()
+                .sellInfo()::get)));
         var throttled = new SellingThrottle().apply(recommended, overview);
         final Collection<Investment> investmentsSold = throttled
             .map(r -> processSale(tenant, r, sold))

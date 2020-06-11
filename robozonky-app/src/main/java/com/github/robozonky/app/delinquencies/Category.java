@@ -16,6 +16,19 @@
 
 package com.github.robozonky.app.delinquencies;
 
+import static com.github.robozonky.app.events.impl.EventFactory.loanDefaulted;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDefaultedLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent10plus;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent10plusLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent30plus;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent30plusLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent60plus;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent60plusLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent90plus;
+import static com.github.robozonky.app.events.impl.EventFactory.loanDelinquent90plusLazy;
+import static com.github.robozonky.app.events.impl.EventFactory.loanNowDelinquent;
+import static com.github.robozonky.app.events.impl.EventFactory.loanNowDelinquentLazy;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -33,7 +46,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.app.events.impl.EventFactory;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -66,17 +79,22 @@ enum Category {
     private static EventSupplier getEventSupplierConstructor(final int threshold) {
         switch (threshold) {
             case -1:
-                return EventFactory::loanDefaulted;
+                return (i, l, d, s) -> loanDefaulted(i, l, d);
             case 0:
-                return EventFactory::loanNowDelinquent;
+                return (investment, loan, since, sellInfoSupplier) -> loanNowDelinquent(investment, loan,
+                        sellInfoSupplier);
             case 10:
-                return EventFactory::loanDelinquent10plus;
+                return (investment, loan, since, sellInfoSupplier) -> loanDelinquent10plus(investment, loan,
+                        sellInfoSupplier);
             case 30:
-                return EventFactory::loanDelinquent30plus;
+                return (investment, loan, since, sellInfoSupplier) -> loanDelinquent30plus(investment, loan,
+                        sellInfoSupplier);
             case 60:
-                return EventFactory::loanDelinquent60plus;
+                return (investment, loan, since, sellInfoSupplier) -> loanDelinquent60plus(investment, loan,
+                        sellInfoSupplier);
             case 90:
-                return EventFactory::loanDelinquent90plus;
+                return (investment, loan, since, sellInfoSupplier) -> loanDelinquent90plus(investment, loan,
+                        sellInfoSupplier);
             default:
                 throw new IllegalArgumentException("Wrong delinquency threshold: " + threshold);
         }
@@ -87,17 +105,17 @@ enum Category {
             final Supplier<? extends SessionEvent> e) {
         switch (threshold) {
             case -1:
-                return EventFactory.loanDefaultedLazy((Supplier<LoanDefaultedEvent>) e);
+                return loanDefaultedLazy((Supplier<LoanDefaultedEvent>) e);
             case 0:
-                return EventFactory.loanNowDelinquentLazy((Supplier<LoanNowDelinquentEvent>) e);
+                return loanNowDelinquentLazy((Supplier<LoanNowDelinquentEvent>) e);
             case 10:
-                return EventFactory.loanDelinquent10plusLazy((Supplier<LoanDelinquent10DaysOrMoreEvent>) e);
+                return loanDelinquent10plusLazy((Supplier<LoanDelinquent10DaysOrMoreEvent>) e);
             case 30:
-                return EventFactory.loanDelinquent30plusLazy((Supplier<LoanDelinquent30DaysOrMoreEvent>) e);
+                return loanDelinquent30plusLazy((Supplier<LoanDelinquent30DaysOrMoreEvent>) e);
             case 60:
-                return EventFactory.loanDelinquent60plusLazy((Supplier<LoanDelinquent60DaysOrMoreEvent>) e);
+                return loanDelinquent60plusLazy((Supplier<LoanDelinquent60DaysOrMoreEvent>) e);
             case 90:
-                return EventFactory.loanDelinquent90plusLazy((Supplier<LoanDelinquent90DaysOrMoreEvent>) e);
+                return loanDelinquent90plusLazy((Supplier<LoanDelinquent90DaysOrMoreEvent>) e);
             default:
                 throw new IllegalArgumentException("Wrong delinquency threshold: " + threshold);
         }
@@ -111,7 +129,8 @@ enum Category {
                 .orElse(0));
         final int loanId = investment.getLoanId();
         final Loan loan = tenant.getLoan(loanId);
-        final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since);
+        final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since,
+                () -> tenant.getSellInfo(investment.getId()));
         LOGGER.trace("Done.");
         return e;
     }
@@ -144,7 +163,7 @@ enum Category {
     @FunctionalInterface
     private interface EventSupplier {
 
-        SessionEvent apply(final Investment i, final Loan l, final LocalDate d);
+        SessionEvent apply(final Investment i, final Loan l, final LocalDate d, final Supplier<SellInfo> s);
     }
 
 }

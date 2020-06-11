@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.events.impl;
+package com.github.robozonky.api.notifications;
 
-import java.util.function.Supplier;
-
-import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
 
-final class LoanNowDelinquentEventImpl extends AbstractLoanDelinquentEventImpl implements LoanNowDelinquentEvent {
+public interface SellableBased {
 
-    public LoanNowDelinquentEventImpl(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        super(investment, loan, sellInfoSupplier);
-    }
+    SellInfo getSellInfo();
 
-    @Override
-    public int getThresholdInDays() {
-        return 0;
-    }
 }

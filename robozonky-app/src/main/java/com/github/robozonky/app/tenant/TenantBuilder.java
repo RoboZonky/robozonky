@@ -22,7 +22,6 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 public final class TenantBuilder {
 
     private String name = null;
-    private boolean dryRun = false;
     private SecretProvider secrets = null;
     private StrategyProvider strategyProvider = StrategyProvider.empty();
     private ApiProvider api;
@@ -47,17 +46,14 @@ public final class TenantBuilder {
         return this;
     }
 
-    public TenantBuilder dryRun() {
-        this.dryRun = true;
-        return this;
-    }
-
-    public PowerTenant build() {
+    public PowerTenant build(boolean enableDryRun) {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
         var apiProvider = api == null ? new ApiProvider() : api;
         var tokenSupplier = new ZonkyApiTokenSupplier(apiProvider, secrets);
-        return new PowerTenantImpl(secrets.getUsername(), name, dryRun, apiProvider, strategyProvider, tokenSupplier);
+        return new PowerTenantImpl(secrets.getUsername(), name, enableDryRun, apiProvider, strategyProvider,
+                tokenSupplier);
     }
+
 }
