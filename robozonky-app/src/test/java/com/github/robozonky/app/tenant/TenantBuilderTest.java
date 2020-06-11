@@ -67,7 +67,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(i.getUsername())
                 .isEqualTo(s.getUsername());
             softly.assertThat(i.getName())
-                .isEqualTo("RoboZonky 'name'");
+                .isEqualTo("name");
             softly.assertThat(i.isDryRun())
                 .isTrue();
         });
@@ -94,7 +94,7 @@ class TenantBuilderTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(i.getUsername())
                 .isEqualTo(s.getUsername());
             softly.assertThat(i.getName())
-                .isEqualTo("RoboZonky");
+                .isBlank();
             softly.assertThat(i.isDryRun())
                 .isFalse();
         });

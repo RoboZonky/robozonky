@@ -18,11 +18,18 @@ package com.github.robozonky.app;
 
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyEnding;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyInitialized;
+import static java.lang.Runtime.getRuntime;
+import static java.lang.System.getProperty;
+import static java.lang.System.lineSeparator;
 
+import java.nio.charset.Charset;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,15 +47,49 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
 
     private static final Logger LOGGER = LogManager.getLogger(RoboZonkyStartupNotifier.class);
 
-    private final String sessionName;
+    private final SessionInfo session;
 
     public RoboZonkyStartupNotifier(final SessionInfo session) {
-        this.sessionName = session.getName();
+        this.session = session;
+    }
+
+    private String replaceVersionPlaceholder(String source, String version) {
+        var id = "v" + version;
+        if (!session.getName()
+            .isBlank()) {
+            id = id + " '" + session.getName() + "'";
+        }
+        var replaced = source.replace("$VERSION", id);
+        return String.format("#%79s", replaced.substring(1)
+            .trim());
+    }
+
+    String readBanner(String version) {
+        try (var inputStream = App.class.getResourceAsStream("robozonky-banner.txt")) {
+            return IOUtils.readLines(inputStream, Defaults.CHARSET)
+                .stream()
+                .map(String::trim)
+                .map(s -> replaceVersionPlaceholder(s, version))
+                .collect(Collectors.joining(lineSeparator(), lineSeparator(), ""));
+        } catch (Exception ex) {
+            LOGGER.debug("Failed reading banner resource.", ex);
+            return "===== RoboZonky v" + version + " '" + session.getName() + "' at your service! =====";
+        }
     }
 
     @Override
     public Optional<Consumer<ReturnCode>> get() {
-        LOGGER.info("===== {} v{} at your service! =====", sessionName, Defaults.ROBOZONKY_VERSION);
+        var version = Defaults.ROBOZONKY_VERSION;
+        LOGGER.info(readBanner(version));
+        LOGGER.debug("Running {} {} v{} from {}.", getProperty("java.vm.vendor"), getProperty("java.vm.name"),
+                getProperty("java.vm.version"), getProperty("java.home"));
+        LOGGER.debug("Running on {} v{} ({}, {} CPUs, {}, {}).", getProperty("os.name"), getProperty("os.version"),
+                getProperty("os.arch"), getRuntime().availableProcessors(), Locale.getDefault(),
+                Charset.defaultCharset());
+        LOGGER.debug("Current working directory is '{}'.", getProperty("user.dir"));
+        if (session.isDryRun()) {
+            LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
+        }
         Events.global()
             .fire(roboZonkyInitialized());
         return Optional.of(result -> {
@@ -60,7 +101,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
             } catch (final Exception ex) {
                 LOGGER.debug("Exception while waiting for the final event being processed.", ex);
             } finally {
-                LOGGER.info("===== {} out. =====", sessionName);
+                LOGGER.info("RoboZonky v{} '{}' out.", version, session.getName());
             }
         });
     }

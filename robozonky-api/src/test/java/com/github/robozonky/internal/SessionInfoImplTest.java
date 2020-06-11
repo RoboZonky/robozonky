@@ -61,7 +61,7 @@ class SessionInfoImplTest {
             softly.assertThat(s.isDryRun())
                 .isTrue();
             softly.assertThat(s.getName())
-                .isEqualTo("RoboZonky 'Test'");
+                .isEqualTo("Test");
         });
     }
 
@@ -76,7 +76,7 @@ class SessionInfoImplTest {
             softly.assertThat(sessionInfo.isDryRun())
                 .isFalse();
             softly.assertThat(sessionInfo.getName())
-                .isEqualTo("RoboZonky '" + id + "'");
+                .isEqualTo(id);
             softly.assertThat(sessionInfo.canInvest())
                 .isTrue();
             softly.assertThat(sessionInfo.canAccessSmp())
@@ -103,7 +103,7 @@ class SessionInfoImplTest {
             softly.assertThat(sessionInfo.isDryRun())
                 .isFalse();
             softly.assertThat(sessionInfo.getName())
-                .isEqualTo("RoboZonky '" + id + "'");
+                .isEqualTo(id);
             softly.assertThat(sessionInfo.canInvest())
                 .isFalse();
             softly.assertThat(sessionInfo.canAccessSmp())
@@ -126,7 +126,7 @@ class SessionInfoImplTest {
             softly.assertThat(s.isDryRun())
                 .isTrue();
             softly.assertThat(s.getName())
-                .isEqualTo("RoboZonky 'Test'");
+                .isEqualTo("Test");
         });
     }
 

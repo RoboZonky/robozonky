@@ -72,8 +72,7 @@ public class SessionInfoImpl implements SessionInfo {
     @Override
     public String getName() {
         return Optional.ofNullable(name)
-            .map(n -> "RoboZonky '" + n + '\'')
-            .orElse("RoboZonky");
+            .orElse("");
     }
 
     private Consents getConsents() {

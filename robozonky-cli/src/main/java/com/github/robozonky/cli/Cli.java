@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "java -jar robozonky-cli.jar", subcommands = {
+@CommandLine.Command(name = "robozonky-cli(.sh|.bat)", subcommands = {
         CommandLine.HelpCommand.class,
         MasterPasswordFeature.class,
         NotificationTestingFeature.class,

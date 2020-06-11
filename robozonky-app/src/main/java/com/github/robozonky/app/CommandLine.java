@@ -44,7 +44,7 @@ import com.github.robozonky.internal.util.UrlUtil;
  * Converts command line into application configuration using {@link picocli.CommandLine}.
  */
 @Command(name = "robozonky(.sh|.bat)")
-public class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMode>>> {
+class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMode>>> {
 
     private static final Logger LOGGER = LogManager.getLogger(CommandLine.class);
     @Option(names = { "-s",
@@ -91,7 +91,6 @@ public class CommandLine implements Callable<Optional<Function<Lifecycle, Invest
     private static PowerTenant getTenant(final CommandLine cli, final SecretProvider secrets) {
         final TenantBuilder b = new TenantBuilder();
         if (cli.dryRunEnabled) {
-            LOGGER.info("RoboZonky is doing a dry run. It will not invest any real money.");
             b.dryRun();
         }
         return b.withSecrets(secrets)

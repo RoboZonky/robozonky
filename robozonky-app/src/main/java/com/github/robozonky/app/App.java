@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app;
 
-import java.nio.charset.Charset;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -96,13 +94,6 @@ public class App implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.debug("Current working directory is '{}'.", System.getProperty("user.dir"));
-        LOGGER.debug("Running {} {} v{} on {} v{} ({}, {} CPUs, {}, {}).", System.getProperty("java.vm.vendor"),
-                System.getProperty("java.vm.name"), System.getProperty("java.vm.version"),
-                System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch"),
-                Runtime.getRuntime()
-                    .availableProcessors(),
-                Locale.getDefault(), Charset.defaultCharset());
         final ReturnCode code = CommandLine.parse(this)
             .map(this::execute)
             .orElse(ReturnCode.ERROR_SETUP);

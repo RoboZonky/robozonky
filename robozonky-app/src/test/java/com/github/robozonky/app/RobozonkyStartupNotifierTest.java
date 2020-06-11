@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app;
 
+import static java.lang.System.lineSeparator;
 import static org.assertj.core.api.Assertions.*;
 
 import java.util.Optional;
@@ -44,5 +45,22 @@ class RobozonkyStartupNotifierTest extends AbstractEventLeveragingTest {
             .accept(r);
         assertThat(this.getEventsRequested()).last()
             .isInstanceOf(RoboZonkyEndingEvent.class);
+    }
+
+    @Test
+    void properBanner() {
+        String lineSep = lineSeparator();
+        String expected = lineSep +
+                "################################################################################" + lineSep +
+                "#        ____            __          _____                   __                #" + lineSep +
+                "#       / __ \\  ____    / /_   ____ /__  /  ____    ____    / /__   __  __     #" + lineSep +
+                "#      / /_/ / / __ \\  / __ \\ / __ \\  / /  / __ \\  / __ \\  / //_/  / / / /     #" + lineSep +
+                "#     / _, _/ / /_/ / / /_/ // /_/ / / /__/ /_/ / / / / / / ,<    / /_/ /      #" + lineSep +
+                "#    /_/ |_|  \\____/ /_.___/ \\____/ /____/\\____/ /_/ /_/ /_/|_|   \\__, /       #" + lineSep +
+                "#                                     v6.0.0-SNAPSHOT 'Testing'  /____/        #" + lineSep +
+                "#                                                                              #" + lineSep +
+                "################################################################################";
+        final RoboZonkyStartupNotifier rzsn = new RoboZonkyStartupNotifier(SESSION);
+        assertThat(rzsn.readBanner("6.0.0-SNAPSHOT")).isEqualTo(expected);
     }
 }
