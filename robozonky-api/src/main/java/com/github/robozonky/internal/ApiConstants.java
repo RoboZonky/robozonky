@@ -22,9 +22,8 @@ public final class ApiConstants {
     public static final String INVESTMENTS = ME + "/investments";
     public static final String LOANS = "/loans";
     public static final String MARKETPLACE = LOANS + "/marketplace";
-    private static final String RESERVATIONS_BASE = "/loans/marketplace/reservations";
-    public static final String RESERVATION_PREFERENCES = RESERVATIONS_BASE + "/my-preferences";
-    public static final String RESERVATIONS = RESERVATIONS_BASE + "/my-reservations";
+    public static final String RESERVATIONS =  "/reservations";
+    public static final String RESERVATION_PREFERENCES =  "/reservations/settings";
     public static final String SMP_INVESTMENTS = "/smp/investments";
 
     private ApiConstants() {
