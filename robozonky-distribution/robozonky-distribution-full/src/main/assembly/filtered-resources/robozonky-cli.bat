@@ -17,7 +17,8 @@ IF EXIST %CUSTOM_JRE_LOCATION%bin\%JAVA_EXECUTABLE% (
 echo Will use '%JAVA_EXECUTABLE%' as the Java executable.
 echo JAVA_HOME set to '%JAVA_HOME%'.
 
-set "ROBOZONKY_OPTS=%JAVA_OPTS% -XX:+ExitOnOutOfMemoryError -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
+rem TODO Don't open java.util when Yasson can be upgraded to 1.0.8+, removing the warning.
+set "ROBOZONKY_OPTS=%JAVA_OPTS% --add-opens java.base/java.util=ALL-UNNAMED -XX:+ExitOnOutOfMemoryError -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
 %JAVA_EXECUTABLE% %ROBOZONKY_OPTS% -jar %HERE%%ROBOZONKY_EXECUTABLE% %*
 
 rem Don't let the window close if something went wrong.
