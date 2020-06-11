@@ -25,7 +25,7 @@ jobs:
         with:
           java-version: ${{ env.DEFAULT_JDK_VERSION }}
       - name: Compile all modules without testing
-        run: mvn --batch-mode clean install -DskipTests ${{ env.STABILIZING_PROPERTIES }} ${{ env.STREAMLINING_PROPERTIES }}
+        run: mvn --batch-mode clean install -DskipTests ${{ env.STABILIZING_PROPERTIES }}
       - name: Test all modules inc. JaCoCo
         run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report -Dpit.skip=true ${{ env.STABILIZING_PROPERTIES }} ${{ env.STREAMLINING_PROPERTIES }}
       - name: Trigger SonarCloud
