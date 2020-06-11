@@ -16,9 +16,10 @@
 
 package com.github.robozonky.api.notifications;
 
-/**
- * Fired immediately after secondary market purchase was submitted to the API.
- */
-public interface SaleOfferedEvent extends SellableBased, InvestmentBased {
+import com.github.robozonky.api.remote.entities.SellInfo;
+
+public interface SellableBased {
+
+    SellInfo getSellInfo();
 
 }
