@@ -33,6 +33,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
@@ -66,7 +67,7 @@ enum Category {
     private static EventSupplier getEventSupplierConstructor(final int threshold) {
         switch (threshold) {
             case -1:
-                return EventFactory::loanDefaulted;
+                return (i, l, d, s) -> EventFactory.loanDefaulted(i, l, d);
             case 0:
                 return EventFactory::loanNowDelinquent;
             case 10:
@@ -111,7 +112,8 @@ enum Category {
                 .orElse(0));
         final int loanId = investment.getLoanId();
         final Loan loan = tenant.getLoan(loanId);
-        final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since);
+        final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since,
+                () -> tenant.getSellInfo(investment.getId()));
         LOGGER.trace("Done.");
         return e;
     }
@@ -144,7 +146,7 @@ enum Category {
     @FunctionalInterface
     private interface EventSupplier {
 
-        SessionEvent apply(final Investment i, final Loan l, final LocalDate d);
+        SessionEvent apply(final Investment i, final Loan l, final LocalDate d, final Supplier<SellInfo> s);
     }
 
 }

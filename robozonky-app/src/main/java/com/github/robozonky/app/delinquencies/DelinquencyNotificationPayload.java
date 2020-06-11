@@ -81,7 +81,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             default:
                 tenant.fire(loanNoLongerDelinquentLazy(() -> {
                     final Loan loan = tenant.getLoan(investment.getLoanId());
-                    return loanNoLongerDelinquent(investment, loan);
+                    return loanNoLongerDelinquent(investment, loan, () -> tenant.getSellInfo(investment.getId()));
                 }));
         }
     }

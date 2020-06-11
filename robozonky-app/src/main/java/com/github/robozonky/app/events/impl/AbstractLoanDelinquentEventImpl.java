@@ -18,21 +18,26 @@ package com.github.robozonky.app.events.impl;
 
 import java.time.LocalDate;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.SellInfo;
 
 abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl implements LoanDelinquentEvent {
 
     private final Investment investment;
     private final Loan loan;
     private final LocalDate since;
+    private final Supplier<SellInfo> sellInfoSupplier;
 
-    AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since) {
+    AbstractLoanDelinquentEventImpl(final Investment investment, final Loan loan, final LocalDate since,
+            final Supplier<SellInfo> sellInfoSupplier) {
         this.investment = investment;
         this.loan = loan;
         this.since = since;
+        this.sellInfoSupplier = sellInfoSupplier;
     }
 
     @Override
@@ -48,6 +53,11 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
     @Override
     public LocalDate getDelinquentSince() {
         return since;
+    }
+
+    @Override
+    public SellInfo getSellInfo() {
+        return sellInfoSupplier.get();
     }
 
     @Override

@@ -71,6 +71,7 @@ import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -116,6 +117,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     private static void assertCorrectThreshold(final LoanDelinquentEvent e, final int threshold) {
         assertThat(e.getThresholdInDays()).isEqualTo(threshold);
+        assertThat(e.getSellInfo()).isNotNull();
     }
 
     @Test
@@ -127,13 +129,13 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
         final Investment investment = MockInvestmentBuilder.fresh(loan, BigDecimal.TEN)
             .build();
         final LocalDate now = LocalDate.now();
-        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, now);
+        final LoanDelinquentEvent e = EventFactory.loanDelinquent90plus(investment, loan, now, SellInfoImpl::new);
         assertCorrectThreshold(e, 90);
-        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, now);
+        final LoanDelinquentEvent e2 = EventFactory.loanDelinquent60plus(investment, loan, now, SellInfoImpl::new);
         assertCorrectThreshold(e2, 60);
-        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, now);
+        final LoanDelinquentEvent e3 = EventFactory.loanDelinquent30plus(investment, loan, now, SellInfoImpl::new);
         assertCorrectThreshold(e3, 30);
-        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, now);
+        final LoanDelinquentEvent e4 = EventFactory.loanDelinquent10plus(investment, loan, now, SellInfoImpl::new);
         assertCorrectThreshold(e4, 10);
     }
 
@@ -194,8 +196,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void investmentSold() {
         final InvestmentSoldEvent e = EventFactory.investmentSold(MockInvestmentBuilder.fresh()
-            .build(),
-                MockLoanBuilder.fresh(), mockPortfolioOverview());
+            .build(), MockLoanBuilder.fresh(), mockPortfolioOverview());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
@@ -209,8 +210,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanDefaulted() {
         final LoanDefaultedEvent e = EventFactory.loanDefaulted(MockInvestmentBuilder.fresh()
-            .build(),
-                MockLoanBuilder.fresh(), LocalDate.now());
+            .build(), MockLoanBuilder.fresh(), LocalDate.now());
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
@@ -224,12 +224,13 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNoLongerDelinquent() {
         final LoanNoLongerDelinquentEvent e = EventFactory.loanNoLongerDelinquent(MockInvestmentBuilder.fresh()
-            .build(),
-                MockLoanBuilder.fresh());
+            .build(), MockLoanBuilder.fresh(), SellInfoImpl::new);
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
             softly.assertThat(e.getInvestment())
+                .isNotNull();
+            softly.assertThat(e.getSellInfo())
                 .isNotNull();
         });
     }
@@ -237,8 +238,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNowDelinquent() {
         final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder.fresh()
-            .build(),
-                MockLoanBuilder.fresh(), LocalDate.now());
+            .build(), MockLoanBuilder.fresh(), LocalDate.now(), SellInfoImpl::new);
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
@@ -248,6 +248,8 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
                 .isNotNull();
             softly.assertThat(e.getThresholdInDays())
                 .isEqualTo(0);
+            softly.assertThat(e.getSellInfo())
+                .isNotNull();
         });
     }
 
@@ -390,25 +392,28 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void saleOffered() {
         final SaleOfferedEvent e = EventFactory.saleOffered(MockInvestmentBuilder.fresh()
-            .build(),
-                MockLoanBuilder.fresh());
+            .build(), MockLoanBuilder.fresh(), SellInfoImpl::new);
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
             softly.assertThat(e.getInvestment())
+                .isNotNull();
+            softly.assertThat(e.getSellInfo())
                 .isNotNull();
         });
     }
 
     @Test
     void saleRecommended() {
-        final SaleRecommendedEvent e = EventFactory.saleRecommended(recommendedInvestment());
+        final SaleRecommendedEvent e = EventFactory.saleRecommended(recommendedInvestment(), SellInfoImpl::new);
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();
             softly.assertThat(e.getInvestment())
                 .isNotNull();
             softly.assertThat(e.getRecommendation())
+                .isNotNull();
+            softly.assertThat(e.getSellInfo())
                 .isNotNull();
         });
     }
