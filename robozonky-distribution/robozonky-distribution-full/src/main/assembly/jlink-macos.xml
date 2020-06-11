@@ -32,7 +32,7 @@
       <excludes>
         <exclude>bin/*</exclude>
       </excludes>
-      <outputDirectory>jre</outputDirectory>
+      <outputDirectory>runtime</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/jre-macos/</directory>
@@ -41,7 +41,7 @@
         <include>bin/*</include>
       </includes>
       <fileMode>744</fileMode>
-      <outputDirectory>jre</outputDirectory>
+      <outputDirectory>runtime</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/shaded/</directory>

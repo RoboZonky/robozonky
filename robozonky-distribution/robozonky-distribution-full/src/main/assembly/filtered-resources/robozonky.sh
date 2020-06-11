@@ -10,7 +10,7 @@ fi
 echo "Will run '$ROBOZONKY_EXECUTABLE' from '$HERE'."
 
 # Use JRE bundled with RoboZonky, if available.
-CUSTOM_JRE_LOCATION="$HERE/jre"
+CUSTOM_JRE_LOCATION="$HERE/runtime"
 JAVA_EXECUTABLE="java"
 
 if [ -f $CUSTOM_JRE_LOCATION/bin/$JAVA_EXECUTABLE ]; then

@@ -29,7 +29,7 @@
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}/jre-windows/</directory>
-      <outputDirectory>jre</outputDirectory>
+      <outputDirectory>runtime</outputDirectory>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/shaded/</directory>

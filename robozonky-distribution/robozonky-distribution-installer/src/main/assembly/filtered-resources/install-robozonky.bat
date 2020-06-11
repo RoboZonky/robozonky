@@ -7,8 +7,8 @@ IF EXIST %HERE%Dist\%ROBOZONKY_EXECUTABLE% (
 )
 echo Will run %ROBOZONKY_EXECUTABLE% from '%HERE%'.
 
-rem Use JRE bundled with RoboZonky, if available.
-set "CUSTOM_JRE_LOCATION=%HERE%jre\"
+rem Use Java runtime bundled with RoboZonky, if available.
+set "CUSTOM_JRE_LOCATION=%HERE%runtime\"
 set "JAVA_EXECUTABLE=java.exe"
 IF EXIST %CUSTOM_JRE_LOCATION%bin\%JAVA_EXECUTABLE% (
     set "JAVA_EXECUTABLE=%CUSTOM_JRE_LOCATION%bin\%JAVA_EXECUTABLE%"

@@ -17,7 +17,7 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
     && unzip $ROBOZONKY_NOARCH -d $BINARY_DIRECTORY \
     && chmod +x $BINARY_DIRECTORY/robozonky.sh
 
-# ... then build a minimalistic JRE using jlink ...
+# ... then build a minimalistic Java runtime using jlink ...
 FROM adoptopenjdk/openjdk14:alpine AS jlink
 ENV WORKING_DIRECTORY=/tmp/robozonky
 COPY --from=scratch /tmp/robozonky $WORKING_DIRECTORY
@@ -25,7 +25,7 @@ COPY . .
 RUN apk add binutils
 RUN rm $(find $WORKING_DIRECTORY -name "robozonky-cli*jar")
 RUN ROBOZONKY_EXECUTABLE=$(find $WORKING_DIRECTORY -name "robozonky-app*jar") \
-    && .github/workflows/jlink.sh $ROBOZONKY_EXECUTABLE $WORKING_DIRECTORY/jre
+    && .github/workflows/jlink.sh $ROBOZONKY_EXECUTABLE $WORKING_DIRECTORY/runtime
 
 # ... and finally restart from a minimal image and copy built binary from previous stage
 FROM alpine:latest
