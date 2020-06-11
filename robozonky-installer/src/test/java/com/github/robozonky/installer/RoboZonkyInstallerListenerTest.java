@@ -310,8 +310,6 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
                 .has(new Condition<>(File::canExecute, "Is executable"));
             softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf"))
-                .exists();
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE)
                 .exists();
         });
@@ -344,9 +342,6 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
                 .has(new Condition<>(File::canExecute, "Is executable"));
             softly.assertThat(
                     new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service"))
-                .doesNotExist();
-            softly.assertThat(
-                    new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-upstart.conf"))
                 .doesNotExist();
             softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE)
                 .exists();

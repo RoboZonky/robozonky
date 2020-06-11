@@ -30,8 +30,7 @@ import freemarker.template.TemplateException;
 
 public enum ServiceGenerator implements Function<File, File> {
 
-    SYSTEMD("robozonky-systemd.service"),
-    UPSTART("robozonky-upstart.conf");
+    SYSTEMD("robozonky-systemd.service");
 
     private static final String ID = "robozonky";
     private final String filename;
