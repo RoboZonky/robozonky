@@ -25,7 +25,8 @@ import picocli.CommandLine;
         MasterPasswordFeature.class,
         NotificationTestingFeature.class,
         StrategyValidationFeature.class,
-        ZonkyCredentialsFeature.class
+        ZonkyCredentialsFeature.class,
+        InstallationFeature.class
 })
 final class Cli implements Callable<Integer> {
 

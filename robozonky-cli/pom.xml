@@ -29,7 +29,7 @@
 
   <properties>
     <com.github.robozonky.distribution.main>com.github.robozonky.cli.Main</com.github.robozonky.distribution.main>
-    <pit.threshold>70</pit.threshold> <!-- This is a command-line utility, therefore near impossible to test fully. -->
+    <pit.threshold>75</pit.threshold> <!-- This is a command-line utility, therefore near impossible to test fully. -->
     <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../${aggregate.report.dir}</sonar.coverage.jacoco.xmlReportPaths>
   </properties>
 
@@ -62,6 +62,10 @@
       <scope>compile</scope>
     </dependency>
     <!-- other dependencies -->
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+    </dependency>
     <dependency>
       <groupId>info.picocli</groupId>
       <artifactId>picocli</artifactId>

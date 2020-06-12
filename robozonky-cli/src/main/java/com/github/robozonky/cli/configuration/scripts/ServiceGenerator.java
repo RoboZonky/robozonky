@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.scripts;
+package com.github.robozonky.cli.configuration.scripts;
 
 import static java.util.Map.entry;
 

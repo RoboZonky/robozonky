@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.scripts;
+package com.github.robozonky.cli.configuration.scripts;
 
 import static java.util.Map.entry;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.installer.CommandLinePart;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.FileUtil;
 
 import freemarker.template.TemplateException;
 
-public abstract class RunScriptGenerator implements Function<CommandLinePart, File> {
+public abstract class RunScriptGenerator implements Function<List<String>, File> {
 
     private static final Logger LOGGER = LogManager.getLogger(RunScriptGenerator.class.getSimpleName());
-    protected final File configFile, distributionDirectory;
+    protected final File distributionDirectory;
+    private final File configFile;
 
     protected RunScriptGenerator(final File distributionDirectory, final File configFile) {
-        this.configFile = configFile;
         this.distributionDirectory = distributionDirectory;
+        this.configFile = configFile;
     }
 
     public static RunScriptGenerator forWindows(final File distributionDirectory, final File configFile) {
@@ -53,21 +52,6 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
         return new UnixRunScriptGenerator(distributionDirectory, configFile);
     }
 
-    private static String assembleJavaOpts(final CommandLinePart commandLine) {
-        final Stream<String> properties = commandLine.getProperties()
-            .entrySet()
-            .stream()
-            .map(e -> "-D" + e.getKey() + '=' + e.getValue());
-        final Stream<String> jvmArgs = commandLine.getJvmArguments()
-            .entrySet()
-            .stream()
-            .map(e -> '-' + e.getValue()
-                .map(v -> e.getKey() + ' ' + v)
-                .orElse(e.getKey()));
-        return Stream.concat(jvmArgs, properties)
-            .collect(Collectors.joining(" "));
-    }
-
     protected File getRootFolder() {
         return this.configFile.getParentFile();
     }
@@ -76,17 +60,16 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
 
     public abstract File getChildRunScript();
 
-    protected File process(final CommandLinePart commandLine, final String templateName,
+    protected File process(final List<String> javaOpts, final String templateName,
             final Function<String, String> finisher) {
         try {
             final String result = TemplateProcessor.INSTANCE.process(templateName, Map.ofEntries(
                     entry("root", distributionDirectory.getAbsolutePath()),
                     entry("options", configFile.getAbsolutePath()),
-                    entry("javaOpts", assembleJavaOpts(commandLine)),
-                    entry("envVars", commandLine.getEnvironmentVariables())));
+                    entry("javaOpts", String.join(" ", javaOpts))));
             final File target = this.getRunScript();
-            Files.write(target.toPath(), finisher.apply(result)
-                .getBytes(Defaults.CHARSET));
+            final String contents = finisher.apply(result);
+            Files.write(target.toPath(), contents.getBytes(Defaults.CHARSET));
             FileUtil.configurePermissions(target, true);
             LOGGER.info("Generated run script: {}.", target.getAbsolutePath());
             return target;
@@ -95,7 +78,7 @@ public abstract class RunScriptGenerator implements Function<CommandLinePart, Fi
         }
     }
 
-    protected File process(final CommandLinePart commandLine, final String templateName) {
-        return process(commandLine, templateName, Function.identity());
+    protected File process(final List<String> javaOpts, final String templateName) {
+        return process(javaOpts, templateName, Function.identity());
     }
 }

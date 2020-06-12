@@ -31,7 +31,7 @@ public class EmailSettingsValidator extends AbstractValidator {
         try { // configure e-mail notification properties
             final Properties emailConfig = Util.configureEmailNotifications(installData);
             final File emailConfigTarget = File.createTempFile("robozonky-", ".cfg");
-            Util.writeOutProperties(emailConfig, emailConfigTarget);
+            com.github.robozonky.cli.configuration.Util.writeOutProperties(emailConfig, emailConfigTarget);
             final Feature f = new NotificationTestingFeature(Variables.ZONKY_USERNAME.getValue(installData),
                     emailConfigTarget.toURI()
                         .toURL());

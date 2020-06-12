@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.scripts;
+package com.github.robozonky.cli.configuration.scripts;
 
 import java.io.File;
+import java.util.List;
 import java.util.regex.Pattern;
-
-import com.github.robozonky.installer.CommandLinePart;
 
 final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
-    private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
+    private static final Pattern UNIX_NEWLINES = Pattern.compile("([\r\n]+)");
     private static final String EXEC_NAME = "robozonky-exec.bat";
 
     public WindowsRunScriptGenerator(final File distributionDirectory, final File configFile) {
@@ -31,8 +30,8 @@ final class WindowsRunScriptGenerator extends RunScriptGenerator {
     }
 
     @Override
-    public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, EXEC_NAME + ".ftl", s -> UNIX_NEWLINES.matcher(s)
+    public File apply(final List<String> javaOpts) {
+        return process(javaOpts, EXEC_NAME + ".ftl", s -> UNIX_NEWLINES.matcher(s)
             .replaceAll("\r\n"));
     }
 
