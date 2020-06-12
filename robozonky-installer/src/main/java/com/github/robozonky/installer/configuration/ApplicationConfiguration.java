@@ -42,7 +42,7 @@ final class ApplicationConfiguration implements PropertyConfiguration {
     public Map<String, String> getApplicationArguments() {
         applicationArguments.put("p", String.valueOf(keystoreSecret));
         if (dryRunEnabled) {
-            applicationArguments.put("-d", "");
+            applicationArguments.put("d", "");
         }
         return Collections.unmodifiableMap(applicationArguments);
     }
