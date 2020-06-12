@@ -21,7 +21,6 @@ import static java.util.Map.entry;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -37,11 +36,12 @@ import freemarker.template.TemplateException;
 public abstract class RunScriptGenerator implements Function<List<String>, File> {
 
     private static final Logger LOGGER = LogManager.getLogger(RunScriptGenerator.class.getSimpleName());
-    protected final File configFile, distributionDirectory;
+    protected final File distributionDirectory;
+    private final File configFile;
 
     protected RunScriptGenerator(final File distributionDirectory, final File configFile) {
-        this.configFile = configFile;
         this.distributionDirectory = distributionDirectory;
+        this.configFile = configFile;
     }
 
     public static RunScriptGenerator forWindows(final File distributionDirectory, final File configFile) {
@@ -66,8 +66,7 @@ public abstract class RunScriptGenerator implements Function<List<String>, File>
             final String result = TemplateProcessor.INSTANCE.process(templateName, Map.ofEntries(
                     entry("root", distributionDirectory.getAbsolutePath()),
                     entry("options", configFile.getAbsolutePath()),
-                    entry("javaOpts", String.join(" ", javaOpts)),
-                    entry("envVars", Collections.emptyMap())));
+                    entry("javaOpts", String.join(" ", javaOpts))));
             final File target = this.getRunScript();
             Files.write(target.toPath(), finisher.apply(result)
                 .getBytes(Defaults.CHARSET));
