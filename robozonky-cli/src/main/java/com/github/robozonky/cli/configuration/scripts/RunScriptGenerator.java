@@ -68,8 +68,8 @@ public abstract class RunScriptGenerator implements Function<List<String>, File>
                     entry("options", configFile.getAbsolutePath()),
                     entry("javaOpts", String.join(" ", javaOpts))));
             final File target = this.getRunScript();
-            Files.write(target.toPath(), finisher.apply(result)
-                .getBytes(Defaults.CHARSET));
+            final String contents = finisher.apply(result);
+            Files.write(target.toPath(), contents.getBytes(Defaults.CHARSET));
             FileUtil.configurePermissions(target, true);
             LOGGER.info("Generated run script: {}.", target.getAbsolutePath());
             return target;

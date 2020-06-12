@@ -40,10 +40,12 @@ class WindowsRunScriptGeneratorTest {
             .toPath())
                 .isEqualTo(installFolder);
         File result = generator.apply(Arrays.asList("-a x", "-b"));
-        assertThat(Files.readString(result.toPath()))
-            .isEqualToIgnoringNewLines("set \"JAVA_OPTS=%JAVA_OPTS% -a x -b\"\r\n\r\n" +
-                    distFolder + "\\robozonky.bat" +
-                    " @" + robozonkyCli);
+        String contents = Files.readString(result.toPath());
+        String expected = "set \"JAVA_OPTS=%JAVA_OPTS% -a x -b\"\r\n" +
+                distFolder + "\\robozonky.bat" + " @" + robozonkyCli;
+        // toCharArray() is a hack to make this pass on Windows. The actual reason for failing is not know.
+        assertThat(contents.toCharArray())
+            .isEqualTo(expected.toCharArray());
     }
 
 }

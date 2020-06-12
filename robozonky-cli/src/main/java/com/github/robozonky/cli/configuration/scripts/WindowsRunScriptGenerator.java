@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 final class WindowsRunScriptGenerator extends RunScriptGenerator {
 
-    private static final Pattern UNIX_NEWLINES = Pattern.compile("(\n)+");
+    private static final Pattern UNIX_NEWLINES = Pattern.compile("([\r\n]+)");
     private static final String EXEC_NAME = "robozonky-exec.bat";
 
     public WindowsRunScriptGenerator(final File distributionDirectory, final File configFile) {
