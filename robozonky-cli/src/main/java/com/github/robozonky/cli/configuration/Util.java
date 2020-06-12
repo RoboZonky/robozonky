@@ -49,13 +49,6 @@ public final class Util {
         }
     }
 
-    public static void copy(final File from, final File to) throws IOException {
-        copy(from.getAbsoluteFile()
-            .toPath(),
-                to.getAbsoluteFile()
-                    .toPath());
-    }
-
     public static void copy(final Path from, final Path to) throws IOException {
         LOGGER.debug("Copying {} to {}", from, to);
         Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
