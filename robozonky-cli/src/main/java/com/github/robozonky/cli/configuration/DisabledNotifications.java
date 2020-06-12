@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
-import java.util.Map;
+import java.nio.file.Path;
+import java.util.Optional;
 
-abstract class AbstractJmxConfiguration implements PropertyConfiguration {
+final class DisabledNotifications implements NotificationConfiguration {
 
-    private final boolean jmxEnabled;
-
-    public AbstractJmxConfiguration(final boolean jmxEnabled) {
-        this.jmxEnabled = jmxEnabled;
+    @Override
+    public Optional<String> getFinalLocation() {
+        return Optional.empty();
     }
 
     @Override
-    public Map<String, String> getProperties() {
-        return Map.ofEntries(
-                Map.entry("com.sun.management.jmxremote", Boolean.toString(jmxEnabled)));
+    public void accept(Path distributionRoot, Path installationRoot) {
+        // No need to do anything.
     }
-
 }

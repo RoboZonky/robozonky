@@ -14,45 +14,41 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.installer.Util;
+final class LocalStrategy implements StrategyConfiguration {
 
-final class LocalNotifications implements NotificationConfiguration {
-
-    private final String configurationLocation;
+    private final String strategyLocation;
     private final AtomicReference<String> finalLocation = new AtomicReference<>();
 
-    public LocalNotifications(final String configurationLocation) {
-        this.configurationLocation = configurationLocation;
+    public LocalStrategy(final String strategyLocation) {
+        this.strategyLocation = strategyLocation;
     }
 
     @Override
-    public Optional<String> getFinalLocation() {
-        return Optional.of(finalLocation.get());
+    public String getFinalLocation() {
+        return finalLocation.get();
     }
 
     @Override
     public void accept(Path distributionRoot, Path installationRoot) {
-        var source = Path.of(configurationLocation)
+        var sourcePath = Path.of(strategyLocation)
             .toAbsolutePath();
-        if (!source.toFile()
+        if (!sourcePath.toFile()
             .canRead()) {
-            throw new IllegalStateException("Cannot read notification configuration: " + configurationLocation);
+            throw new IllegalStateException("Cannot read strategy: " + strategyLocation);
         }
-        var target = installationRoot.resolve("robozonky-notifications.cfg")
+        var target = installationRoot.resolve("robozonky-strategy.cfg")
             .toAbsolutePath();
         try {
-            Util.copy(source, target);
-            finalLocation.set(target.toUri()
-                .toString());
+            Util.copy(sourcePath, target);
+            finalLocation.set(target.toString());
         } catch (IOException ex) {
-            throw new IllegalStateException("Can not copy notification configuration: " + configurationLocation, ex);
+            throw new IllegalStateException("Can not copy strategy: " + strategyLocation, ex);
         }
     }
 }

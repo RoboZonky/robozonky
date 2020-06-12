@@ -14,43 +14,37 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.installer.Util;
+final class FreshNotifications implements NotificationConfiguration {
 
-final class LocalStrategy implements StrategyConfiguration {
-
-    private final String strategyLocation;
+    private final Properties properties;
     private final AtomicReference<String> finalLocation = new AtomicReference<>();
 
-    public LocalStrategy(final String strategyLocation) {
-        this.strategyLocation = strategyLocation;
+    public FreshNotifications(final Properties properties) {
+        this.properties = properties;
     }
 
     @Override
-    public String getFinalLocation() {
-        return finalLocation.get();
+    public Optional<String> getFinalLocation() {
+        return Optional.of(finalLocation.get());
     }
 
     @Override
     public void accept(Path distributionRoot, Path installationRoot) {
-        var sourcePath = Path.of(strategyLocation)
-            .toAbsolutePath();
-        if (!sourcePath.toFile()
-            .canRead()) {
-            throw new IllegalStateException("Cannot read strategy: " + strategyLocation);
-        }
-        var target = installationRoot.resolve("robozonky-strategy.cfg")
-            .toAbsolutePath();
+        Path target = installationRoot.resolve("robozonky-notifications.cfg");
         try {
-            Util.copy(sourcePath, target);
-            finalLocation.set(target.toString());
+            Util.writeOutProperties(properties, target.toFile());
+            finalLocation.set(target.toUri()
+                .toString());
         } catch (IOException ex) {
-            throw new IllegalStateException("Can not copy strategy: " + strategyLocation, ex);
+            throw new IllegalStateException("Failed writing notification properties: " + ex);
         }
     }
 }

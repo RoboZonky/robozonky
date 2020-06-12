@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.installer.Util;
+final class LocalNotifications implements NotificationConfiguration {
 
-final class FreshNotifications implements NotificationConfiguration {
-
-    private final Properties properties;
+    private final String configurationLocation;
     private final AtomicReference<String> finalLocation = new AtomicReference<>();
 
-    public FreshNotifications(final Properties properties) {
-        this.properties = properties;
+    public LocalNotifications(final String configurationLocation) {
+        this.configurationLocation = configurationLocation;
     }
 
     @Override
@@ -40,13 +37,20 @@ final class FreshNotifications implements NotificationConfiguration {
 
     @Override
     public void accept(Path distributionRoot, Path installationRoot) {
-        Path target = installationRoot.resolve("robozonky-notifications.cfg");
+        var source = Path.of(configurationLocation)
+            .toAbsolutePath();
+        if (!source.toFile()
+            .canRead()) {
+            throw new IllegalStateException("Cannot read notification configuration: " + configurationLocation);
+        }
+        var target = installationRoot.resolve("robozonky-notifications.cfg")
+            .toAbsolutePath();
         try {
-            Util.writeOutProperties(properties, target.toFile());
+            Util.copy(source, target);
             finalLocation.set(target.toUri()
                 .toString());
         } catch (IOException ex) {
-            throw new IllegalStateException("Failed writing notification properties: " + ex);
+            throw new IllegalStateException("Can not copy notification configuration: " + configurationLocation, ex);
         }
     }
 }

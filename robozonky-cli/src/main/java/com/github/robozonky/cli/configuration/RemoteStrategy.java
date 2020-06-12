@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.net.MalformedURLException;
 import java.net.URL;

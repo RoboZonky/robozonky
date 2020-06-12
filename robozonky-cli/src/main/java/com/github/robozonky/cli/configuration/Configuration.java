@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
-import static java.util.Objects.requireNonNull;
+import java.nio.file.Path;
+import java.util.function.BiConsumer;
 
-public interface StrategyConfiguration extends Configuration {
+public interface Configuration extends BiConsumer<Path, Path> {
 
-    static StrategyConfiguration local(String strategyLocationPath) {
-        return new LocalStrategy(requireNonNull(strategyLocationPath));
-    }
-
-    static StrategyConfiguration remote(String strategyLocationUrl) {
-        return new RemoteStrategy(requireNonNull(strategyLocationUrl));
-    }
-
-    String getFinalLocation();
-
+    /**
+     *
+     * @param distributionRoot
+     * @param installationRoot
+     */
+    @Override
+    void accept(Path distributionRoot, Path installationRoot);
 }

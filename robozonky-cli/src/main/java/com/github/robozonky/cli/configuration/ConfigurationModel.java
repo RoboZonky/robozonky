@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -27,9 +27,8 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.installer.Util;
-import com.github.robozonky.installer.configuration.scripts.RunScriptGenerator;
-import com.github.robozonky.installer.configuration.scripts.ServiceGenerator;
+import com.github.robozonky.cli.configuration.scripts.RunScriptGenerator;
+import com.github.robozonky.cli.configuration.scripts.ServiceGenerator;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.Settings;
 

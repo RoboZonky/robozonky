@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration.scripts;
+package com.github.robozonky.cli.configuration.scripts;
 
 import java.io.IOException;
 import java.io.StringWriter;

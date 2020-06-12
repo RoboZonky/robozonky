@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -23,8 +23,6 @@ import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.github.robozonky.installer.Util;
 
 final class EnabledJmxConfiguration extends AbstractJmxConfiguration {
 

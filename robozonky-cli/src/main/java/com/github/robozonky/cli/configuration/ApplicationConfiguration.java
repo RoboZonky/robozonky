@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.configuration;
+package com.github.robozonky.cli.configuration;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
-
-import com.github.robozonky.installer.Util;
 
 final class ApplicationConfiguration implements PropertyConfiguration {
 

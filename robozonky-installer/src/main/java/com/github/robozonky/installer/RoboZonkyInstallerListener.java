@@ -36,10 +36,10 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.installer.configuration.ConfigurationModel;
-import com.github.robozonky.installer.configuration.NotificationConfiguration;
-import com.github.robozonky.installer.configuration.PropertyConfiguration;
-import com.github.robozonky.installer.configuration.StrategyConfiguration;
+import com.github.robozonky.cli.configuration.ConfigurationModel;
+import com.github.robozonky.cli.configuration.NotificationConfiguration;
+import com.github.robozonky.cli.configuration.PropertyConfiguration;
+import com.github.robozonky.cli.configuration.StrategyConfiguration;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
