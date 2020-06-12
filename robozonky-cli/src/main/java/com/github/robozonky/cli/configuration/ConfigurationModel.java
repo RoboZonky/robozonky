@@ -81,15 +81,18 @@ public final class ConfigurationModel {
             List<String> cliLines = new ArrayList<>(0);
             applicationConfiguration.getApplicationArguments()
                 .forEach((k, v) -> {
-                    if (v.isBlank()) {
-                        cliLines.add("-" + k);
-                    } else {
-                        cliLines.add("-" + k + " \"" + v + "\"");
+                    cliLines.add("-" + k);
+                    if (!v.isBlank()) {
+                        cliLines.add("\"" + v + "\"");
                     }
                 });
-            cliLines.add("-s \"" + strategyConfiguration.getFinalLocation() + "\"");
+            cliLines.add("-s");
+            cliLines.add("\"" + strategyConfiguration.getFinalLocation() + "\"");
             notificationConfiguration.getFinalLocation()
-                .ifPresent(n -> cliLines.add("-i \"" + n + "\""));
+                .ifPresent(n -> {
+                    cliLines.add("-i");
+                    cliLines.add("\"" + n + "\"");
+                });
             String robozonkyCliContents = String.join(lineSeparator, cliLines);
             Files.write(robozonkyCli, robozonkyCliContents.getBytes(Defaults.CHARSET));
         } catch (final Exception ex) {

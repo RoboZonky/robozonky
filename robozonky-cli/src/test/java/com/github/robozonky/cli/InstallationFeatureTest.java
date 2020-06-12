@@ -68,10 +68,14 @@ class InstallationFeatureTest {
         String cliContents = Files.readString(feature.installation.resolve("robozonky.cli"));
         assertThat(cliContents)
             .isEqualTo("-d\r\n"
-                    + "-g \"" + feature.installation + "/robozonky.keystore\"\r\n"
-                    + "-p \"" + String.valueOf(feature.secret) + "\"\r\n"
-                    + "-s \"" + feature.strategyLocation + "\"\r\n"
-                    + "-i \"" + feature.notificationLocation + "\"");
+                    + "-g\r\n" +
+                    "\"" + feature.installation + "/robozonky.keystore\"\r\n"
+                    + "-p\r\n" +
+                    "\"" + String.valueOf(feature.secret) + "\"\r\n"
+                    + "-s\r\n" +
+                    "\"" + feature.strategyLocation + "\"\r\n"
+                    + "-i\r\n" +
+                    "\"" + feature.notificationLocation + "\"");
         // test exec contents
         String execContents = Files.readString(feature.installation.resolve("robozonky-exec.bat"));
         assertThat(execContents)
@@ -118,10 +122,14 @@ class InstallationFeatureTest {
         // test CLI contents
         String cliContents = Files.readString(feature.installation.resolve("robozonky.cli"));
         assertThat(cliContents)
-            .isEqualTo("-g \"" + feature.installation + "/robozonky.keystore\"\n"
-                    + "-p \"" + String.valueOf(feature.secret) + "\"\n"
-                    + "-s \"" + feature.strategyLocation + "\"\n"
-                    + "-i \"" + feature.notificationLocation + "\"");
+            .isEqualTo("-g\n" +
+                    "\"" + feature.installation + "/robozonky.keystore\"\n"
+                    + "-p\n" +
+                    "\"" + String.valueOf(feature.secret) + "\"\n"
+                    + "-s\n" +
+                    "\"" + feature.strategyLocation + "\"\n"
+                    + "-i\n" +
+                    "\"" + feature.notificationLocation + "\"");
         // test exec contents
         String execContents = Files.readString(feature.installation.resolve("robozonky-exec.sh"));
         assertThat(execContents)
