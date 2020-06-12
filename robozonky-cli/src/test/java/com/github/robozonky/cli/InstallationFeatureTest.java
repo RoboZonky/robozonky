@@ -69,7 +69,7 @@ class InstallationFeatureTest {
         assertThat(cliContents)
             .isEqualTo("-d\r\n"
                     + "-g\r\n" +
-                    "\"" + feature.installation + "/robozonky.keystore\"\r\n"
+                    "\"" + feature.installation.resolve("robozonky.keystore") + "\"\r\n"
                     + "-p\r\n" +
                     "\"" + String.valueOf(feature.secret) + "\"\r\n"
                     + "-s\r\n" +
@@ -123,7 +123,7 @@ class InstallationFeatureTest {
         String cliContents = Files.readString(feature.installation.resolve("robozonky.cli"));
         assertThat(cliContents)
             .isEqualTo("-g\n" +
-                    "\"" + feature.installation + "/robozonky.keystore\"\n"
+                    "\"" + feature.installation.resolve("robozonky.keystore") + "\"\n"
                     + "-p\n" +
                     "\"" + String.valueOf(feature.secret) + "\"\n"
                     + "-s\n" +
