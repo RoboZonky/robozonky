@@ -45,7 +45,7 @@ import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 
-final class RoboZonkyInstallerListener extends AbstractInstallerListener {
+public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
     private static final Logger LOGGER = LogManager.getLogger(RoboZonkyInstallerListener.class);
     static File INSTALL_PATH;
