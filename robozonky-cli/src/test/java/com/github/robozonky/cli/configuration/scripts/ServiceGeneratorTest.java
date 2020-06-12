@@ -33,7 +33,7 @@ class ServiceGeneratorTest {
         Path path = Files.createTempFile("robozonky-", ".service");
         File result = generator.apply(path.toFile());
         String content = Files.readString(result.toPath());
-        assertThat(content).isEqualTo("[Unit]\n" +
+        assertThat(content).isEqualToIgnoringNewLines("[Unit]\n" +
                 "Description=RoboZonky: Automated Zonky.cz investing robot\n" +
                 "After=network.target\n" +
                 "\n" +

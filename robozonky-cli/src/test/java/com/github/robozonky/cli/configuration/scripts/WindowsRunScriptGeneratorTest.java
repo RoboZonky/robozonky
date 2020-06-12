@@ -41,7 +41,7 @@ class WindowsRunScriptGeneratorTest {
                 .isEqualTo(installFolder);
         File result = generator.apply(Arrays.asList("-a x", "-b"));
         assertThat(Files.readString(result.toPath()))
-            .isEqualTo("set \"JAVA_OPTS=%JAVA_OPTS% -a x -b\"\r\n" +
+            .isEqualToIgnoringNewLines("set \"JAVA_OPTS=%JAVA_OPTS% -a x -b\"\r\n" +
                     distFolder + "\\robozonky.bat" +
                     " @" + robozonkyCli);
     }

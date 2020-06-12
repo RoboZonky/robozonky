@@ -41,7 +41,7 @@ class UnixRunScriptGeneratorTest {
                 .isEqualTo(installFolder);
         File result = generator.apply(Arrays.asList("-a x", "-b"));
         assertThat(Files.readString(result.toPath()))
-            .isEqualTo("#!/bin/bash\n" +
+            .isEqualToIgnoringNewLines("#!/bin/bash\n" +
                     "export JAVA_OPTS=\"$JAVA_OPTS -a x -b\"\n" +
                     distFolder + "/robozonky.sh " + "@" + robozonkyCli);
     }
