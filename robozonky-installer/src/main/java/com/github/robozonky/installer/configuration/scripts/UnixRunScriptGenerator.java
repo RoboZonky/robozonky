@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.installer.scripts;
+package com.github.robozonky.installer.configuration.scripts;
 
 import java.io.File;
-
-import com.github.robozonky.installer.CommandLinePart;
+import java.util.List;
 
 final class UnixRunScriptGenerator extends RunScriptGenerator {
 
@@ -29,8 +28,8 @@ final class UnixRunScriptGenerator extends RunScriptGenerator {
     }
 
     @Override
-    public File apply(final CommandLinePart commandLine) {
-        return process(commandLine, EXEC_NAME + ".ftl");
+    public File apply(final List<String> javaOpts) {
+        return process(javaOpts, EXEC_NAME + ".ftl");
     }
 
     @Override

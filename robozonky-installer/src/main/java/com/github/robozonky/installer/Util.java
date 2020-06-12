@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +30,7 @@ import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.util.FileUtil;
 import com.izforge.izpack.api.data.InstallData;
 
-final class Util {
+public final class Util {
 
     private static final Logger LOGGER = LogManager.getLogger(Util.class);
 
@@ -53,13 +50,15 @@ final class Util {
         return String.valueOf(Integer.parseInt(string));
     }
 
-    public static void writeOutProperties(final Properties properties, final File target) {
-        try (var writer = Files.newBufferedWriter(target.toPath(), Defaults.CHARSET)) {
-            FileUtil.configurePermissions(target, false);
+    public static void writeOutProperties(final Properties properties, final File target) throws IOException {
+        writeOutProperties(properties, target.toPath());
+    }
+
+    public static void writeOutProperties(final Properties properties, final Path target) throws IOException {
+        try (var writer = Files.newBufferedWriter(target, Defaults.CHARSET)) {
+            FileUtil.configurePermissions(target.toFile(), false);
             properties.store(writer, Defaults.ROBOZONKY_USER_AGENT);
             LOGGER.debug("Written properties to {}.", target);
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
         }
     }
 
@@ -95,53 +94,17 @@ final class Util {
         return p;
     }
 
-    public static void copyFile(final File from, final File to) throws IOException {
-        final Path f = from.getAbsoluteFile()
-            .toPath();
-        final Path t = to.getAbsoluteFile()
-            .toPath();
-        LOGGER.debug("Copying {} to {}", f, t);
-        Files.copy(f, t, StandardCopyOption.REPLACE_EXISTING);
-        FileUtil.configurePermissions(to, false);
+    public static void copy(final File from, final File to) throws IOException {
+        copy(from.getAbsoluteFile()
+            .toPath(),
+                to.getAbsoluteFile()
+                    .toPath());
     }
 
-    public static void copyOptions(final CommandLinePart source, final CommandLinePart target) {
-        source.getOptions()
-            .forEach((k, v) -> target.setOption(k, v.toArray(new String[0])));
+    public static void copy(final Path from, final Path to) throws IOException {
+        LOGGER.debug("Copying {} to {}", from, to);
+        Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
+        FileUtil.configurePermissions(to.toFile(), false);
     }
 
-    static void processCommandLine(final CommandLinePart commandLine, final Properties settings,
-            final CommandLinePart... parts) {
-        Stream.of(parts)
-            .map(CommandLinePart::getProperties)
-            .flatMap(p -> p.entrySet()
-                .stream())
-            .peek(e -> LOGGER.trace("Processing property {}.", e))
-            .filter(e -> Objects.nonNull(e.getValue())) // prevent NPEs coming from evil code
-            .forEach(e -> {
-                final String key = e.getKey();
-                final String value = e.getValue();
-                if (key.startsWith("robozonky")) { // RoboZonky settings to be written to a separate file
-                    LOGGER.debug("Storing property {}.", e);
-                    settings.setProperty(key, value);
-                } else { // general Java system property to end up on the command line
-                    LOGGER.debug("Setting property {}.", e);
-                    commandLine.setProperty(key, value);
-                }
-            });
-        Stream.of(parts)
-            .map(CommandLinePart::getJvmArguments)
-            .flatMap(p -> p.entrySet()
-                .stream())
-            .peek(e -> LOGGER.trace("Processing JVM argument {}.", e))
-            .forEach(e -> {
-                final String key = e.getKey();
-                final Optional<String> value = e.getValue();
-                if (value.isPresent()) {
-                    commandLine.setJvmArgument(key, value.get());
-                } else {
-                    commandLine.setJvmArgument(key);
-                }
-            });
-    }
 }

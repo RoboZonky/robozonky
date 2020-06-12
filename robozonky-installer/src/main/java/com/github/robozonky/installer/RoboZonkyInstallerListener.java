@@ -16,61 +16,52 @@
 
 package com.github.robozonky.installer;
 
+import static com.github.robozonky.installer.Variables.EMAIL_CONFIGURATION_SOURCE;
+import static com.github.robozonky.installer.Variables.EMAIL_CONFIGURATION_TYPE;
+import static com.github.robozonky.installer.Variables.IS_DRY_RUN;
+import static com.github.robozonky.installer.Variables.IS_EMAIL_ENABLED;
+import static com.github.robozonky.installer.Variables.IS_JMX_ENABLED;
+import static com.github.robozonky.installer.Variables.IS_JMX_SECURITY_ENABLED;
+import static com.github.robozonky.installer.Variables.JMX_HOSTNAME;
+import static com.github.robozonky.installer.Variables.JMX_PORT;
+import static com.github.robozonky.installer.Variables.STRATEGY_SOURCE;
+import static com.github.robozonky.installer.Variables.STRATEGY_TYPE;
+import static java.lang.Boolean.parseBoolean;
+
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
-import java.util.Properties;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.installer.scripts.RunScriptGenerator;
-import com.github.robozonky.installer.scripts.ServiceGenerator;
-import com.github.robozonky.internal.Settings;
+import com.github.robozonky.installer.configuration.ConfigurationModel;
+import com.github.robozonky.installer.configuration.NotificationConfiguration;
+import com.github.robozonky.installer.configuration.PropertyConfiguration;
+import com.github.robozonky.installer.configuration.StrategyConfiguration;
 import com.izforge.izpack.api.data.InstallData;
 import com.izforge.izpack.api.data.Pack;
 import com.izforge.izpack.api.event.AbstractInstallerListener;
 import com.izforge.izpack.api.event.ProgressListener;
 
-public final class RoboZonkyInstallerListener extends AbstractInstallerListener {
+final class RoboZonkyInstallerListener extends AbstractInstallerListener {
 
     private static final Logger LOGGER = LogManager.getLogger(RoboZonkyInstallerListener.class);
     static File INSTALL_PATH;
-    static File JMX_PROPERTIES_FILE;
-    static File EMAIL_CONFIG_FILE;
-    static File CLI_CONFIG_FILE;
     private static File DIST_PATH;
-    private static File SETTINGS_FILE;
-    private static File LOG4J2_CONFIG_FILE;
     private static File KEYSTORE_SOURCE;
-    private static File KEYSTORE_TARGET;
     private static char[] KEYSTORE_SECRET;
     private static InstallData DATA;
-    private RoboZonkyInstallerListener.OS operatingSystem = RoboZonkyInstallerListener.OS.OTHER;
+
+    private final boolean isUnix;
 
     public RoboZonkyInstallerListener() {
-        if (SystemUtils.IS_OS_LINUX) {
-            operatingSystem = RoboZonkyInstallerListener.OS.LINUX;
-        } else if (SystemUtils.IS_OS_WINDOWS) {
-            operatingSystem = RoboZonkyInstallerListener.OS.WINDOWS;
-        }
+        this(!SystemUtils.IS_OS_WINDOWS);
     }
 
-    /**
-     * Testing OS-specific behavior was proving very difficult, this constructor takes all of that pain away.
-     * 
-     * @param os Fake operating system used for testing.
-     */
-    RoboZonkyInstallerListener(final RoboZonkyInstallerListener.OS os) {
-        operatingSystem = os;
+    public RoboZonkyInstallerListener(boolean isUnix) {
+        this.isUnix = isUnix;
     }
 
     static void setKeystoreInformation(final File keystore, final char... keystorePassword) {
@@ -92,225 +83,70 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         RoboZonkyInstallerListener.DATA = data;
         INSTALL_PATH = new File(Variables.INSTALL_PATH.getValue(DATA));
         DIST_PATH = new File(INSTALL_PATH, "dist/");
-        KEYSTORE_TARGET = new File(INSTALL_PATH, "robozonky.keystore");
-        JMX_PROPERTIES_FILE = new File(INSTALL_PATH, "management.properties");
-        EMAIL_CONFIG_FILE = new File(INSTALL_PATH, "robozonky-notifications.cfg");
-        SETTINGS_FILE = new File(INSTALL_PATH, "robozonky.properties");
-        CLI_CONFIG_FILE = new File(INSTALL_PATH, "robozonky.cli");
-        LOG4J2_CONFIG_FILE = new File(INSTALL_PATH, "log4j2.xml");
     }
 
     static void resetInstallData() {
         RoboZonkyInstallerListener.DATA = null;
         INSTALL_PATH = null;
         DIST_PATH = null;
-        KEYSTORE_TARGET = null;
-        JMX_PROPERTIES_FILE = null;
-        EMAIL_CONFIG_FILE = null;
-        SETTINGS_FILE = null;
-        CLI_CONFIG_FILE = null;
-        LOG4J2_CONFIG_FILE = null;
     }
 
-    private static void primeKeyStore() throws IOException {
-        Files.deleteIfExists(KEYSTORE_TARGET.toPath()); // re-install into the same directory otherwise fails
-        Files.copy(KEYSTORE_SOURCE.toPath(), KEYSTORE_TARGET.toPath());
-    }
-
-    static CommandLinePart prepareCore() throws IOException {
-        final CommandLinePart cli = new CommandLinePart()
-            .setOption("-g", KEYSTORE_TARGET.getAbsolutePath())
-            .setOption("-p", String.valueOf(KEYSTORE_SECRET));
-        if (Boolean.valueOf(Variables.IS_DRY_RUN.getValue(DATA))) {
-            cli.setOption("-d");
-            cli.setJvmArgument("Xmx128m"); // more memory for the JFR recording
-            cli.setJvmArgument("XX:StartFlightRecording=disk=true,dumponexit=true,maxage=1d,path-to-gc-roots=true");
+    static PropertyConfiguration prepareCore() {
+        if (parseBoolean(IS_DRY_RUN.getValue(DATA))) {
+            return PropertyConfiguration.applicationDryRun(KEYSTORE_SOURCE.toPath(), KEYSTORE_SECRET);
         } else {
-            cli.setJvmArgument("Xmx64m");
-        }
-        primeKeyStore();
-        return cli;
-    }
-
-    private static File assembleCliFile(final CommandLinePart... source) throws IOException {
-        // assemble the CLI
-        final CommandLinePart cli = new CommandLinePart();
-        Stream.of(source)
-            .forEach(c -> Util.copyOptions(c, cli));
-        // store it to a file
-        cli.storeOptions(CLI_CONFIG_FILE);
-        return CLI_CONFIG_FILE.getAbsoluteFile();
-    }
-
-    static CommandLinePart prepareStrategy() {
-        final String content = Variables.STRATEGY_SOURCE.getValue(DATA);
-        if (Objects.equals(Variables.STRATEGY_TYPE.getValue(DATA), "file")) {
-            final File strategyFile = new File(INSTALL_PATH, "robozonky-strategy.cfg");
-            try {
-                Util.copyFile(new File(content), strategyFile);
-                return new CommandLinePart().setOption("-s", strategyFile.getAbsolutePath());
-            } catch (final IOException ex) {
-                throw new IllegalStateException("Failed copying strategy file.", ex);
-            }
-        } else {
-            try {
-                return new CommandLinePart().setOption("-s", new URL(content).toExternalForm());
-            } catch (final MalformedURLException ex) {
-                throw new IllegalStateException("Wrong strategy URL.", ex);
-            }
+            return PropertyConfiguration.applicationReal(KEYSTORE_SOURCE.toPath(), KEYSTORE_SECRET);
         }
     }
 
-    private static URL getEmailConfiguration() throws IOException {
-        final String type = Variables.EMAIL_CONFIGURATION_TYPE.getValue(DATA);
-        LOGGER.debug("Configuring notifications: {}", type);
-        switch (type) {
+    static StrategyConfiguration prepareStrategy() {
+        final String content = STRATEGY_SOURCE.getValue(DATA);
+        if (Objects.equals(STRATEGY_TYPE.getValue(DATA), "file")) {
+            return StrategyConfiguration.local(content);
+        } else {
+            return StrategyConfiguration.remote(content);
+        }
+    }
+
+    static NotificationConfiguration prepareEmailConfiguration() {
+        if (!parseBoolean(IS_EMAIL_ENABLED.getValue(DATA))) {
+            return NotificationConfiguration.disabled();
+        }
+        switch (EMAIL_CONFIGURATION_TYPE.getValue(DATA)) {
             case "file":
-                final File f = new File(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
-                Util.copyFile(f, EMAIL_CONFIG_FILE);
-                return EMAIL_CONFIG_FILE.toURI()
-                    .toURL();
+                return NotificationConfiguration.reuse(EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
             case "url":
-                return new URL(Variables.EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
+                return NotificationConfiguration.remote(EMAIL_CONFIGURATION_SOURCE.getValue(DATA));
             default:
-                final Properties props = Util.configureEmailNotifications(DATA);
-                Util.writeOutProperties(props, EMAIL_CONFIG_FILE);
-                return EMAIL_CONFIG_FILE.toURI()
-                    .toURL();
+                return NotificationConfiguration.create(Util.configureEmailNotifications(DATA));
         }
     }
 
-    static CommandLinePart prepareEmailConfiguration() {
-        if (!Boolean.valueOf(Variables.IS_EMAIL_ENABLED.getValue(DATA))) {
-            return new CommandLinePart();
-        }
-        try {
-            final URL url = getEmailConfiguration();
-            return new CommandLinePart().setOption("-i", url.toExternalForm());
-        } catch (final Exception ex) {
-            throw new IllegalStateException("Failed writing e-mail configuration.", ex);
-        }
-    }
-
-    static CommandLinePart prepareJmx() {
-        final boolean isJmxEnabled = Boolean.parseBoolean(Variables.IS_JMX_ENABLED.getValue(DATA));
-        final CommandLinePart clp = new CommandLinePart()
-            .setProperty("com.sun.management.jmxremote", isJmxEnabled ? "true" : "false")
-            // the buffer is effectively a memory leak; we'll reduce its size from 1000 to 10
-            .setProperty("jmx.remote.x.notification.buffer.size", "10");
+    static PropertyConfiguration prepareJmx() {
+        final boolean isJmxEnabled = parseBoolean(IS_JMX_ENABLED.getValue(DATA));
         if (!isJmxEnabled) { // ignore JMX
-            return clp;
+            return PropertyConfiguration.disabledJmx();
         }
-        // write JMX properties file
-        final Properties props = new Properties();
-        props.setProperty("com.sun.management.jmxremote.authenticate",
-                Variables.IS_JMX_SECURITY_ENABLED.getValue(DATA));
-        props.setProperty("com.sun.management.jmxremote.ssl", "false");
-        final String port = Variables.JMX_PORT.getValue(DATA);
-        props.setProperty("com.sun.management.jmxremote.rmi.port", port);
-        props.setProperty("com.sun.management.jmxremote.port", port);
-        try {
-            Util.writeOutProperties(props, JMX_PROPERTIES_FILE);
-        } catch (final Exception ex) {
-            throw new IllegalStateException("Failed writing JMX configuration.", ex);
-        }
-        // configure JMX to read the props file
-        return clp.setProperty("com.sun.management.config.file", JMX_PROPERTIES_FILE.getAbsolutePath())
-            .setProperty("java.rmi.server.hostname", Variables.JMX_HOSTNAME.getValue(DATA));
-    }
-
-    private static CommandLinePart prepareCommandLine(final CommandLinePart strategy, final CommandLinePart emailConfig,
-            final CommandLinePart jmxConfig, final CommandLinePart core,
-            final CommandLinePart logging) {
-        try {
-            final File cliConfigFile = assembleCliFile(core, strategy, emailConfig);
-            // have the CLI file loaded during RoboZonky startup
-            final CommandLinePart commandLine = new CommandLinePart()
-                .setOption("@" + cliConfigFile.getAbsolutePath())
-                .setProperty(Settings.FILE_LOCATION_PROPERTY, SETTINGS_FILE.getAbsolutePath())
-                .setEnvironmentVariable("JAVA_HOME", "");
-            // now proceed to set all system properties and settings
-            final Properties settings = new Properties();
-            Util.processCommandLine(commandLine, settings, strategy, jmxConfig, core, logging);
-            // write settings to a file
-            Util.writeOutProperties(settings, SETTINGS_FILE);
-            return commandLine;
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed writing CLI.", ex);
-        }
-    }
-
-    private static void prepareLinuxServices(final File runScript) {
-        for (final ServiceGenerator serviceGenerator : ServiceGenerator.values()) {
-            final File result = serviceGenerator.apply(runScript);
-            LOGGER.info("Generated {} as a {} service.", result, serviceGenerator);
-        }
-    }
-
-    private static CommandLinePart prepareLogging() {
-        try {
-            final File log4j2config = new File(DIST_PATH, "log4j2.xml");
-            if (log4j2config.exists()) {
-                final Path target = Files
-                    .move(log4j2config.toPath(), LOG4J2_CONFIG_FILE.toPath(), StandardCopyOption.REPLACE_EXISTING)
-                    .toAbsolutePath();
-                LOGGER.info("Will read logging configuration from '{}'.", target);
-                return new CommandLinePart()
-                    .setProperty("log4j.configurationFile", target.toString());
-            } else {
-                LOGGER.warn("Logging configuration file '{}' not found, not setting up logging.", log4j2config);
-                return new CommandLinePart();
-            }
-        } catch (final IOException ex) {
-            throw new IllegalStateException("Failed copying Log4j configuration file.", ex);
-        }
-    }
-
-    RoboZonkyInstallerListener.OS getOperatingSystem() {
-        return operatingSystem;
-    }
-
-    private void prepareRunScript(final CommandLinePart commandLine) {
-        boolean isWindows = operatingSystem == RoboZonkyInstallerListener.OS.WINDOWS;
-        final RunScriptGenerator generator = isWindows
-                ? RunScriptGenerator.forWindows(DIST_PATH, CLI_CONFIG_FILE)
-                : RunScriptGenerator.forUnix(DIST_PATH, CLI_CONFIG_FILE);
-        final File runScript = generator.apply(commandLine);
-        final File distRunScript = generator.getChildRunScript();
-        Stream<File> toMakeExecutable = Stream.of(runScript, distRunScript);
-        final File javaExecutable = new File(DIST_PATH, isWindows ? "jre/bin/java.exe" : "jre/bin/java");
-        if (javaExecutable.exists()) {
-            toMakeExecutable = Stream.concat(Stream.of(javaExecutable), toMakeExecutable);
-        } else {
-            LOGGER.info("Bundled Java binary not found, not making it executable.");
-        }
-        toMakeExecutable.forEach(file -> {
-            final boolean success = file.setExecutable(true);
-            LOGGER.info("Made '{}' executable: {}.", file, success);
-        });
-        if (operatingSystem == RoboZonkyInstallerListener.OS.LINUX) {
-            prepareLinuxServices(runScript);
-        }
+        final int port = Integer.parseInt(JMX_PORT.getValue(DATA));
+        return PropertyConfiguration.enabledJmx(JMX_HOSTNAME.getValue(DATA), port,
+                parseBoolean(IS_JMX_SECURITY_ENABLED.getValue(DATA)));
     }
 
     @Override
     public void afterPacks(final List<Pack> packs, final ProgressListener progressListener) {
         try {
-            progressListener.startAction("Konfigurace RoboZonky", 7);
+            progressListener.startAction("Konfigurace RoboZonky", 5);
             progressListener.nextStep("Příprava strategie.", 1, 1);
-            final CommandLinePart strategyConfig = prepareStrategy();
+            final StrategyConfiguration strategyConfig = prepareStrategy();
             progressListener.nextStep("Příprava nastavení e-mailu.", 2, 1);
-            final CommandLinePart emailConfig = prepareEmailConfiguration();
+            final NotificationConfiguration emailConfig = prepareEmailConfiguration();
             progressListener.nextStep("Příprava nastavení JMX.", 3, 1);
-            final CommandLinePart jmx = prepareJmx();
-            progressListener.nextStep("Příprava nastavení Zonky.", 4, 1);
-            final CommandLinePart core = prepareCore();
-            progressListener.nextStep("Příprava nastavení logování.", 5, 1);
-            final CommandLinePart logging = prepareLogging();
-            progressListener.nextStep("Generování parametrů příkazové řádky.", 6, 1);
-            final CommandLinePart result = prepareCommandLine(strategyConfig, emailConfig, jmx, core, logging);
-            progressListener.nextStep("Generování spustitelného souboru.", 7, 1);
-            prepareRunScript(result);
+            final PropertyConfiguration jmx = prepareJmx();
+            progressListener.nextStep("Příprava nastavení RoboZonky.", 4, 1);
+            final PropertyConfiguration core = prepareCore();
+            progressListener.nextStep("Generování konfigurace RoboZonky.", 5, 1);
+            ConfigurationModel configurationModel = ConfigurationModel.load(core, strategyConfig, emailConfig, jmx);
+            configurationModel.materialize(DIST_PATH.toPath(), INSTALL_PATH.toPath(), isUnix);
             progressListener.stopAction();
         } catch (final Exception ex) {
             LOGGER.error("Uncaught exception.", ex);
@@ -318,9 +154,4 @@ public final class RoboZonkyInstallerListener extends AbstractInstallerListener 
         }
     }
 
-    enum OS {
-        WINDOWS,
-        LINUX,
-        OTHER
-    }
 }

@@ -69,7 +69,6 @@ class CommandLine implements Callable<Optional<Function<Lifecycle, InvestmentMod
     public CommandLine() {
         // for backwards compatibility with RoboZonky 4.x, which used JCommander
         System.setProperty("picocli.trimQuotes", "true");
-        System.setProperty("picocli.useSimplifiedAtFiles", "true");
     }
 
     /**

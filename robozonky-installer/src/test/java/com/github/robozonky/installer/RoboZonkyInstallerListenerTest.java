@@ -16,14 +16,15 @@
 
 package com.github.robozonky.installer;
 
-import static org.assertj.core.api.Assertions.*;
+import static com.github.robozonky.installer.RoboZonkyInstallerListener.INSTALL_PATH;
+import static com.github.robozonky.installer.RoboZonkyInstallerListener.setInstallData;
+import static com.github.robozonky.installer.RoboZonkyInstallerListener.setKeystoreInformation;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.UUID;
@@ -33,8 +34,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
@@ -53,7 +52,7 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     @BeforeAll
     static void initialize() {
         final File f = newFile(false);
-        RoboZonkyInstallerListener.setKeystoreInformation(f, UUID.randomUUID()
+        setKeystoreInformation(f, UUID.randomUUID()
             .toString()
             .toCharArray());
     }
@@ -128,193 +127,32 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
     }
 
     @Test
-    void emailDisabled() {
-        // prepare
-        final InstallData data = RoboZonkyInstallerListenerTest.mockBaseData();
-        when(data.getVariable(Variables.IS_EMAIL_ENABLED.getKey())).thenReturn("false");
-        RoboZonkyInstallerListener.setInstallData(data);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getProperties())
-                .isEmpty();
-            softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE)
-                .doesNotExist();
-        });
-    }
-
-    @Test
-    void emailEnabled() {
-        // prepare
-        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        RoboZonkyInstallerListener.setInstallData(localData);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                .containsOnlyKeys("-i");
-            softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE)
-                .canRead();
-        });
-    }
-
-    @Test
-    void emailEnabledConfiguredFromFile() throws IOException {
-        final File f = File.createTempFile("robozonky-", ".tmp");
-        // prepare
-        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_TYPE.getKey())).thenReturn("file");
-        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_SOURCE.getKey())).thenReturn(f.getAbsolutePath());
-        RoboZonkyInstallerListener.setInstallData(localData);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                .containsOnlyKeys("-i");
-            softly.assertThat(RoboZonkyInstallerListener.EMAIL_CONFIG_FILE)
-                .canRead();
-        });
-    }
-
-    @Test
-    void emailEnabledConfiguredFromURL() throws IOException {
-        final URL f = File.createTempFile("robozonky-", ".tmp")
-            .toURI()
-            .toURL();
-        // prepare
-        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_TYPE.getKey())).thenReturn("url");
-        when(localData.getVariable(Variables.EMAIL_CONFIGURATION_SOURCE.getKey())).thenReturn(f.toExternalForm());
-        RoboZonkyInstallerListener.setInstallData(localData);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareEmailConfiguration();
-        assertThat(clp.getOptions()).containsOnlyKeys("-i");
-    }
-
-    @Test
-    void strategyFile() {
-        // prepare
-        RoboZonkyInstallerListener.setInstallData(data);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareStrategy();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                .containsKey("-s");
-            final File newStrat = new File(data.getVariable(Variables.INSTALL_PATH.getKey()), "robozonky-strategy.cfg");
-            softly.assertThat(newStrat)
-                .exists();
-        });
-    }
-
-    @Test
-    void coreWithoutTweaks() throws IOException {
-        // prepare
-        RoboZonkyInstallerListener.setInstallData(data);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareCore();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                .doesNotContainKey("-d")
-                .doesNotContainKey("-r")
-                .doesNotContainKey("-x");
-            softly.assertThat(clp.getOptions()
-                .get("-p"))
-                .isNotNull();
-        });
-    }
-
-    @Test
-    void coreWithTweaks() throws IOException {
-        // prepare
-        final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
-        when(localData.getVariable(Variables.IS_DRY_RUN.getKey())).thenReturn("true");
-        RoboZonkyInstallerListener.setInstallData(localData);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareCore();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                .containsKey("-d");
-            softly.assertThat(clp.getOptions()
-                .get("-p"))
-                .isNotNull();
-        });
-    }
-
-    @Test
-    void jmx() {
-        // prepare
-        RoboZonkyInstallerListener.setInstallData(data);
-        when(data.getVariable(Variables.IS_JMX_ENABLED.getKey())).thenReturn("true");
-        when(data.getVariable(Variables.IS_JMX_SECURITY_ENABLED.getKey())).thenReturn("false");
-        when(data.getVariable(Variables.JMX_PORT.getKey())).thenReturn("1234");
-        when(data.getVariable(Variables.JMX_HOSTNAME.getKey())).thenReturn("somewhere");
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareJmx();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getProperties()
-                .get("com.sun.management.jmxremote"))
-                .isEqualTo("true");
-            softly.assertThat(clp.getProperties()
-                .get("com.sun.management.config.file"))
-                .isEqualTo(RoboZonkyInstallerListener.JMX_PROPERTIES_FILE.getAbsolutePath());
-            softly.assertThat(RoboZonkyInstallerListener.JMX_PROPERTIES_FILE)
-                .exists();
-        });
-    }
-
-    @Test
-    void strategyUrl() {
-        // prepare
-        final InstallData localData = RoboZonkyInstallerListenerTest.mockBaseData();
-        when(localData.getVariable(Variables.STRATEGY_TYPE.getKey())).thenReturn("url");
-        when(localData.getVariable(Variables.STRATEGY_SOURCE.getKey())).thenReturn("http://www.robozonky.cz");
-        RoboZonkyInstallerListener.setInstallData(localData);
-        // execute SUT
-        final CommandLinePart clp = RoboZonkyInstallerListener.prepareStrategy();
-        // test
-        assertSoftly(softly -> {
-            softly.assertThat(clp.getOptions())
-                .containsKey("-s");
-            final File newStrat = new File(data.getVariable(Variables.INSTALL_PATH.getKey()), "robozonky-strategy.cfg");
-            softly.assertThat(newStrat)
-                .doesNotExist();
-        });
-    }
-
-    @Test
     void progressUnix() {
         final ProgressListener progress = mock(ProgressListener.class);
         // execute SUT
-        RoboZonkyInstallerListener.setInstallData(data);
-        final InstallerListener listener = new RoboZonkyInstallerListener(RoboZonkyInstallerListener.OS.LINUX);
+        setInstallData(data);
+        final InstallerListener listener = new RoboZonkyInstallerListener(true);
         listener.afterPacks(Collections.emptyList(), progress);
         // test
         assertSoftly(softly -> {
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "log4j2.xml"))
+            softly.assertThat(new File(INSTALL_PATH, "log4j2.xml"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky.properties"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky.cli"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.bat"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky-exec.bat"))
                 .doesNotExist();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.sh"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky-exec.sh"))
                 .exists()
                 .has(new Condition<>(File::canExecute, "Is executable"));
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky-systemd.service"))
                 .exists();
-            softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE)
+            softly.assertThat(new File(INSTALL_PATH, "robozonky.cli"))
                 .exists();
         });
         verify(progress, times(1)).startAction(anyString(), anyInt());
-        verify(progress, times(7))
+        verify(progress, times(5))
             .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }
@@ -324,45 +162,32 @@ class RoboZonkyInstallerListenerTest extends AbstractRoboZonkyTest {
         final ProgressListener progress = mock(ProgressListener.class);
         final InstallData localData = RoboZonkyInstallerListenerTest.mockData();
         // execute SUT
-        RoboZonkyInstallerListener.setInstallData(localData);
-        final InstallerListener listener = new RoboZonkyInstallerListener(RoboZonkyInstallerListener.OS.WINDOWS);
+        setInstallData(localData);
+        final InstallerListener listener = new RoboZonkyInstallerListener(false);
         listener.afterPacks(Collections.emptyList(), progress);
         // test
         assertSoftly(softly -> {
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "log4j2.xml"))
+            softly.assertThat(new File(INSTALL_PATH, "log4j2.xml"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.properties"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky.properties"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky.cli"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky.cli"))
                 .exists();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.sh"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky-exec.sh"))
                 .doesNotExist();
-            softly.assertThat(new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-exec.bat"))
+            softly.assertThat(new File(INSTALL_PATH, "robozonky-exec.bat"))
                 .exists()
                 .has(new Condition<>(File::canExecute, "Is executable"));
             softly.assertThat(
-                    new File(RoboZonkyInstallerListener.INSTALL_PATH, "robozonky-systemd.service"))
+                    new File(INSTALL_PATH, "robozonky-systemd.service"))
                 .doesNotExist();
-            softly.assertThat(RoboZonkyInstallerListener.CLI_CONFIG_FILE)
+            softly.assertThat(new File(INSTALL_PATH, "robozonky.cli"))
                 .exists();
         });
         verify(progress, times(1)).startAction(anyString(), anyInt());
-        verify(progress, times(7))
+        verify(progress, times(5))
             .nextStep(anyString(), anyInt(), eq(1));
         verify(progress, times(1)).stopAction();
     }
 
-    @Test
-    @EnabledOnOs(OS.LINUX)
-    void properLinux() {
-        final RoboZonkyInstallerListener listener = new RoboZonkyInstallerListener();
-        assertThat(listener.getOperatingSystem()).isEqualTo(RoboZonkyInstallerListener.OS.LINUX);
-    }
-
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    void properWindows() {
-        final RoboZonkyInstallerListener listener = new RoboZonkyInstallerListener();
-        assertThat(listener.getOperatingSystem()).isEqualTo(RoboZonkyInstallerListener.OS.WINDOWS);
-    }
 }
