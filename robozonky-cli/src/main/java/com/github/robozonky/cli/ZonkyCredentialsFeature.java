@@ -46,7 +46,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
             "--username" }, description = "Username to use to authenticate with Zonky servers.", required = true)
     private String username = null;
     @Option(names = { "-p",
-            "--password" }, description = "Authorization code obtained from Zonky. If not provided, will check for existing token", required = true, interactive = true, arity = "0..1")
+            "--password" }, description = "Authorization code obtained from Zonky. If not provided, will check for existing token", interactive = true, arity = "0..1")
     private char[] password = null;
     @Option(names = { "-t",
             "--token" }, description = "Raw JSON of the Zonky API token will be stored in this file. Keep it secret, keep it safe.")
