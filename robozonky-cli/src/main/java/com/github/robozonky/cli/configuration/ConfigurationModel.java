@@ -132,13 +132,17 @@ public final class ConfigurationModel {
                 : RunScriptGenerator.forWindows(distributionRoot.toFile(), robozonkyCli.toFile());
         final File runScript = generator.apply(jvmArguments);
         final File distRunScript = generator.getChildRunScript();
-        Stream<File> toMakeExecutable = Stream.of(runScript, distRunScript);
-        final File javaExecutable = distributionRoot.resolve(unix ? "jre/bin/java" : "jre/bin/java.exe")
+        final File distCliRunScript = distributionRoot.resolve(unix ? "robozonky-cli.sh" : "robozonky-cli.bat")
+            .toFile();
+        Stream<File> toMakeExecutable = Stream.of(runScript, distRunScript, distCliRunScript);
+        final Path runtimeRoot = distributionRoot.resolve("runtime")
+            .resolve("bin");
+        final File javaExecutable = runtimeRoot.resolve(unix ? "java" : "java.exe")
             .toFile();
         if (javaExecutable.exists()) {
             toMakeExecutable = Stream.concat(Stream.of(javaExecutable), toMakeExecutable);
         } else {
-            LOGGER.info("Bundled Java binary not found, not making it executable.");
+            LOGGER.info("Bundled Java binary {} not found, not making it executable.", javaExecutable);
         }
         toMakeExecutable.forEach(file -> {
             final boolean success = file.setExecutable(true);
