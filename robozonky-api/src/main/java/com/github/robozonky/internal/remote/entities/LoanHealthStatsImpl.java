@@ -68,7 +68,7 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
 
     @Override
     public int getCurrentDaysDue() {
-        return 0;
+        return currentDaysInDue;
     }
 
     @Override
