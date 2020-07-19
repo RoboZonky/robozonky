@@ -111,10 +111,11 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public OptionalInt getLongestDpd() {
-        return OptionalInt.of(detail.get()
+        int maxDpd = detail.get()
             .map(d -> d.getLoanHealthStats()
                 .getLongestDaysDue())
-            .orElse(0));
+            .orElseGet(() -> getCurrentDpd().orElse(0));
+        return OptionalInt.of(maxDpd);
     }
 
     @Override

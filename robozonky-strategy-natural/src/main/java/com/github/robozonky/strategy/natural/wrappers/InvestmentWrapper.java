@@ -183,11 +183,10 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public OptionalInt getLongestDpd() {
-        var maxDpd = investment.getLegalDpd()
-            .orElseGet(() -> sellInfo.get()
-                .map(si -> si.getLoanHealthStats()
-                    .getLongestDaysDue())
-                .orElse(0));
+        int maxDpd = sellInfo.get()
+            .map(si -> si.getLoanHealthStats()
+                .getLongestDaysDue())
+            .orElseGet(() -> getCurrentDpd().orElse(0));
         return OptionalInt.of(maxDpd);
     }
 
