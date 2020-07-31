@@ -48,9 +48,10 @@
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
     <version.org.junit.platform>1.${version.org.junit5}</version.org.junit.platform>
     <version.org.mockito>3.4.6</version.org.mockito>
-    <version.org.mock-server>5.9.0</version.org.mock-server>
+    <version.org.mock-server>5.11.1</version.org.mock-server>
     <version.org.apache.logging.log4j>2.13.3</version.org.apache.logging.log4j>
     <version.com.sun.mail>1.6.5</version.com.sun.mail>
+    <version.com.fasterxml.jackson>2.11.1</version.com.fasterxml.jackson>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
@@ -339,6 +340,10 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
           </exclusion>
+          <exclusion> <!-- We don't need it, and it has misaligned transitive dependencies. -->
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <!-- Logging. -->
@@ -412,6 +417,11 @@
         <groupId>com.google.code.findbugs</groupId>
         <artifactId>jsr305</artifactId>
         <version>3.0.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.opentest4j</groupId>
+        <artifactId>opentest4j</artifactId>
+        <version>1.2.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
