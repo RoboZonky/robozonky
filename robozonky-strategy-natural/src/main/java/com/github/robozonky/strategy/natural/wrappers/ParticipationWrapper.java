@@ -47,6 +47,11 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     }
 
     @Override
+    public long getLoanId() {
+        return participation.getLoanId();
+    }
+
+    @Override
     public boolean isInsuranceActive() {
         return participation.isInsuranceActive();
     }

@@ -55,6 +55,10 @@ public interface Wrapper<T> {
 
     long getId();
 
+    default long getLoanId() {
+        return getId();
+    }
+
     boolean isInsuranceActive();
 
     Region getRegion();
