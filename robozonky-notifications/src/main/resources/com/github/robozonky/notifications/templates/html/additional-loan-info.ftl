@@ -21,11 +21,5 @@
       <th style="width: 20%; text-align: right;">Pojištěno:</th>
       <td><#if data.insurance>Ano<#else>Ne</#if>.</td>
     </tr>
-<#if data.investedOn??>
-    <tr>
-      <th style="width: 20%; text-align: right;">Zainvestováno:</th>
-      <td>${data.investedOn?date}</td>
-    </tr>
-</#if>
   </tbody>
 </table>

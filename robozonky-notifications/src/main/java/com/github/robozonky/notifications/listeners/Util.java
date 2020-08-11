@@ -122,7 +122,6 @@ final class Util {
             })
             .orElseGet(() -> returned.subtract(originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
-        loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal()
             .orElse(Money.ZERO)
