@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.daemon;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -25,7 +26,8 @@ import com.github.robozonky.internal.jobs.TenantJob;
 
 public final class SellingJobService implements JobService {
 
-    private static final SellingJob INSTANCE = new SellingJob();
+    private static final SellingJob SELLING_INSTANCE = new SellingJob();
+    private static final SaleCheckJob CHECKING_INSTANCE = new SaleCheckJob();
 
     @Override
     public Collection<SimpleJob> getSimpleJobs() {
@@ -34,7 +36,7 @@ public final class SellingJobService implements JobService {
 
     @Override
     public Collection<TenantJob> getTenantJobs() {
-        return Collections.singleton(INSTANCE);
+        return Arrays.asList(SELLING_INSTANCE, CHECKING_INSTANCE);
     }
 
 }
