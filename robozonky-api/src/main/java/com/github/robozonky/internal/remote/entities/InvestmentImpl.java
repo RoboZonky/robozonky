@@ -17,7 +17,6 @@
 package com.github.robozonky.internal.remote.entities;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
@@ -299,12 +298,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
 
     public void setRating(final Rating rating) {
         this.rating = rating;
-    }
-
-    private static String toOptionalString(final OffsetDateTime dateTime) {
-        return Optional.ofNullable(dateTime)
-            .map(OffsetDateTime::toString)
-            .orElse(null);
     }
 
     public void setLoanAnnuity(final Money loanAnnuity) {
