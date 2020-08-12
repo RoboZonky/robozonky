@@ -32,9 +32,18 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.api.notifications.LoanDefaultedEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
+import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
+import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.app.events.Events;
+import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
@@ -49,13 +58,15 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     private static final Logger LOGGER = LogManager.getLogger(DelinquencyNotificationPayload.class);
 
     private final Function<Tenant, Registry> registryFunction;
+    private final boolean force;
 
     public DelinquencyNotificationPayload() {
-        this(Registry::new);
+        this(Registry::new, false);
     }
 
-    DelinquencyNotificationPayload(final Function<Tenant, Registry> registryFunction) {
+    DelinquencyNotificationPayload(final Function<Tenant, Registry> registryFunction, final boolean force) {
         this.registryFunction = registryFunction;
+        this.force = force;
     }
 
     private static boolean isDefaulted(final Investment i) {
@@ -178,6 +189,17 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     @Override
     public void accept(final Tenant tenant) {
-        ((PowerTenant) tenant).inTransaction(this::process);
+        PowerTenant powerTenant = (PowerTenant) tenant;
+        SessionEvents sessionEvents = Events.forSession(powerTenant);
+        boolean shouldTrigger = force || Stream.of(LoanDefaultedEvent.class, LoanDelinquent10DaysOrMoreEvent.class,
+                LoanDelinquent30DaysOrMoreEvent.class, LoanDelinquent60DaysOrMoreEvent.class,
+                LoanDelinquent90DaysOrMoreEvent.class, LoanNowDelinquentEvent.class,
+                LoanNoLongerDelinquentEvent.class)
+            .anyMatch(sessionEvents::isListenerRegistered);
+        if (!shouldTrigger) {
+            LOGGER.debug("Skipping on account of no event listener being configured to receive the results.");
+            return;
+        }
+        powerTenant.inTransaction(this::process);
     }
 }

@@ -49,7 +49,7 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
     private final Registry r = new Registry(tenant);
-    private final DelinquencyNotificationPayload payload = new DelinquencyNotificationPayload(t -> r);
+    private final DelinquencyNotificationPayload payload = new DelinquencyNotificationPayload(t -> r, true);
 
     @Test
     void initializesWithoutTriggeringEvents() {

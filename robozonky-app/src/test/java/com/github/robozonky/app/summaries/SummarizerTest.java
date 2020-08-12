@@ -33,7 +33,7 @@ class SummarizerTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void basics() {
-        final Summarizer summarizer = new Summarizer();
+        final Summarizer summarizer = new Summarizer(true);
         summarizer.accept(tenant);
         assertThat(this.getEventsRequested())
             .first()
