@@ -42,6 +42,7 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
 import com.github.robozonky.notifications.Target;
@@ -52,6 +53,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
+        .set(LoanImpl::setDatePublished, DateUtil.offsetNow())
         .set(LoanImpl::setAmount, Money.from(200))
         .set(LoanImpl::setAnnuity, Money.from(BigDecimal.TEN))
         .set(LoanImpl::setRating, Rating.D)

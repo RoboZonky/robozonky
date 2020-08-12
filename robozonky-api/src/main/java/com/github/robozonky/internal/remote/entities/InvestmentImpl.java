@@ -17,15 +17,11 @@
 package com.github.robozonky.internal.remote.entities;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.StringJoiner;
 
 import javax.json.bind.annotation.JsonbProperty;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -35,11 +31,8 @@ import com.github.robozonky.api.remote.enums.InsuranceStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.test.DateUtil;
 
 public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
-
-    private static final Logger LOGGER = LogManager.getLogger(InvestmentImpl.class);
 
     @JsonbProperty(nillable = true)
     private PaymentStatus paymentStatus;
@@ -60,10 +53,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @JsonbProperty(nillable = true)
     private Ratio revenueRate;
     private Rating rating;
-
-    // OffsetDateTime is expensive to parse, and Investments are on the hot path. Only do it when needed.
-    @JsonbProperty(nillable = true)
-    private String investmentDate;
 
     private Money loanAnnuity = Money.ZERO;
     private Money loanAmount = Money.ZERO;
@@ -148,19 +137,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     @Override
     public Optional<PaymentStatus> getPaymentStatus() {
         return Optional.ofNullable(paymentStatus);
-    }
-
-    @Override
-    public OffsetDateTime getInvestmentDate() {
-        return Optional.ofNullable(investmentDate)
-            .map(OffsetDateTime::parse)
-            .orElseGet(() -> {
-                final int monthsElapsed = getLoanTermInMonth() - getRemainingMonths();
-                final OffsetDateTime d = DateUtil.offsetNow()
-                    .minusMonths(monthsElapsed);
-                LOGGER.debug("Investment date for investment #{} guessed to be {}.", getId(), d);
-                return d;
-            });
     }
 
     @Override
@@ -324,16 +300,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         this.rating = rating;
     }
 
-    private static String toOptionalString(final OffsetDateTime dateTime) {
-        return Optional.ofNullable(dateTime)
-            .map(OffsetDateTime::toString)
-            .orElse(null);
-    }
-
-    public void setInvestmentDate(final OffsetDateTime investmentDate) {
-        this.investmentDate = toOptionalString(investmentDate);
-    }
-
     public void setLoanAnnuity(final Money loanAnnuity) {
         this.loanAnnuity = loanAnnuity;
     }
@@ -411,7 +377,6 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
             .add("insuranceActive=" + insuranceActive)
             .add("insuranceStatus=" + insuranceStatus)
             .add("interestRate=" + interestRate)
-            .add("investmentDate='" + investmentDate + "'")
             .add("legalDpd=" + legalDpd)
             .add("loanAmount='" + loanAmount + "'")
             .add("loanAnnuity='" + loanAnnuity + "'")

@@ -17,7 +17,10 @@
 package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,12 +40,11 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
         this.portfolioOverview = portfolioOverview;
     }
 
-    protected Ratio estimateRevenueRate(final OffsetDateTime dateForFees) {
-        return getRating().getMaximalRevenueRate(dateForFees.toInstant(), portfolioOverview.getInvested());
-    }
-
-    protected Ratio estimateRevenueRate() {
-        return estimateRevenueRate(DateUtil.offsetNow());
+    protected Ratio estimateRevenueRate() { // Loans with ID < 400k are assumed to have the old pre-2019 fees.
+        LocalDateTime dateForFees = getLoanId() < 400_000 ? LocalDate.of(2019, 02, 28)
+            .atStartOfDay() : DateUtil.localNow();
+        Instant feeInstant = dateForFees.toInstant(ZoneOffset.ofHours(1));
+        return getRating().getMaximalRevenueRate(feeInstant, portfolioOverview.getInvested());
     }
 
     @Override

@@ -50,6 +50,11 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
+    public long getLoanId() {
+        return investment.getLoanId();
+    }
+
+    @Override
     public boolean isInsuranceActive() {
         return investment.isInsuranceActive();
     }
@@ -67,7 +72,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     @Override
     public Ratio getRevenueRate() {
         return investment.getRevenueRate()
-            .orElseGet(() -> estimateRevenueRate(investment.getInvestmentDate()));
+            .orElseGet(this::estimateRevenueRate);
     }
 
     @Override

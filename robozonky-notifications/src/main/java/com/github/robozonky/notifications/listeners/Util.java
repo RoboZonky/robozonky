@@ -122,7 +122,6 @@ final class Util {
             })
             .orElseGet(() -> returned.subtract(originalPrincipal));
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
-        loanData.put("investedOn", toDate(i.getInvestmentDate()));
         loanData.put("loanTermRemaining", i.getRemainingMonths());
         loanData.put("amountRemaining", i.getRemainingPrincipal()
             .orElse(Money.ZERO)
@@ -138,7 +137,7 @@ final class Util {
             .getValue());
         loanData.put("penaltiesPaid", i.getPaidPenalty()
             .getValue());
-        loanData.put("monthsElapsed", getMonthsElapsed(i));
+        loanData.put("monthsElapsed", getMonthsElapsed(l));
         loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
         loanData.put("postponed", i.isInstalmentPostponement());
         return loanData;
@@ -213,8 +212,8 @@ final class Util {
             .add(i.getPaidPenalty());
     }
 
-    private static long getMonthsElapsed(final Investment i) {
-        return Period.between(i.getInvestmentDate()
+    private static long getMonthsElapsed(final Loan l) {
+        return Period.between(l.getDatePublished()
             .toLocalDate(),
                 DateUtil.localNow()
                     .toLocalDate())
