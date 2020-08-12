@@ -52,15 +52,11 @@ public final class SessionEvents {
     private final Map<Class, List<EventListenerSupplier>> suppliers = new ConcurrentHashMap<>(0);
     private final Set<EventFiringListener> debugListeners = new CopyOnWriteArraySet<>();
     private final SessionInfo sessionInfo;
-    private EventListener<? extends Event> injectedDebugListener;
+    private EventListener injectedDebugListener;
 
     private SessionEvents(final SessionInfo sessionInfo) {
         this.sessionInfo = sessionInfo;
         addListener(new LoggingEventFiringListener(sessionInfo));
-    }
-
-    public SessionInfo getSessionInfo() {
-        return sessionInfo;
     }
 
     static Collection<SessionEvents> all() { // defensive copy
@@ -89,7 +85,7 @@ public final class SessionEvents {
     /**
      * Takes a set of {@link Runnable}s and queues them to be fired on a background thread, in the guaranteed order of
      * appearance.
-     * 
+     *
      * @param futures Each item in the stream represents a singular event to be fired.
      * @return When complete, all listeners have been notified of all the events.
      */
@@ -98,6 +94,10 @@ public final class SessionEvents {
         final CompletableFuture[] results = futures.map(CompletableFuture::runAsync)
             .toArray(CompletableFuture[]::new);
         return GlobalEvents.merge(results);
+    }
+
+    public SessionInfo getSessionInfo() {
+        return sessionInfo;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -127,20 +127,22 @@ public final class SessionEvents {
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     <T extends Event> CompletableFuture fireAny(final LazyEvent<T> event) {
         // loan all listeners
         debugListeners.forEach(l -> l.requested(event));
-        final Class<T> eventType = event.getEventType();
-        final List<EventListenerSupplier<T>> s = suppliers.computeIfAbsent(eventType,
-                e -> retrieveListenerSuppliers(e));
+        final Stream<EventListener<T>> registered = getRegisteredEventListeners(event.getEventType());
         // send the event to all listeners, execute on the background
-        final Stream<EventListener> registered = s.stream()
+        final Stream<EventListener<T>> withInjected = injectedDebugListener == null ? registered
+                : Stream.concat(Stream.<EventListener<T>>of(injectedDebugListener), registered);
+        return runAsync(withInjected.map(l -> new EventTriggerRunnable(event, l)));
+    }
+
+    private <T extends Event> Stream<EventListener<T>> getRegisteredEventListeners(final Class<T> eventType) {
+        List<EventListenerSupplier<T>> registeredSuppliers = suppliers.computeIfAbsent(eventType,
+                e -> retrieveListenerSuppliers(e));
+        return registeredSuppliers.stream()
             .map(Supplier::get)
             .flatMap(Optional::stream);
-        final Stream<EventListener> withInjected = injectedDebugListener == null ? registered
-                : Stream.concat(Stream.of(injectedDebugListener), registered);
-        return runAsync(withInjected.map(l -> new EventTriggerRunnable(event, l)));
     }
 
     public boolean addListener(final EventFiringListener listener) {
@@ -169,6 +171,11 @@ public final class SessionEvents {
     @SuppressWarnings("unchecked")
     public CompletableFuture fire(final SessionEvent event) {
         return fire(EventFactory.async((Class<SessionEvent>) event.getClass(), () -> event));
+    }
+
+    public boolean isListenerRegistered(final Class<? extends Event> eventClass) {
+        return getRegisteredEventListeners(eventClass).findAny()
+            .isPresent();
     }
 
     private final class EventTriggerRunnable implements Runnable {
