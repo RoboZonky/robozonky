@@ -36,28 +36,31 @@ public interface EventFiringListener {
     /**
      * Called after {@link #requested(LazyEvent)} and before {@link #fired(Event, Class)}. The event was already
      * initialized and is about to be sent to the {@link EventListener}.
-     * 
+     *
+     * @param <T>      Generic type of the event class.
      * @param event    The event that was instantiated from the original {@link LazyEvent}.
-     * @param listener
+     * @param listener Type of the listener which failed.
      */
     <T extends Event> void ready(T event, Class<? extends EventListener<T>> listener);
 
     /**
      * Event was processed and delivered to the {@link EventListener}.
-     * 
+     *
+     * @param <T>      Generic type of the event class.
      * @param event    The event that was delivered. If null, there was no listener to deliver the event to, likely
      *                 notifications disabled.
-     * @param listener
+     * @param listener Type of the listener which failed.
      */
     <T extends Event> void fired(T event, Class<? extends EventListener<T>> listener);
 
     /**
      * Called whenever an exception is thrown during event processing.
-     * 
+     *
+     * @param <T>      Generic type of the event class.
      * @param event    Does not provide the {@link Event} instance directly since instantiating it may have been the
      *                 cause
      *                 of the failure.
-     * @param listener
+     * @param listener Type of the listener which failed.
      * @param ex       Cause of the failure.
      */
     <T extends Event> void failed(LazyEvent<? extends Event> event, Class<? extends EventListener<T>> listener,

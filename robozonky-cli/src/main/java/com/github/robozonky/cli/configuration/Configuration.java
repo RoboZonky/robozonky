@@ -23,8 +23,8 @@ public interface Configuration extends BiConsumer<Path, Path> {
 
     /**
      *
-     * @param distributionRoot
-     * @param installationRoot
+     * @param distributionRoot Path to the root of the distribution.
+     * @param installationRoot Path to the root of the installation.
      */
     @Override
     void accept(Path distributionRoot, Path installationRoot);

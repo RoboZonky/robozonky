@@ -35,7 +35,7 @@ public final class ParticipationDescriptor
 
     /**
      *
-     * @param participation
+     * @param participation Participation in question.
      * @param related       Provided as a Supplier in order to allow the calling code to retrieve the (likely remote)
      *                      entity on-demand.
      */
@@ -45,7 +45,7 @@ public final class ParticipationDescriptor
 
     /**
      *
-     * @param participation
+     * @param participation Participation in question.
      * @param related       Provided as a Supplier in order to allow the calling code to retrieve the (likely remote)
      *                      entity on-demand.
      * @param detail        Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely

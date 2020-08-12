@@ -26,14 +26,14 @@ import com.github.robozonky.api.notifications.EventListenerSupplier;
  * such as when additional remote information needs to be retrieved or calculations performed. We can first determine
  * whether someone is actually listening for the event first, and only then perform these heavy operations.
  * 
- * @param <T>
+ * @param <T> Type of the event being fired.
  */
 public interface LazyEvent<T extends Event> extends Supplier<T> {
 
     /**
      * Type of the event so that we can pre-scan all the {@link EventListenerSupplier}s.
      * 
-     * @return
+     * @return never null
      */
     Class<T> getEventType();
 

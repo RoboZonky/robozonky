@@ -100,6 +100,9 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
     /**
      * Requires {@link CharArrayAdapter} to work properly, otherwise the char[] is represented as a sequence of
      * character elements.
+     *
+     * @param token never null
+     * @return never null
      */
     public static String marshal(final ZonkyApiToken token) {
         try (final Jsonb jsonb = JsonbBuilder.create()) {

@@ -536,7 +536,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -545,6 +545,7 @@
             </goals>
             <configuration>
               <skip>${com.github.robozonky.distribution}</skip>
+              <failOnWarnings>true</failOnWarnings>
             </configuration>
           </execution>
         </executions>

@@ -80,16 +80,16 @@ public interface PowerTenant extends Tenant {
     /**
      * See {@link SessionEvents#fire(SessionEvent)} for the semantics of this method.
      * 
-     * @param event
-     * @return
+     * @param event Event to fire.
+     * @return Complete when fired.
      */
     CompletableFuture fire(SessionEvent event);
 
     /**
      * See {@link SessionEvents#fire(LazyEvent)} for the semantics of this method.
-     * 
-     * @param event
-     * @return
+     *
+     * @param event Event to fire.
+     * @return Complete when fired.
      */
     CompletableFuture fire(LazyEvent<? extends SessionEvent> event);
 }

@@ -62,11 +62,11 @@ public abstract class AbstractListener<T extends Event> implements EventListener
     }
 
     /**
-     * Override to run custom code after {@link #handle(Event, SessionInfo)} has finished processing. Always call
-     * {@link AbstractListener#finish(Event, SessionInfo)} in your override.
+     * Override to run custom code after {@link #handle(Event, SessionInfo)} has finished processing.
+     * Always call this method in your override.
      * 
-     * @param event
-     * @param sessionInfo
+     * @param event       Event in question.
+     * @param sessionInfo Session where the event is being fired.
      */
     protected void finish(final T event, final SessionInfo sessionInfo) {
         if (event instanceof DelinquencyBased) {

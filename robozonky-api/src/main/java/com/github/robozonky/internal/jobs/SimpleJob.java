@@ -29,7 +29,7 @@ public interface SimpleJob extends Job {
     /**
      * The task to run.
      * 
-     * @return
+     * @return never null
      */
     SimplePayload payload();
 }

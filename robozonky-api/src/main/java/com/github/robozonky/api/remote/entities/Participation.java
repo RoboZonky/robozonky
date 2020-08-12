@@ -54,9 +54,9 @@ public interface Participation {
     boolean isWillExceedLoanInvestmentLimit();
 
     /**
-     * Semantics is identical to {@link BaseLoan#isInsuranceActive()} ()}.
+     * Semantics is identical to {@link BaseLoan#isInsuranceActive()}.
      *
-     * @return
+     * @return See {@link BaseLoan#isInsuranceActive()}.
      */
     boolean isInsuranceActive();
 

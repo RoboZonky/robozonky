@@ -218,8 +218,8 @@ public final class Money implements Comparable<Money> {
     }
 
     /**
-     * @param o
-     * @return
+     * @param o Object to compare against.
+     * @return See {@link Comparable#compareTo(Object)}.
      * @throws IllegalArgumentException When the two non-zero instances don't share {@link #getCurrency()}.
      */
     @Override

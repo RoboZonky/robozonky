@@ -26,7 +26,7 @@ public interface Events {
     /**
      * Used to fire {@link GlobalEvent}s, will reach all {@link Tenant}s in the system.
      * 
-     * @return
+     * @return never null
      */
     static GlobalEvents global() {
         return GlobalEvents.get();
@@ -37,7 +37,7 @@ public interface Events {
      * {@link PowerTenant} to fire those.
      * 
      * @param tenant The {@link Tenant} to reach. If you don't have the instance, you have no business firing the event.
-     * @return
+     * @return never null, event manager for the given {@link Tenant}.
      */
     static SessionEvents forSession(final PowerTenant tenant) {
         return SessionEvents.forSession(tenant.getSessionInfo());

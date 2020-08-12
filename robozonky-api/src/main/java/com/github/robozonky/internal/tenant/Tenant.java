@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -65,7 +66,7 @@ public interface Tenant extends AutoCloseable {
      * the robot will have been operating over an inconsistent view of the data, where a sum of blocked amounts doesn't
      * fully match the available balance.
      * 
-     * @return
+     * @return never null
      */
     RemotePortfolio getPortfolio();
 
@@ -83,8 +84,8 @@ public interface Tenant extends AutoCloseable {
      * Retrieve a {@link LoanImpl} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getLoan(int)}.
      * 
-     * @param loanId
-     * @return
+     * @param loanId ID of the {@link Loan} in question.
+     * @return never null
      */
     default Loan getLoan(final int loanId) {
         return call(zonky -> zonky.getLoan(loanId));
@@ -94,8 +95,8 @@ public interface Tenant extends AutoCloseable {
      * Retrieve a {@link SellInfoImpl} from Zonky, possibly caching it in the process. If you don't wish to cache it,
      * simply use {@link #call(Function)} to get to {@link Zonky#getSellInfo(long)}.
      * 
-     * @param investmentId
-     * @return
+     * @param investmentId ID of the {@link Investment} in question.
+     * @return never null
      */
     default SellInfo getSellInfo(final long investmentId) {
         return call(zonky -> zonky.getSellInfo(investmentId));

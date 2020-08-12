@@ -40,7 +40,7 @@ public interface Investment extends BaseInvestment {
     /**
      * The original term.
      *
-     * @return
+     * @return 1+
      */
     int getLoanTermInMonth();
 
@@ -49,17 +49,16 @@ public interface Investment extends BaseInvestment {
      * May be less than {@link #getRemainingMonths()} in case of early payments.
      * May be missing in case of defaulted loans.
      *
-     * @return
+     * @return never null
      */
     OptionalInt getCurrentTerm();
 
     boolean isOnSmp();
 
     /**
-     * /**
      * How many monthly payments are now remaining. Also see {@link #getCurrentTerm()}.
      *
-     * @return
+     * @return 0+
      */
     int getRemainingMonths();
 
@@ -74,9 +73,9 @@ public interface Investment extends BaseInvestment {
     InsuranceStatus getInsuranceStatus();
 
     /**
-     * Semantics is identical to {@link BaseLoan#isInsuranceActive()} ()}.
+     * Semantics is identical to {@link BaseLoan#isInsuranceActive()}.
      *
-     * @return
+     * @return See {@link BaseLoan#isInsuranceActive()}.
      */
     boolean isInsuranceActive();
 

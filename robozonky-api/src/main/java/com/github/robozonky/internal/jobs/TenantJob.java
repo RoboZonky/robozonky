@@ -21,7 +21,7 @@ public interface TenantJob extends Job {
     /**
      * The task to run.
      * 
-     * @return
+     * @return never null
      */
     TenantPayload payload();
 }

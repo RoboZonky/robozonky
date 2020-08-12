@@ -74,7 +74,7 @@ public enum Region implements BaseEnum {
     /**
      * Purely for display purposes. It may seem unused from Java code, but may still be used from Freemarker templates.
      * 
-     * @return
+     * @return never null
      */
     public String getRichCode() {
         return richCode;

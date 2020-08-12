@@ -37,7 +37,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     /**
      *
-     * @param investment
+     * @param investment Investment in question.
      * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
      *                   remote) entity on-demand.
      */
@@ -47,7 +47,7 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     /**
      *
-     * @param investment
+     * @param investment Investment in question.
      * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
      *                   remote) entity on-demand.
      * @param sellInfo   Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely

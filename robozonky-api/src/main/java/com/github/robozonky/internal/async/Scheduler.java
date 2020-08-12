@@ -26,12 +26,12 @@ public interface Scheduler extends AutoCloseable {
 
     /**
      *
-     * @param toSchedule
-     * @param delayInBetween
-     * @param firstDelay
+     * @param toSchedule     Task to schedule.
+     * @param delayInBetween Delay between the first task's end and second task's start.
+     * @param firstDelay     The delay before the first instance of the task is scheduled.
      * @param timeout        Maximum run time for a single instance of the scheduled task. Only used when greater than
      *                       0.
-     * @return
+     * @return never null
      */
     TaskDescriptor submit(final Runnable toSchedule, final Duration delayInBetween, final Duration firstDelay,
             final Duration timeout);

@@ -40,20 +40,20 @@ public interface TransactionalPowerTenant extends TransactionalTenant,
 
     /**
      * Do not block on the return value of this method, unless some other thread is still able to call
-     * {@link #commit()}. Otherwise this is a self-inflicted. deadlock.
-     * 
-     * @param event
-     * @return
+     * {@link #commit()}. Otherwise this is a self-inflicted deadlock.
+     *
+     * @param event Event to fire.
+     * @return Complete when fired.
      */
     @Override
     CompletableFuture<?> fire(SessionEvent event);
 
     /**
      * Do not block on the return value of this method, unless some other thread is still able to call
-     * {@link #commit()}. Otherwise this is a self-inflicted. deadlock.
-     * 
-     * @param event
-     * @return
+     * {@link #commit()}. Otherwise this is a self-inflicted deadlock.
+     *
+     * @param event Event to fire.
+     * @return Complete when fired.
      */
     @Override
     CompletableFuture<?> fire(LazyEvent<? extends SessionEvent> event);

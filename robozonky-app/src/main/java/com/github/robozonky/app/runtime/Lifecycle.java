@@ -68,6 +68,8 @@ public class Lifecycle {
 
     /**
      * For testing purposes. PITest mutations would start these and not kill them, leading to stuck processes.
+     * 
+     * @return never null, registered shutdown hooks.
      */
     public static Collection<Thread> getShutdownHooks() {
         return HOOKS.getAndSet(initShutdownHooks());
@@ -109,7 +111,9 @@ public class Lifecycle {
     }
 
     /**
-     * Triggered by the deamon to make {@link #suspend()} unblock.
+     * Triggered by the daemon to make {@link #suspend()} unblock.
+     * 
+     * @param t Cause of the unblocking.
      */
     public void resumeToFail(final Throwable t) {
         final boolean failedAlready = failed.getAndSet(true);

@@ -58,7 +58,7 @@ public final class ReloadableBuilder<T> {
      * be no value. If not specified, the {@link Reloadable} will never reload, unless {@link Reloadable#clear()} is
      * called.
      * 
-     * @param duration
+     * @param duration Duration after which to reload.
      * @return This.
      */
     public ReloadableBuilder<T> reloadAfter(final Duration duration) {
@@ -69,11 +69,11 @@ public final class ReloadableBuilder<T> {
      * The same semantics as {@link #reloadAfter(Function)}, only the actual duration would be inferred from the value
      * of the {@link Reloadable} every time its new value is fetched.
      * 
-     * @param durationSupplier
+     * @param durationFunction Function returning the duration after which to reload.
      * @return This.
      */
-    public ReloadableBuilder<T> reloadAfter(final Function<T, Duration> durationSupplier) {
-        this.reloadAfter = durationSupplier;
+    public ReloadableBuilder<T> reloadAfter(final Function<T, Duration> durationFunction) {
+        this.reloadAfter = durationFunction;
         return this;
     }
 
@@ -93,7 +93,7 @@ public final class ReloadableBuilder<T> {
     /**
      * Add a listener to run every time a value changes.
      * 
-     * @param changeListener
+     * @param changeListener The instance to listen for changes.
      * @return This.
      */
     public ReloadableBuilder<T> addListener(final ReloadListener<T> changeListener) {
@@ -105,7 +105,7 @@ public final class ReloadableBuilder<T> {
      * When the operation is successfully executed without errors, the given finisher has to be executed as well. If it
      * throws an exception, the operation itself is considered failed.
      * 
-     * @param consumer
+     * @param consumer The finisher instance.
      * @return This.
      */
     public ReloadableBuilder<T> finishWith(final Consumer<T> consumer) {

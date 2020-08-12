@@ -45,7 +45,6 @@ public final class GlobalEvents {
         return CompletableFuture.allOf(runnables);
     }
 
-    @SuppressWarnings("rawtypes")
     public CompletableFuture fire(final LazyEvent<? extends GlobalEvent> event) {
         LOGGER.debug("Firing {} for all sessions.", event);
         final CompletableFuture[] futures = SessionEvents.all()
@@ -58,10 +57,9 @@ public final class GlobalEvents {
     /**
      * Transforms given {@link Event} into {@link LazyEvent} and delegates to {@link #fire(LazyEvent)}.
      * 
-     * @param event
-     * @return
+     * @param event Event to fire.
+     * @return never null, event fired when complete.
      */
-    @SuppressWarnings("unchecked")
     public CompletableFuture fire(final GlobalEvent event) {
         return fire(EventFactory.async((Class<GlobalEvent>) event.getClass(), () -> event));
     }

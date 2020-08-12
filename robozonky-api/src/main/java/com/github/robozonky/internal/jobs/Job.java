@@ -35,14 +35,14 @@ public interface Job {
     /**
      * How much time to leave between one task ending and the other starting.
      * 
-     * @return
+     * @return never null
      */
     Duration repeatEvery();
 
     /**
      * Longest possible time duration that the task will be allowed to run for.
      * 
-     * @return
+     * @return never null
      */
     default Duration killIn() {
         return Duration.ofMinutes(1);

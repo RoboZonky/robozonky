@@ -105,6 +105,8 @@ public class Zonky {
     }
 
     /**
+     * @param loan   Loan to invest in.
+     * @param amount How much CZK to invest.
      * @return Success or one of known investment failures.
      */
     public InvestmentResult invest(final Loan loan, final int amount) {

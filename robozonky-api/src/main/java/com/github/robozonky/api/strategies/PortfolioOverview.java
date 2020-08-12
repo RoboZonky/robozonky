@@ -69,7 +69,7 @@ public interface PortfolioOverview {
     /**
      * Retrieve annual rate of return of the entire portfolio as reported by Zonky.
      * 
-     * @return
+     * @return never null
      */
     Ratio getAnnualProfitability();
 
@@ -91,7 +91,7 @@ public interface PortfolioOverview {
      * Retrieve minimal annual rate of return of the entire portfolio, assuming Zonky rist cost model holds.
      * (See {@link Rating#getMinimalRevenueRate(Money)}.)
      * 
-     * @return
+     * @return never null
      */
     default Ratio getMinimalAnnualProfitability() {
         return getProfitability(r -> r.getMinimalRevenueRate(getInvested()));
@@ -101,7 +101,7 @@ public interface PortfolioOverview {
      * Retrieve maximal annual rate of return of the entire portfolio, assuming none of the loans are ever delinquent.
      * (See {@link Rating#getMaximalRevenueRate(Money)}.)
      * 
-     * @return
+     * @return never null
      */
     default Ratio getOptimalAnnualProfitability() {
         return getProfitability(r -> r.getMaximalRevenueRate(getInvested()));

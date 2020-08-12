@@ -28,9 +28,9 @@ public interface RemotePortfolio {
      * Adjust {@link #getTotal()} temporarily to reflect an operation performed by the robot that was not yet retrieved
      * from the remote API.
      * 
-     * @param loanId
-     * @param rating
-     * @param amount
+     * @param loanId ID of the loan.
+     * @param rating Rating of the loan.
+     * @param amount Amount of the charge.
      */
     void simulateCharge(final int loanId, final Rating rating, final Money amount);
 
@@ -39,7 +39,7 @@ public interface RemotePortfolio {
     /**
      * Takes {@link #getTotal()} and summarizes it.
      * 
-     * @return
+     * @return never null
      */
     PortfolioOverview getOverview();
 }

@@ -66,7 +66,8 @@ public final class RandomUtil extends Random {
 
     /**
      * Will call {@link Random#nextInt(int)} on the {@link Random} implementation currently used.
-     * 
+     *
+     * @param bound Maximum number to generate.
      * @return Return of the call.
      */
     public static int getNextInt(final int bound) {
