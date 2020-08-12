@@ -93,8 +93,6 @@ class InvestmentImplTest {
                     .isEqualTo(311149);
                 softly.assertThat(investment.getLoanName())
                     .isNotBlank();
-                softly.assertThat(investment.getInvestmentDate())
-                    .isNotNull();
                 softly.assertThat(investment.getAmount())
                     .isEqualTo(Money.from(200));
                 softly.assertThat(investment.getPurchasePrice())

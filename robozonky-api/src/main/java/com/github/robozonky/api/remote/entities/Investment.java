@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -67,11 +66,6 @@ public interface Investment extends BaseInvestment {
     String getLoanName();
 
     Optional<PaymentStatus> getPaymentStatus();
-
-    /**
-     * @return This appears to always be null, so we guess from other fields.
-     */
-    OffsetDateTime getInvestmentDate();
 
     Ratio getInterestRate();
 

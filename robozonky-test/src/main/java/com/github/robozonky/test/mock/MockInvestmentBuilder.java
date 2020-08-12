@@ -17,7 +17,6 @@
 package com.github.robozonky.test.mock;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -55,7 +54,6 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
             .set(InvestmentImpl::setPaidInterest, Money.from(BigDecimal.ZERO))
             .set(InvestmentImpl::setPaidPenalty, Money.from(BigDecimal.ZERO))
             .set(InvestmentImpl::setPaidPrincipal, Money.from(BigDecimal.ZERO))
-            .set(InvestmentImpl::setInvestmentDate, OffsetDateTime.now())
             .set(InvestmentImpl::setInsuranceActive, loan.isInsuranceActive());
     }
 
