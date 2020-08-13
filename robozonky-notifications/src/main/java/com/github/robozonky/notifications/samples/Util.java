@@ -93,7 +93,7 @@ final class Util {
         loan.setPurpose(randomize(Purpose.values()));
         loan.setRegion(randomize(Region.values()));
         // set basic financial properties
-        final Integer amount = (2 + RANDOM.nextInt(68) * 10_0000); // from 20 to 700_000
+        final int amount = (2 + RANDOM.nextInt(68)) * 10_000; // from 20k to 700k
         loan.setAmount(Money.from(amount));
         final int term = 6 + RANDOM.nextInt(76); // from 6 to 84
         loan.setTermInMonths(term);
