@@ -43,11 +43,13 @@ import com.github.robozonky.test.mock.MockReservationBuilder;
 
 class ReservationSessionTest extends AbstractZonkyLeveragingTest {
 
-    private static Reservation mockReservation() {
+    private static Reservation mockReservation(Loan loan) {
         final MyReservationImpl mr = mock(MyReservationImpl.class);
         when(mr.getReservedAmount()).thenReturn(Money.from(200));
         return new MockReservationBuilder()
             .set(ReservationImpl::setMyReservation, mr)
+            .set(ReservationImpl::setId, loan.getId())
+            .set(ReservationImpl::setRating, loan.getRating())
             .build();
     }
 
@@ -69,7 +71,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
-        final Reservation p = mockReservation();
+        final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
             .thenAnswer(i -> {
@@ -101,7 +103,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
-        final Reservation p = mockReservation();
+        final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
             .thenAnswer(i -> {
@@ -134,7 +136,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final int loanId = l.getId();
-        final Reservation p = mockReservation();
+        final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
             .thenAnswer(i -> {

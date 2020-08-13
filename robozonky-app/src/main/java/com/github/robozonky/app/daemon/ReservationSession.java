@@ -25,7 +25,6 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationCheck
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedReservation;
@@ -108,15 +107,17 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
                 .subtract(1));
             return false;
         }
-        final Loan l = recommendation.descriptor()
-            .related();
+        final Reservation reservation = recommendation.descriptor()
+            .item();
         result.add(recommendation.descriptor()
             .item());
         tenant.getPortfolio()
-            .simulateCharge(l.getId(), l.getRating(), recommendation.amount());
+            .simulateCharge(reservation.getId(), reservation.getRating(), recommendation.amount());
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
             .subtract(recommendation.amount()));
-        tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(l, recommendation.amount(),
+        tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(recommendation.descriptor()
+            .related(),
+                recommendation.amount(),
                 tenant.getPortfolio()
                     .getOverview())));
         return true;

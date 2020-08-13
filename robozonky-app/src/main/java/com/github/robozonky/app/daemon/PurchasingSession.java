@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -117,18 +116,19 @@ final class PurchasingSession extends
         }
         final Participation participation = recommendation.descriptor()
             .item();
-        final Loan l = recommendation.descriptor()
-            .related();
         final boolean succeeded = tenant.getSessionInfo()
             .isDryRun() || actualPurchase(participation);
         discard(recommendation.descriptor());
         if (succeeded) {
             result.add(participation);
             tenant.getPortfolio()
-                .simulateCharge(l.getId(), l.getRating(), recommendation.amount());
+                .simulateCharge(participation.getLoanId(), participation.getRating(), recommendation.amount());
             tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
                 .subtract(recommendation.amount()));
-            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation, l, recommendation.amount(),
+            tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation,
+                    recommendation.descriptor()
+                        .related(),
+                    recommendation.amount(),
                     tenant.getPortfolio()
                         .getOverview())));
         }
