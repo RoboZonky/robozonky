@@ -68,8 +68,7 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public Ratio getRevenueRate() {
-        return getLoan().getRevenueRate()
-            .orElseGet(this::estimateRevenueRate);
+        return estimateRevenueRate();
     }
 
     @Override

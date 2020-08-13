@@ -41,7 +41,7 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     protected Ratio estimateRevenueRate() { // Loans with ID < 400k are assumed to have the old pre-2019 fees.
-        LocalDateTime dateForFees = getLoanId() < 400_000 ? LocalDate.of(2019, 02, 28)
+        LocalDateTime dateForFees = getLoanId() < 400_000 ? LocalDate.of(2019, 2, 28)
             .atStartOfDay() : DateUtil.localNow();
         Instant feeInstant = dateForFees.toInstant(ZoneOffset.ofHours(1));
         return getRating().getMaximalRevenueRate(feeInstant, portfolioOverview.getInvested());
