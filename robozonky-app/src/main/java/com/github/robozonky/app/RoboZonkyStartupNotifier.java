@@ -22,6 +22,8 @@ import static java.lang.Runtime.getRuntime;
 import static java.lang.System.getProperty;
 import static java.lang.System.lineSeparator;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Optional;
@@ -29,7 +31,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -65,9 +66,9 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     }
 
     String readBanner(String version) {
-        try (var inputStream = App.class.getResourceAsStream("robozonky-banner.txt")) {
-            return IOUtils.readLines(inputStream, Defaults.CHARSET)
-                .stream()
+        var banner = "robozonky-banner.txt";
+        try (var reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(banner)))) {
+            return reader.lines()
                 .map(String::trim)
                 .map(s -> replaceVersionPlaceholder(s, version))
                 .collect(Collectors.joining(lineSeparator(), lineSeparator(), ""));
