@@ -40,7 +40,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -88,7 +87,6 @@ final class Util {
         final LoanImpl loan = new LoanImpl();
         loan.setId(100_000 + RANDOM.nextInt(900_000)); // six-digit number
         loan.setCountryOfOrigin(randomize(Country.values()));
-        loan.setCurrency(Defaults.CURRENCY);
         loan.setMainIncomeType(randomize(MainIncomeType.values()));
         loan.setPurpose(randomize(Purpose.values()));
         loan.setRegion(randomize(Region.values()));

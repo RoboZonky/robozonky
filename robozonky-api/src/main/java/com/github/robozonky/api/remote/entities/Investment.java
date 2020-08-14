@@ -16,8 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.OffsetDateTime;
-import java.util.Currency;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -31,17 +29,13 @@ import com.github.robozonky.api.remote.enums.Rating;
 
 public interface Investment {
 
-    Optional<OffsetDateTime> getTimeCreated();
-
-    InvestmentStatus getStatus();
+    long getId();
 
     int getLoanId();
 
-    Currency getCurrency();
-
-    long getId();
-
     Money getAmount();
+
+    InvestmentStatus getStatus();
 
     Rating getRating();
 

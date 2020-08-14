@@ -16,8 +16,6 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.Currency;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Country;
@@ -63,8 +61,6 @@ public interface Participation {
     LoanHealth getLoanHealthInfo();
 
     Country getCountryOfOrigin();
-
-    Currency getCurrency();
 
     Money getRemainingPrincipal();
 

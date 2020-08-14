@@ -16,10 +16,7 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import java.util.Currency;
 import java.util.StringJoiner;
-
-import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -32,7 +29,6 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.util.json.CurrencyAdapter;
 
 public class ParticipationImpl implements Participation {
 
@@ -52,8 +48,6 @@ public class ParticipationImpl implements Participation {
     protected boolean insuranceActive;
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-    @JsonbTypeAdapter(CurrencyAdapter.class)
-    protected Currency currency;
     protected Money remainingPrincipal;
     protected Money discount;
     protected Money price;
@@ -65,7 +59,6 @@ public class ParticipationImpl implements Participation {
     public ParticipationImpl(final Loan loan, final Money remainingPrincipal, final int remainingInstalmentCount) {
         this.loanId = loan.getId();
         this.countryOfOrigin = loan.getCountryOfOrigin();
-        this.currency = loan.getCurrency();
         this.incomeType = loan.getMainIncomeType();
         this.interestRate = loan.getInterestRate();
         this.loanName = loan.getName();
@@ -209,15 +202,6 @@ public class ParticipationImpl implements Participation {
     }
 
     @Override
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(final Currency currency) {
-        this.currency = currency;
-    }
-
-    @Override
     public Money getRemainingPrincipal() {
         return remainingPrincipal;
     }
@@ -250,7 +234,6 @@ public class ParticipationImpl implements Participation {
             .add("id=" + id)
             .add("loanId=" + loanId)
             .add("countryOfOrigin=" + countryOfOrigin)
-            .add("currency=" + currency)
             .add("discount='" + discount + "'")
             .add("incomeType=" + incomeType)
             .add("mainIncomeIndustry=" + mainIncomeIndustry)

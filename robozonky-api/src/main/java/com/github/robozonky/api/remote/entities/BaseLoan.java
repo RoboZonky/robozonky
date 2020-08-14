@@ -17,7 +17,6 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
-import java.util.Currency;
 import java.util.Optional;
 
 import com.github.robozonky.api.Money;
@@ -32,8 +31,6 @@ import com.github.robozonky.api.remote.enums.Region;
 public interface BaseLoan {
 
     Country getCountryOfOrigin();
-
-    Currency getCurrency();
 
     MainIncomeType getMainIncomeType();
 

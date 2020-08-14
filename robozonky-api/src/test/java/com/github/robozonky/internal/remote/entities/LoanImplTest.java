@@ -74,8 +74,6 @@ class LoanImplTest {
                     .isEqualTo(Money.from(615));
                 softly.assertThat(loan.getRating())
                     .isEqualTo(Rating.AAAA);
-                softly.assertThat(loan.getCurrency())
-                    .isEqualTo(Defaults.CURRENCY);
                 softly.assertThat(loan.getCountryOfOrigin())
                     .isEqualTo(Defaults.COUNTRY_OF_ORIGIN);
                 softly.assertThat(loan.getRemainingInvestment())

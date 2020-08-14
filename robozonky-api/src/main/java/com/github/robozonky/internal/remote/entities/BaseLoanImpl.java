@@ -17,11 +17,8 @@
 package com.github.robozonky.internal.remote.entities;
 
 import java.time.OffsetDateTime;
-import java.util.Currency;
 import java.util.Optional;
 import java.util.StringJoiner;
-
-import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -33,7 +30,6 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.util.json.CurrencyAdapter;
 
 public abstract class BaseLoanImpl implements BaseLoan {
 
@@ -56,8 +52,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
     protected String datePublished;
 
     protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-    @JsonbTypeAdapter(CurrencyAdapter.class)
-    protected Currency currency = Defaults.CURRENCY;
 
     protected Money amount;
     protected Money remainingInvestment;
@@ -74,15 +68,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
 
     public void setCountryOfOrigin(final Country countryOfOrigin) {
         this.countryOfOrigin = countryOfOrigin;
-    }
-
-    @Override
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(final Currency currency) {
-        this.currency = currency;
     }
 
     @Override
@@ -278,7 +263,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
             .add("annuity='" + annuity + "'")
             .add("annuityWithInsurance='" + annuityWithInsurance + "'")
             .add("countryOfOrigin=" + countryOfOrigin)
-            .add("currency=" + currency)
             .add("datePublished='" + datePublished + "'")
             .add("insuranceActive=" + insuranceActive)
             .add("interestRate=" + interestRate)

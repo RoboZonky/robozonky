@@ -28,11 +28,17 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
+import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
+public class InvestmentImpl implements Investment {
+
+    private long id;
+    private int loanId;
+    private Money amount;
+    private InvestmentStatus status;
 
     @JsonbProperty(nillable = true)
     private PaymentStatus paymentStatus;
@@ -83,7 +89,9 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     public InvestmentImpl(final Loan loan, final Money amount) {
-        super(loan, amount);
+        this.loanId = loan.getId();
+        this.amount = amount;
+        this.status = InvestmentStatus.ACTIVE;
         this.rating = loan.getRating();
         this.interestRate = rating.getInterestRate();
         this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
@@ -95,8 +103,48 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
     }
 
     @Override
+    public InvestmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(final InvestmentStatus status) {
+        this.status = status;
+    }
+
+    @Override
+    public int getLoanId() {
+        return loanId;
+    }
+
+    public void setLoanId(final int loanId) {
+        this.loanId = loanId;
+    }
+
+    @Override
+    public long getId() {
+        return id;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
+    }
+
+    @Override
+    public Money getAmount() {
+        return amount;
+    }
+
+    public void setAmount(final Money amount) {
+        this.amount = amount;
+    }
+
+    @Override
     public Rating getRating() {
         return rating;
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
     }
 
     @Override
@@ -104,9 +152,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return Optional.ofNullable(loanHealthInfo);
     }
 
+    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
+        this.loanHealthInfo = loanHealthInfo;
+    }
+
     @Override
     public OptionalInt getLegalDpd() {
         return legalDpd == null ? OptionalInt.empty() : OptionalInt.of(legalDpd);
+    }
+
+    public void setLegalDpd(final Integer legalDpd) {
+        this.legalDpd = legalDpd;
     }
 
     @Override
@@ -114,9 +170,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return loanTermInMonth;
     }
 
+    public void setLoanTermInMonth(final int loanTermInMonth) {
+        this.loanTermInMonth = loanTermInMonth;
+    }
+
     @Override
     public OptionalInt getCurrentTerm() {
         return currentTerm == null ? OptionalInt.empty() : OptionalInt.of(currentTerm);
+    }
+
+    public void setCurrentTerm(final Integer currentTerm) {
+        this.currentTerm = currentTerm;
     }
 
     @Override
@@ -124,9 +188,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return onSmp;
     }
 
+    public void setOnSmp(final boolean onSmp) {
+        this.onSmp = onSmp;
+    }
+
     @Override
     public int getRemainingMonths() {
         return remainingMonths;
+    }
+
+    public void setRemainingMonths(final int remainingMonths) {
+        this.remainingMonths = remainingMonths;
     }
 
     @Override
@@ -134,9 +206,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return loanName;
     }
 
+    public void setLoanName(final String loanName) {
+        this.loanName = loanName;
+    }
+
     @Override
     public Optional<PaymentStatus> getPaymentStatus() {
         return Optional.ofNullable(paymentStatus);
+    }
+
+    public void setPaymentStatus(final PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     @Override
@@ -144,9 +224,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return interestRate;
     }
 
+    public void setInterestRate(final Ratio interestRate) {
+        this.interestRate = interestRate;
+    }
+
     @Override
     public Optional<Ratio> getRevenueRate() {
         return Optional.ofNullable(revenueRate);
+    }
+
+    public void setRevenueRate(final Ratio revenueRate) {
+        this.revenueRate = revenueRate;
     }
 
     @Override
@@ -154,9 +242,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return insuranceStatus;
     }
 
+    public void setInsuranceStatus(final InsuranceStatus insuranceStatus) {
+        this.insuranceStatus = insuranceStatus;
+    }
+
     @Override
     public boolean isInsuranceActive() {
         return insuranceActive;
+    }
+
+    public void setInsuranceActive(final boolean insuranceActive) {
+        this.insuranceActive = insuranceActive;
     }
 
     @Override
@@ -164,9 +260,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return instalmentPostponement;
     }
 
+    public void setInstalmentPostponement(final boolean instalmentPostponement) {
+        this.instalmentPostponement = instalmentPostponement;
+    }
+
     @Override
     public Money getLoanAnnuity() {
         return loanAnnuity;
+    }
+
+    public void setLoanAnnuity(final Money loanAnnuity) {
+        this.loanAnnuity = loanAnnuity;
     }
 
     @Override
@@ -174,9 +278,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return loanAmount;
     }
 
+    public void setLoanAmount(final Money loanAmount) {
+        this.loanAmount = loanAmount;
+    }
+
     @Override
     public Money getPurchasePrice() {
         return purchasePrice;
+    }
+
+    public void setPurchasePrice(final Money purchasePrice) {
+        this.purchasePrice = purchasePrice;
     }
 
     @Override
@@ -184,9 +296,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return paid;
     }
 
+    public void setPaid(final Money paid) {
+        this.paid = paid;
+    }
+
     @Override
     public Money getToPay() {
         return toPay;
+    }
+
+    public void setToPay(final Money toPay) {
+        this.toPay = toPay;
     }
 
     @Override
@@ -194,9 +314,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return amountDue;
     }
 
+    public void setAmountDue(final Money amountDue) {
+        this.amountDue = amountDue;
+    }
+
     @Override
     public Money getPaidInterest() {
         return paidInterest;
+    }
+
+    public void setPaidInterest(final Money paidInterest) {
+        this.paidInterest = paidInterest;
     }
 
     @Override
@@ -204,9 +332,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return dueInterest;
     }
 
+    public void setDueInterest(final Money dueInterest) {
+        this.dueInterest = dueInterest;
+    }
+
     @Override
     public Money getPaidPrincipal() {
         return paidPrincipal;
+    }
+
+    public void setPaidPrincipal(final Money paidPrincipal) {
+        this.paidPrincipal = paidPrincipal;
     }
 
     @Override
@@ -214,9 +350,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return duePrincipal;
     }
 
+    public void setDuePrincipal(final Money duePrincipal) {
+        this.duePrincipal = duePrincipal;
+    }
+
     @Override
     public Money getExpectedInterest() {
         return expectedInterest;
+    }
+
+    public void setExpectedInterest(final Money expectedInterest) {
+        this.expectedInterest = expectedInterest;
     }
 
     @Override
@@ -224,9 +368,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return Optional.ofNullable(remainingPrincipal);
     }
 
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
     @Override
     public Optional<Money> getSmpSoldFor() {
         return Optional.ofNullable(smpSoldFor);
+    }
+
+    public void setSmpSoldFor(final Money smpSoldFor) {
+        this.smpSoldFor = smpSoldFor;
     }
 
     @Override
@@ -234,9 +386,17 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return paidPenalty;
     }
 
+    public void setPaidPenalty(final Money paidPenalty) {
+        this.paidPenalty = paidPenalty;
+    }
+
     @Override
     public Optional<Money> getSmpFee() {
         return Optional.ofNullable(smpFee);
+    }
+
+    public void setSmpFee(final Money smpFee) {
+        this.smpFee = smpFee;
     }
 
     @Override
@@ -244,160 +404,47 @@ public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
         return Optional.ofNullable(smpPrice);
     }
 
-    public void setPaymentStatus(final PaymentStatus paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
-        this.loanHealthInfo = loanHealthInfo;
-    }
-
-    public void setOnSmp(final boolean onSmp) {
-        this.onSmp = onSmp;
-    }
-
-    public void setInsuranceActive(final boolean insuranceActive) {
-        this.insuranceActive = insuranceActive;
-    }
-
-    public void setInstalmentPostponement(final boolean instalmentPostponement) {
-        this.instalmentPostponement = instalmentPostponement;
-    }
-
-    public void setLegalDpd(final Integer legalDpd) {
-        this.legalDpd = legalDpd;
-    }
-
-    public void setLoanTermInMonth(final int loanTermInMonth) {
-        this.loanTermInMonth = loanTermInMonth;
-    }
-
-    public void setCurrentTerm(final Integer currentTerm) {
-        this.currentTerm = currentTerm;
-    }
-
-    public void setRemainingMonths(final int remainingMonths) {
-        this.remainingMonths = remainingMonths;
-    }
-
-    public void setLoanName(final String loanName) {
-        this.loanName = loanName;
-    }
-
-    public void setInsuranceStatus(final InsuranceStatus insuranceStatus) {
-        this.insuranceStatus = insuranceStatus;
-    }
-
-    public void setInterestRate(final Ratio interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public void setRevenueRate(final Ratio revenueRate) {
-        this.revenueRate = revenueRate;
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
-    public void setLoanAnnuity(final Money loanAnnuity) {
-        this.loanAnnuity = loanAnnuity;
-    }
-
-    public void setLoanAmount(final Money loanAmount) {
-        this.loanAmount = loanAmount;
-    }
-
-    public void setPaid(final Money paid) {
-        this.paid = paid;
-    }
-
-    public void setToPay(final Money toPay) {
-        this.toPay = toPay;
-    }
-
-    public void setAmountDue(final Money amountDue) {
-        this.amountDue = amountDue;
-    }
-
-    public void setPaidInterest(final Money paidInterest) {
-        this.paidInterest = paidInterest;
-    }
-
-    public void setDueInterest(final Money dueInterest) {
-        this.dueInterest = dueInterest;
-    }
-
-    public void setPaidPrincipal(final Money paidPrincipal) {
-        this.paidPrincipal = paidPrincipal;
-    }
-
-    public void setDuePrincipal(final Money duePrincipal) {
-        this.duePrincipal = duePrincipal;
-    }
-
-    public void setExpectedInterest(final Money expectedInterest) {
-        this.expectedInterest = expectedInterest;
-    }
-
-    public void setPurchasePrice(final Money purchasePrice) {
-        this.purchasePrice = purchasePrice;
-    }
-
-    public void setRemainingPrincipal(final Money remainingPrincipal) {
-        this.remainingPrincipal = remainingPrincipal;
-    }
-
     public void setSmpPrice(final Money smpPrice) {
         this.smpPrice = smpPrice;
-    }
-
-    public void setSmpSoldFor(final Money smpSoldFor) {
-        this.smpSoldFor = smpSoldFor;
-    }
-
-    public void setSmpFee(final Money smpFee) {
-        this.smpFee = smpFee;
-    }
-
-    public void setPaidPenalty(final Money paidPenalty) {
-        this.paidPenalty = paidPenalty;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", InvestmentImpl.class.getSimpleName() + "[", "]")
-            .add("super=" + super.toString())
-            .add("amountDue='" + amountDue + "'")
+            .add("id=" + id)
+            .add("amount=" + amount)
+            .add("amountDue=" + amountDue)
             .add("currentTerm=" + currentTerm)
-            .add("dueInterest='" + dueInterest + "'")
-            .add("duePrincipal='" + duePrincipal + "'")
-            .add("expectedInterest='" + expectedInterest + "'")
+            .add("dueInterest=" + dueInterest)
+            .add("duePrincipal=" + duePrincipal)
+            .add("expectedInterest=" + expectedInterest)
             .add("instalmentPostponement=" + instalmentPostponement)
             .add("insuranceActive=" + insuranceActive)
             .add("insuranceStatus=" + insuranceStatus)
             .add("interestRate=" + interestRate)
             .add("legalDpd=" + legalDpd)
-            .add("loanAmount='" + loanAmount + "'")
-            .add("loanAnnuity='" + loanAnnuity + "'")
+            .add("loanAmount=" + loanAmount)
+            .add("loanAnnuity=" + loanAnnuity)
             .add("loanHealthInfo=" + loanHealthInfo)
+            .add("loanId=" + loanId)
             .add("loanName='" + loanName + "'")
             .add("loanTermInMonth=" + loanTermInMonth)
             .add("onSmp=" + onSmp)
-            .add("paid='" + paid + "'")
-            .add("paidInterest='" + paidInterest + "'")
-            .add("paidPenalty='" + paidPenalty + "'")
-            .add("paidPrincipal='" + paidPrincipal + "'")
+            .add("paid=" + paid)
+            .add("paidInterest=" + paidInterest)
+            .add("paidPenalty=" + paidPenalty)
+            .add("paidPrincipal=" + paidPrincipal)
             .add("paymentStatus=" + paymentStatus)
-            .add("purchasePrice='" + purchasePrice + "'")
+            .add("purchasePrice=" + purchasePrice)
             .add("rating=" + rating)
             .add("remainingMonths=" + remainingMonths)
-            .add("remainingPrincipal='" + remainingPrincipal + "'")
+            .add("remainingPrincipal=" + remainingPrincipal)
             .add("revenueRate=" + revenueRate)
-            .add("smpFee='" + smpFee + "'")
-            .add("smpPrice='" + smpPrice + "'")
-            .add("smpSoldFor='" + smpSoldFor + "'")
-            .add("toPay='" + toPay + "'")
+            .add("smpFee=" + smpFee)
+            .add("smpPrice=" + smpPrice)
+            .add("smpSoldFor=" + smpSoldFor)
+            .add("status=" + status)
+            .add("toPay=" + toPay)
             .toString();
     }
 }

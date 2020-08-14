@@ -43,7 +43,6 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
             .set(InvestmentImpl::setInterestRate, loan.getInterestRate())
             .set(InvestmentImpl::setRevenueRate, loan.getRevenueRate()
                 .orElse(null))
-            .set(InvestmentImpl::setCurrency, loan.getCurrency())
             .set(InvestmentImpl::setAmount, Money.from(invested))
             .set(InvestmentImpl::setLoanAnnuity, loan.getAnnuity())
             .set(InvestmentImpl::setLoanAmount, loan.getAmount())

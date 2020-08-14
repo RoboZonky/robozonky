@@ -66,8 +66,6 @@ class ZonkyTest {
         final InvestmentImpl i = mock(InvestmentImpl.class);
         doReturn(loan.getId()).when(i)
             .getLoanId();
-        doReturn(loan.getCurrency()).when(i)
-            .getCurrency();
         when(i.getAmount()).thenReturn(Money.from(amount));
         return i;
     }
