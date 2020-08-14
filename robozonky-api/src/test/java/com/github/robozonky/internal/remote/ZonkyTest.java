@@ -64,8 +64,8 @@ class ZonkyTest {
 
     private static InvestmentImpl mockInvestment(final Loan loan, final int amount) {
         final InvestmentImpl i = mock(InvestmentImpl.class);
-        doReturn(loan.getId()).when(i)
-            .getLoanId();
+        ((Investment) doReturn(loan.getId()).when(i)).getLoan()
+            .getId();
         when(i.getAmount()).thenReturn(Money.from(amount));
         return i;
     }
@@ -184,8 +184,11 @@ class ZonkyTest {
         when(provider.obtainPaginated(eq(PortfolioApi.class), any(), any())).thenReturn(api);
         final Zonky z = mockZonky(provider);
         // start test
-        assertThat(z.getInvestmentByLoanId(i1.getLoanId()))
-            .hasValueSatisfying(i -> assertThat(i.getLoanId()).isEqualTo(i1.getLoanId()));
+        assertThat(z.getInvestmentByLoanId(i1.getLoan()
+            .getId()))
+                .hasValueSatisfying(i -> assertThat(i.getLoan()
+                    .getId()).isEqualTo(i1.getLoan()
+                        .getId()));
 
     }
 

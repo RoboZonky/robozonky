@@ -67,7 +67,8 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         Map<Integer, Tuple2<Rating, Money>> result = RemoteData.getAmountsBlocked(tenant);
         Assertions.assertThat(result)
-            .containsOnly(Map.entry(i.getLoanId(), Tuple.of(Rating.D, Money.from(10))));
+            .containsOnly(Map.entry(i.getLoan()
+                .getId(), Tuple.of(Rating.D, Money.from(10))));
     }
 
 }

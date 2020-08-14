@@ -127,7 +127,8 @@ enum Category {
             .toLocalDate()
             .minusDays(investment.getLegalDpd()
                 .orElse(0));
-        final int loanId = investment.getLoanId();
+        final int loanId = investment.getLoan()
+            .getId();
         final Loan loan = tenant.getLoan(loanId);
         final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since,
                 () -> tenant.getSellInfo(investment.getId()));

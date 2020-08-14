@@ -122,7 +122,8 @@ public class Zonky {
     }
 
     public void cancel(final Investment investment) {
-        LOGGER.debug("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
+        LOGGER.debug("Cancelling offer to sell investment in loan #{}.", investment.getLoan()
+            .getId());
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
@@ -138,7 +139,8 @@ public class Zonky {
     }
 
     private void sell(final Investment investment, final SellRequest request) {
-        LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoanId(), request);
+        LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoan()
+            .getId(), request);
         controlApi.run(api -> api.offer(request));
     }
 

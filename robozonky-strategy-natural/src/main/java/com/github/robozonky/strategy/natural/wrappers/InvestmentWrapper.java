@@ -51,7 +51,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public long getLoanId() {
-        return investment.getLoanId();
+        return investment.getLoan()
+            .getId();
     }
 
     @Override
@@ -206,6 +207,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public String toString() {
-        return "Wrapper for loan #" + investment.getLoanId() + ", investment #" + getId();
+        return "Wrapper for loan #" + investment.getLoan()
+            .getId() + ", investment #" + getId();
     }
 }

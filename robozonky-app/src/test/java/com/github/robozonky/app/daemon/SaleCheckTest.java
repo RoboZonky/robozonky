@@ -70,12 +70,18 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
 
         @BeforeEach
         void markInvestmentsAsOffered() {
-            when(zonky.getInvestmentByLoanId(eq(soldEarlier.getLoanId()))).thenReturn(Optional.of(soldEarlier));
-            cache.markAsOffered(soldEarlier.getLoanId());
-            when(zonky.getInvestmentByLoanId(eq(soldNow.getLoanId()))).thenReturn(Optional.of(soldNow));
-            cache.markAsOffered(soldNow.getLoanId());
-            when(zonky.getInvestmentByLoanId(eq(onSmp.getLoanId()))).thenReturn(Optional.of(onSmp));
-            cache.markAsOffered(onSmp.getLoanId());
+            when(zonky.getInvestmentByLoanId(eq(soldEarlier.getLoan()
+                .getId()))).thenReturn(Optional.of(soldEarlier));
+            cache.markAsOffered(soldEarlier.getLoan()
+                .getId());
+            when(zonky.getInvestmentByLoanId(eq(soldNow.getLoan()
+                .getId()))).thenReturn(Optional.of(soldNow));
+            cache.markAsOffered(soldNow.getLoan()
+                .getId());
+            when(zonky.getInvestmentByLoanId(eq(onSmp.getLoan()
+                .getId()))).thenReturn(Optional.of(onSmp));
+            cache.markAsOffered(onSmp.getLoan()
+                .getId());
             cache.markAsOffered(4); // non-existent
         }
 
@@ -84,13 +90,17 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
             sut.accept(tenant);
             assertSoftly(softly -> {
                 // "regular" not sold and thus not offered; "sold" was sold; "4" invalid and thus no longer offered
-                assertThat(cache.getOffered()).containsOnly(onSmp.getLoanId());
+                assertThat(cache.getOffered()).containsOnly(onSmp.getLoan()
+                    .getId());
                 // this was the only one sold during this session
-                assertThat(cache.wasOnceSold(soldNow.getLoanId())).isTrue();
+                assertThat(cache.wasOnceSold(soldNow.getLoan()
+                    .getId())).isTrue();
                 // this was offered, but not marked as sold == sold in some previous session
-                assertThat(cache.wasOnceSold(soldEarlier.getLoanId())).isFalse();
+                assertThat(cache.wasOnceSold(soldEarlier.getLoan()
+                    .getId())).isFalse();
                 // this is still on the marketplace, offered to be sold
-                assertThat(cache.wasOnceSold(onSmp.getLoanId())).isFalse();
+                assertThat(cache.wasOnceSold(onSmp.getLoan()
+                    .getId())).isFalse();
             });
             final List<Event> events = getEventsRequested();
             assertThat(events)

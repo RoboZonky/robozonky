@@ -55,7 +55,8 @@ final class Selling implements TenantPayload {
             final SoldParticipationCache sold) {
         final InvestmentDescriptor d = r.descriptor();
         final Investment i = d.item();
-        final int loanId = i.getLoanId();
+        final int loanId = i.getLoan()
+            .getId();
         try {
             final boolean isRealRun = !tenant.getSessionInfo()
                 .isDryRun();
@@ -88,11 +89,14 @@ final class Selling implements TenantPayload {
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
             .parallel() // this list is potentially very long, and investment pages take long to load; speed this up
             .filter(i -> sold.getOffered()
-                .noneMatch(id -> id == i.getLoanId())) // to enable dry run
-            .filter(i -> !sold.wasOnceSold(i.getLoanId()))
+                .noneMatch(id -> id == i.getLoan()
+                    .getId())) // to enable dry run
+            .filter(i -> !sold.wasOnceSold(i.getLoan()
+                .getId()))
             .map(i -> i.getLoanHealthInfo()
                 .map(healthInfo -> {
-                    Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoanId());
+                    Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()
+                        .getId());
                     if (healthInfo == LoanHealth.HEALTHY) {
                         return new InvestmentDescriptor(i, loanSupplier);
                     } else {

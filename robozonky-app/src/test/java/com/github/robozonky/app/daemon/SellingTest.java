@@ -141,7 +141,9 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(2))
                 .isInstanceOf(SellingCompletedEvent.class);
         });
-        verify(zonky, times(1)).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+        verify(zonky, times(1)).sell(argThat(inv -> i.getLoan()
+            .getId() == inv.getLoan()
+                .getId()));
     }
 
     private void saleMade(final boolean isDryRun, final boolean healthy) {
@@ -171,21 +173,37 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         });
         final VerificationMode m = isDryRun ? never() : times(1);
         if (healthy) {
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+            verify(zonky, m).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()));
+            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()), eq(sellInfo));
         } else {
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()));
+            verify(zonky, m).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()), eq(sellInfo));
         }
         // try to sell the same thing again, make sure it doesn't happen
         readPreexistingEvents();
         s.accept(tenant);
         if (healthy) {
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+            verify(zonky, m).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()));
+            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()), eq(sellInfo));
         } else {
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
+            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()));
+            verify(zonky, m).sell(argThat(inv -> i.getLoan()
+                .getId() == inv.getLoan()
+                    .getId()), eq(sellInfo));
         }
     }
 

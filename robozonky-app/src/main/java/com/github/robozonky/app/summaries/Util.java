@@ -59,7 +59,9 @@ final class Util {
                             .subtract(i.getPaidPenalty())
                             .max(remaining.getZero());
                         LOGGER.debug("Delinquent: {} in loan #{}, investment #{}.",
-                                principalNotYetReturned, i.getLoanId(), i.getId());
+                                principalNotYetReturned, i.getLoan()
+                                    .getId(),
+                                i.getId());
                         return principalNotYetReturned;
                     }, ADDING_REDUCTION)));
     }

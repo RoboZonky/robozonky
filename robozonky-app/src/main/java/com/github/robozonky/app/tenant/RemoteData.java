@@ -62,7 +62,8 @@ final class RemoteData {
                 .toOffsetDateTime());
         return tenant.call(zonky -> zonky.getInvestments(select))
             .peek(investment -> LOGGER.debug("Found: {}.", investment))
-            .collect(Collectors.toMap(i -> i.getLoanId(), i -> Tuple.of(i.getRating(), i.getAmount())));
+            .collect(Collectors.toMap(i -> i.getLoan()
+                .getId(), i -> Tuple.of(i.getRating(), i.getAmount())));
     }
 
     public OffsetDateTime getRetrievedOn() {

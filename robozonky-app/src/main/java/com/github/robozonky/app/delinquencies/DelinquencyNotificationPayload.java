@@ -81,7 +81,8 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         switch (status) {
             case WRITTEN_OFF: // investment is lost for good
                 tenant.fire(loanLostLazy(() -> {
-                    final Loan loan = tenant.getLoan(investment.getLoanId());
+                    final Loan loan = tenant.getLoan(investment.getLoan()
+                        .getId());
                     return loanLost(investment, loan);
                 }));
                 return;
@@ -91,7 +92,8 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 return;
             default:
                 tenant.fire(loanNoLongerDelinquentLazy(() -> {
-                    final Loan loan = tenant.getLoan(investment.getLoanId());
+                    final Loan loan = tenant.getLoan(investment.getLoan()
+                        .getId());
                     return loanNoLongerDelinquent(investment, loan, () -> tenant.getSellInfo(investment.getId()));
                 }));
         }

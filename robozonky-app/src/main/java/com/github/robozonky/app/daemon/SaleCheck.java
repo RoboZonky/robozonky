@@ -64,7 +64,8 @@ final class SaleCheck implements TenantPayload {
             .mapToObj(id -> retrieveInvestmentIfSold(cache, tenant, id))
             .flatMap(Optional::stream)
             .forEach(sold -> {
-                final int loanId = sold.getLoanId();
+                final int loanId = sold.getLoan()
+                    .getId();
                 cache.markAsSold(loanId);
                 ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
                     final Loan l = tenant.getLoan(loanId);
