@@ -18,8 +18,10 @@ package com.github.robozonky.internal.remote.entities;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -36,11 +38,13 @@ import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Label;
 import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
 
 public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     private int id;
     private int activeLoanOrdinal;
+    private Rating rating;
     private String title;
     private String story;
     private Money annuity;
@@ -94,6 +98,21 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     public void setActiveLoanOrdinal(final int activeLoanOrdinal) {
         this.activeLoanOrdinal = activeLoanOrdinal;
+    }
+
+    @Override
+    public Rating getRating() { // TODO try to convince Zonky to make this available on the API.
+        if (rating != null) {
+            return rating;
+        }
+        return Arrays.stream(Rating.values())
+            .filter(rating -> Objects.equals(rating.getInterestRate(), getInterestRate()))
+            .findAny()
+            .orElseThrow(() -> new IllegalStateException("Unknown interest rate: " + getInterestRate()));
+    }
+
+    public void setRating(final Rating rating) {
+        this.rating = rating;
     }
 
     @Override
@@ -201,6 +220,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     public String toString() {
         return new StringJoiner(", ", InvestmentLoanDataImpl.class.getSimpleName() + "[", "]")
             .add("id=" + id)
+            .add("rating=" + rating)
             .add("annuity=" + annuity)
             .add("interestRate=" + interestRate)
             .add("revenueRate=" + revenueRate)

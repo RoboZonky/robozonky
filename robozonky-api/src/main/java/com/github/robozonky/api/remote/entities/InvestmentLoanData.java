@@ -24,12 +24,15 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Label;
 import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
 
 public interface InvestmentLoanData {
 
     int getId();
 
     int getActiveLoanOrdinal();
+
+    Rating getRating();
 
     String getTitle();
 

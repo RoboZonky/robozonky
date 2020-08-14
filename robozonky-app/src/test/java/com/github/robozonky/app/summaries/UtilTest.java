@@ -71,7 +71,9 @@ class UtilTest extends AbstractZonkyLeveragingTest {
             .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
             .build();
         final Statistics stats = mock(StatisticsImpl.class);
-        final RiskPortfolio r = new RiskPortfolioImpl(i.getRating(), Money.ZERO, Money.ZERO, i.getRemainingPrincipal()
+        final RiskPortfolio r = new RiskPortfolioImpl(i.getLoan()
+            .getRating(), Money.ZERO, Money.ZERO,
+                i.getRemainingPrincipal()
             .orElseThrow());
         when(stats.getRiskPortfolio()).thenReturn(Collections.singletonList(r));
         final Zonky zonky = harmlessZonky();

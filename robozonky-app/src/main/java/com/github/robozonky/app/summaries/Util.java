@@ -50,7 +50,8 @@ final class Util {
     static Map<Rating, Money> getAmountsAtRisk(final Tenant tenant) {
         return tenant.call(Zonky::getDelinquentInvestments)
             .parallel() // possibly many pages' worth of results; fetch in parallel
-            .collect(groupingBy(Investment::getRating,
+            .collect(groupingBy(investment -> investment.getLoan()
+                .getRating(),
                     () -> new EnumMap<>(Rating.class),
                     mapping(i -> {
                         final Money remaining = i.getRemainingPrincipal()
@@ -86,7 +87,8 @@ final class Util {
                     .orElseThrow(); // Zonky must send the information.
                 switch (healthInfo) {
                     case HEALTHY:
-                        return Tuple.of(investment.getRating(),
+                        return Tuple.of(investment.getLoan()
+                            .getRating(),
                                 investment.getRemainingPrincipal()
                                     .orElse(Money.ZERO),
                                 investment.getSmpFee()
@@ -94,7 +96,9 @@ final class Util {
                     case HISTORICALLY_IN_DUE:
                     case CURRENTLY_IN_DUE:
                         var sellInfo = tenant.getSellInfo(investment.getId());
-                        return Tuple.of(investment.getRating(), sellInfo.getPriceInfo()
+                        return Tuple.of(investment.getLoan()
+                            .getRating(),
+                                sellInfo.getPriceInfo()
                             .getSellPrice(),
                                 sellInfo.getPriceInfo()
                                     .getFee()

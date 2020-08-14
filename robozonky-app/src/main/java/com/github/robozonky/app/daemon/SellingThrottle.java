@@ -106,6 +106,7 @@ final class SellingThrottle
         final Map<Rating, Set<RecommendedInvestment>> eligible = investmentDescriptors
             .collect(Collectors.groupingBy(t -> t.descriptor()
                 .item()
+                .getLoan()
                 .getRating(), Collectors.toSet()));
         final Money maxSeloffValue = getMaxSelloffValue(portfolioOverview);
         return eligible.entrySet()

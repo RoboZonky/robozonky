@@ -83,7 +83,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Rating getRating() {
-        return investment.getRating();
+        return investment.getLoan()
+            .getRating();
     }
 
     @Override

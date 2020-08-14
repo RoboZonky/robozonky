@@ -107,7 +107,8 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getRegion())
                 .isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating())
-                .isEqualTo(investment.getRating());
+                .isEqualTo(investment.getLoan()
+                    .getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(loan.getMainIncomeType());
             softly.assertThat(w.getPurpose())
@@ -185,7 +186,8 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getRegion())
                 .isEqualTo(LOAN.getRegion());
             softly.assertThat(w.getRating())
-                .isEqualTo(INVESTMENT.getRating());
+                .isEqualTo(INVESTMENT.getLoan()
+                    .getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(LOAN.getMainIncomeType());
             softly.assertThat(w.getPurpose())
