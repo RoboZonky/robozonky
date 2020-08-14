@@ -16,18 +16,41 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.Optional;
+import java.util.Set;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.DetailLabel;
+import com.github.robozonky.api.remote.enums.Label;
+import com.github.robozonky.api.remote.enums.Purpose;
 
-public interface SellPriceInfo {
+public interface InvestmentLoanData {
 
-    SellFee getFee();
+    int getId();
 
-    Money getSellPrice();
+    int getActiveLoanOrdinal();
 
-    Money getBoughtFor();
+    String getTitle();
 
-    Money getRemainingPrincipal();
+    String getStory();
 
-    Ratio getDiscount();
+    Money getAnnuity();
+
+    Optional<Label> getLabel();
+
+    Set<DetailLabel> getDetailLabels();
+
+    Borrower getBorrower();
+
+    LoanHealthStats getHealthStats();
+
+    Purpose getPurpose();
+
+    Instalments getPayments();
+
+    Ratio getRevenueRate();
+
+    Ratio getInterestRate();
+
 }

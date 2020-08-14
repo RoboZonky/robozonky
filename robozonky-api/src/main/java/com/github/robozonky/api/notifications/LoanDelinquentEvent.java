@@ -21,7 +21,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 /**
  * Fired immediately after an {@link Investment} is identified as delinquent.
  */
-public interface LoanDelinquentEvent extends SellableBased, DelinquencyBased {
+public interface LoanDelinquentEvent extends DelinquencyBased {
 
     int getThresholdInDays();
 

@@ -22,13 +22,7 @@ import javax.json.bind.JsonbBuilder;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.enums.InsuranceStatus;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.LoanHealth;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
 
 class InvestmentImplTest {
 
@@ -133,32 +127,6 @@ class InvestmentImplTest {
             SoftAssertions.assertSoftly(softly -> {
                 softly.assertThat(investment.getId())
                     .isEqualTo(12851390);
-                softly.assertThat(investment.getLoanId())
-                    .isEqualTo(311149);
-                softly.assertThat(investment.getLoanName())
-                    .isNotBlank();
-                softly.assertThat(investment.getAmount())
-                    .isEqualTo(Money.from(200));
-                softly.assertThat(investment.getPurchasePrice())
-                    .isEqualTo(Money.from(143.7));
-                softly.assertThat(investment.getRating())
-                    .isEqualTo(Rating.A);
-                softly.assertThat(investment.getInterestRate())
-                    .isEqualTo(Rating.A.getInterestRate());
-                softly.assertThat(investment.getRevenueRate())
-                    .hasValue(Rating.A.getMaximalRevenueRate());
-                softly.assertThat(investment.getLoanHealthInfo())
-                    .hasValue(LoanHealth.HEALTHY);
-                softly.assertThat(investment.getPaymentStatus())
-                    .hasValue(PaymentStatus.OK);
-                softly.assertThat(investment.getInsuranceStatus())
-                    .isEqualTo(InsuranceStatus.NOT_INSURED);
-                softly.assertThat(investment.getStatus())
-                    .isEqualTo(InvestmentStatus.ACTIVE);
-                softly.assertThat(investment.getLegalDpd())
-                    .hasValue(0);
-                softly.assertThat(investment.getCurrentTerm())
-                    .hasValue(54);
             });
         }
     }

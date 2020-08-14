@@ -16,44 +16,92 @@
 
 package com.github.robozonky.internal.remote.entities;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
-import com.github.robozonky.api.remote.entities.LoanHealthStats;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.entities.SellPriceInfo;
 
 public class SellInfoImpl implements SellInfo {
 
-    private LoanHealthStatsImpl loanHealthStats = new LoanHealthStatsImpl();
-    private SellPriceInfoImpl priceInfo = new SellPriceInfoImpl();
+    private Money sellPrice;
+
+    private SellFeeImpl fee;
+
+    private Money boughtFor;
+
+    private Money remainingPrincipal;
+
+    private Ratio discount;
 
     public SellInfoImpl() {
         // For JSON-B.
     }
 
+    public SellInfoImpl(Money sellPrice) {
+        this.sellPrice = Objects.requireNonNull(sellPrice);
+    }
+
+    public SellInfoImpl(Money sellPrice, Money sellFee) {
+        this.sellPrice = Objects.requireNonNull(sellPrice);
+        this.fee = new SellFeeImpl(sellFee);
+    }
+
     @Override
-    public LoanHealthStats getLoanHealthStats() {
-        return loanHealthStats;
-    }
-
-    public void setLoanHealthStats(final LoanHealthStatsImpl loanHealthStats) {
-        this.loanHealthStats = loanHealthStats;
+    public SellFee getFee() {
+        return fee;
     }
 
     @Override
-    public SellPriceInfo getPriceInfo() {
-        return priceInfo;
+    public Money getSellPrice() {
+        return sellPrice;
     }
 
-    public void setPriceInfo(final SellPriceInfoImpl priceInfo) {
-        this.priceInfo = priceInfo;
+    @Override
+    public Money getBoughtFor() {
+        return boughtFor;
+    }
+
+    @Override
+    public Money getRemainingPrincipal() {
+        return remainingPrincipal;
+    }
+
+    @Override
+    public Ratio getDiscount() {
+        return discount;
+    }
+
+    public void setSellPrice(final Money sellPrice) {
+        this.sellPrice = sellPrice;
+    }
+
+    public void setFee(final SellFeeImpl fee) {
+        this.fee = fee;
+    }
+
+    public void setBoughtFor(final Money boughtFor) {
+        this.boughtFor = boughtFor;
+    }
+
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
+    public void setDiscount(final Ratio discount) {
+        this.discount = discount;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", SellInfoImpl.class.getSimpleName() + "[", "]")
-            .add("loanHealthStats=" + loanHealthStats)
-            .add("priceInfo=" + priceInfo)
+            .add("boughtFor='" + boughtFor + "'")
+            .add("sellPrice='" + sellPrice + "'")
+            .add("discount='" + discount + "'")
+            .add("fee=" + fee)
+            .add("remainingPrincipal='" + remainingPrincipal + "'")
             .toString();
     }
 }

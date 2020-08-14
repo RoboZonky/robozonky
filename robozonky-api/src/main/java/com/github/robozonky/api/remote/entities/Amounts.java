@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.enums;
+package com.github.robozonky.api.remote.entities;
 
-public enum InsuranceStatus {
+import com.github.robozonky.api.Money;
 
-    NOT_INSURED,
-    CURRENTLY_INSURED,
-    FORMERLY_INSURED,
-    ADDITIONALLY_INSURED
+public interface Amounts {
+
+    Money getTotal();
+
+    Money getUnpaid();
+
+    default Money getPaid() {
+        return getTotal().subtract(getUnpaid());
+    }
 
 }

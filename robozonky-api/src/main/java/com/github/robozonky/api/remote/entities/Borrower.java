@@ -16,18 +16,13 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Region;
 
-public interface SellInfo {
+public interface Borrower {
 
-    SellFee getFee();
+    MainIncomeType getPrimaryIncomeType();
 
-    Money getSellPrice();
+    Region getRegion();
 
-    Money getBoughtFor();
-
-    Money getRemainingPrincipal();
-
-    Ratio getDiscount();
 }

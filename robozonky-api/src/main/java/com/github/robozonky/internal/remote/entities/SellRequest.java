@@ -33,32 +33,31 @@ public class SellRequest {
 
     public SellRequest(final long investmentId, final SellInfo sellInfo) {
         this.investmentId = investmentId;
-        this.remainingPrincipal = sellInfo.getPriceInfo()
-            .getRemainingPrincipal()
+        this.remainingPrincipal = sellInfo.getRemainingPrincipal()
             .getValue();
-        this.feeAmount = sellInfo.getPriceInfo()
-            .getFee()
+        this.feeAmount = sellInfo.getFee()
             .getValue()
             .getValue();
-        this.discount = sellInfo.getPriceInfo()
-            .getDiscount()
+        this.discount = sellInfo.getDiscount()
             .bigDecimalValue();
-        this.price = sellInfo.getPriceInfo()
-            .getSellPrice()
+        this.price = sellInfo.getSellPrice()
             .getValue();
     }
 
     public SellRequest(final Investment investment) {
         this.investmentId = investment.getId();
-        this.remainingPrincipal = investment.getRemainingPrincipal()
-            .orElseThrow()
+        this.remainingPrincipal = investment.getPrincipal()
+            .getUnpaid()
             .getValue();
-        this.feeAmount = investment.getSmpFee()
+        this.feeAmount = investment.getSmpSellInfo()
+            .map(s -> s.getFee()
+                .getValue())
             .orElse(Money.ZERO)
             .getValue();
         this.discount = BigDecimal.ZERO;
-        this.price = investment.getSmpPrice()
-            .map(Money::getValue)
+        this.price = investment.getSmpSellInfo()
+            .map(s -> s.getSellPrice()
+                .getValue())
             .orElse(remainingPrincipal);
     }
 
@@ -66,36 +65,36 @@ public class SellRequest {
         return investmentId;
     }
 
-    public BigDecimal getRemainingPrincipal() {
-        return remainingPrincipal;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    public BigDecimal getFeeAmount() {
-        return feeAmount;
-    }
-
     public void setInvestmentId(final long investmentId) {
         this.investmentId = investmentId;
+    }
+
+    public BigDecimal getRemainingPrincipal() {
+        return remainingPrincipal;
     }
 
     public void setRemainingPrincipal(final BigDecimal remainingPrincipal) {
         this.remainingPrincipal = remainingPrincipal;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
     public void setPrice(final BigDecimal price) {
         this.price = price;
     }
 
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
     public void setDiscount(final BigDecimal discount) {
         this.discount = discount;
+    }
+
+    public BigDecimal getFeeAmount() {
+        return feeAmount;
     }
 
     public void setFeeAmount(final BigDecimal feeAmount) {

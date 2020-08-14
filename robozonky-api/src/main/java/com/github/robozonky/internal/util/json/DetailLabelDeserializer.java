@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.internal.util.json;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.DetailLabel;
 
-public interface SellInfo {
+public final class DetailLabelDeserializer extends AbstractDeserializer<DetailLabel> {
 
-    SellFee getFee();
-
-    Money getSellPrice();
-
-    Money getBoughtFor();
-
-    Money getRemainingPrincipal();
-
-    Ratio getDiscount();
+    public DetailLabelDeserializer() {
+        super(DetailLabel::valueOf, DetailLabel.UNKNOWN);
+    }
 }

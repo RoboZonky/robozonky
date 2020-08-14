@@ -21,7 +21,6 @@ import com.github.robozonky.api.strategies.SellStrategy;
 /**
  * Fired immediately after {@link SellStrategy} has recommended a particular investment.
  */
-public interface SaleRecommendedEvent extends SellableBased, InvestmentBased,
-        Recommending {
+public interface SaleRecommendedEvent extends InvestmentBased, Recommending {
 
 }

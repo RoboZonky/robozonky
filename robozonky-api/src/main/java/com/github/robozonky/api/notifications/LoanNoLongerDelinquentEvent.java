@@ -21,6 +21,6 @@ import com.github.robozonky.api.remote.entities.Investment;
 /**
  * Fired immediately after an {@link Investment} is identified as no longer delinquent.
  */
-public interface LoanNoLongerDelinquentEvent extends SellableBased, InvestmentBased {
+public interface LoanNoLongerDelinquentEvent extends InvestmentBased {
 
 }

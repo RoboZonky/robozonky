@@ -17,114 +17,21 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.InsuranceStatus;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
-import com.github.robozonky.api.remote.enums.LoanHealth;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 
 public interface Investment {
 
     long getId();
 
-    int getLoanId();
+    InvestmentLoanData getLoan();
 
-    Money getAmount();
+    Optional<SellInfo> getSmpSellInfo();
 
-    InvestmentStatus getStatus();
+    Amounts getPrincipal();
 
-    Rating getRating();
+    Amounts getInterest();
 
-    /**
-     * @return Empty when no longer relevant, such as when sold.
-     */
-    Optional<LoanHealth> getLoanHealthInfo();
+    SellStatus getSellStatus();
 
-    OptionalInt getLegalDpd();
-
-    /**
-     * The original term.
-     *
-     * @return 1+
-     */
-    int getLoanTermInMonth();
-
-    /**
-     * How many monthly payments were remaining to be made from {@link #getLoanTermInMonth()}.
-     * May be less than {@link #getRemainingMonths()} in case of early payments.
-     * May be missing in case of defaulted loans.
-     *
-     * @return never null
-     */
-    OptionalInt getCurrentTerm();
-
-    boolean isOnSmp();
-
-    /**
-     * How many monthly payments are now remaining. Also see {@link #getCurrentTerm()}.
-     *
-     * @return 0+
-     */
-    int getRemainingMonths();
-
-    String getLoanName();
-
-    Optional<PaymentStatus> getPaymentStatus();
-
-    Ratio getInterestRate();
-
-    Optional<Ratio> getRevenueRate();
-
-    InsuranceStatus getInsuranceStatus();
-
-    /**
-     * Semantics is identical to {@link BaseLoan#isInsuranceActive()}.
-     *
-     * @return See {@link BaseLoan#isInsuranceActive()}.
-     */
-    boolean isInsuranceActive();
-
-    boolean isInstalmentPostponement();
-
-    Money getLoanAnnuity();
-
-    Money getLoanAmount();
-
-    Money getPurchasePrice();
-
-    Money getPaid();
-
-    Money getToPay();
-
-    Money getAmountDue();
-
-    Money getPaidInterest();
-
-    Money getDueInterest();
-
-    Money getPaidPrincipal();
-
-    Money getDuePrincipal();
-
-    Money getExpectedInterest();
-
-    /**
-     * @return Empty when the investment is already sold.
-     */
-    Optional<Money> getRemainingPrincipal();
-
-    Optional<Money> getSmpSoldFor();
-
-    Money getPaidPenalty();
-
-    Optional<Money> getSmpFee();
-
-    /**
-     * @return Empty when cannot be sold, that is when sold already.
-     */
-    Optional<Money> getSmpPrice();
 }

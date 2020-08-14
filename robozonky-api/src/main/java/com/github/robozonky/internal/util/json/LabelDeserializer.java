@@ -16,11 +16,11 @@
 
 package com.github.robozonky.internal.util.json;
 
-import com.github.robozonky.api.remote.enums.Country;
+import com.github.robozonky.api.remote.enums.Label;
 
-public final class CountryDeserializer extends AbstractDeserializer<Country> {
+public final class LabelDeserializer extends AbstractDeserializer<Label> {
 
-    public CountryDeserializer() {
-        super(Country::findByCode, Country.UNKNOWN);
+    public LabelDeserializer() {
+        super(Label::valueOf, Label.UNKNOWN);
     }
 }

@@ -21,13 +21,13 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.InvestmentLoanData;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 
@@ -36,9 +36,7 @@ class RecommendedInvestmentTest {
     private static final Loan LOAN = LoanDescriptorTest.mockLoan();
 
     private static Investment mockInvestment(final BigDecimal remainingPrincipal) {
-        final Investment i = mock(InvestmentImpl.class);
-        when(i.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(remainingPrincipal)));
-        return i;
+        return new InvestmentImpl(mock(InvestmentLoanData.class), Money.from(remainingPrincipal));
     }
 
     @Test

@@ -23,13 +23,11 @@ import java.util.StringJoiner;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.BaseLoan;
-import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.internal.Defaults;
 
 public abstract class BaseLoanImpl implements BaseLoan {
 
@@ -51,8 +49,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
     // OffsetDateTime is expensive to parse, and Loans are on the hot path. Only do it when needed.
     protected String datePublished;
 
-    protected Country countryOfOrigin = Defaults.COUNTRY_OF_ORIGIN;
-
     protected Money amount;
     protected Money remainingInvestment;
     protected Money reservedAmount;
@@ -60,15 +56,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
     protected Money annuityWithInsurance;
     protected Money premium;
     protected Money zonkyPlusAmount;
-
-    @Override
-    public Country getCountryOfOrigin() {
-        return countryOfOrigin;
-    }
-
-    public void setCountryOfOrigin(final Country countryOfOrigin) {
-        this.countryOfOrigin = countryOfOrigin;
-    }
 
     @Override
     public MainIncomeType getMainIncomeType() {
@@ -262,7 +249,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
             .add("amount='" + amount + "'")
             .add("annuity='" + annuity + "'")
             .add("annuityWithInsurance='" + annuityWithInsurance + "'")
-            .add("countryOfOrigin=" + countryOfOrigin)
             .add("datePublished='" + datePublished + "'")
             .add("insuranceActive=" + insuranceActive)
             .add("interestRate=" + interestRate)
