@@ -40,7 +40,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanInvestmentDataImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationPreferenceImpl;
@@ -110,7 +110,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         final Reservation withInvestment = new MockReservationBuilder()
             .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
-        final MyInvestmentImpl i = mockMyInvestment();
+        final LoanInvestmentDataImpl i = mockMyInvestment();
         final Loan loanWithInvestment = new MockLoanBuilder()
             .set(LoanImpl::setMyInvestment, i)
             .build();

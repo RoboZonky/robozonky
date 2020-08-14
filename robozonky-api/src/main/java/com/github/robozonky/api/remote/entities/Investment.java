@@ -16,17 +16,32 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.time.OffsetDateTime;
+import java.util.Currency;
 import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.InsuranceStatus;
+import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.PaymentStatus;
 import com.github.robozonky.api.remote.enums.Rating;
 
-public interface Investment extends BaseInvestment {
+public interface Investment {
+
+    Optional<OffsetDateTime> getTimeCreated();
+
+    InvestmentStatus getStatus();
+
+    int getLoanId();
+
+    Currency getCurrency();
+
+    long getId();
+
+    Money getAmount();
 
     Rating getRating();
 
