@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -29,16 +28,18 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.RiskPortfolioImpl;
 import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
 
@@ -58,9 +59,10 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
     void chargesAffectAmounts() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        Investment i = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, Rating.C)
-            .set(InvestmentImpl::setAmount, Money.from(BigDecimal.TEN))
+        final Loan loan = new MockLoanBuilder()
+                .set(LoanImpl::setRating, Rating.C)
+                .build();
+        Investment i = MockInvestmentBuilder.fresh(loan, 10)
             .build();
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         Statistics s = mock(StatisticsImpl.class);

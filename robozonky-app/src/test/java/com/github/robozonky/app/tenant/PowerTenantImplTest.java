@@ -23,8 +23,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -35,9 +33,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellFee;
-import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.entities.SellPriceInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
@@ -45,14 +40,10 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.SellFeeImpl;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
-import com.github.robozonky.internal.remote.entities.SellPriceInfoImpl;
 import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -111,13 +102,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setRemainingInvestment, Money.from(1_000))
             .build();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final SellFee sf = mock(SellFeeImpl.class);
-        when(sf.getExpiresAt()).thenReturn(Optional.of(OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID)));
-        final SellPriceInfo spi = mock(SellPriceInfoImpl.class);
-        when(spi.getFee()).thenReturn(sf);
-        final SellInfo si = mock(SellInfoImpl.class);
-        when(si.getPriceInfo()).thenReturn(spi);
-        when(z.getSellInfo(anyLong())).thenReturn(si);
         doThrow(IllegalStateException.class).when(z)
             .getRestrictions(); // will result in full restrictions
         final ApiProvider api = mockApiProvider(a, z);
@@ -126,7 +110,6 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
             .build(false)) {
             assertThat(tenant.getAvailability()).isNotNull();
             assertThat(tenant.getLoan(l.getId())).isSameAs(l);
-            assertThat(tenant.getSellInfo(1)).isSameAs(si);
             assertThat(tenant.getPortfolio()).isNotNull();
             assertThat(tenant.getSessionInfo()).isNotNull();
             assertThat(tenant.getState(PowerTenantImpl.class)).isNotNull();

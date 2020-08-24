@@ -24,7 +24,6 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
@@ -39,14 +38,15 @@ import com.github.robozonky.api.remote.entities.MyReservation;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
 import com.github.robozonky.internal.remote.endpoints.LoanApi;
 import com.github.robozonky.internal.remote.endpoints.ParticipationApi;
 import com.github.robozonky.internal.remote.endpoints.PortfolioApi;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -54,6 +54,7 @@ import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationPreferencesImpl;
 import com.github.robozonky.internal.remote.entities.ResolutionRequest;
 import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
+import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
 class ZonkyTest {
@@ -63,11 +64,7 @@ class ZonkyTest {
     }
 
     private static InvestmentImpl mockInvestment(final Loan loan, final int amount) {
-        final InvestmentImpl i = mock(InvestmentImpl.class);
-        ((Investment) doReturn(loan.getId()).when(i)).getLoan()
-            .getId();
-        when(i.getAmount()).thenReturn(Money.from(amount));
-        return i;
+        return new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(amount));
     }
 
     @SuppressWarnings("unchecked")
@@ -151,11 +148,11 @@ class ZonkyTest {
     @Test
     void portfolioApi() {
         final PaginatedApi<InvestmentImpl, PortfolioApi> pa = mockApi();
-        when(pa.execute(notNull())).thenReturn(mock(SellInfo.class));
+        when(pa.execute(notNull())).thenReturn(mock(InvestmentImpl.class));
         final ApiProvider p = spy(new ApiProvider());
         when(p.portfolio(any())).thenReturn(pa);
         final Zonky z = new Zonky(p, () -> mock(ZonkyApiTokenImpl.class));
-        assertThat(z.getSellInfo(new InvestmentImpl())).isNotNull();
+        assertThat(z.getInvestment(1)).isNotNull();
         when(pa.execute(notNull())).thenReturn(mock(Statistics.class));
         assertThat(z.getStatistics()).isNotNull();
     }
@@ -279,24 +276,12 @@ class ZonkyTest {
         final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
-        final Investment p = mock(InvestmentImpl.class);
-        when(p.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(10)));
-        when(p.getSmpFee()).thenReturn(Optional.of(Money.from(1)));
-        when(p.getId()).thenReturn(1L);
-        z.sell(p);
-        verify(control).offer(any());
-    }
-
-    @Test
-    void sellWithSellInfo() {
-        final ControlApi control = mock(ControlApi.class);
-        final Api<ControlApi> ca = mockApi(control);
-        final Zonky z = mockZonkyControl(ca);
-        final Investment p = mock(InvestmentImpl.class);
-        when(p.getRemainingPrincipal()).thenReturn(Optional.of(Money.from(10)));
-        when(p.getSmpFee()).thenReturn(Optional.of(Money.from(1)));
-        when(p.getId()).thenReturn(1L);
-        z.sell(p);
+        final InvestmentImpl investment = new InvestmentImpl();
+        investment.setId(1);
+        investment.setPrincipal(new AmountsImpl(Money.from(10)));
+        final SellInfoImpl sellInfo = new SellInfoImpl(Money.from(10), Money.from(1));
+        investment.setSmpSellInfo(sellInfo);
+        z.sell(investment);
         verify(control).offer(any());
     }
 

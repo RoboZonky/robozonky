@@ -40,7 +40,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -99,47 +99,48 @@ final class Util {
                 entry("insurance", loan.isInsuranceActive()));
     }
 
-    public static Map<String, Object> getSellInfoData(final SellInfo sellInfo) {
+    public static Map<String, Object> getDelinquencyData(final Investment investment) {
         return Map.ofEntries(
-                entry("currentDaysDue", sellInfo.getLoanHealthStats()
+                entry("currentDaysDue", investment.getLoan()
+                    .getHealthStats()
                     .getCurrentDaysDue()),
-                entry("daysSinceLastDue", sellInfo.getLoanHealthStats()
+                entry("daysSinceLastDue", investment.getLoan()
+                    .getHealthStats()
                     .getDaysSinceLastInDue()),
-                entry("longestDaysDue", sellInfo.getLoanHealthStats()
+                entry("longestDaysDue", investment.getLoan()
+                    .getHealthStats()
                     .getLongestDaysDue()));
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
         final Money returned = getReturned(i);
-        final Money originalPrincipal = i.getPurchasePrice();
-        final Money balance = i.getSmpSoldFor()
-            .map(soldFor -> {
-                final Money in = soldFor.add(returned);
-                final Money fee = i.getSmpFee()
-                    .orElse(soldFor.getZero());
-                final Money out = originalPrincipal.add(fee);
-                return in.subtract(out);
-            })
-            .orElseGet(() -> returned.subtract(originalPrincipal));
+        final Money originalPrincipal = i.getPrincipal()
+            .getTotal();
+        // TODO Convince Zonky to include the actual sell price in the new API.
+        // TODO Convince Zonky to include penalty data in the new API.
+        final Money balance = returned.subtract(originalPrincipal);
         final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
-        loanData.put("loanTermRemaining", i.getRemainingMonths());
-        loanData.put("amountRemaining", i.getRemainingPrincipal()
-            .orElse(Money.ZERO)
-            .getValue());
+        loanData.put("loanTermRemaining", i.getLoan()
+            .getPayments()
+            .getUnpaid());
+        loanData.put("amountRemaining", i.getPrincipal()
+            .getUnpaid());
         loanData.put("amountHeld", originalPrincipal.getValue());
         loanData.put("amountPaid", returned.getValue());
         loanData.put("balance", balance.getValue());
-        loanData.put("interestExpected", i.getExpectedInterest()
+        loanData.put("interestExpected", i.getInterest()
+            .getUnpaid()
             .getValue());
-        loanData.put("principalPaid", i.getPaidPrincipal()
+        loanData.put("principalPaid", i.getPrincipal()
+            .getPaid()
             .getValue());
-        loanData.put("interestPaid", i.getPaidInterest()
-            .getValue());
-        loanData.put("penaltiesPaid", i.getPaidPenalty()
+        loanData.put("interestPaid", i.getInterest()
+            .getPaid()
             .getValue());
         loanData.put("monthsElapsed", getMonthsElapsed(l));
-        loanData.put("insurance", i.isInsuranceActive()); // override the one coming from parent
-        loanData.put("postponed", i.isInstalmentPostponement());
+        loanData.put("insurance", i.getLoan()
+            .getDetailLabels()
+            .contains(DetailLabel.CURRENTLY_INSURED));
         return loanData;
     }
 
@@ -206,10 +207,11 @@ final class Util {
         }
     }
 
-    private static Money getReturned(final Investment i) {
-        return i.getPaidInterest()
-            .add(i.getPaidPrincipal())
-            .add(i.getPaidPenalty());
+    private static Money getReturned(final Investment i) { // Convince Zonky to add penalty data to the new API.
+        return i.getPrincipal()
+            .getPaid()
+            .add(i.getInterest()
+                .getPaid());
     }
 
     private static long getMonthsElapsed(final Loan l) {

@@ -19,13 +19,12 @@ package com.github.robozonky.strategy.natural.wrappers;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -36,12 +35,10 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
 
     private final Investment investment;
-    private final Supplier<Optional<SellInfo>> sellInfo;
 
     public InvestmentWrapper(final InvestmentDescriptor original, final PortfolioOverview portfolioOverview) {
         super(original, portfolioOverview);
         this.investment = original.item();
-        this.sellInfo = original::sellInfo;
     }
 
     @Override
@@ -57,7 +54,9 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public boolean isInsuranceActive() {
-        return investment.isInsuranceActive();
+        return investment.getLoan()
+            .getDetailLabels()
+            .contains(DetailLabel.CURRENTLY_INSURED);
     }
 
     @Override
@@ -67,13 +66,13 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Ratio getInterestRate() {
-        return investment.getInterestRate();
+        return investment.getLoan()
+            .getInterestRate();
     }
 
     @Override
     public Ratio getRevenueRate() {
-        return investment.getRevenueRate()
-            .orElseGet(this::estimateRevenueRate);
+        return estimateRevenueRate();
     }
 
     @Override
@@ -89,90 +88,90 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalTermInMonths() {
-        return investment.getLoanTermInMonth();
+        return investment.getLoan()
+            .getPayments()
+            .getTotal();
     }
 
     @Override
     public int getRemainingTermInMonths() {
-        return investment.getRemainingMonths();
+        return investment.getLoan()
+            .getPayments()
+            .getUnpaid();
     }
 
     @Override
     public int getOriginalAmount() {
-        return investment.getLoanAmount()
+        return investment.getPrincipal()
+            .getTotal()
             .getValue()
             .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return investment.getLoanAnnuity()
+        return investment.getLoan()
+            .getAnnuity()
             .getValue()
             .intValue();
     }
 
     @Override
     public BigDecimal getRemainingPrincipal() {
-        return investment.getRemainingPrincipal()
-            .orElseThrow()
+        return investment.getPrincipal()
+            .getUnpaid()
             .getValue();
     }
 
     @Override
-    public Optional<BigDecimal> getReturns() {
-        var interest = investment.getPaidInterest();
-        var principal = investment.getPaidPrincipal();
-        var penalties = investment.getPaidPenalty();
+    public Optional<BigDecimal> getReturns() { // FIXME add penalties when Zonky API supports it again
+        var interest = investment.getInterest()
+            .getPaid();
+        var principal = investment.getPrincipal()
+            .getPaid();
         return Optional.of(interest.add(principal)
-            .add(penalties)
+            .add(interest)
             .getValue());
     }
 
     @Override
     public Optional<BigDecimal> getSellFee() {
-        var fee = investment.getSmpFee()
-            .orElseGet(() -> sellInfo.get()
-                .map(si -> si.getPriceInfo()
-                    .getFee()
-                    .getValue())
-                .orElse(Money.ZERO))
+        var fee = investment.getSmpSellInfo()
+            .map(sellInfo -> sellInfo.getFee()
+                .getValue())
+            .orElse(Money.ZERO)
             .getValue();
         return Optional.of(fee);
     }
 
-    private <T> T extractOrFail(final Function<SellInfo, T> extractor) {
-        return sellInfo.get()
-            .map(extractor)
-            .orElseThrow();
-    }
-
     @Override
     public Optional<LoanHealth> getHealth() {
-        var healthInfo = investment.getLoanHealthInfo()
-            .orElseGet(() -> extractOrFail(si -> si.getLoanHealthStats()
-                .getLoanHealthInfo()));
+        var healthInfo = investment.getLoan()
+            .getHealthStats()
+            .getLoanHealthInfo();
         return Optional.of(healthInfo);
     }
 
     @Override
     public Optional<BigDecimal> getOriginalPurchasePrice() {
-        return Optional.of(investment.getPurchasePrice()
-            .getValue());
+        return Optional.of(investment.getSmpSellInfo()
+            .map(sellInfo -> sellInfo.getBoughtFor()
+                .getValue())
+            .orElseGet(this::getRemainingPrincipal));
     }
 
     @Override
     public Optional<BigDecimal> getPrice() {
-        var price = investment.getSmpPrice()
-            .orElseGet(() -> extractOrFail(si -> si.getPriceInfo()
-                .getSellPrice()));
+        var price = investment.getSmpSellInfo()
+            .map(SellInfo::getSellPrice)
+            .orElseThrow();
         return Optional.of(price.getValue());
     }
 
     @Override
     public Optional<BigDecimal> getDiscount() {
-        var discount = sellInfo.get()
-            .map(si -> si.getPriceInfo()
-                .getDiscount())
+        var discount = investment.getSmpSellInfo()
+            .map(SellInfo::getDiscount)
             .orElse(Ratio.ZERO);
         var result = discount.apply(Money.from(getRemainingPrincipal()));
         return Optional.of(result.getValue());
@@ -180,35 +179,30 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public OptionalInt getCurrentDpd() {
-        var currentDpd = investment.getLegalDpd()
-            .orElseGet(() -> sellInfo.get()
-                .map(si -> si.getLoanHealthStats()
-                    .getCurrentDaysDue())
-                .orElse(0));
+        var currentDpd = investment.getLoan()
+            .getHealthStats()
+            .getCurrentDaysDue();
         return OptionalInt.of(currentDpd);
     }
 
     @Override
     public OptionalInt getLongestDpd() {
-        int maxDpd = sellInfo.get()
-            .map(si -> si.getLoanHealthStats()
-                .getLongestDaysDue())
-            .orElseGet(() -> getCurrentDpd().orElse(0));
+        int maxDpd = investment.getLoan()
+            .getHealthStats()
+            .getLongestDaysDue();
         return OptionalInt.of(maxDpd);
     }
 
     @Override
     public OptionalInt getDaysSinceDpd() {
-        var daysSinceLastDpd = sellInfo.get()
-            .map(si -> si.getLoanHealthStats()
-                .getDaysSinceLastInDue())
-            .orElse(0);
+        var daysSinceLastDpd = investment.getLoan()
+            .getHealthStats()
+            .getDaysSinceLastInDue();
         return OptionalInt.of(daysSinceLastDpd);
     }
 
     @Override
     public String toString() {
-        return "Wrapper for loan #" + investment.getLoan()
-            .getId() + ", investment #" + getId();
+        return "Wrapper for loan #" + getLoanId() + ", investment #" + getId();
     }
 }

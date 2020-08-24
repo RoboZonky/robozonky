@@ -39,14 +39,15 @@ import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -63,13 +64,9 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     }
 
     private static Investment mockInvestment(final Loan loan, final LoanHealth loanHealth) {
-        return MockInvestmentBuilder.fresh(loan, 200)
-            .set(InvestmentImpl::setRating, Rating.AAAAA)
-            .set(InvestmentImpl::setLoanTermInMonth, 1000)
-            .set(InvestmentImpl::setLoanHealthInfo, loanHealth)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.valueOf(100)))
-            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
-            .set(InvestmentImpl::setOnSmp, false)
+        return MockInvestmentBuilder.fresh(loan, new LoanHealthStatsImpl(loanHealth), 200)
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.valueOf(100))))
+            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .build();
     }
 
@@ -149,10 +146,10 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     private void saleMade(final boolean isDryRun, final boolean healthy) {
         final Loan loan = new MockLoanBuilder().build();
         final Investment i = mockInvestment(loan, healthy ? LoanHealth.HEALTHY : LoanHealth.HISTORICALLY_IN_DUE);
+        SellInfo sellInfo = mock(SellInfoImpl.class);
+        when(i.getSmpSellInfo()).thenReturn(Optional.of(sellInfo));
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
-        SellInfo sellInfo = mock(SellInfoImpl.class);
-        when(zonky.getSellInfo(eq(i.getId()))).thenReturn(sellInfo);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, isDryRun);

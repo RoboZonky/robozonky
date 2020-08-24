@@ -41,7 +41,8 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Label;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -70,38 +71,32 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static boolean isDefaulted(final Investment i) {
-        return i.getPaymentStatus()
-            .map(s -> s == PaymentStatus.PAID_OFF)
+        var isDue = i.getLoan().getHealthStats().getCurrentDaysDue() > 0;
+        var isTerminated = i.getLoan().getLabel()
+            .map(label -> label == Label.TERMINATED)
             .orElse(false);
-    }
-
-    private static void processNoLongerDelinquent(final PowerTenant tenant, final Investment investment,
-            final PaymentStatus status) {
-        LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
-        switch (status) {
-            case WRITTEN_OFF: // investment is lost for good
-                tenant.fire(loanLostLazy(() -> {
-                    final Loan loan = tenant.getLoan(investment.getLoan()
-                        .getId());
-                    return loanLost(investment, loan);
-                }));
-                return;
-            case PAID:
-                LOGGER.debug("Ignoring a repaid investment #{}, will be handled by transaction processors.",
-                        investment.getId());
-                return;
-            default:
-                tenant.fire(loanNoLongerDelinquentLazy(() -> {
-                    final Loan loan = tenant.getLoan(investment.getLoan()
-                        .getId());
-                    return loanNoLongerDelinquent(investment, loan, () -> tenant.getSellInfo(investment.getId()));
-                }));
-        }
+        return isDue && isTerminated;
     }
 
     private static void processNoLongerDelinquent(final Investment investment, final PowerTenant tenant) {
-        investment.getPaymentStatus()
-            .ifPresent(status -> processNoLongerDelinquent(tenant, investment, status));
+        LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
+        if (investment.getLoan().getPayments().getUnpaid() == 0 &&
+                investment.getPrincipal().getUnpaid().isZero()) {
+            LOGGER.debug("Ignoring a repaid investment #{}, will be handled elsewhere.",
+                         investment.getId());
+            return;
+        } else if (investment.getSellStatus() == SellStatus.NOT_SELLABLE) { // Investment is lost for good.
+            // TODO Try to convince Zonky to add a dedicated status for this eventuality.
+            tenant.fire(loanLostLazy(() -> {
+                final Loan loan = tenant.getLoan(investment.getLoan().getId());
+                return loanLost(investment, loan);
+            }));
+            return;
+        }
+        tenant.fire(loanNoLongerDelinquentLazy(() -> {
+            final Loan loan = tenant.getLoan(investment.getLoan().getId());
+            return loanNoLongerDelinquent(investment, loan);
+        }));
     }
 
     private static void processDelinquent(final PowerTenant tenant, final Registry registry,
@@ -112,8 +107,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             LOGGER.debug("Investment #{} may not be promoted anymore.", investmentId);
             return;
         }
-        final int daysPastDue = currentDelinquent.getLegalDpd()
-            .orElse(0);
+        final int daysPastDue = currentDelinquent.getLoan().getHealthStats().getCurrentDaysDue();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
             .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
@@ -150,8 +144,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
-            .filter(i -> i.getLegalDpd()
-                .orElse(0) > 0)
+            .filter(i -> i.getLoan().getHealthStats().getCurrentDaysDue() > 0)
             .filter(i -> !isDefaulted(i));
     }
 
@@ -176,8 +169,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
             getNonDefaulted(delinquents).forEach(d -> {
                 for (final Category cat : Category.values()) {
-                    int dpd = d.getLegalDpd()
-                        .orElse(Integer.MAX_VALUE);
+                    int dpd = d.getLoan().getHealthStats().getCurrentDaysDue();
                     if (cat.getThresholdInDays() > dpd || cat.getThresholdInDays() < 0) {
                         continue;
                     }

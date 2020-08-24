@@ -16,11 +16,8 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.util.function.Supplier;
-
 import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 
@@ -28,12 +25,8 @@ final class SaleRecommendedEventImpl
         extends AbstractRecommendationBasedEventImpl<RecommendedInvestment, InvestmentDescriptor, Investment>
         implements SaleRecommendedEvent {
 
-    private final Supplier<SellInfo> sellInfoSupplier;
-
-    public SaleRecommendedEventImpl(final RecommendedInvestment recommendation,
-            final Supplier<SellInfo> sellInfoSupplier) {
+    public SaleRecommendedEventImpl(final RecommendedInvestment recommendation) {
         super(recommendation);
-        this.sellInfoSupplier = sellInfoSupplier;
     }
 
     @Override
@@ -41,8 +34,4 @@ final class SaleRecommendedEventImpl
         return super.getRecommending();
     }
 
-    @Override
-    public SellInfo getSellInfo() {
-        return sellInfoSupplier.get();
-    }
 }

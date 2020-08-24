@@ -65,7 +65,9 @@ final class RemoteData {
             .collect(Collectors.toMap(i -> i.getLoan()
                 .getId(),
                     i -> Tuple.of(i.getLoan()
-                        .getRating(), i.getAmount())));
+                        .getRating(),
+                            i.getPrincipal()
+                                .getUnpaid())));
     }
 
     public OffsetDateTime getRetrievedOn() {

@@ -31,7 +31,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -62,7 +61,8 @@ final class Selling implements TenantPayload {
                 .isDryRun();
             if (isRealRun) {
                 LOGGER.debug("Will send sell request for loan #{}.", loanId);
-                var call = d.sellInfo()
+                var call = d.item()
+                    .getSmpSellInfo()
                     .map(sellInfo -> (Consumer<Zonky>) zonky -> zonky.sell(i, sellInfo))
                     .orElseGet(() -> z -> z.sell(i));
                 tenant.run(call);
@@ -70,7 +70,7 @@ final class Selling implements TenantPayload {
                 LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
             }
             sold.markAsOffered(loanId);
-            tenant.fire(EventFactory.saleOffered(i, d.related(), () -> tenant.getSellInfo(i.getId())));
+            tenant.fire(EventFactory.saleOffered(i, d.related()));
             LOGGER.info("Offered to sell investment in loan #{}.", loanId);
             return Optional.of(i);
         } catch (final InternalServerErrorException ex) { // The sell endpoint has been seen to throw these.
@@ -93,24 +93,17 @@ final class Selling implements TenantPayload {
                     .getId())) // to enable dry run
             .filter(i -> !sold.wasOnceSold(i.getLoan()
                 .getId()))
-            .map(i -> i.getLoanHealthInfo()
-                .map(healthInfo -> {
-                    Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()
-                        .getId());
-                    if (healthInfo == LoanHealth.HEALTHY) {
-                        return new InvestmentDescriptor(i, loanSupplier);
-                    } else {
-                        return new InvestmentDescriptor(i, loanSupplier, () -> tenant.getSellInfo(i.getId()));
-                    }
-                })
-                .orElseThrow())
+            .map(i -> {
+                Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()
+                    .getId());
+                return new InvestmentDescriptor(i, loanSupplier);
+            })
             .collect(Collectors.toSet());
         final PortfolioOverview overview = tenant.getPortfolio()
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
         var recommended = strategy.recommend(eligible, overview, tenant.getSessionInfo())
-            .peek(r -> tenant.fire(EventFactory.saleRecommended(r, r.descriptor()
-                .sellInfo()::get)));
+            .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
         var throttled = new SellingThrottle().apply(recommended, overview);
         final Collection<Investment> investmentsSold = throttled
             .map(r -> processSale(tenant, r, sold))

@@ -16,18 +16,14 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.util.function.Supplier;
-
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 
 final class LoanNowDelinquentEventImpl extends AbstractLoanDelinquentEventImpl implements LoanNowDelinquentEvent {
 
-    public LoanNowDelinquentEventImpl(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        super(investment, loan, sellInfoSupplier);
+    public LoanNowDelinquentEventImpl(final Investment investment, final Loan loan) {
+        super(investment, loan);
     }
 
     @Override

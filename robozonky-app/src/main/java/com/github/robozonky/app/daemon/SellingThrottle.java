@@ -63,8 +63,8 @@ final class SellingThrottle
         final List<RecommendedInvestment> byAmountIncreasing = eligible.stream()
             .sorted(Comparator.comparing(d -> d.descriptor()
                 .item()
-                .getRemainingPrincipal()
-                .orElseThrow()))
+                .getPrincipal()
+                .getUnpaid()))
             .collect(Collectors.toList());
         LOGGER.trace("Eligible investments: {}.", byAmountIncreasing);
         final Set<RecommendedInvestment> included = new HashSet<>();
@@ -72,8 +72,8 @@ final class SellingThrottle
         for (final RecommendedInvestment evaluating : byAmountIncreasing) {
             final Money value = evaluating.descriptor()
                 .item()
-                .getRemainingPrincipal()
-                .orElseThrow();
+                .getPrincipal()
+                .getUnpaid();
             final Money ifIncluded = czkIncluded.add(value);
             if (ifIncluded.compareTo(maxSelloffSize) > 0) {
                 continue;

@@ -25,12 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Either;
@@ -73,7 +74,7 @@ final class Cache<T> {
         }
     };
 
-    private static final Backend<SellInfo> SELL_INFO_BACKEND = new Backend<>() {
+    private static final Backend<Investment> INVESTMENT_BACKEND = new Backend<>() {
         @Override
         public Duration getEvictEvery() {
             return Duration.ofHours(1);
@@ -85,25 +86,27 @@ final class Cache<T> {
         }
 
         @Override
-        public Class<SellInfo> getItemClass() {
-            return SellInfo.class;
+        public Class<Investment> getItemClass() {
+            return Investment.class;
         }
 
         @Override
-        public Either<Exception, SellInfo> getItem(final long id, final Tenant tenant) {
+        public Either<Exception, Investment> getItem(final long id, final Tenant tenant) {
             try {
-                return Either.right(tenant.call(zonky -> zonky.getSellInfo(id)));
+                return tenant.call(zonky -> zonky.getInvestment(id))
+                        .map((Function<Investment, Either<Exception, Investment>>) Either::right)
+                        .orElse(Either.left(new IllegalStateException("No investment #" + id)));
             } catch (final Exception ex) {
                 return Either.left(ex);
             }
         }
 
         @Override
-        public boolean shouldCache(final SellInfo item) {
-            return item.getPriceInfo()
-                .getFee()
-                .getExpiresAt()
-                .map(expiration -> expiration.isAfter(DateUtil.offsetNow()))
+        public boolean shouldCache(final Investment item) {
+            return item.getSmpSellInfo()
+                .flatMap(si -> si.getFee()
+                    .getExpiresAt()
+                    .map(expiration -> expiration.isAfter(DateUtil.offsetNow())))
                 .orElse(true);
         }
     };
@@ -125,8 +128,8 @@ final class Cache<T> {
         return new Cache<>(tenant, LOAN_BACKEND);
     }
 
-    public static Cache<SellInfo> forSellInfo(final Tenant tenant) {
-        return new Cache<>(tenant, SELL_INFO_BACKEND);
+    public static Cache<Investment> forInvestment(final Tenant tenant) {
+        return new Cache<>(tenant, INVESTMENT_BACKEND);
     }
 
     private static String identify(final Class<?> clz, final long id) {

@@ -154,14 +154,6 @@ public class Zonky {
         sell(investment, request);
     }
 
-    public SellInfo getSellInfo(final Investment investment) {
-        return getSellInfo(investment.getId());
-    }
-
-    public SellInfo getSellInfo(final long investmentId) {
-        return portfolioApi.execute(api -> api.getSellInfo(investmentId));
-    }
-
     public void accept(final Reservation reservation) {
         final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation()
             .getId(), Resolution.ACCEPTED);

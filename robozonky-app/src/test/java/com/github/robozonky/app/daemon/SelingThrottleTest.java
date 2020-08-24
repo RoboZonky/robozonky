@@ -32,6 +32,7 @@ import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 
@@ -41,24 +42,19 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
     void picksSmallestOneIfAllOverThreshold() {
         final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, rating)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
-            .build();
+                .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN)))
+                .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, rating)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN.pow(2)))
-            .build();
+                .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN.pow(2))))
+                .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, rating)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.ONE))
-            .build();
+                .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.ONE)))
+                .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getInvested(eq(rating))).thenReturn(Money.from(10));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
             .map(i -> new InvestmentDescriptor(i, () -> null))
-            .map(d -> d.recommend(d.item()
-                .getRemainingPrincipal()
-                .orElseThrow()))
+                .map(d -> d.recommend(d.item().getPrincipal().getUnpaid()))
             .flatMap(Optional::stream);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
@@ -70,26 +66,20 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void picksAllBelowThreshold() {
-        final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, rating)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN))
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN)))
             .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, rating)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.TEN.pow(2)))
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN.pow(2))))
             .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, rating)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.ONE))
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.ONE)))
             .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         when(portfolioOverview.getInvested()).thenReturn(Money.from(2200));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
             .map(i -> new InvestmentDescriptor(i, () -> null))
-            .map(d -> d.recommend(d.item()
-                .getRemainingPrincipal()
-                .orElseThrow()))
+            .map(d -> d.recommend(d.item().getPrincipal().getUnpaid()))
             .flatMap(Optional::stream);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);

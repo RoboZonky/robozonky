@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
@@ -56,16 +56,13 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
     class SomethingIsOffered {
 
         private final Investment soldEarlier = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-            .set(InvestmentImpl::setOnSmp, false)
-            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
+            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .build();
         private final Investment soldNow = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-            .set(InvestmentImpl::setOnSmp, false)
-            .set(InvestmentImpl::setStatus, InvestmentStatus.SOLD)
+            .set(InvestmentImpl::setSellStatus, SellStatus.SOLD)
             .build();
         private final Investment onSmp = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
-            .set(InvestmentImpl::setOnSmp, true)
-            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
+            .set(InvestmentImpl::setSellStatus, SellStatus.OFFERED)
             .build();
 
         @BeforeEach

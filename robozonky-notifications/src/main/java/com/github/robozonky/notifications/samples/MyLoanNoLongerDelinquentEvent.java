@@ -17,14 +17,8 @@
 package com.github.robozonky.notifications.samples;
 
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 
 public final class MyLoanNoLongerDelinquentEvent extends AbstractInvestmentBasedEvent
         implements LoanNoLongerDelinquentEvent {
 
-    @Override
-    public SellInfo getSellInfo() {
-        return new SellInfoImpl();
-    }
 }

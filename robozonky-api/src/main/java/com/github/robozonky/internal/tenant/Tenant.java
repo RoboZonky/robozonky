@@ -23,14 +23,12 @@ import java.util.function.Function;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.util.StreamUtil;
 
@@ -92,14 +90,15 @@ public interface Tenant extends AutoCloseable {
     }
 
     /**
-     * Retrieve a {@link SellInfoImpl} from Zonky, possibly caching it in the process. If you don't wish to cache it,
-     * simply use {@link #call(Function)} to get to {@link Zonky#getSellInfo(long)}.
+     * Retrieve an {@link Investment} from Zonky, possibly caching it in the process. If you don't wish to cache it,
+     * simply use {@link #call(Function)} to get to {@link Zonky#getInvestment(long)}.
      * 
      * @param investmentId ID of the {@link Investment} in question.
      * @return never null
      */
-    default SellInfo getSellInfo(final long investmentId) {
-        return call(zonky -> zonky.getSellInfo(investmentId));
+    default Investment getInvestment(final long investmentId) {
+        return call(zonky -> zonky.getInvestment(investmentId))
+                .orElseThrow();
     }
 
     <T> InstanceState<T> getState(final Class<T> clz);

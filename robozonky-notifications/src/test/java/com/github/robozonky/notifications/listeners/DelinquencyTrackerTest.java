@@ -34,14 +34,13 @@ import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.SupportedListener;
@@ -65,7 +64,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         .set(LoanImpl::setUrl, "http://localhost")
         .build();
     private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
-        .set(InvestmentImpl::setExpectedInterest, Money.from(BigDecimal.TEN))
+        .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(BigDecimal.TEN)))
         .build();
     private static final Loan LOAN2 = new MockLoanBuilder()
         .set(LoanImpl::setAmount, Money.from(200))
@@ -140,10 +139,6 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             return 10;
         }
 
-        @Override
-        public SellInfo getSellInfo() {
-            return new SellInfoImpl();
-        }
     }
 
     private static class MyLoanNoLongerDelinquentEvent implements LoanNoLongerDelinquentEvent {
@@ -163,9 +158,5 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             return OffsetDateTime.now();
         }
 
-        @Override
-        public SellInfo getSellInfo() {
-            return new SellInfoImpl();
-        }
     }
 }

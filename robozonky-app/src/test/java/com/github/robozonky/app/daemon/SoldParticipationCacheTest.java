@@ -26,13 +26,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.TenantBuilder;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
 
@@ -68,15 +69,15 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrievesSold() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLoanId, 2)
+        final Loan loan = MockLoanBuilder.fresh();
+        final Investment i1 = MockInvestmentBuilder.fresh(loan, 200)
             .build();
         when(zonky.getSoldInvestments()).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
-        assertThat(instance.wasOnceSold(2)).isTrue();
+        assertThat(instance.wasOnceSold(loan.getId())).isTrue();
         assertThat(instance.wasOnceSold(1)).isFalse();
         instance.markAsSold(1);
-        assertThat(instance.wasOnceSold(2)).isTrue();
+        assertThat(instance.wasOnceSold(loan.getId())).isTrue();
         assertThat(instance.wasOnceSold(1)).isTrue();
     }
 
@@ -84,15 +85,15 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
     void retrievesOffered() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLoanId, 2)
+        final Loan loan = MockLoanBuilder.fresh();
+        final Investment i1 = MockInvestmentBuilder.fresh(loan, 200)
             .build();
         when(zonky.getInvestments(notNull())).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.getOffered()).isEmpty();
         instance.markAsOffered(1);
-        instance.markAsOffered(2);
-        assertThat(instance.getOffered()).containsOnly(1, 2);
+        instance.markAsOffered(loan.getId());
+        assertThat(instance.getOffered()).containsOnly(1, loan.getId());
         instance.markAsSold(1);
         assertSoftly(softly -> {
             softly.assertThat(instance.getOffered())
