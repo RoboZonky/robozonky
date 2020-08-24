@@ -19,7 +19,6 @@ package com.github.robozonky.test.mock;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.InvestmentLoanData;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
@@ -54,7 +53,7 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
 
     public static MockInvestmentBuilder fresh(final Loan loan, final LoanHealthStats loanHealthStats,
             final BigDecimal invested) {
-        InvestmentLoanData ild = loanHealthStats == null ? new InvestmentLoanDataImpl(loan)
+        InvestmentLoanDataImpl ild = loanHealthStats == null ? new InvestmentLoanDataImpl(loan)
                 : new InvestmentLoanDataImpl(loan, loanHealthStats);
         return fresh()
             .set(InvestmentImpl::setLoan, ild)

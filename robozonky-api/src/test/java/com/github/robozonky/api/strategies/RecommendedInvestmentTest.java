@@ -27,16 +27,16 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.InvestmentLoanData;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
 
 class RecommendedInvestmentTest {
 
     private static final Loan LOAN = LoanDescriptorTest.mockLoan();
 
     private static Investment mockInvestment(final BigDecimal remainingPrincipal) {
-        return new InvestmentImpl(mock(InvestmentLoanData.class), Money.from(remainingPrincipal));
+        return new InvestmentImpl(mock(InvestmentLoanDataImpl.class), Money.from(remainingPrincipal));
     }
 
     @Test

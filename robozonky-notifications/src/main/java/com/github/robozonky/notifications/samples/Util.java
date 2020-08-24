@@ -122,7 +122,10 @@ final class Util {
     }
 
     public static Investment randomizeInvestment(final Loan loan) {
-        return new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200 + (RANDOM.nextInt(24) * 200L))); // from 200 to 5000
+        return new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200 + (RANDOM.nextInt(24) * 200L))); // from
+                                                                                                                    // 200
+                                                                                                                    // to
+                                                                                                                    // 5000
     }
 
     public static Participation randomizeParticipation(final Loan loan) {

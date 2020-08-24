@@ -26,6 +26,10 @@ public final class AmountsImpl implements Amounts {
     private Money total;
     private Money unpaid;
 
+    public AmountsImpl() {
+        // For JSON-B.
+    }
+
     public AmountsImpl(final Money total) {
         this(total, total);
     }
@@ -56,5 +60,23 @@ public final class AmountsImpl implements Amounts {
     @Override
     public String toString() {
         return unpaid + " unpaid out of " + total;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !Objects.equals(getClass(), o.getClass())) {
+            return false;
+        }
+        final AmountsImpl amounts = (AmountsImpl) o;
+        return Objects.equals(total, amounts.total) &&
+                Objects.equals(unpaid, amounts.unpaid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(total, unpaid);
     }
 }

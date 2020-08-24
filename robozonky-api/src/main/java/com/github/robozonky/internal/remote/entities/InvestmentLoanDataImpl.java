@@ -52,10 +52,10 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     private Label label;
     @JsonbProperty(nillable = true)
     private Set<DetailLabel> detailLabels;
-    private Borrower borrower;
-    private LoanHealthStats healthStats;
+    private BorrowerImpl borrower;
+    private LoanHealthStatsImpl healthStats;
     private Purpose purpose;
-    private Instalments payments;
+    private InstalmentsImpl payments;
     private Ratio revenueRate;
     private Ratio interestRate;
 
@@ -73,7 +73,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
         this.story = loan.getStory();
         this.annuity = loan.getAnnuity();
         this.borrower = new BorrowerImpl(loan.getMainIncomeType(), loan.getRegion());
-        this.healthStats = loanHealthStats;
+        this.healthStats = (LoanHealthStatsImpl) loanHealthStats;
         this.purpose = loan.getPurpose();
         this.payments = new InstalmentsImpl(loan.getTermInMonths());
         this.revenueRate = loan.getRevenueRate()
@@ -167,7 +167,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
         return requireNonNull(borrower);
     }
 
-    public void setBorrower(final Borrower borrower) {
+    public void setBorrower(final BorrowerImpl borrower) {
         this.borrower = borrower;
     }
 
@@ -176,7 +176,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
         return requireNonNull(healthStats);
     }
 
-    public void setHealthStats(final LoanHealthStats healthStats) {
+    public void setHealthStats(final LoanHealthStatsImpl healthStats) {
         this.healthStats = healthStats;
     }
 
@@ -194,7 +194,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
         return requireNonNull(payments);
     }
 
-    public void setPayments(final Instalments payments) {
+    public void setPayments(final InstalmentsImpl payments) {
         this.payments = payments;
     }
 

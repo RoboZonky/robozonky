@@ -33,18 +33,18 @@ import com.github.robozonky.api.remote.enums.SellStatus;
 public class InvestmentImpl implements Investment {
 
     private long id;
-    private InvestmentLoanData loan;
+    private InvestmentLoanDataImpl loan;
     @JsonbProperty(nillable = true)
-    private SellInfo smpSellInfo;
-    private Amounts principal;
-    private Amounts interest;
+    private SellInfoImpl smpSellInfo;
+    private AmountsImpl principal;
+    private AmountsImpl interest;
     private SellStatus sellStatus;
 
     public InvestmentImpl() {
         // For JSON-B.
     }
 
-    public InvestmentImpl(final InvestmentLoanData loan, final Money amount) {
+    public InvestmentImpl(final InvestmentLoanDataImpl loan, final Money amount) {
         this.principal = new AmountsImpl(amount);
         this.loan = loan;
     }
@@ -63,7 +63,7 @@ public class InvestmentImpl implements Investment {
         return requireNonNull(loan);
     }
 
-    public void setLoan(final InvestmentLoanData loan) {
+    public void setLoan(final InvestmentLoanDataImpl loan) {
         this.loan = loan;
     }
 
@@ -72,7 +72,7 @@ public class InvestmentImpl implements Investment {
         return Optional.ofNullable(smpSellInfo);
     }
 
-    public void setSmpSellInfo(final SellInfo smpSellInfo) {
+    public void setSmpSellInfo(final SellInfoImpl smpSellInfo) {
         this.smpSellInfo = smpSellInfo;
     }
 
@@ -81,7 +81,7 @@ public class InvestmentImpl implements Investment {
         return requireNonNull(principal);
     }
 
-    public void setPrincipal(final Amounts principal) {
+    public void setPrincipal(final AmountsImpl principal) {
         this.principal = principal;
     }
 
@@ -90,7 +90,7 @@ public class InvestmentImpl implements Investment {
         return requireNonNull(interest);
     }
 
-    public void setInterest(final Amounts interest) {
+    public void setInterest(final AmountsImpl interest) {
         this.interest = interest;
     }
 

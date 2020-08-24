@@ -94,8 +94,8 @@ final class Cache<T> {
         public Either<Exception, Investment> getItem(final long id, final Tenant tenant) {
             try {
                 return tenant.call(zonky -> zonky.getInvestment(id))
-                        .map((Function<Investment, Either<Exception, Investment>>) Either::right)
-                        .orElse(Either.left(new IllegalStateException("No investment #" + id)));
+                    .map((Function<Investment, Either<Exception, Investment>>) Either::right)
+                    .orElse(Either.left(new IllegalStateException("No investment #" + id)));
             } catch (final Exception ex) {
                 return Either.left(ex);
             }

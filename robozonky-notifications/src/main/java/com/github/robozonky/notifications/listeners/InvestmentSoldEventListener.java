@@ -33,7 +33,9 @@ public class InvestmentSoldEventListener extends AbstractListener<InvestmentSold
     public String getSubject(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
         // TODO Convince Zonky to include the actual sell price in the new API.
-        final BigDecimal remaining = i.getPrincipal().getUnpaid().getValue();
+        final BigDecimal remaining = i.getPrincipal()
+            .getUnpaid()
+            .getValue();
         return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }
 

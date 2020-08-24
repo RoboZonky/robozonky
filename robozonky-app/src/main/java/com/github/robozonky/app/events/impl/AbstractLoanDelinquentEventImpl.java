@@ -45,7 +45,9 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
 
     @Override
     public LocalDate getDelinquentSince() {
-        var currentDaysInDue = investment.getLoan().getHealthStats().getCurrentDaysDue();
+        var currentDaysInDue = investment.getLoan()
+            .getHealthStats()
+            .getCurrentDaysDue();
         return LocalDate.now()
             .minusDays(currentDaysInDue);
     }

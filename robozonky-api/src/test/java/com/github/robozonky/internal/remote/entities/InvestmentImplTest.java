@@ -16,13 +16,36 @@
 
 package com.github.robozonky.internal.remote.entities;
 
+import static com.github.robozonky.api.remote.enums.DetailLabel.COVID_19_POSTPONEMENT_PROCESSED;
+import static com.github.robozonky.api.remote.enums.DetailLabel.CURRENTLY_INSURED;
+import static com.github.robozonky.api.remote.enums.DetailLabel.VERIFIED_BORROWER;
+import static com.github.robozonky.api.remote.enums.DetailLabel.VERIFIED_INCOME;
+import static com.github.robozonky.api.remote.enums.Label.PAST_DUE_CURRENTLY;
+import static com.github.robozonky.api.remote.enums.Label.PAST_DUE_PREVIOUSLY;
+import static com.github.robozonky.api.remote.enums.Label.PENDING;
+import static com.github.robozonky.api.remote.enums.Label.TERMINATED;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
+
+import java.util.OptionalInt;
+
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.InvestmentLoanData;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
+import com.github.robozonky.api.remote.entities.SellFee;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.remote.enums.SellStatus;
 
 class InvestmentImplTest {
 
@@ -124,9 +147,425 @@ class InvestmentImplTest {
     void deserializeNeverLate() throws Exception {
         try (Jsonb jsonb = JsonbBuilder.create()) {
             Investment investment = jsonb.fromJson(NEVER_LATE_INVESTMENT_JSON, InvestmentImpl.class);
-            SoftAssertions.assertSoftly(softly -> {
+            assertSoftly(softly -> {
                 softly.assertThat(investment.getId())
-                    .isEqualTo(12851390);
+                    .isEqualTo(14284046);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.SELLABLE_WITH_FEE);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(199.66)));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(110.08)));
+                // SellInfo is present and contains particular values.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getFee)
+                    .map(SellFee::getValue)
+                    .contains(Money.from(2.99));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getBoughtFor)
+                    .contains(Money.from(199.66));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getDiscount)
+                    .contains(Ratio.ZERO);
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getRemainingPrincipal)
+                    .contains(Money.from(199.66));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getSellPrice)
+                    .contains(Money.from(199.66));
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(740849, InvestmentLoanData::getId)
+                    .returns(Money.from(8419), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(84, 83), InvestmentLoanData::getPayments)
+                    .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
+                    .returns(Rating.B, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.STREDOCESKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("9.99"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("13.49"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .isEmpty();
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(0, LoanHealthStats::getDueInstalments)
+                    .returns(1, LoanHealthStats::getLongestDaysDue)
+                    .returns(1, LoanHealthStats::getPaidInstalments);
+            });
+        }
+    }
+
+    @Test
+    void deserializeHistoricallyLate() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(HISTORICALLY_LATE_INVESTMENT_JSON, InvestmentImpl.class);
+            assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                    .isEqualTo(13803553);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.SELLABLE_WITH_FEE);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(196.96), Money.from(195.71)));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(79.34), Money.from(77.16)));
+                // SellInfo is present and contains particular values.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getFee)
+                    .map(SellFee::getValue)
+                    .contains(Money.from(2.38));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getBoughtFor)
+                    .contains(Money.from(196.96));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getDiscount)
+                    .contains(Ratio.fromPercentage(19));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getRemainingPrincipal)
+                    .contains(Money.from(195.71));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getSellPrice)
+                    .contains(Money.from(158.53));
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(691603, InvestmentLoanData::getId)
+                    .returns(Money.from(4404), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(66, 62), InvestmentLoanData::getPayments)
+                    .returns(Purpose.AUTO_MOTO, InvestmentLoanData::getPurpose)
+                    .returns(Rating.B, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.SELF_EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.ZLINSKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("9.99"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("13.49"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .contains(PAST_DUE_PREVIOUSLY);
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.HISTORICALLY_IN_DUE, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(17, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(1, LoanHealthStats::getDueInstalments)
+                    .returns(5, LoanHealthStats::getLongestDaysDue)
+                    .returns(4, LoanHealthStats::getPaidInstalments);
+            });
+        }
+    }
+
+    @Test
+    void deserializeLate() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(LATE_INVESTMENT_JSON, InvestmentImpl.class);
+            assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                    .isEqualTo(10011582);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.SELLABLE_WITH_FEE);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(600), Money.from(593.85)));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(271.21), Money.from(252.11)));
+                // SellInfo is present and contains particular values.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getFee)
+                    .map(SellFee::getValue)
+                    .contains(Money.from(7.93));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getBoughtFor)
+                    .contains(Money.from(600));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getDiscount)
+                    .contains(Ratio.fromPercentage(11));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getRemainingPrincipal)
+                    .contains(Money.from(593.85));
+                softly.assertThat(investment.getSmpSellInfo())
+                    .map(SellInfo::getSellPrice)
+                    .contains(Money.from(528.53));
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(685008, InvestmentLoanData::getId)
+                    .returns(Money.from(5263), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(84, 81), InvestmentLoanData::getPayments)
+                    .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
+                    .returns(Rating.A, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.PARDUBICKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("7.99"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("10.99"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .contains(PAST_DUE_CURRENTLY);
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.CURRENTLY_IN_DUE, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(0, LoanHealthStats::getDueInstalments)
+                    .returns(21, LoanHealthStats::getLongestDaysDue)
+                    .returns(3, LoanHealthStats::getPaidInstalments);
+            });
+        }
+    }
+
+    @Test
+    void deserializeDefaulted() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(DEFAULTED_INVESTMENT_JSON, InvestmentImpl.class);
+            assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                    .isEqualTo(6997009);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.NOT_SELLABLE);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(200), Money.from(194.99)));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(9.54), Money.from(2.48)));
+                // SellInfo is missing.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .isEmpty();
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(565277, InvestmentLoanData::getId)
+                    .returns(Money.from(2585), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(6, 2), InvestmentLoanData::getPayments)
+                    .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
+                    .returns(Rating.AA, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.STREDOCESKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("6.29"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("8.49"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .contains(TERMINATED);
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.CURRENTLY_IN_DUE, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(0, LoanHealthStats::getDueInstalments)
+                    .returns(147, LoanHealthStats::getLongestDaysDue)
+                    .returns(5, LoanHealthStats::getPaidInstalments);
+            });
+        }
+    }
+
+    @Test
+    void deserializeSold() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(SOLD_INVESTMENT_JSON, InvestmentImpl.class);
+            assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                    .isEqualTo(10232546);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.SOLD);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(122.23), Money.from(118.9)));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(9.29), Money.from(8.81)));
+                // SellInfo is missing.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .isEmpty();
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(193181, InvestmentLoanData::getId)
+                    .returns(Money.from(3973), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(61, 34), InvestmentLoanData::getPayments)
+                    .returns(Purpose.OTHER, InvestmentLoanData::getPurpose)
+                    .returns(Rating.AAAA, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.SELF_EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.STREDOCESKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("4.49"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("4.99"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .isEmpty();
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(COVID_19_POSTPONEMENT_PROCESSED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(0, LoanHealthStats::getDueInstalments)
+                    .returns(1, LoanHealthStats::getLongestDaysDue)
+                    .returns(26, LoanHealthStats::getPaidInstalments);
+            });
+        }
+    }
+
+    @Test
+    void deserializeFinished() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(FINISHED_INVESTMENT_JSON, InvestmentImpl.class);
+            assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                    .isEqualTo(13214919);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.NOT_SELLABLE);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(190.6), Money.ZERO));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(8.49), Money.from(0.01)));
+                // SellInfo is missing.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .isEmpty();
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(517589, InvestmentLoanData::getId)
+                    .returns(Money.from(6234), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(13, 0), InvestmentLoanData::getPayments)
+                    .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
+                    .returns(Rating.B, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.JIHOMORAVSKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("9.99"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("13.49"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .isEmpty();
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(0, LoanHealthStats::getDueInstalments)
+                    .returns(1, LoanHealthStats::getLongestDaysDue)
+                    .returns(13, LoanHealthStats::getPaidInstalments);
+            });
+        }
+    }
+
+    @Test
+    void deserializePending() throws Exception {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            Investment investment = jsonb.fromJson(PENDING_INVESTMENT_JSON, InvestmentImpl.class);
+            assertSoftly(softly -> {
+                softly.assertThat(investment.getId())
+                    .isEqualTo(14300760);
+                softly.assertThat(investment.getSellStatus())
+                    .isEqualTo(SellStatus.NOT_SELLABLE);
+                softly.assertThat(investment.getPrincipal())
+                    .isEqualTo(new AmountsImpl(Money.from(200)));
+                softly.assertThat(investment.getInterest())
+                    .isEqualTo(new AmountsImpl(Money.from(26.93)));
+                // SellInfo is missing.
+                softly.assertThat(investment.getSmpSellInfo())
+                    .isEmpty();
+                // Loan data is present and contains particular values
+                softly.assertThat(investment.getLoan())
+                    .returns(769283, InvestmentLoanData::getId)
+                    .returns(Money.from(1925), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(60), InvestmentLoanData::getPayments)
+                    .returns(Purpose.HOUSEHOLD, InvestmentLoanData::getPurpose)
+                    .returns(Rating.AAAA, InvestmentLoanData::getRating)
+                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                        .getPrimaryIncomeType())
+                    .returns(Region.JIHOMORAVSKY, l -> l.getBorrower()
+                        .getRegion())
+                    .returns(Ratio.fromPercentage("4.49"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("4.99"), InvestmentLoanData::getInterestRate);
+                softly.assertThat(investment.getLoan()
+                    .getLabel())
+                    .contains(PENDING);
+                softly.assertThat(investment.getLoan()
+                    .getDetailLabels())
+                    .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                softly.assertThat(investment.getLoan()
+                    .getStory())
+                    .isNotBlank();
+                softly.assertThat(investment.getLoan()
+                    .getTitle())
+                    .isNotBlank();
+                // Health stats are present and contains particular values
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
+                    .returns(0, LoanHealthStats::getCurrentDaysDue)
+                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
+                    .returns(0, LoanHealthStats::getDueInstalments)
+                    .returns(1, LoanHealthStats::getLongestDaysDue)
+                    .returns(0, LoanHealthStats::getPaidInstalments);
             });
         }
     }

@@ -30,7 +30,6 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellFee;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -165,9 +164,8 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
     void sellInfoValues() {
         final LoanHealthStats healthInfo = mock(LoanHealthStatsImpl.class);
         when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
-        final SellInfo priceInfo = mock(SellInfo.class);
-        when(priceInfo.getDiscount()).thenReturn(Ratio.fromPercentage(10));
-        when(priceInfo.getSellPrice()).thenReturn(Money.from(10));
+        final SellInfoImpl priceInfo = new SellInfoImpl(Money.from(10));
+        priceInfo.setDiscount(Ratio.fromPercentage(10));
         final SellFee feeInfo = mock(SellFeeImpl.class);
         when(feeInfo.getValue()).thenReturn(Money.from(2));
         when(priceInfo.getFee()).thenReturn(feeInfo);
