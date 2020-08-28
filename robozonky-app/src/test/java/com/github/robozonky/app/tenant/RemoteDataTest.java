@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
@@ -67,7 +66,7 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .build();
         Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(10));
-        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
+        when(zonky.getPendingInvestments()).thenReturn(Stream.of(i));
         Map<Integer, Tuple2<Rating, Money>> result = RemoteData.getAmountsBlocked(tenant);
         Assertions.assertThat(result)
             .containsOnly(Map.entry(i.getLoan()

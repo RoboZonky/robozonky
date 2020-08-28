@@ -37,7 +37,7 @@ import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
-import com.github.robozonky.internal.remote.Select;
+import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
@@ -74,13 +74,9 @@ final class Selling implements TenantPayload {
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
-        final Select sellable = Select.unrestricted()
-            .equalsPlain("delinquent", "true")
-            .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY")
-            .equals("status", "ACTIVE");
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         LOGGER.debug("Starting to query for sellable investments.");
-        final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
+        final Set<InvestmentDescriptor> eligible = tenant.call(Zonky::getSellableInvestments)
             .filter(i -> sold.getOffered()
                 .noneMatch(id -> id == i.getLoan()
                     .getId())) // to enable dry run

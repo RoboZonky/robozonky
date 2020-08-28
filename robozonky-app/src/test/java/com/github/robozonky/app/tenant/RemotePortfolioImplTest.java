@@ -65,7 +65,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
             .build();
         Investment i = MockInvestmentBuilder.fresh(loan, 10)
             .build();
-        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
+        when(zonky.getPendingInvestments()).thenReturn(Stream.of(i));
         Statistics s = mock(StatisticsImpl.class);
         when(s.getRiskPortfolio())
             .thenReturn(singletonList(new RiskPortfolioImpl(Rating.D, Money.from(1), Money.from(2), Money.from(3))));

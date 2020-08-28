@@ -39,10 +39,6 @@ import com.github.robozonky.internal.remote.entities.SellRequest;
 public interface ControlApi {
 
     @GET
-    @Path(ApiConstants.ME + "/logout")
-    void logout();
-
-    @GET
     @Path("/investors/me/restrictions")
     RestrictionsImpl restrictions();
 

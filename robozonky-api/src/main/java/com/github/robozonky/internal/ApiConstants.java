@@ -19,8 +19,7 @@ package com.github.robozonky.internal;
 public final class ApiConstants {
 
     public static final String ME = "/users/me";
-    public static final String NEW_ME = "/api/me";
-    public static final String INVESTMENTS = NEW_ME + "/investments";
+    public static final String INVESTMENTS = "/api/me/investments";
     public static final String LOANS = "/loans";
     public static final String MARKETPLACE = LOANS + "/marketplace";
     public static final String RESERVATIONS = "/reservations";

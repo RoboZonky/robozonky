@@ -176,17 +176,31 @@ public class Zonky {
         return getStream(portfolioApi, PortfolioApi::items, select);
     }
 
+    public Stream<Investment> getPendingInvestments() {
+        final Select s = new Select()
+            .equals("investmentStatus", "AWAITING_INVESTMENT");
+        return getInvestments(s);
+    }
+
     public Stream<Investment> getSoldInvestments() {
-        final Select s = new Select().equals("status", "SOLD");
+        final Select s = Select.unrestricted()
+            .equals("investmentStatus", "ACTIVE")
+            .in("sellStatus", "SOLD");
+        return getInvestments(s);
+    }
+
+    public Stream<Investment> getSellableInvestments() {
+        final Select s = Select.unrestricted()
+            .equals("investmentStatus", "ACTIVE")
+            .in("sellStatus", "SELLABLE_WITH_FEE", "SELLABLE_WITHOUT_FEE");
         return getInvestments(s);
     }
 
     public Stream<Investment> getDelinquentInvestments() {
-        final Select s = new Select()
-            .in("loan.status", "ACTIVE", "PAID_OFF")
-            .equals("status", "ACTIVE")
-            .equalsPlain("delinquent", "true")
-            .equalsPlain("loanHealthInfo", "CURRENTLY_IN_DUE");
+        final Select s = Select.unrestricted()
+            .equals("investmentStatus", "ACTIVE")
+            .in("loanHealth", "ONE_TO_FIFTEEN_DPD", "SIXTEEN_TO_THIRTY_DPD", "THIRTY_ONE_TO_SIXTY_DPD",
+                    "SIXTY_ONE_TO_NINETY_DPD", "MORE_THAN_NINETY_DPD", "PAID_OFF");
         return getInvestments(s);
     }
 
