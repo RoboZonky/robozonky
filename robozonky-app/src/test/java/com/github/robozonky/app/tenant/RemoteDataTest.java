@@ -33,11 +33,12 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
-import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class RemoteDataTest extends AbstractZonkyLeveragingTest {
@@ -63,9 +64,9 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .build();
-        Investment i = MockInvestmentBuilder.fresh(loan, 10)
-            .build();
+        Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(10));
         when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
         Map<Integer, Tuple2<Rating, Money>> result = RemoteData.getAmountsBlocked(tenant);
         Assertions.assertThat(result)

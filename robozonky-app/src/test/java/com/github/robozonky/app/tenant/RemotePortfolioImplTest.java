@@ -61,6 +61,7 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setRating, Rating.C)
+            .set(LoanImpl::setInterestRate, Rating.C.getInterestRate())
             .build();
         Investment i = MockInvestmentBuilder.fresh(loan, 10)
             .build();

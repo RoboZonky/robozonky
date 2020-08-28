@@ -81,7 +81,9 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         return isDue && isTerminated;
     }
 
-    private static void processNoLongerDelinquent(final Investment investment, final PowerTenant tenant) {
+    private static void processNoLongerDelinquent(final Registry registry, final Investment investment,
+            final PowerTenant tenant) {
+        registry.remove(investment);
         LOGGER.debug("Investment identified as no longer delinquent: {}.", investment);
         if (investment.getLoan()
             .getPayments()
@@ -173,7 +175,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 .parallelStream()
                 .forEach(i -> {
                     registry.remove(i);
-                    processNoLongerDelinquent(i, tenant);
+                    processNoLongerDelinquent(registry, i, tenant);
                 });
             // potentially thousands of items, with relatively heavy logic behind them
             getDefaulted(delinquents).forEach(d -> processDefaulted(tenant, registry, d));

@@ -21,7 +21,6 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -39,7 +38,6 @@ import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Select;
-import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 
@@ -61,11 +59,7 @@ final class Selling implements TenantPayload {
                 .isDryRun();
             if (isRealRun) {
                 LOGGER.debug("Will send sell request for loan #{}.", loanId);
-                var call = d.item()
-                    .getSmpSellInfo()
-                    .map(sellInfo -> (Consumer<Zonky>) zonky -> zonky.sell(i, sellInfo))
-                    .orElseGet(() -> z -> z.sell(i));
-                tenant.run(call);
+                tenant.run(zonky -> zonky.sell(i));
             } else {
                 LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
             }
@@ -87,12 +81,12 @@ final class Selling implements TenantPayload {
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         LOGGER.debug("Starting to query for sellable investments.");
         final Set<InvestmentDescriptor> eligible = tenant.call(zonky -> zonky.getInvestments(sellable))
-            .parallel() // this list is potentially very long, and investment pages take long to load; speed this up
             .filter(i -> sold.getOffered()
                 .noneMatch(id -> id == i.getLoan()
                     .getId())) // to enable dry run
             .filter(i -> !sold.wasOnceSold(i.getLoan()
                 .getId()))
+            .map(i -> tenant.getInvestment(i.getId())) // Make sure we have the proper sell info.
             .map(i -> {
                 Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()
                     .getId());

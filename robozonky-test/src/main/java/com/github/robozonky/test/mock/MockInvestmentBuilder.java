@@ -21,9 +21,11 @@ import java.math.BigDecimal;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockInvestmentBuilder> {
 
@@ -53,8 +55,12 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
 
     public static MockInvestmentBuilder fresh(final Loan loan, final LoanHealthStats loanHealthStats,
             final BigDecimal invested) {
-        InvestmentLoanDataImpl ild = loanHealthStats == null ? new InvestmentLoanDataImpl(loan)
-                : new InvestmentLoanDataImpl(loan, loanHealthStats);
+        LoanImpl loanImpl = (LoanImpl) loan;
+        if (loanImpl.getRating() == null) {
+            loanImpl.setRating(Rating.AAAAA);
+        }
+        InvestmentLoanDataImpl ild = loanHealthStats == null ? new InvestmentLoanDataImpl(loanImpl)
+                : new InvestmentLoanDataImpl(loanImpl, loanHealthStats);
         return fresh()
             .set(InvestmentImpl::setLoan, ild)
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(invested)));

@@ -34,7 +34,9 @@ import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class SelingThrottleTest extends AbstractZonkyLeveragingTest {
 
@@ -42,12 +44,15 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
     void picksSmallestOneIfAllOverThreshold() {
         final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN)))
             .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN.pow(2))))
             .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.ONE)))
             .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
@@ -69,12 +74,15 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
     @Test
     void picksAllBelowThreshold() {
         final Investment i1 = MockInvestmentBuilder.fresh()
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN)))
             .build();
         final Investment i2 = MockInvestmentBuilder.fresh()
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN.pow(2))))
             .build();
         final Investment i3 = MockInvestmentBuilder.fresh()
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.ONE)))
             .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();

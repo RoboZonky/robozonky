@@ -123,6 +123,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             .sell(any());
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
+        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> Optional.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, false);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -143,14 +144,15 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .getId()));
     }
 
-    private void saleMade(final boolean isDryRun, final boolean healthy) {
+    private void saleMade(final boolean isDryRun) {
         final Loan loan = new MockLoanBuilder().build();
-        final Investment i = mockInvestment(loan, healthy ? LoanHealth.HEALTHY : LoanHealth.HISTORICALLY_IN_DUE);
+        final Investment i = mockInvestment(loan, LoanHealth.HEALTHY);
         SellInfo sellInfo = mock(SellInfoImpl.class);
         when(i.getSmpSellInfo()).thenReturn(Optional.of(sellInfo));
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
+        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> Optional.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, isDryRun);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -169,58 +171,34 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
-        if (healthy) {
-            verify(zonky, m).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()));
-            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()), eq(sellInfo));
-        } else {
-            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()));
-            verify(zonky, m).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()), eq(sellInfo));
-        }
+        verify(zonky, m).sell(argThat(inv -> i.getLoan()
+            .getId() == inv.getLoan()
+                .getId()));
         // try to sell the same thing again, make sure it doesn't happen
         readPreexistingEvents();
         s.accept(tenant);
-        if (healthy) {
-            verify(zonky, m).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()));
-            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()), eq(sellInfo));
-        } else {
-            verify(zonky, never()).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()));
-            verify(zonky, m).sell(argThat(inv -> i.getLoan()
-                .getId() == inv.getLoan()
-                    .getId()), eq(sellInfo));
-        }
+        verify(zonky, m).sell(argThat(inv -> i.getLoan()
+            .getId() == inv.getLoan()
+                .getId()));
     }
 
     @Test
     void saleMade() {
-        saleMade(false, true);
+        saleMade(false);
     }
 
     @Test
     void saleMadeDryRun() {
-        saleMade(true, true);
+        saleMade(true);
     }
 
     @Test
     void saleMadeUnhealthy() {
-        saleMade(false, false);
+        saleMade(false);
     }
 
     @Test
     void saleMadeUnhealthyDryRun() {
-        saleMade(true, false);
+        saleMade(true);
     }
 }

@@ -97,10 +97,10 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         instance.markAsSold(1);
         assertSoftly(softly -> {
             softly.assertThat(instance.getOffered())
-                .containsOnly(2);
+                .containsOnly(loan.getId());
             softly.assertThat(instance.wasOnceSold(1))
                 .isTrue();
-            softly.assertThat(instance.wasOnceSold(2))
+            softly.assertThat(instance.wasOnceSold(loan.getId()))
                 .isFalse();
         });
     }

@@ -55,6 +55,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -68,6 +69,7 @@ import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -230,8 +232,12 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void loanNowDelinquent() {
-        final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder.fresh()
-            .build(), MockLoanBuilder.fresh());
+        Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setRating, Rating.AAAAA)
+            .build();
+        final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder
+            .fresh(loan, new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE), 200)
+            .build(), loan);
         assertSoftly(softly -> {
             softly.assertThat(e.getLoan())
                 .isNotNull();

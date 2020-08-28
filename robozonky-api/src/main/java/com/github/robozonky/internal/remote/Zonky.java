@@ -38,7 +38,6 @@ import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.Resolution;
@@ -142,11 +141,6 @@ public class Zonky {
         LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoan()
             .getId(), request);
         controlApi.run(api -> api.offer(request));
-    }
-
-    public void sell(final Investment investment, final SellInfo sellInfo) {
-        SellRequest request = new SellRequest(investment.getId(), sellInfo);
-        sell(investment, request);
     }
 
     public void sell(final Investment investment) {

@@ -39,8 +39,6 @@ import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.LoanInvestmentDataImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationPreferenceImpl;
@@ -107,24 +105,15 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         final Reservation simple = new MockReservationBuilder()
             .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
-        final Reservation withInvestment = new MockReservationBuilder()
-            .set(ReservationImpl::setMyReservation, mockMyReservation())
-            .build();
-        final LoanInvestmentDataImpl i = mockMyInvestment();
-        final Loan loanWithInvestment = new MockLoanBuilder()
-            .set(LoanImpl::setMyInvestment, i)
-            .build();
         final Loan fresh = MockLoanBuilder.fresh();
         when(z.getLoan(eq(simple.getId()))).thenReturn(fresh);
-        when(z.getLoan(eq(withInvestment.getId()))).thenReturn(loanWithInvestment);
         when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(SOME_PREFERENCE));
-        when(z.getPendingReservations()).thenReturn(Stream.of(withInvestment, simple));
+        when(z.getPendingReservations()).thenReturn(Stream.of(simple));
         final Tenant t = mockTenant(z, false);
         when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
         final TenantPayload p = new ReservationsProcessing();
         p.accept(t);
         verify(z).accept(eq(simple));
-        verify(z, never()).accept(eq(withInvestment)); // already had investment
         assertThat(getEventsRequested()).hasSize(4);
     }
 

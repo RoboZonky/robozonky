@@ -37,18 +37,25 @@ import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.app.tenant.TransactionalPowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class CategoryTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky();
-    private final Loan loan = MockLoanBuilder.fresh();
-    private final Investment investment = MockInvestmentBuilder.fresh(loan, 200)
+    private final Loan loan = new MockLoanBuilder()
+        .set(LoanImpl::setRating, Rating.D)
+        .build();
+    private final Investment investment = MockInvestmentBuilder
+        .fresh(loan, new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE), 200)
         .build();
 
     @Test
