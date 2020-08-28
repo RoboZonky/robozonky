@@ -39,6 +39,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.Statistics;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
 import com.github.robozonky.internal.remote.endpoints.LoanApi;
@@ -172,19 +173,21 @@ class ZonkyTest {
     @Test
     void investmentById() {
         // prepare data
-        final Loan l1 = mock(LoanImpl.class);
-        when(l1.getId()).thenReturn(1);
-        final InvestmentImpl i1 = mockInvestment(l1, 200);
+        final LoanImpl loan = new LoanImpl();
+        loan.setRating(Rating.A);
+        loan.setAmount(Money.from(200));
+        loan.setRemainingInvestment(Money.from(200));
+        final InvestmentImpl investment = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200));
         // prepare api
-        final PaginatedApi<InvestmentImpl, PortfolioApi> api = mockApi(singletonList(i1));
+        final PaginatedApi<InvestmentImpl, PortfolioApi> api = mockApi(singletonList(investment));
         final ApiProvider provider = mockApiProvider();
         when(provider.obtainPaginated(eq(PortfolioApi.class), any(), any())).thenReturn(api);
         final Zonky z = mockZonky(provider);
         // start test
-        assertThat(z.getInvestmentByLoanId(i1.getLoan()
+        assertThat(z.getInvestmentByLoanId(investment.getLoan()
             .getId()))
                 .hasValueSatisfying(i -> assertThat(i.getLoan()
-                    .getId()).isEqualTo(i1.getLoan()
+                    .getId()).isEqualTo(investment.getLoan()
                         .getId()));
 
     }
@@ -233,17 +236,17 @@ class ZonkyTest {
             .invest(any());
         final Api<ControlApi> ca = mockApi(control);
         final PaginatedApi<LoanImpl, LoanApi> la = mockApi();
-        final int loanId = 1;
-        final Loan loan = mock(LoanImpl.class);
-        when(loan.getId()).thenReturn(loanId);
-        when(loan.getAmount()).thenReturn(Money.from(200.0));
-        when(loan.getRemainingInvestment()).thenReturn(Money.from(200.0));
+        final LoanImpl loan = new LoanImpl();
+        loan.setRating(Rating.A);
+        loan.setAmount(Money.from(200));
+        loan.setRemainingInvestment(Money.from(200));
         when(la.execute(any())).thenReturn(loan);
         final Zonky z = mockZonky(ca, la);
-        final Loan l = z.getLoan(loanId);
-        final InvestmentImpl i = mockInvestment(l, 200);
+        final Loan l = z.getLoan(loan.getId());
+        final Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200));
         assertThat(z.invest(l, 200)
-            .getFailureType()).contains(InvestmentFailureType.UNKNOWN);
+            .getFailureType())
+                .contains(InvestmentFailureType.UNKNOWN);
     }
 
     @Test
@@ -276,7 +279,9 @@ class ZonkyTest {
         final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
-        final InvestmentImpl investment = new InvestmentImpl();
+        final LoanImpl loan = new LoanImpl();
+        loan.setRating(Rating.D);
+        final InvestmentImpl investment = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200));
         investment.setId(1);
         investment.setPrincipal(new AmountsImpl(Money.from(10)));
         final SellInfoImpl sellInfo = new SellInfoImpl(Money.from(10), Money.from(1));
@@ -290,8 +295,7 @@ class ZonkyTest {
         final ControlApi control = mock(ControlApi.class);
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
-        final Investment i = mock(InvestmentImpl.class);
-        when(i.getId()).thenReturn(1L);
+        final Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(), Money.from(200));
         z.cancel(i);
         verify(control).cancel(eq(i.getId()));
     }

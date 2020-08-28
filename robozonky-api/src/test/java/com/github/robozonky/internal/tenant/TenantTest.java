@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 
@@ -33,16 +32,6 @@ class TenantTest {
         my.run(zonky -> {
             /* NOOP */ });
         verify(my).call(notNull());
-    }
-
-    @Test
-    void delegatesSellInfo() {
-        Investment result = mock(Investment.class);
-        Tenant my = spy(Tenant.class);
-        when(my.call(notNull())).thenReturn(result);
-        Investment actual = my.getInvestment(1);
-        assertThat(actual)
-            .isSameAs(result);
     }
 
     @Test
