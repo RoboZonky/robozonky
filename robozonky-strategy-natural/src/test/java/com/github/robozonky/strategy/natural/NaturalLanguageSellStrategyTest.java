@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -42,12 +43,17 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
 
+    private static final Loan LOAN = new MockLoanBuilder()
+        .set(LoanImpl::setAmount, Money.from(100_000))
+        .set(LoanImpl::setRating, Rating.A)
+        .build();
+
     private static Investment mockInvestment() {
         return mockInvestment(BigDecimal.TEN);
     }
 
     private static Investment mockInvestment(final BigDecimal fee) {
-        return MockInvestmentBuilder.fresh(new MockLoanBuilder().build(), 10)
+        return MockInvestmentBuilder.fresh(LOAN, 10)
             .set(InvestmentImpl::setSmpSellInfo, new SellInfoImpl(Money.from(10), Money.from(fee)))
             .build();
     }
@@ -57,10 +63,7 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
     }
 
     private static InvestmentDescriptor mockDescriptor(final Investment investment) {
-        final Loan l = new MockLoanBuilder()
-            .set(LoanImpl::setAmount, Money.from(100_000))
-            .build();
-        return new InvestmentDescriptor(investment, () -> l);
+        return new InvestmentDescriptor(investment, () -> LOAN);
     }
 
     @Test

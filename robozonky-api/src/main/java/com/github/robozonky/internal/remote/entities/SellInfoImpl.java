@@ -46,6 +46,7 @@ public class SellInfoImpl implements SellInfo {
 
     public SellInfoImpl(Money sellPrice, Money sellFee) {
         this.sellPrice = Objects.requireNonNull(sellPrice);
+        this.boughtFor = sellPrice;
         this.fee = new SellFeeImpl(sellFee);
     }
 

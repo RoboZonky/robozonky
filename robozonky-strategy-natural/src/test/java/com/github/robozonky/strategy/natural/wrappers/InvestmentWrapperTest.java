@@ -17,7 +17,6 @@
 package com.github.robozonky.strategy.natural.wrappers;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
-import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -29,7 +28,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
-import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -38,6 +36,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InstalmentsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
@@ -75,7 +74,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             .set(LoanImpl::setInsuranceActive, false)
             .set(LoanImpl::setAmount, Money.from(100_000))
             .set(LoanImpl::setRating, Rating.D)
-            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setInterestRate, Ratio.fromPercentage(19.99))
             .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
             .set(LoanImpl::setRegion, Region.JIHOCESKY)
@@ -88,6 +87,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
         final InvestmentImpl investment = MockInvestmentBuilder
             .fresh(loan, new LoanHealthStatsImpl(LoanHealth.HEALTHY), invested)
             .set(InvestmentImpl::setSmpSellInfo, new SellInfoImpl(Money.from(1), Money.from(1)))
+            .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(1)))
             .build();
         InvestmentLoanDataImpl ild = (InvestmentLoanDataImpl) investment.getLoan();
         ild.setPayments(new InstalmentsImpl(20, 10));
@@ -101,7 +101,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
                     .getDetailLabels()
                     .contains(DetailLabel.CURRENTLY_INSURED));
             softly.assertThat(w.getInterestRate())
-                .isEqualTo(Ratio.ONE);
+                .isEqualTo(Ratio.fromPercentage(19.99));
             softly.assertThat(w.getRegion())
                 .isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating())
@@ -134,7 +134,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getHealth())
                 .contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getOriginalPurchasePrice())
-                .contains(new BigDecimal("10.00"));
+                .contains(new BigDecimal("1.00"));
             softly.assertThat(w.getDiscount())
                 .contains(BigDecimal.ZERO);
             softly.assertThat(w.getPrice())
@@ -162,15 +162,13 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
 
     @Test
     void sellInfoValues() {
-        final LoanHealthStats healthInfo = mock(LoanHealthStatsImpl.class);
-        when(healthInfo.getLoanHealthInfo()).thenReturn(LoanHealth.HISTORICALLY_IN_DUE);
-        final SellInfoImpl priceInfo = new SellInfoImpl(Money.from(10));
-        priceInfo.setDiscount(Ratio.fromPercentage(10));
-        final SellFee feeInfo = mock(SellFeeImpl.class);
-        when(feeInfo.getValue()).thenReturn(Money.from(2));
-        when(priceInfo.getFee()).thenReturn(feeInfo);
-        final Investment investment = MockInvestmentBuilder.fresh(LOAN, 200)
-            .set(InvestmentImpl::setSmpSellInfo, priceInfo)
+        final LoanHealthStats healthInfo = new LoanHealthStatsImpl(LoanHealth.HISTORICALLY_IN_DUE);
+        final SellFeeImpl feeInfo = new SellFeeImpl(Money.from(2));
+        final SellInfoImpl sellInfo = new SellInfoImpl(Money.from(10));
+        sellInfo.setFee(feeInfo);
+        sellInfo.setDiscount(Ratio.fromPercentage(10));
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, healthInfo, BigDecimal.valueOf(200))
+            .set(InvestmentImpl::setSmpSellInfo, sellInfo)
             .build();
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);

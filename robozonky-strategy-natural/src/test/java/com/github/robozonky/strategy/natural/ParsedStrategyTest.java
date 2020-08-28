@@ -131,6 +131,7 @@ class ParsedStrategyTest {
         // no loan or participation should be bought; every investment should be sold
         final LoanImpl loanUnder = ParsedStrategyTest.mockLoan(1000);
         final LoanImpl loanOver = new MockLoanBuilder()
+            .set(LoanImpl::setRating, Rating.A)
             .set(LoanImpl::setAmount, Money.from(2_000))
             .set(LoanImpl::setTermInMonths, 84)
             .build();

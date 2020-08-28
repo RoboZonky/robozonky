@@ -102,8 +102,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalAmount() {
-        return investment.getPrincipal()
-            .getTotal()
+        return getLoan()
+            .getAmount()
             .getValue()
             .intValue();
     }
