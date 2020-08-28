@@ -124,7 +124,8 @@ final class Util {
             .getPayments()
             .getUnpaid());
         loanData.put("amountRemaining", i.getPrincipal()
-            .getUnpaid());
+            .getUnpaid()
+            .getValue());
         loanData.put("amountHeld", originalPrincipal.getValue());
         loanData.put("amountPaid", returned.getValue());
         loanData.put("balance", balance.getValue());

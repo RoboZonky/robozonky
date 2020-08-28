@@ -34,12 +34,14 @@ import com.github.robozonky.api.notifications.LoanDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.notifications.AbstractTargetHandler;
@@ -63,7 +65,8 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         .set(LoanImpl::setName, "")
         .set(LoanImpl::setUrl, "http://localhost")
         .build();
-    private static final Investment INVESTMENT = MockInvestmentBuilder.fresh(LOAN, 200)
+    private static final Investment INVESTMENT = MockInvestmentBuilder
+        .fresh(LOAN, new LoanHealthStatsImpl(LoanHealth.UNKNOWN), 200)
         .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(BigDecimal.TEN)))
         .build();
     private static final Loan LOAN2 = new MockLoanBuilder()

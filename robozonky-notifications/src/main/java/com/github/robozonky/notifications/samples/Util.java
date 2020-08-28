@@ -33,14 +33,17 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.test.DateUtil;
@@ -86,6 +89,7 @@ final class Util {
     public static Loan randomizeLoan() {
         final LoanImpl loan = new LoanImpl();
         loan.setId(100_000 + RANDOM.nextInt(900_000)); // six-digit number
+        loan.setRating(Rating.values()[RANDOM.nextInt(Rating.values().length)]);
         loan.setMainIncomeType(randomize(MainIncomeType.values()));
         loan.setPurpose(randomize(Purpose.values()));
         loan.setRegion(randomize(Region.values()));
@@ -122,10 +126,13 @@ final class Util {
     }
 
     public static Investment randomizeInvestment(final Loan loan) {
-        return new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200 + (RANDOM.nextInt(24) * 200L))); // from
-                                                                                                                    // 200
-                                                                                                                    // to
-                                                                                                                    // 5000
+        InvestmentImpl investment = new InvestmentImpl(new InvestmentLoanDataImpl(loan,
+                new LoanHealthStatsImpl(LoanHealth.UNKNOWN)),
+                Money.from(200 + (RANDOM.nextInt(24) * 200L))); // From 200 to 5_000.
+        Money interest = Money.from(RANDOM.nextDouble() * 10);
+        Money unpaidInterest = interest.divideBy(2);
+        investment.setInterest(new AmountsImpl(interest, unpaidInterest));
+        return investment;
     }
 
     public static Participation randomizeParticipation(final Loan loan) {
