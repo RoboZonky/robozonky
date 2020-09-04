@@ -17,13 +17,7 @@
 package com.github.robozonky.notifications.samples;
 
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 
 public final class MySaleOfferedEvent extends AbstractInvestmentBasedEvent implements SaleOfferedEvent {
 
-    @Override
-    public SellInfo getSellInfo() {
-        return new SellInfoImpl();
-    }
 }

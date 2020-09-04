@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.remote.entities;
+package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
-public interface SellPriceInfo {
+import com.github.robozonky.internal.util.json.LabelDeserializer;
 
-    SellFee getFee();
+@JsonbTypeDeserializer(LabelDeserializer.class)
+public enum Label {
 
-    Money getSellPrice();
+    PENDING,
+    PAST_DUE_PREVIOUSLY,
+    PAST_DUE_CURRENTLY,
+    TERMINATED,
+    UNKNOWN
 
-    Money getBoughtFor();
-
-    Money getRemainingPrincipal();
-
-    Ratio getDiscount();
 }

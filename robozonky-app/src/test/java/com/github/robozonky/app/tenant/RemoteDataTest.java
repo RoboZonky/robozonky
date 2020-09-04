@@ -16,10 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -30,14 +28,17 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
-import com.github.robozonky.test.mock.MockInvestmentBuilder;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class RemoteDataTest extends AbstractZonkyLeveragingTest {
 
@@ -60,14 +61,16 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
     void amountsBlocked() {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
-        Investment i = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setRating, Rating.D)
-            .set(InvestmentImpl::setAmount, Money.from(BigDecimal.TEN))
+        final Loan loan = new MockLoanBuilder()
+            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .build();
-        when(zonky.getInvestments(any())).thenReturn(Stream.of(i));
+        Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(10));
+        when(zonky.getPendingInvestments()).thenReturn(Stream.of(i));
         Map<Integer, Tuple2<Rating, Money>> result = RemoteData.getAmountsBlocked(tenant);
         Assertions.assertThat(result)
-            .containsOnly(Map.entry(i.getLoanId(), Tuple.of(Rating.D, Money.from(10))));
+            .containsOnly(Map.entry(i.getLoan()
+                .getId(), Tuple.of(Rating.D, Money.from(10))));
     }
 
 }

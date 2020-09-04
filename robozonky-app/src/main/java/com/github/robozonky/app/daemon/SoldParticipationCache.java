@@ -29,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.SessionInfo;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.state.InstanceState;
@@ -55,7 +54,8 @@ final class SoldParticipationCache {
 
     private static Set<Integer> retrieveSoldParticipationIds(final Tenant tenant) {
         return tenant.call(Zonky::getSoldInvestments)
-            .mapToInt(Investment::getLoanId)
+            .mapToInt(investment -> investment.getLoan()
+                .getId())
             .distinct()
             .boxed()
             .collect(Collectors.toSet());

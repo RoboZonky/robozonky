@@ -16,17 +16,22 @@
 
 package com.github.robozonky.test.mock;
 
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 public class MockLoanBuilder extends BaseLoanMockBuilder<LoanImpl, MockLoanBuilder> {
 
-    public static LoanImpl fresh() {
-        return new MockLoanBuilder().build();
-    }
-
     public MockLoanBuilder() {
         super(LoanImpl.class);
         set(LoanImpl::setId, RANDOM.nextInt());
+        set(LoanImpl::setRating, Rating.A);
+        set(LoanImpl::setInterestRate, Rating.A.getInterestRate());
+        set(LoanImpl::setRevenueRate, Rating.A.getMaximalRevenueRate());
+    }
+
+    public static LoanImpl fresh() {
+        return new MockLoanBuilder()
+            .build();
     }
 
 }

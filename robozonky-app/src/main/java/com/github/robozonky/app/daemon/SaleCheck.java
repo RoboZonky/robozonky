@@ -26,7 +26,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -40,15 +39,16 @@ final class SaleCheck implements TenantPayload {
         final Optional<Investment> i = tenant.call(z -> z.getInvestmentByLoanId(loanId));
         if (i.isPresent()) {
             final Investment actual = i.get();
-            if (actual.getStatus() == InvestmentStatus.SOLD) {
-                return Optional.of(actual);
-            } else if (actual.isOnSmp()) {
-                LOGGER.debug("Investment for loan #{} is still on SMP.", loanId);
-                return Optional.empty();
-            } else {
-                LOGGER.info("Investment for loan #{} was not sold.", loanId);
-                cache.unmarkAsOffered(loanId);
-                return Optional.empty();
+            switch (actual.getSellStatus()) {
+                case SOLD:
+                    return Optional.of(actual);
+                case OFFERED:
+                    LOGGER.debug("Investment for loan #{} is still on SMP.", loanId);
+                    return Optional.empty();
+                default:
+                    LOGGER.info("Investment for loan #{} was not sold.", loanId);
+                    cache.unmarkAsOffered(loanId);
+                    return Optional.empty();
             }
         } else {
             LOGGER.warn("Investment for loan #{} not found in the API.", loanId);
@@ -64,7 +64,8 @@ final class SaleCheck implements TenantPayload {
             .mapToObj(id -> retrieveInvestmentIfSold(cache, tenant, id))
             .flatMap(Optional::stream)
             .forEach(sold -> {
-                final int loanId = sold.getLoanId();
+                final int loanId = sold.getLoan()
+                    .getId();
                 cache.markAsSold(loanId);
                 ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
                     final Loan l = tenant.getLoan(loanId);

@@ -39,6 +39,10 @@ public class LoanHealthStatsImpl implements LoanHealthStats {
         // For JSON-B.
     }
 
+    public LoanHealthStatsImpl(LoanHealth loanHealth) {
+        this.loanHealthInfo = loanHealth;
+    }
+
     @Override
     public int getPaidInstalments() {
         return paidInstalments;

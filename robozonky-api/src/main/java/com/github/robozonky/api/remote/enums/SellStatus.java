@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.api.remote.enums;
 
-import com.github.robozonky.api.remote.entities.SellInfo;
+public enum SellStatus {
 
-public interface SellableBased {
-
-    SellInfo getSellInfo();
+    NOT_SELLABLE,
+    SELLABLE_WITH_FEE,
+    SELLABLE_WITHOUT_FEE,
+    OFFERED,
+    SOLD
 
 }

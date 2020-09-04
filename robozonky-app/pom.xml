@@ -62,10 +62,6 @@
       <groupId>info.picocli</groupId>
       <artifactId>picocli</artifactId>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
     <!-- all logging dependencies -->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>

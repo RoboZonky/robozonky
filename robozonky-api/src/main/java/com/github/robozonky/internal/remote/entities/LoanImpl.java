@@ -22,7 +22,7 @@ import java.util.StringJoiner;
 import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.MyInvestment;
+import com.github.robozonky.api.remote.entities.LoanInvestmentData;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -39,15 +39,19 @@ public class LoanImpl extends BaseLoanImpl implements Loan {
 
     protected String url;
     @JsonbProperty(nillable = true)
-    protected MyInvestmentImpl myInvestment;
+    protected LoanInvestmentDataImpl myInvestment;
 
     public LoanImpl() {
         // For JSON-B.
     }
 
     @Override
-    public Optional<MyInvestment> getMyInvestment() {
+    public Optional<LoanInvestmentData> getMyInvestment() {
         return Optional.ofNullable(myInvestment);
+    }
+
+    public void setMyInvestment(final LoanInvestmentDataImpl myInvestment) {
+        this.myInvestment = myInvestment;
     }
 
     @Override
@@ -57,10 +61,6 @@ public class LoanImpl extends BaseLoanImpl implements Loan {
 
     public void setUrl(final String url) {
         this.url = url;
-    }
-
-    public void setMyInvestment(final MyInvestmentImpl myInvestment) {
-        this.myInvestment = myInvestment;
     }
 
     @Override

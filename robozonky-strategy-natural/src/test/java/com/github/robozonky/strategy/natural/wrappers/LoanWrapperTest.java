@@ -47,14 +47,12 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
             .set(LoanImpl::setInsuranceActive, false)
             .set(LoanImpl::setAmount, Money.from(100_000))
             .set(LoanImpl::setRating, Rating.D)
-            .set(LoanImpl::setInterestRate, Ratio.ONE)
             .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
             .set(LoanImpl::setRegion, Region.JIHOCESKY)
             .set(LoanImpl::setStory, UUID.randomUUID()
                 .toString())
             .set(LoanImpl::setTermInMonths, 20)
-            .set(LoanImpl::setInterestRate, Ratio.ONE)
             .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
             .build();
         LoanDescriptor ld = new LoanDescriptor(loan);
@@ -65,7 +63,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.isInsuranceActive())
                 .isEqualTo(loan.isInsuranceActive());
             softly.assertThat(w.getInterestRate())
-                .isEqualTo(Ratio.ONE);
+                .isEqualTo(loan.getInterestRate());
             softly.assertThat(w.getRegion())
                 .isEqualTo(loan.getRegion());
             softly.assertThat(w.getRating())
@@ -101,7 +99,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getReturns())
                 .isEmpty();
             softly.assertThat(w.getRevenueRate())
-                .isEqualTo(Ratio.fromRaw("0.1499"));
+                .isEqualTo(Ratio.fromRaw("0.0799"));
             softly.assertThat(w.getOriginalAnnuity())
                 .isEqualTo(loan.getAnnuity()
                     .getValue()
@@ -121,6 +119,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
     void fromLoanWithoutRevenueRate() {
         final LoanImpl loan = new MockLoanBuilder()
             .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setRevenueRate, null)
             .build();
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);

@@ -28,7 +28,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.internal.Defaults;
 
 class LoanImplTest {
 
@@ -74,10 +73,6 @@ class LoanImplTest {
                     .isEqualTo(Money.from(615));
                 softly.assertThat(loan.getRating())
                     .isEqualTo(Rating.AAAA);
-                softly.assertThat(loan.getCurrency())
-                    .isEqualTo(Defaults.CURRENCY);
-                softly.assertThat(loan.getCountryOfOrigin())
-                    .isEqualTo(Defaults.COUNTRY_OF_ORIGIN);
                 softly.assertThat(loan.getRemainingInvestment())
                     .isEqualTo(Money.from(318_900));
                 softly.assertThat(loan.getReservedAmount())

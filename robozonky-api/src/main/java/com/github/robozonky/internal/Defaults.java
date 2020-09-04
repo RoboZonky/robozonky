@@ -29,8 +29,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.remote.enums.Country;
-
 /**
  * Carries application constants (such as version) and desired environmental settings (such as charset or locale).
  */
@@ -39,7 +37,6 @@ public final class Defaults {
     private static final Logger LOGGER = LogManager.getLogger(Defaults.class);
 
     public static final Currency CURRENCY = Currency.getInstance("CZK");
-    public static final Country COUNTRY_OF_ORIGIN = Country.CZECHIA;
     public static final String MEDIA_TYPE = MediaType.APPLICATION_JSON + "; charset=UTF-8";
     public static final Locale LOCALE = Locale.forLanguageTag("cs-CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;

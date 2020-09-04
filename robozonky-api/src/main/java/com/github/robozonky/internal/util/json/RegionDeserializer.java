@@ -16,14 +16,19 @@
 
 package com.github.robozonky.internal.util.json;
 
+import java.util.Arrays;
+
 import com.github.robozonky.api.remote.enums.Region;
 
 public final class RegionDeserializer extends AbstractDeserializer<Region> {
 
     public RegionDeserializer() {
-        super(s -> {
-            final int actualId = Integer.parseInt(s) - 1; // regions in Zonky API are indexed from 1
-            return Region.values()[actualId];
-        }, Region.UNKNOWN);
+        super(s -> Arrays.stream(Region.values())
+            .filter(x -> s.equals(x.name())) // Regions in Investment API use their name.
+            .findAny()
+            .orElseGet(() -> {
+                final int actualId = Integer.parseInt(s) - 1; // Regions in Loan API are indexed from 1.
+                return Region.values()[actualId];
+            }), Region.UNKNOWN);
     }
 }

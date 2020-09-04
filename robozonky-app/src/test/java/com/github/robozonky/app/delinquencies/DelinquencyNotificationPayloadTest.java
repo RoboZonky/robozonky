@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
@@ -36,12 +37,16 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
+import com.github.robozonky.api.remote.enums.Label;
+import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
@@ -51,29 +56,40 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     private final Registry r = new Registry(tenant);
     private final DelinquencyNotificationPayload payload = new DelinquencyNotificationPayload(t -> r, true);
 
+    private static InvestmentImpl getDelinquentInvestment(int dpd) {
+        LoanHealthStatsImpl loanHealthStats = new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE);
+        loanHealthStats.setCurrentDaysInDue(dpd);
+        InvestmentLoanDataImpl investmentLoanData = new InvestmentLoanDataImpl(new MockLoanBuilder().build(),
+                loanHealthStats);
+        InvestmentImpl investment = new InvestmentImpl(investmentLoanData, Money.from(200));
+        investment.setId((int) (Math.random() * 1_000_000));
+        investment.setSellStatus(SellStatus.SELLABLE_WITH_FEE);
+        return investment;
+    }
+
+    private static InvestmentImpl getDefaultedInvestment() {
+        LoanHealthStatsImpl loanHealthStats = new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE);
+        loanHealthStats.setCurrentDaysInDue(Integer.MAX_VALUE);
+        InvestmentLoanDataImpl investmentLoanData = new InvestmentLoanDataImpl(new MockLoanBuilder().build(),
+                loanHealthStats);
+        investmentLoanData.setLabel(Label.TERMINATED);
+        InvestmentImpl investment = new InvestmentImpl(investmentLoanData, Money.from(200));
+        investment.setId((int) (Math.random() * 1_000_000));
+        investment.setSellStatus(SellStatus.NOT_SELLABLE);
+        return investment;
+    }
+
     @Test
     void initializesWithoutTriggeringEvents() {
-        final Investment i0 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 0)
-            .build();
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .build();
-        final Investment i10 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 10)
-            .build();
-        final Investment i30 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 30)
-            .build();
-        final Investment i60 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 60)
-            .build();
-        final Investment i90 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 90)
-            .build();
-        final Investment defaulted = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.PAID_OFF)
-            .build();
+        final Investment i0 = new InvestmentImpl(new InvestmentLoanDataImpl(new MockLoanBuilder().build(),
+                new LoanHealthStatsImpl()),
+                Money.from(200));
+        final Investment i1 = getDelinquentInvestment(1);
+        final Investment i10 = getDelinquentInvestment(10);
+        final Investment i30 = getDelinquentInvestment(30);
+        final Investment i60 = getDelinquentInvestment(60);
+        final Investment i90 = getDelinquentInvestment(90);
+        final Investment defaulted = getDefaultedInvestment();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i0, i1, i10, i30, i60, i90, defaulted));
         // run test
         payload.accept(tenant);
@@ -103,24 +119,12 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void triggersEventsOnNewDelinquents() {
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .build();
-        final Investment i10 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 10)
-            .build();
-        final Investment i30 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 30)
-            .build();
-        final Investment i60 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 60)
-            .build();
-        final Investment i90 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 90)
-            .build();
-        final Investment defaulted = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.PAID_OFF)
-            .build();
+        final Investment i1 = getDelinquentInvestment(1);
+        final Investment i10 = getDelinquentInvestment(10);
+        final Investment i30 = getDelinquentInvestment(30);
+        final Investment i60 = getDelinquentInvestment(60);
+        final Investment i90 = getDelinquentInvestment(90);
+        final Investment defaulted = getDefaultedInvestment();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
@@ -138,16 +142,11 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void handlesRegularHealing() {
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .build();
+        final Investment i1 = getDelinquentInvestment(1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.OK)
-            .build();
+        final Investment i2 = getDelinquentInvestment(1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
@@ -168,16 +167,11 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void handlesLoss() {
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .build();
+        final Investment i1 = getDefaultedInvestment();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.WRITTEN_OFF)
-            .build();
+        final Investment i2 = getDefaultedInvestment();
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
@@ -185,7 +179,7 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
             .extracting(e -> (Object) e.getClass()
                 .getInterfaces()[0])
-            .containsOnly(LoanNowDelinquentEvent.class);
+            .containsOnly(LoanDefaultedEvent.class);
         readPreexistingEvents();
         // now the same delinquency is no longer available
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
@@ -198,25 +192,21 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void handlesRepayment() {
-        final Investment i1 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .build();
+        final Investment i1 = getDelinquentInvestment(1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setLegalDpd, 1)
-            .set(InvestmentImpl::setPaymentStatus, PaymentStatus.PAID)
-            .build();
+        final InvestmentImpl i2 = getDelinquentInvestment(1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
-        assertThat(getEventsRequested()).hasSize(1)
+        assertThat(getEventsRequested())
             .extracting(e -> (Object) e.getClass()
                 .getInterfaces()[0])
-            .containsOnly(LoanNowDelinquentEvent.class);
+            .containsExactly(LoanNowDelinquentEvent.class);
         readPreexistingEvents();
+        i2.setPrincipal(new AmountsImpl(Money.ZERO));
         // now the same delinquency is no longer available
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
         when(zonky.getInvestment(eq(i2.getId()))).thenReturn(Optional.of(i2));

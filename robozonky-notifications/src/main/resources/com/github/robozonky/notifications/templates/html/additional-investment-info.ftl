@@ -13,10 +13,6 @@
       <th style="width: 20%; text-align: right;">Zaplacené úroky:</th>
       <td>${data.interestPaid?string.currency} z původních ${data.interestExpected?string.currency}</td>
     </tr>
-    <tr>
-      <th style="width: 20%; text-align: right;">Zaplacené pokuty:</th>
-      <td>${data.penaltiesPaid?string.currency}.</td>
-    </tr>
 <#if data.currentDaysDue??>
     <tr>
       <th style="width: 20%; text-align: right;">Aktuálně po splatnosti:</th>

@@ -16,388 +16,102 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import java.time.Instant;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.StringJoiner;
 
 import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Amounts;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.InsuranceStatus;
-import com.github.robozonky.api.remote.enums.LoanHealth;
-import com.github.robozonky.api.remote.enums.PaymentStatus;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.entities.InvestmentLoanData;
+import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.SellStatus;
 
-public class InvestmentImpl extends BaseInvestmentImpl implements Investment {
+public class InvestmentImpl implements Investment {
 
+    private long id;
+    private InvestmentLoanDataImpl loan;
     @JsonbProperty(nillable = true)
-    private PaymentStatus paymentStatus;
-    @JsonbProperty(nillable = true)
-    private LoanHealth loanHealthInfo;
-    private boolean onSmp;
-    private boolean insuranceActive;
-    private boolean instalmentPostponement;
-    @JsonbProperty(nillable = true)
-    private Integer legalDpd;
-    @JsonbProperty(nillable = true)
-    private Integer currentTerm = 0;
-    private int loanTermInMonth = 84;
-    private int remainingMonths = loanTermInMonth - currentTerm;
-    private String loanName;
-    private InsuranceStatus insuranceStatus = InsuranceStatus.NOT_INSURED;
-    private Ratio interestRate;
-    @JsonbProperty(nillable = true)
-    private Ratio revenueRate;
-    private Rating rating;
-
-    private Money loanAnnuity = Money.ZERO;
-    private Money loanAmount = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money paid = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money toPay = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money amountDue = Money.ZERO;
-    private Money paidInterest = Money.ZERO;
-    private Money dueInterest = Money.ZERO;
-    private Money paidPrincipal = Money.ZERO;
-    private Money duePrincipal = Money.ZERO;
-    private Money expectedInterest = Money.ZERO;
-    private Money purchasePrice = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money remainingPrincipal = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money smpPrice = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money smpSoldFor = Money.ZERO;
-    @JsonbProperty(nillable = true)
-    private Money smpFee = Money.ZERO;
-    private Money paidPenalty = Money.ZERO;
+    private SellInfoImpl smpSellInfo;
+    private AmountsImpl principal;
+    private AmountsImpl interest;
+    private SellStatus sellStatus;
 
     public InvestmentImpl() {
         // For JSON-B.
     }
 
-    public InvestmentImpl(final Loan loan, final Money amount) {
-        super(loan, amount);
-        this.rating = loan.getRating();
-        this.interestRate = rating.getInterestRate();
-        this.revenueRate = rating.getMinimalRevenueRate(Instant.now());
-        this.remainingPrincipal = amount;
-        this.purchasePrice = remainingPrincipal;
-        this.remainingMonths = loan.getTermInMonths();
-        this.loanTermInMonth = loan.getTermInMonths();
-        this.insuranceActive = loan.isInsuranceActive();
+    public InvestmentImpl(final InvestmentLoanDataImpl loan, final Money amount) {
+        this.principal = new AmountsImpl(amount);
+        this.loan = loan;
     }
 
     @Override
-    public Rating getRating() {
-        return rating;
+    public long getId() {
+        return id;
+    }
+
+    public void setId(final long id) {
+        this.id = id;
     }
 
     @Override
-    public Optional<LoanHealth> getLoanHealthInfo() {
-        return Optional.ofNullable(loanHealthInfo);
+    public InvestmentLoanData getLoan() {
+        return requireNonNull(loan);
+    }
+
+    public void setLoan(final InvestmentLoanDataImpl loan) {
+        this.loan = loan;
     }
 
     @Override
-    public OptionalInt getLegalDpd() {
-        return legalDpd == null ? OptionalInt.empty() : OptionalInt.of(legalDpd);
+    public Optional<SellInfo> getSmpSellInfo() {
+        return Optional.ofNullable(smpSellInfo);
+    }
+
+    public void setSmpSellInfo(final SellInfoImpl smpSellInfo) {
+        this.smpSellInfo = smpSellInfo;
     }
 
     @Override
-    public int getLoanTermInMonth() {
-        return loanTermInMonth;
+    public Amounts getPrincipal() {
+        return requireNonNull(principal);
+    }
+
+    public void setPrincipal(final AmountsImpl principal) {
+        this.principal = principal;
     }
 
     @Override
-    public OptionalInt getCurrentTerm() {
-        return currentTerm == null ? OptionalInt.empty() : OptionalInt.of(currentTerm);
+    public Amounts getInterest() {
+        return requireNonNull(interest);
+    }
+
+    public void setInterest(final AmountsImpl interest) {
+        this.interest = interest;
     }
 
     @Override
-    public boolean isOnSmp() {
-        return onSmp;
+    public SellStatus getSellStatus() {
+        return requireNonNull(sellStatus);
     }
 
-    @Override
-    public int getRemainingMonths() {
-        return remainingMonths;
-    }
-
-    @Override
-    public String getLoanName() {
-        return loanName;
-    }
-
-    @Override
-    public Optional<PaymentStatus> getPaymentStatus() {
-        return Optional.ofNullable(paymentStatus);
-    }
-
-    @Override
-    public Ratio getInterestRate() {
-        return interestRate;
-    }
-
-    @Override
-    public Optional<Ratio> getRevenueRate() {
-        return Optional.ofNullable(revenueRate);
-    }
-
-    @Override
-    public InsuranceStatus getInsuranceStatus() {
-        return insuranceStatus;
-    }
-
-    @Override
-    public boolean isInsuranceActive() {
-        return insuranceActive;
-    }
-
-    @Override
-    public boolean isInstalmentPostponement() {
-        return instalmentPostponement;
-    }
-
-    @Override
-    public Money getLoanAnnuity() {
-        return loanAnnuity;
-    }
-
-    @Override
-    public Money getLoanAmount() {
-        return loanAmount;
-    }
-
-    @Override
-    public Money getPurchasePrice() {
-        return purchasePrice;
-    }
-
-    @Override
-    public Money getPaid() {
-        return paid;
-    }
-
-    @Override
-    public Money getToPay() {
-        return toPay;
-    }
-
-    @Override
-    public Money getAmountDue() {
-        return amountDue;
-    }
-
-    @Override
-    public Money getPaidInterest() {
-        return paidInterest;
-    }
-
-    @Override
-    public Money getDueInterest() {
-        return dueInterest;
-    }
-
-    @Override
-    public Money getPaidPrincipal() {
-        return paidPrincipal;
-    }
-
-    @Override
-    public Money getDuePrincipal() {
-        return duePrincipal;
-    }
-
-    @Override
-    public Money getExpectedInterest() {
-        return expectedInterest;
-    }
-
-    @Override
-    public Optional<Money> getRemainingPrincipal() {
-        return Optional.ofNullable(remainingPrincipal);
-    }
-
-    @Override
-    public Optional<Money> getSmpSoldFor() {
-        return Optional.ofNullable(smpSoldFor);
-    }
-
-    @Override
-    public Money getPaidPenalty() {
-        return paidPenalty;
-    }
-
-    @Override
-    public Optional<Money> getSmpFee() {
-        return Optional.ofNullable(smpFee);
-    }
-
-    @Override
-    public Optional<Money> getSmpPrice() {
-        return Optional.ofNullable(smpPrice);
-    }
-
-    public void setPaymentStatus(final PaymentStatus paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
-    public void setLoanHealthInfo(final LoanHealth loanHealthInfo) {
-        this.loanHealthInfo = loanHealthInfo;
-    }
-
-    public void setOnSmp(final boolean onSmp) {
-        this.onSmp = onSmp;
-    }
-
-    public void setInsuranceActive(final boolean insuranceActive) {
-        this.insuranceActive = insuranceActive;
-    }
-
-    public void setInstalmentPostponement(final boolean instalmentPostponement) {
-        this.instalmentPostponement = instalmentPostponement;
-    }
-
-    public void setLegalDpd(final Integer legalDpd) {
-        this.legalDpd = legalDpd;
-    }
-
-    public void setLoanTermInMonth(final int loanTermInMonth) {
-        this.loanTermInMonth = loanTermInMonth;
-    }
-
-    public void setCurrentTerm(final Integer currentTerm) {
-        this.currentTerm = currentTerm;
-    }
-
-    public void setRemainingMonths(final int remainingMonths) {
-        this.remainingMonths = remainingMonths;
-    }
-
-    public void setLoanName(final String loanName) {
-        this.loanName = loanName;
-    }
-
-    public void setInsuranceStatus(final InsuranceStatus insuranceStatus) {
-        this.insuranceStatus = insuranceStatus;
-    }
-
-    public void setInterestRate(final Ratio interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public void setRevenueRate(final Ratio revenueRate) {
-        this.revenueRate = revenueRate;
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
-    public void setLoanAnnuity(final Money loanAnnuity) {
-        this.loanAnnuity = loanAnnuity;
-    }
-
-    public void setLoanAmount(final Money loanAmount) {
-        this.loanAmount = loanAmount;
-    }
-
-    public void setPaid(final Money paid) {
-        this.paid = paid;
-    }
-
-    public void setToPay(final Money toPay) {
-        this.toPay = toPay;
-    }
-
-    public void setAmountDue(final Money amountDue) {
-        this.amountDue = amountDue;
-    }
-
-    public void setPaidInterest(final Money paidInterest) {
-        this.paidInterest = paidInterest;
-    }
-
-    public void setDueInterest(final Money dueInterest) {
-        this.dueInterest = dueInterest;
-    }
-
-    public void setPaidPrincipal(final Money paidPrincipal) {
-        this.paidPrincipal = paidPrincipal;
-    }
-
-    public void setDuePrincipal(final Money duePrincipal) {
-        this.duePrincipal = duePrincipal;
-    }
-
-    public void setExpectedInterest(final Money expectedInterest) {
-        this.expectedInterest = expectedInterest;
-    }
-
-    public void setPurchasePrice(final Money purchasePrice) {
-        this.purchasePrice = purchasePrice;
-    }
-
-    public void setRemainingPrincipal(final Money remainingPrincipal) {
-        this.remainingPrincipal = remainingPrincipal;
-    }
-
-    public void setSmpPrice(final Money smpPrice) {
-        this.smpPrice = smpPrice;
-    }
-
-    public void setSmpSoldFor(final Money smpSoldFor) {
-        this.smpSoldFor = smpSoldFor;
-    }
-
-    public void setSmpFee(final Money smpFee) {
-        this.smpFee = smpFee;
-    }
-
-    public void setPaidPenalty(final Money paidPenalty) {
-        this.paidPenalty = paidPenalty;
+    public void setSellStatus(final SellStatus sellStatus) {
+        this.sellStatus = sellStatus;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", InvestmentImpl.class.getSimpleName() + "[", "]")
-            .add("super=" + super.toString())
-            .add("amountDue='" + amountDue + "'")
-            .add("currentTerm=" + currentTerm)
-            .add("dueInterest='" + dueInterest + "'")
-            .add("duePrincipal='" + duePrincipal + "'")
-            .add("expectedInterest='" + expectedInterest + "'")
-            .add("instalmentPostponement=" + instalmentPostponement)
-            .add("insuranceActive=" + insuranceActive)
-            .add("insuranceStatus=" + insuranceStatus)
-            .add("interestRate=" + interestRate)
-            .add("legalDpd=" + legalDpd)
-            .add("loanAmount='" + loanAmount + "'")
-            .add("loanAnnuity='" + loanAnnuity + "'")
-            .add("loanHealthInfo=" + loanHealthInfo)
-            .add("loanName='" + loanName + "'")
-            .add("loanTermInMonth=" + loanTermInMonth)
-            .add("onSmp=" + onSmp)
-            .add("paid='" + paid + "'")
-            .add("paidInterest='" + paidInterest + "'")
-            .add("paidPenalty='" + paidPenalty + "'")
-            .add("paidPrincipal='" + paidPrincipal + "'")
-            .add("paymentStatus=" + paymentStatus)
-            .add("purchasePrice='" + purchasePrice + "'")
-            .add("rating=" + rating)
-            .add("remainingMonths=" + remainingMonths)
-            .add("remainingPrincipal='" + remainingPrincipal + "'")
-            .add("revenueRate=" + revenueRate)
-            .add("smpFee='" + smpFee + "'")
-            .add("smpPrice='" + smpPrice + "'")
-            .add("smpSoldFor='" + smpSoldFor + "'")
-            .add("toPay='" + toPay + "'")
+            .add("id=" + id)
+            .add("loan=" + loan)
+            .add("principal=" + principal)
+            .add("interest=" + interest)
+            .add("sellStatus=" + sellStatus)
+            .add("smpSellInfo=" + smpSellInfo)
             .toString();
     }
 }

@@ -20,7 +20,12 @@ import java.math.BigDecimal;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
+import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
+import com.github.robozonky.internal.remote.entities.LoanImpl;
 
 public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockInvestmentBuilder> {
 
@@ -34,27 +39,31 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
     }
 
     public static MockInvestmentBuilder fresh(final Loan loan, final int invested) {
-        return fresh(loan, BigDecimal.valueOf(invested));
+        return fresh(loan, null, invested);
+    }
+
+    public static MockInvestmentBuilder fresh(final Loan loan, final LoanHealthStats loanHealthStats,
+            final int invested) {
+        return fresh(loan, loanHealthStats, BigDecimal.valueOf(invested));
     }
 
     public static MockInvestmentBuilder fresh(final Loan loan, final BigDecimal invested) {
         return fresh()
-            .set(InvestmentImpl::setLoanId, loan.getId())
-            .set(InvestmentImpl::setInterestRate, loan.getInterestRate())
-            .set(InvestmentImpl::setRevenueRate, loan.getRevenueRate()
-                .orElse(null))
-            .set(InvestmentImpl::setCurrency, loan.getCurrency())
-            .set(InvestmentImpl::setAmount, Money.from(invested))
-            .set(InvestmentImpl::setLoanAnnuity, loan.getAnnuity())
-            .set(InvestmentImpl::setLoanAmount, loan.getAmount())
-            .set(InvestmentImpl::setLoanTermInMonth, loan.getTermInMonths())
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(invested))
-            .set(InvestmentImpl::setPurchasePrice, Money.from(invested))
-            .set(InvestmentImpl::setRating, loan.getRating())
-            .set(InvestmentImpl::setPaidInterest, Money.from(BigDecimal.ZERO))
-            .set(InvestmentImpl::setPaidPenalty, Money.from(BigDecimal.ZERO))
-            .set(InvestmentImpl::setPaidPrincipal, Money.from(BigDecimal.ZERO))
-            .set(InvestmentImpl::setInsuranceActive, loan.isInsuranceActive());
+            .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(loan))
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(invested)));
+    }
+
+    public static MockInvestmentBuilder fresh(final Loan loan, final LoanHealthStats loanHealthStats,
+            final BigDecimal invested) {
+        LoanImpl loanImpl = (LoanImpl) loan;
+        if (loanImpl.getRating() == null) {
+            loanImpl.setRating(Rating.AAAAA);
+        }
+        InvestmentLoanDataImpl ild = loanHealthStats == null ? new InvestmentLoanDataImpl(loanImpl)
+                : new InvestmentLoanDataImpl(loanImpl, loanHealthStats);
+        return fresh()
+            .set(InvestmentImpl::setLoan, ild)
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(invested)));
     }
 
 }

@@ -19,7 +19,6 @@ package com.github.robozonky.app;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.Random;
 
 import com.github.robozonky.api.Money;
@@ -27,21 +26,21 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.events.AbstractEventLeveragingTest;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanInvestmentDataImpl;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragingTest {
 
     private static final Random RANDOM = new Random(0);
 
-    protected static MyInvestmentImpl mockMyInvestment() {
+    protected static LoanInvestmentDataImpl mockMyInvestment() {
         return mockMyInvestment(OffsetDateTime.now());
     }
 
-    private static MyInvestmentImpl mockMyInvestment(final OffsetDateTime creationDate) {
-        final MyInvestmentImpl m = mock(MyInvestmentImpl.class);
+    private static LoanInvestmentDataImpl mockMyInvestment(final OffsetDateTime creationDate) {
+        final LoanInvestmentDataImpl m = mock(LoanInvestmentDataImpl.class);
         when(m.getId()).thenReturn(RANDOM.nextLong());
-        when(m.getTimeCreated()).thenReturn(Optional.of(creationDate));
+        when(m.getTimeCreated()).thenReturn(creationDate);
         return m;
     }
 

@@ -23,7 +23,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +32,7 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.MyInvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanInvestmentDataImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
@@ -42,9 +41,9 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void emptyGet() {
         final int loanId = 1;
-        final MyInvestmentImpl mi = mock(MyInvestmentImpl.class);
+        final LoanInvestmentDataImpl mi = mock(LoanInvestmentDataImpl.class);
         final OffsetDateTime d = OffsetDateTime.now();
-        when(mi.getTimeCreated()).thenReturn(Optional.of(d));
+        when(mi.getTimeCreated()).thenReturn(d);
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setMyInvestment, mi)
             .set(LoanImpl::setRemainingInvestment, Money.from(1_000))

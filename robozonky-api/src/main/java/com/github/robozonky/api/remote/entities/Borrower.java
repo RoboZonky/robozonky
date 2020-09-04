@@ -14,25 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util.json;
+package com.github.robozonky.api.remote.entities;
 
-import java.util.Currency;
+import com.github.robozonky.api.remote.enums.MainIncomeType;
+import com.github.robozonky.api.remote.enums.Region;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+public interface Borrower {
 
-import com.github.robozonky.internal.Defaults;
+    MainIncomeType getPrimaryIncomeType();
 
-public class CurrencyAdapterTest {
-
-    private final CurrencyAdapter adapter = new CurrencyAdapter();
-
-    @Test
-    void marshalAndUnmarshal() {
-        String json = adapter.adaptToJson(Defaults.CURRENCY);
-        Currency currency = adapter.adaptFromJson(json);
-        Assertions.assertThat(currency)
-            .isSameAs(Defaults.CURRENCY);
-    }
+    Region getRegion();
 
 }

@@ -31,7 +31,8 @@ class DelinquencyTracker {
     }
 
     private String toId(final Investment investment) {
-        return target.getId() + "-" + investment.getLoanId();
+        return target.getId() + "-" + investment.getLoan()
+            .getId();
     }
 
     public void setDelinquent(final SessionInfo sessionInfo, final Investment investment) {

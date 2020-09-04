@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.util.json;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 import java.util.function.Function;
 
 import javax.json.bind.serializer.DeserializationContext;
@@ -28,13 +29,14 @@ import org.apache.logging.log4j.Logger;
 
 abstract class AbstractDeserializer<T extends Enum<T>> implements JsonbDeserializer<T> {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger;
     private final Function<String, T> converter;
     private final T defaultValue;
 
     protected AbstractDeserializer(final Function<String, T> converter, final T defaultValue) {
-        this.converter = converter;
-        this.defaultValue = defaultValue;
+        this.converter = Objects.requireNonNull(converter);
+        this.defaultValue = Objects.requireNonNull(defaultValue);
+        this.logger = LogManager.getLogger(defaultValue.getClass());
     }
 
     @Override

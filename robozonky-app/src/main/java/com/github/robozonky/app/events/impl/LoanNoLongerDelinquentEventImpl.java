@@ -17,24 +17,19 @@
 package com.github.robozonky.app.events.impl;
 
 import java.util.StringJoiner;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 
 final class LoanNoLongerDelinquentEventImpl extends AbstractEventImpl implements LoanNoLongerDelinquentEvent {
 
     private final Investment investment;
     private final Loan loan;
-    private final Supplier<SellInfo> sellInfoSupplier;
 
-    public LoanNoLongerDelinquentEventImpl(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
+    public LoanNoLongerDelinquentEventImpl(final Investment investment, final Loan loan) {
         this.investment = investment;
         this.loan = loan;
-        this.sellInfoSupplier = sellInfoSupplier;
     }
 
     @Override
@@ -45,11 +40,6 @@ final class LoanNoLongerDelinquentEventImpl extends AbstractEventImpl implements
     @Override
     public Investment getInvestment() {
         return investment;
-    }
-
-    @Override
-    public SellInfo getSellInfo() {
-        return sellInfoSupplier.get();
     }
 
     @Override

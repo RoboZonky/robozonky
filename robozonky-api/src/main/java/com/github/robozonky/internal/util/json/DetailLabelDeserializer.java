@@ -16,19 +16,11 @@
 
 package com.github.robozonky.internal.util.json;
 
-import java.util.Currency;
+import com.github.robozonky.api.remote.enums.DetailLabel;
 
-import javax.json.bind.adapter.JsonbAdapter;
+public final class DetailLabelDeserializer extends AbstractDeserializer<DetailLabel> {
 
-public final class CurrencyAdapter implements JsonbAdapter<Currency, String> {
-
-    @Override
-    public String adaptToJson(Currency obj) {
-        return obj.getCurrencyCode();
-    }
-
-    @Override
-    public Currency adaptFromJson(String obj) {
-        return Currency.getInstance(obj);
+    public DetailLabelDeserializer() {
+        super(DetailLabel::valueOf, DetailLabel.UNKNOWN);
     }
 }

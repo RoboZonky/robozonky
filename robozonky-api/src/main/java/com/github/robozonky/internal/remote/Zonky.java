@@ -38,7 +38,6 @@ import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.entities.ReservationPreferences;
 import com.github.robozonky.api.remote.entities.Restrictions;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.api.remote.enums.Resolution;
@@ -122,7 +121,8 @@ public class Zonky {
     }
 
     public void cancel(final Investment investment) {
-        LOGGER.debug("Cancelling offer to sell investment in loan #{}.", investment.getLoanId());
+        LOGGER.debug("Cancelling offer to sell investment in loan #{}.", investment.getLoan()
+            .getId());
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
@@ -138,26 +138,14 @@ public class Zonky {
     }
 
     private void sell(final Investment investment, final SellRequest request) {
-        LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoanId(), request);
+        LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoan()
+            .getId(), request);
         controlApi.run(api -> api.offer(request));
-    }
-
-    public void sell(final Investment investment, final SellInfo sellInfo) {
-        SellRequest request = new SellRequest(investment.getId(), sellInfo);
-        sell(investment, request);
     }
 
     public void sell(final Investment investment) {
         SellRequest request = new SellRequest(investment);
         sell(investment, request);
-    }
-
-    public SellInfo getSellInfo(final Investment investment) {
-        return getSellInfo(investment.getId());
-    }
-
-    public SellInfo getSellInfo(final long investmentId) {
-        return portfolioApi.execute(api -> api.getSellInfo(investmentId));
     }
 
     public void accept(final Reservation reservation) {
@@ -188,17 +176,31 @@ public class Zonky {
         return getStream(portfolioApi, PortfolioApi::items, select);
     }
 
+    public Stream<Investment> getPendingInvestments() {
+        final Select s = new Select()
+            .equals("investmentStatus", "AWAITING_INVESTMENT");
+        return getInvestments(s);
+    }
+
     public Stream<Investment> getSoldInvestments() {
-        final Select s = new Select().equals("status", "SOLD");
+        final Select s = Select.unrestricted()
+            .equals("investmentStatus", "ACTIVE")
+            .in("sellStatus", "SOLD");
+        return getInvestments(s);
+    }
+
+    public Stream<Investment> getSellableInvestments() {
+        final Select s = Select.unrestricted()
+            .equals("investmentStatus", "ACTIVE")
+            .in("sellStatus", "SELLABLE_WITH_FEE", "SELLABLE_WITHOUT_FEE");
         return getInvestments(s);
     }
 
     public Stream<Investment> getDelinquentInvestments() {
-        final Select s = new Select()
-            .in("loan.status", "ACTIVE", "PAID_OFF")
-            .equals("status", "ACTIVE")
-            .equalsPlain("delinquent", "true")
-            .equalsPlain("loanHealthInfo", "CURRENTLY_IN_DUE");
+        final Select s = Select.unrestricted()
+            .equals("investmentStatus", "ACTIVE")
+            .in("loanHealth", "ONE_TO_FIFTEEN_DPD", "SIXTEEN_TO_THIRTY_DPD", "THIRTY_ONE_TO_SIXTY_DPD",
+                    "SIXTY_ONE_TO_NINETY_DPD", "MORE_THAN_NINETY_DPD", "PAID_OFF");
         return getInvestments(s);
     }
 

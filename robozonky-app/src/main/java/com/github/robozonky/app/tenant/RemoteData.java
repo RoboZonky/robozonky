@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,8 +26,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Statistics;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
@@ -57,12 +54,14 @@ final class RemoteData {
     }
 
     static Map<Integer, Tuple2<Rating, Money>> getAmountsBlocked(final Tenant tenant) {
-        final Select select = new Select()
-            .lessThanOrNull("activeFrom", Instant.EPOCH.atZone(Defaults.ZONE_ID)
-                .toOffsetDateTime());
-        return tenant.call(zonky -> zonky.getInvestments(select))
+        return tenant.call(Zonky::getPendingInvestments)
             .peek(investment -> LOGGER.debug("Found: {}.", investment))
-            .collect(Collectors.toMap(i -> i.getLoanId(), i -> Tuple.of(i.getRating(), i.getAmount())));
+            .collect(Collectors.toMap(i -> i.getLoan()
+                .getId(),
+                    i -> Tuple.of(i.getLoan()
+                        .getRating(),
+                            i.getPrincipal()
+                                .getUnpaid())));
     }
 
     public OffsetDateTime getRetrievedOn() {

@@ -23,7 +23,7 @@ public interface Loan extends BaseLoan {
     /**
      * @return Empty if the loan doesn't have an investment by the current user.
      */
-    Optional<MyInvestment> getMyInvestment();
+    Optional<LoanInvestmentData> getMyInvestment();
 
     String getUrl();
 }

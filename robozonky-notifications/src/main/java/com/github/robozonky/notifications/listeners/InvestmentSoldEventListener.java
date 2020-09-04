@@ -18,7 +18,6 @@ package com.github.robozonky.notifications.listeners;
 
 import java.math.BigDecimal;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.notifications.AbstractTargetHandler;
@@ -33,8 +32,9 @@ public class InvestmentSoldEventListener extends AbstractListener<InvestmentSold
     @Override
     public String getSubject(final InvestmentSoldEvent event) {
         final Investment i = event.getInvestment();
-        final BigDecimal remaining = i.getSmpSoldFor()
-            .orElse(Money.ZERO)
+        // TODO Convince Zonky to include the actual sell price in the new API.
+        final BigDecimal remaining = i.getPrincipal()
+            .getUnpaid()
             .getValue();
         return "Participace prodána - " + remaining.intValue() + ",- Kč, půjčka " + Util.identifyLoan(event);
     }

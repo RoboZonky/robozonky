@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
 /**
@@ -33,7 +32,6 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
 
     private final Investment investment;
     private final Supplier<Loan> related;
-    private final Supplier<SellInfo> sellInfo;
 
     /**
      *
@@ -42,22 +40,8 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
      *                   remote) entity on-demand.
      */
     public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related) {
-        this(investment, related, null);
-    }
-
-    /**
-     *
-     * @param investment Investment in question.
-     * @param related    Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
-     *                   remote) entity on-demand.
-     * @param sellInfo   Provided as a {@link Supplier} in order to allow the calling code to retrieve the (likely
-     *                   remote) entity on-demand. Null means no such information exists.
-     */
-    public InvestmentDescriptor(final Investment investment, final Supplier<Loan> related,
-            final Supplier<SellInfo> sellInfo) {
         this.investment = investment;
         this.related = Memoizer.memoize(related);
-        this.sellInfo = sellInfo == null ? null : Memoizer.memoize(sellInfo);
     }
 
     @Override
@@ -70,14 +54,9 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
         return related.get();
     }
 
-    public Optional<SellInfo> sellInfo() {
-        return Optional.ofNullable(sellInfo)
-            .map(Supplier::get);
-    }
-
     private Money getRemainingPrincipal() {
-        return investment.getRemainingPrincipal()
-            .orElseThrow();
+        return investment.getPrincipal()
+            .getUnpaid();
     }
 
     public Optional<RecommendedInvestment> recommend() {

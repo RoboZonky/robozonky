@@ -17,6 +17,7 @@
 package com.github.robozonky.internal.remote.entities;
 
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
@@ -34,6 +35,10 @@ public class SellFeeImpl implements SellFee {
 
     public SellFeeImpl() {
         // For JSON-B.
+    }
+
+    public SellFeeImpl(Money fee) {
+        this.value = Objects.requireNonNull(fee);
     }
 
     @Override

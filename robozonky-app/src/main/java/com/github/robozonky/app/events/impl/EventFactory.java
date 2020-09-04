@@ -62,7 +62,6 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -112,38 +111,32 @@ public final class EventFactory {
         return new LoanDefaultedEventImpl(investment, loan, since);
     }
 
-    public static LoanNowDelinquentEvent loanNowDelinquent(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanNowDelinquentEventImpl(investment, loan, sellInfoSupplier);
+    public static LoanNowDelinquentEvent loanNowDelinquent(final Investment investment, final Loan loan) {
+        return new LoanNowDelinquentEventImpl(investment, loan);
     }
 
-    public static LoanDelinquent10DaysOrMoreEvent loanDelinquent10plus(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent10DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
+    public static LoanDelinquent10DaysOrMoreEvent loanDelinquent10plus(final Investment investment, final Loan loan) {
+        return new LoanDelinquent10DaysOrMoreEventImpl(investment, loan);
     }
 
-    public static LoanDelinquent30DaysOrMoreEvent loanDelinquent30plus(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent30DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
+    public static LoanDelinquent30DaysOrMoreEvent loanDelinquent30plus(final Investment investment, final Loan loan) {
+        return new LoanDelinquent30DaysOrMoreEventImpl(investment, loan);
     }
 
-    public static LoanDelinquent60DaysOrMoreEvent loanDelinquent60plus(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent60DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
+    public static LoanDelinquent60DaysOrMoreEvent loanDelinquent60plus(final Investment investment, final Loan loan) {
+        return new LoanDelinquent60DaysOrMoreEventImpl(investment, loan);
     }
 
-    public static LoanDelinquent90DaysOrMoreEvent loanDelinquent90plus(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanDelinquent90DaysOrMoreEventImpl(investment, loan, sellInfoSupplier);
+    public static LoanDelinquent90DaysOrMoreEvent loanDelinquent90plus(final Investment investment, final Loan loan) {
+        return new LoanDelinquent90DaysOrMoreEventImpl(investment, loan);
     }
 
     public static LoanLostEvent loanLost(final Investment investment, final Loan loan) {
         return new LoanLostEventImpl(investment, loan);
     }
 
-    public static LoanNoLongerDelinquentEvent loanNoLongerDelinquent(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new LoanNoLongerDelinquentEventImpl(investment, loan, sellInfoSupplier);
+    public static LoanNoLongerDelinquentEvent loanNoLongerDelinquent(final Investment investment, final Loan loan) {
+        return new LoanNoLongerDelinquentEventImpl(investment, loan);
     }
 
     public static LoanRecommendedEvent loanRecommended(final RecommendedLoan recommendation) {
@@ -204,14 +197,12 @@ public final class EventFactory {
         return new RoboZonkyUpdateDetectedEventImpl(version);
     }
 
-    public static SaleOfferedEvent saleOffered(final Investment investment, final Loan loan,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new SaleOfferedEventImpl(investment, loan, sellInfoSupplier);
+    public static SaleOfferedEvent saleOffered(final Investment investment, final Loan loan) {
+        return new SaleOfferedEventImpl(investment, loan);
     }
 
-    public static SaleRecommendedEvent saleRecommended(final RecommendedInvestment recommendation,
-            final Supplier<SellInfo> sellInfoSupplier) {
-        return new SaleRecommendedEventImpl(recommendation, sellInfoSupplier);
+    public static SaleRecommendedEvent saleRecommended(final RecommendedInvestment recommendation) {
+        return new SaleRecommendedEventImpl(recommendation);
     }
 
     public static SellingCompletedEvent sellingCompleted(final Collection<Investment> investments,

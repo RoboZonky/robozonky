@@ -51,8 +51,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final Investment i = MockInvestmentBuilder.fresh(l, 200)
             .build();
         final CompletableFuture<?> result = SessionEvents.forSession(mockSessionInfo())
-            .fire(EventFactory.loanNoLongerDelinquentLazy(() -> EventFactory.loanNoLongerDelinquent(i, l,
-                    () -> tenant.getSellInfo(i.getId()))));
+            .fire(EventFactory.loanNoLongerDelinquentLazy(() -> EventFactory.loanNoLongerDelinquent(i, l)));
         result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }
@@ -63,7 +62,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         final Investment i = MockInvestmentBuilder.fresh(l, 200)
             .build();
         final CompletableFuture<?> result = SessionEvents.forSession(mockSessionInfo())
-            .fire(EventFactory.loanNoLongerDelinquent(i, l, () -> tenant.getSellInfo(i.getId())));
+            .fire(EventFactory.loanNoLongerDelinquent(i, l));
         result.join(); // make sure it does not throw
         assertThat(getEventsRequested()).hasSize(1);
     }
@@ -73,8 +72,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
         Loan l = MockLoanBuilder.fresh();
         Investment i = MockInvestmentBuilder.fresh(l, 200)
             .build();
-        final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(i, l,
-                () -> tenant.getSellInfo(i.getId()));
+        final LoanDelinquent90DaysOrMoreEvent e = EventFactory.loanDelinquent90plus(i, l);
         assertThat(SessionEvents.getImplementingEvent(e.getClass()))
             .isEqualTo(LoanDelinquent90DaysOrMoreEvent.class);
     }

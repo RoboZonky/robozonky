@@ -16,9 +16,21 @@
 
 package com.github.robozonky.api.remote.entities;
 
-public interface MyInvestment extends BaseInvestment {
+import java.time.OffsetDateTime;
 
-    int getInvestorId();
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.remote.enums.InvestmentStatus;
 
-    String getInvestorNickname();
+public interface LoanInvestmentData {
+
+    long getId();
+
+    long getLoanId();
+
+    Money getAmount();
+
+    InvestmentStatus getStatus();
+
+    OffsetDateTime getTimeCreated();
+
 }

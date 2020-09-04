@@ -16,11 +16,8 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.util.Currency;
-
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Country;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -61,10 +58,6 @@ public interface Participation {
     boolean isInsuranceActive();
 
     LoanHealth getLoanHealthInfo();
-
-    Country getCountryOfOrigin();
-
-    Currency getCurrency();
 
     Money getRemainingPrincipal();
 

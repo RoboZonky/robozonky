@@ -39,14 +39,15 @@ import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
 import com.github.robozonky.api.remote.enums.LoanHealth;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -63,13 +64,9 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     }
 
     private static Investment mockInvestment(final Loan loan, final LoanHealth loanHealth) {
-        return MockInvestmentBuilder.fresh(loan, 200)
-            .set(InvestmentImpl::setRating, Rating.AAAAA)
-            .set(InvestmentImpl::setLoanTermInMonth, 1000)
-            .set(InvestmentImpl::setLoanHealthInfo, loanHealth)
-            .set(InvestmentImpl::setRemainingPrincipal, Money.from(BigDecimal.valueOf(100)))
-            .set(InvestmentImpl::setStatus, InvestmentStatus.ACTIVE)
-            .set(InvestmentImpl::setOnSmp, false)
+        return MockInvestmentBuilder.fresh(loan, new LoanHealthStatsImpl(loanHealth), 200)
+            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.valueOf(100))))
+            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .build();
     }
 
@@ -125,7 +122,8 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         doThrow(InternalServerErrorException.class).when(zonky)
             .sell(any());
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
-        when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
+        when(zonky.getSellableInvestments()).thenAnswer(inv -> Stream.of(i));
+        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> Optional.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, false);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -141,17 +139,20 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.get(2))
                 .isInstanceOf(SellingCompletedEvent.class);
         });
-        verify(zonky, times(1)).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
+        verify(zonky, times(1)).sell(argThat(inv -> i.getLoan()
+            .getId() == inv.getLoan()
+                .getId()));
     }
 
-    private void saleMade(final boolean isDryRun, final boolean healthy) {
+    private void saleMade(final boolean isDryRun) {
         final Loan loan = new MockLoanBuilder().build();
-        final Investment i = mockInvestment(loan, healthy ? LoanHealth.HEALTHY : LoanHealth.HISTORICALLY_IN_DUE);
+        final Investment i = mockInvestment(loan, LoanHealth.HEALTHY);
+        SellInfo sellInfo = mock(SellInfoImpl.class);
+        when(i.getSmpSellInfo()).thenReturn(Optional.of(sellInfo));
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
-        SellInfo sellInfo = mock(SellInfoImpl.class);
-        when(zonky.getSellInfo(eq(i.getId()))).thenReturn(sellInfo);
-        when(zonky.getInvestments(any())).thenAnswer(inv -> Stream.of(i));
+        when(zonky.getSellableInvestments()).thenAnswer(inv -> Stream.of(i));
+        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> Optional.of(i));
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, isDryRun);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -170,42 +171,34 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);
-        if (healthy) {
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
-        } else {
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
-        }
+        verify(zonky, m).sell(argThat(inv -> i.getLoan()
+            .getId() == inv.getLoan()
+                .getId()));
         // try to sell the same thing again, make sure it doesn't happen
         readPreexistingEvents();
         s.accept(tenant);
-        if (healthy) {
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
-        } else {
-            verify(zonky, never()).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()));
-            verify(zonky, m).sell(argThat(inv -> i.getLoanId() == inv.getLoanId()), eq(sellInfo));
-        }
+        verify(zonky, m).sell(argThat(inv -> i.getLoan()
+            .getId() == inv.getLoan()
+                .getId()));
     }
 
     @Test
     void saleMade() {
-        saleMade(false, true);
+        saleMade(false);
     }
 
     @Test
     void saleMadeDryRun() {
-        saleMade(true, true);
+        saleMade(true);
     }
 
     @Test
     void saleMadeUnhealthy() {
-        saleMade(false, false);
+        saleMade(false);
     }
 
     @Test
     void saleMadeUnhealthyDryRun() {
-        saleMade(true, false);
+        saleMade(true);
     }
 }

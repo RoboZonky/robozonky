@@ -16,24 +16,16 @@
 
 package com.github.robozonky.api.remote.entities;
 
-import java.time.OffsetDateTime;
-import java.util.Currency;
-import java.util.Optional;
-
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.enums.InvestmentStatus;
 
-public interface BaseInvestment {
+public interface Amounts {
 
-    Optional<OffsetDateTime> getTimeCreated();
+    Money getTotal();
 
-    InvestmentStatus getStatus();
+    Money getUnpaid();
 
-    int getLoanId();
+    default Money getPaid() {
+        return getTotal().subtract(getUnpaid());
+    }
 
-    Currency getCurrency();
-
-    long getId();
-
-    Money getAmount();
 }

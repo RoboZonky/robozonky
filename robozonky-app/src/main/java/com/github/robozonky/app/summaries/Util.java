@@ -24,15 +24,12 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.internal.remote.Select;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
@@ -50,26 +47,22 @@ final class Util {
     static Map<Rating, Money> getAmountsAtRisk(final Tenant tenant) {
         return tenant.call(Zonky::getDelinquentInvestments)
             .parallel() // possibly many pages' worth of results; fetch in parallel
-            .collect(groupingBy(Investment::getRating,
+            .collect(groupingBy(investment -> investment.getLoan()
+                .getRating(),
                     () -> new EnumMap<>(Rating.class),
                     mapping(i -> {
-                        final Money remaining = i.getRemainingPrincipal()
-                            .orElseThrow();
-                        final Money principalNotYetReturned = remaining.subtract(i.getPaidInterest())
-                            .subtract(i.getPaidPenalty())
+                        final Money remaining = i.getPrincipal()
+                            .getUnpaid();
+                        // TODO Convince Zonky to add penalties back to the API.
+                        final Money principalNotYetReturned = remaining.subtract(i.getInterest()
+                            .getPaid())
                             .max(remaining.getZero());
                         LOGGER.debug("Delinquent: {} in loan #{}, investment #{}.",
-                                principalNotYetReturned, i.getLoanId(), i.getId());
+                                principalNotYetReturned, i.getLoan()
+                                    .getId(),
+                                i.getId());
                         return principalNotYetReturned;
                     }, ADDING_REDUCTION)));
-    }
-
-    private static Stream<Investment> getInvestmentsBasedOnHealth(final Tenant tenant) {
-        var select = Select.unrestricted()
-            .equals("status", "ACTIVE")
-            .equalsPlain("delinquent", "true")
-            .equalsPlain("onSmp", "CAN_BE_OFFERED_ONLY");
-        return tenant.call(zonky -> zonky.getInvestments(select));
     }
 
     /**
@@ -77,25 +70,30 @@ final class Util {
      * @return First is sellable with or without fee, second just without.
      */
     static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
-        var allSellableInvestments = getInvestmentsBasedOnHealth(tenant)
+        var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
             .map(investment -> {
-                var healthInfo = investment.getLoanHealthInfo()
-                    .orElseThrow(); // Zonky must send the information.
+                var healthInfo = investment.getLoan()
+                    .getHealthStats()
+                    .getLoanHealthInfo();
                 switch (healthInfo) {
                     case HEALTHY:
-                        return Tuple.of(investment.getRating(),
-                                investment.getRemainingPrincipal()
-                                    .orElse(Money.ZERO),
-                                investment.getSmpFee()
+                        return Tuple.of(investment.getLoan()
+                            .getRating(),
+                                investment.getPrincipal()
+                                    .getUnpaid(),
+                                investment.getSmpSellInfo()
+                                    .map(si -> si.getFee()
+                                        .getValue())
                                     .orElse(Money.ZERO));
                     case HISTORICALLY_IN_DUE:
                     case CURRENTLY_IN_DUE:
-                        var sellInfo = tenant.getSellInfo(investment.getId());
-                        return Tuple.of(investment.getRating(), sellInfo.getPriceInfo()
-                            .getSellPrice(),
-                                sellInfo.getPriceInfo()
-                                    .getFee()
+                        var investmentWithSellInfo = tenant.getInvestment(investment.getId());
+                        var sellInfo = investmentWithSellInfo.getSmpSellInfo()
+                            .orElseThrow();
+                        return Tuple.of(investmentWithSellInfo.getLoan()
+                            .getRating(), sellInfo.getSellPrice(),
+                                sellInfo.getFee()
                                     .getValue());
                     default:
                         throw new IllegalStateException("Unsupported loan health info: " + healthInfo);

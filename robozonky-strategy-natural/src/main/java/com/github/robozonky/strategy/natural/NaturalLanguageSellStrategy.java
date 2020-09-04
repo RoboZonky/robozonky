@@ -21,7 +21,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -37,22 +39,20 @@ class NaturalLanguageSellStrategy implements SellStrategy {
 
     private static boolean isFree(final InvestmentDescriptor descriptor) {
         return descriptor.item()
-            .getSmpFee()
-            .map(Money::isZero)
-            .orElseGet(() -> descriptor.sellInfo()
-                .map(si -> si.getPriceInfo()
-                    .getFee()
-                    .getValue()
-                    .isZero())
-                .orElse(true));
+            .getSmpSellInfo()
+            .map(s -> s.getFee()
+                .getValue())
+            .orElse(Money.ZERO)
+            .isZero();
     }
 
     private static boolean isUndiscounted(final InvestmentDescriptor descriptor) {
-        return descriptor.sellInfo()
-            .map(si -> si.getPriceInfo()
-                .getDiscount()
-                .intValue() == 0)
-            .orElse(true);
+        return descriptor.item()
+            .getSmpSellInfo()
+            .map(SellInfo::getDiscount)
+            .orElse(Ratio.ZERO)
+            .bigDecimalValue()
+            .signum() == 0;
     }
 
     private Stream<InvestmentDescriptor> getFreeAndOutsideStrategy(final Collection<InvestmentDescriptor> available,

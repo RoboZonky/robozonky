@@ -56,8 +56,7 @@ class BaseEnumTest {
         var mainIncomeType = code(MainIncomeType.class, MainIncomeType.values(), MainIncomeType::findByCode);
         var rating = code(Rating.class, Rating.values(), Rating::findByCode);
         var region = code(Region.class, Region.values(), Region::findByCode);
-        var country = code(Country.class, Country.values(), Country::findByCode);
-        return Stream.of(purpose, mainIncomeType, rating, region, country)
+        return Stream.of(purpose, mainIncomeType, rating, region)
             .flatMap(s -> s);
     }
 }

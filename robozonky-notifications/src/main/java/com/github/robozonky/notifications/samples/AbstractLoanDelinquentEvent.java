@@ -19,8 +19,6 @@ package com.github.robozonky.notifications.samples;
 import java.time.LocalDate;
 
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
-import com.github.robozonky.api.remote.entities.SellInfo;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.test.DateUtil;
 
 abstract class AbstractLoanDelinquentEvent extends AbstractInvestmentBasedEvent
@@ -39,11 +37,6 @@ abstract class AbstractLoanDelinquentEvent extends AbstractInvestmentBasedEvent
     @Override
     public int getThresholdInDays() {
         return thresholdInDays;
-    }
-
-    @Override
-    public SellInfo getSellInfo() {
-        return new SellInfoImpl();
     }
 
     @Override

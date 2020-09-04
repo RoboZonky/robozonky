@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.util.json;
+package com.github.robozonky.api.remote.entities;
 
-import static org.assertj.core.api.Assertions.*;
+public interface Instalments {
 
-import java.util.UUID;
+    int getTotal();
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+    int getUnpaid();
 
-import org.junit.jupiter.api.Test;
-
-import com.github.robozonky.api.remote.enums.Country;
-
-class AbstractDeserializerTest {
-
-    @Test
-    void defaultValue() throws Exception {
-        try (Jsonb jsonb = JsonbBuilder.create()) {
-            Country country = jsonb.fromJson("\"" + UUID.randomUUID() + "\"", Country.class);
-            assertThat(country).isEqualTo(Country.UNKNOWN);
-        }
+    default int getPaid() {
+        return getTotal() - getUnpaid();
     }
 
 }

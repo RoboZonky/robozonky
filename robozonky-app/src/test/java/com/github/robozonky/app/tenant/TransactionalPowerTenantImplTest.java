@@ -35,7 +35,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.RoboZonkyDaemonSuspendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -44,7 +43,6 @@ import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.OAuth;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.state.TenantState;
@@ -114,15 +112,6 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         final Loan result = tenant.getLoan(loanId);
         assertThat(transactional.getLoan(loanId)).isEqualTo(result);
-    }
-
-    @Test
-    void delegatesSellInfo() {
-        final SellInfo fresh = mock(SellInfoImpl.class);
-        final long investmentId = 1;
-        when(zonky.getSellInfo(eq(investmentId))).thenReturn(fresh);
-        final SellInfo result = tenant.getSellInfo(investmentId);
-        assertThat(transactional.getSellInfo(investmentId)).isEqualTo(result);
     }
 
     @Test

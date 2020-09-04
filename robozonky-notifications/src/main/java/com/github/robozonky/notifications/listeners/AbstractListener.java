@@ -37,7 +37,6 @@ import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
-import com.github.robozonky.api.notifications.SellableBased;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
@@ -91,16 +90,13 @@ public abstract class AbstractListener<T extends Event> implements EventListener
                 var e = (InvestmentBased) event;
                 Util.getLoanData(e.getInvestment(), e.getLoan())
                     .forEach(data::put);
+                Util.getDelinquencyData(e.getInvestment())
+                    .forEach(data::put);
             } else {
                 var e = (LoanBased) event;
                 Util.getLoanData(e.getLoan())
                     .forEach(data::put);
             }
-        }
-        if (event instanceof SellableBased) {
-            var e = (SellableBased) event;
-            Util.getSellInfoData(e.getSellInfo())
-                .forEach(data::put);
         }
         return data;
     }
