@@ -94,11 +94,15 @@ public interface Tenant extends AutoCloseable {
      * simply use {@link #call(Function)} to get to {@link Zonky#getInvestment(long)}.
      * 
      * @param investmentId ID of the {@link Investment} in question.
+     * @param fresh        Whether to refresh the cache, if any.
      * @return never null
      */
+    default Investment getInvestment(final long investmentId, final boolean fresh) {
+        return call(zonky -> zonky.getInvestment(investmentId));
+    }
+
     default Investment getInvestment(final long investmentId) {
-        return call(zonky -> zonky.getInvestment(investmentId))
-            .orElseThrow();
+        return getInvestment(investmentId, false);
     }
 
     <T> InstanceState<T> getState(final Class<T> clz);

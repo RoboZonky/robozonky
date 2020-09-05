@@ -63,7 +63,7 @@ final class Selling implements TenantPayload {
             } else {
                 LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
             }
-            sold.markAsOffered(loanId);
+            sold.markAsOffered(i.getId());
             tenant.fire(EventFactory.saleOffered(i, d.related()));
             LOGGER.info("Offered to sell investment in loan #{}.", loanId);
             return Optional.of(i);
@@ -77,11 +77,9 @@ final class Selling implements TenantPayload {
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         LOGGER.debug("Starting to query for sellable investments.");
         final Set<InvestmentDescriptor> eligible = tenant.call(Zonky::getSellableInvestments)
-            .filter(i -> sold.getOffered()
-                .noneMatch(id -> id == i.getLoan()
-                    .getId())) // to enable dry run
-            .filter(i -> !sold.wasOnceSold(i.getLoan()
-                .getId()))
+            .filter(investment -> sold.getOffered()
+                .noneMatch(investmentId -> investmentId == investment.getId())) // to enable dry run
+            .filter(i -> !sold.wasOnceSold(i.getId()))
             .map(i -> tenant.getInvestment(i.getId())) // Make sure we have the proper sell info.
             .map(i -> {
                 Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()

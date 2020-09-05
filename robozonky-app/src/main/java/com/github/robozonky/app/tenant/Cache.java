@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,9 +92,7 @@ final class Cache<T> {
         @Override
         public Either<Exception, Investment> getItem(final long id, final Tenant tenant) {
             try {
-                return tenant.call(zonky -> zonky.getInvestment(id))
-                    .map((Function<Investment, Either<Exception, Investment>>) Either::right)
-                    .orElse(Either.left(new IllegalStateException("No investment #" + id)));
+                return tenant.call(zonky -> Either.right(zonky.getInvestment(id)));
             } catch (final Exception ex) {
                 return Either.left(ex);
             }
@@ -173,8 +170,14 @@ final class Cache<T> {
     }
 
     public T get(final long id) {
+        return get(id, false);
+    }
+
+    public T get(final long id, final boolean forceLoad) {
         if (isClosed.get()) {
             throw new IllegalStateException("Already closed.");
+        } else if (forceLoad) {
+            storage.remove(id);
         }
         return getFromCache(id).orElseGet(() -> {
             final T item = backend.getItem(id, tenant)

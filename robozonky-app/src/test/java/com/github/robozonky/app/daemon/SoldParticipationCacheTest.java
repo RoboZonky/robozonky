@@ -74,10 +74,10 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
             .build();
         when(zonky.getSoldInvestments()).thenReturn(Stream.of(i1));
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
-        assertThat(instance.wasOnceSold(loan.getId())).isTrue();
+        assertThat(instance.wasOnceSold(i1.getId())).isTrue();
         assertThat(instance.wasOnceSold(1)).isFalse();
         instance.markAsSold(1);
-        assertThat(instance.wasOnceSold(loan.getId())).isTrue();
+        assertThat(instance.wasOnceSold(i1.getId())).isTrue();
         assertThat(instance.wasOnceSold(1)).isTrue();
     }
 
@@ -92,15 +92,15 @@ class SoldParticipationCacheTest extends AbstractZonkyLeveragingTest {
         final SoldParticipationCache instance = SoldParticipationCache.forTenant(tenant);
         assertThat(instance.getOffered()).isEmpty();
         instance.markAsOffered(1);
-        instance.markAsOffered(loan.getId());
-        assertThat(instance.getOffered()).containsOnly(1, loan.getId());
+        instance.markAsOffered(i1.getId());
+        assertThat(instance.getOffered()).containsOnly(1L, i1.getId());
         instance.markAsSold(1);
         assertSoftly(softly -> {
             softly.assertThat(instance.getOffered())
-                .containsOnly(loan.getId());
+                .containsOnly(i1.getId());
             softly.assertThat(instance.wasOnceSold(1))
                 .isTrue();
-            softly.assertThat(instance.wasOnceSold(loan.getId()))
+            softly.assertThat(instance.wasOnceSold(i1.getId()))
                 .isFalse();
         });
     }

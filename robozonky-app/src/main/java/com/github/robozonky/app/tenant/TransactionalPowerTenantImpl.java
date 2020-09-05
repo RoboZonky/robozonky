@@ -151,6 +151,11 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     }
 
     @Override
+    public Investment getInvestment(long investmentId, boolean fresh) {
+        return parent.getInvestment(investmentId, fresh);
+    }
+
+    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         LOGGER.trace("Creating transactional instance state for {}.", clz);
         return new TransactionalInstanceState<>(stateUpdates, parent.getState(clz));

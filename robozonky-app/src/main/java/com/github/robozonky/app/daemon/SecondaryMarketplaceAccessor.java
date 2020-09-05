@@ -80,7 +80,7 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
             .call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
             .filter(p -> { // never re-purchase what was once sold
                 final int loanId = p.getLoanId();
-                if (cache.wasOnceSold(loanId)) {
+                if (cache.wasOnceSold(p.getInvestmentId())) {
                     LOGGER.debug("Loan #{} already sold before, ignoring.", loanId);
                     return false;
                 } else {

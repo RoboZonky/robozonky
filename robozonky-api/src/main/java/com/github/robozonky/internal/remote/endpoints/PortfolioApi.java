@@ -27,7 +27,6 @@ import javax.ws.rs.Produces;
 import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
-import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.remote.entities.StatisticsImpl;
 
 @Produces(Defaults.MEDIA_TYPE)
@@ -45,6 +44,6 @@ public interface PortfolioApi extends EntityCollectionApi<InvestmentImpl> {
 
     @Path(ApiConstants.INVESTMENTS + "/{investmentId")
     @GET
-    SellInfoImpl getSellInfo(@PathParam("investmentId") long investmentId);
+    InvestmentImpl getInvestment(@PathParam("investmentId") long investmentId);
 
 }

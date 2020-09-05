@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote;
 import static java.util.Collections.singleton;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -137,15 +136,11 @@ public class Zonky {
         }
     }
 
-    private void sell(final Investment investment, final SellRequest request) {
+    public void sell(final Investment investment) {
+        SellRequest request = new SellRequest(investment);
         LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoan()
             .getId(), request);
         controlApi.run(api -> api.offer(request));
-    }
-
-    public void sell(final Investment investment) {
-        SellRequest request = new SellRequest(investment);
-        sell(investment, request);
     }
 
     public void accept(final Reservation reservation) {
@@ -208,14 +203,8 @@ public class Zonky {
         return loanApi.execute(api -> api.item(id));
     }
 
-    public Optional<Investment> getInvestment(final long id) {
-        final Select s = new Select().equals("id", id);
-        return getInvestments(s).findFirst();
-    }
-
-    public Optional<Investment> getInvestmentByLoanId(final int loanId) {
-        final Select s = new Select().equals("loan.id", loanId);
-        return getInvestments(s).findFirst();
+    public Investment getInvestment(final long id) {
+        return portfolioApi.execute(api -> api.getInvestment(id));
     }
 
     public LastPublishedItem getLastPublishedLoanInfo() {
