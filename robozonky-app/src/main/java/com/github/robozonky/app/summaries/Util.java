@@ -72,10 +72,10 @@ final class Util {
     static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
         var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
-            .map(investment -> {
+            .map(investment -> { // All sellables will always have health stats.
                 var healthInfo = investment.getLoan()
                     .getHealthStats()
-                    .orElseThrow()// All sellables will always have health stats.
+                    .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
                     .getLoanHealthInfo();
                 switch (healthInfo) {
                     case HEALTHY:
@@ -84,14 +84,15 @@ final class Util {
                                 investment.getPrincipal()
                                     .getUnpaid(),
                                 investment.getSmpSellInfo()
-                                    .map(si -> si.getFee()
-                                        .getValue())
-                                    .orElseThrow());
+                                    .orElseThrow(() -> new IllegalStateException(
+                                            "Investment has no sell info: " + investment))
+                                    .getFee()
+                                    .getValue());
                     case HISTORICALLY_IN_DUE:
                     case CURRENTLY_IN_DUE:
                         var investmentWithSellInfo = tenant.getInvestment(investment.getId());
                         var sellInfo = investmentWithSellInfo.getSmpSellInfo()
-                            .orElseThrow();
+                            .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment));
                         return Tuple.of(investmentWithSellInfo.getLoan()
                             .getRating(), sellInfo.getSellPrice(),
                                 sellInfo.getFee()

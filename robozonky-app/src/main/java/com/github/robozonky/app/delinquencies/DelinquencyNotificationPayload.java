@@ -107,16 +107,16 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static void processDelinquent(final PowerTenant tenant, final Registry registry,
-            final Investment currentDelinquent) {
-        final long investmentId = currentDelinquent.getId();
-        final EnumSet<Category> knownCategories = registry.getCategories(currentDelinquent);
+            final Investment delinquent) {
+        final long investmentId = delinquent.getId();
+        final EnumSet<Category> knownCategories = registry.getCategories(delinquent);
         if (knownCategories.contains(Category.HOPELESS)) {
             LOGGER.debug("Investment #{} may not be promoted anymore.", investmentId);
             return;
         }
-        final int daysPastDue = currentDelinquent.getLoan()
+        final int daysPastDue = delinquent.getLoan()
             .getHealthStats()
-            .orElseThrow()
+            .orElseThrow(() -> new IllegalStateException("Delinquent has no health stats: " + delinquent))
             .getCurrentDaysDue();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
@@ -126,8 +126,8 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         if (firstNextCategory.isPresent()) {
             final Category category = firstNextCategory.get();
             LOGGER.debug("Investment #{} placed to category {}.", investmentId, category);
-            category.process(tenant, currentDelinquent);
-            registry.addCategory(currentDelinquent, category);
+            category.process(tenant, delinquent);
+            registry.addCategory(delinquent, category);
         } else {
             LOGGER.debug("Investment #{} can not yet be promoted to the next category.", investmentId);
         }
@@ -154,11 +154,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
-            .filter(i -> !isDefaulted(i))
-            .filter(i -> i.getLoan()
-                .getHealthStats()
-                .orElseThrow()
-                .getCurrentDaysDue() > 0);
+            .filter(i -> !isDefaulted(i));
     }
 
     private void process(final PowerTenant tenant) {
@@ -180,18 +176,18 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             getNonDefaulted(delinquents).forEach(d -> processDelinquent(tenant, registry, d));
         } else {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
-            getNonDefaulted(delinquents).forEach(d -> {
+            getNonDefaulted(delinquents).forEach(delinquent -> {
+                int dpd = delinquent.getLoan()
+                    .getHealthStats()
+                    .orElseThrow(() -> new IllegalStateException("Delinquent has no health stats: " + delinquent))
+                    .getCurrentDaysDue();
                 for (final Category cat : Category.values()) {
-                    int dpd = d.getLoan()
-                        .getHealthStats()
-                        .orElseThrow()
-                        .getCurrentDaysDue();
                     if (cat.getThresholdInDays() > dpd || cat.getThresholdInDays() < 0) {
                         continue;
                     }
-                    registry.addCategory(d, cat);
+                    registry.addCategory(delinquent, cat);
                 }
-                LOGGER.debug("No category found for investment #{}.", d.getId());
+                LOGGER.debug("No category found for investment #{}.", delinquent.getId());
             });
         }
         registry.persist();

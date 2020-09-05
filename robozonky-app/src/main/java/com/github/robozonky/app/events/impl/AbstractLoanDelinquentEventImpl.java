@@ -47,7 +47,7 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
     public LocalDate getDelinquentSince() {
         var currentDaysInDue = investment.getLoan()
             .getHealthStats()
-            .orElseThrow()
+            .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
             .getCurrentDaysDue();
         return LocalDate.now()
             .minusDays(currentDaysInDue);

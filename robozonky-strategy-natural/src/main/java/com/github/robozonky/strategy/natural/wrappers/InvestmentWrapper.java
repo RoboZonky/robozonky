@@ -113,7 +113,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     public int getOriginalAnnuity() {
         return investment.getLoan()
             .getAnnuity()
-            .orElseThrow()
+            .orElseThrow(() -> new IllegalStateException("Investment has no annuity: " + investment))
             .getValue()
             .intValue();
     }
@@ -164,8 +164,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     @Override
     public Optional<BigDecimal> getPrice() {
         var price = investment.getSmpSellInfo()
-            .map(SellInfo::getSellPrice)
-            .orElseThrow();
+            .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment))
+            .getSellPrice();
         return Optional.of(price.getValue());
     }
 

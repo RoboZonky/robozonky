@@ -50,7 +50,8 @@ public enum Purpose implements BaseEnum {
     }
 
     public static Purpose findByCode(final String code) {
-        return maybeFindByCode(code).orElseThrow(() -> new IllegalArgumentException("Unknown loan purpose: " + code));
+        return maybeFindByCode(code)
+            .orElseThrow(() -> new IllegalArgumentException("Unknown loan purpose: " + code));
     }
 
     @Override
