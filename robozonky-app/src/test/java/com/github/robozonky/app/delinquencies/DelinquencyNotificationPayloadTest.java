@@ -80,21 +80,16 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void initializesWithoutTriggeringEvents() {
-        final Investment i0 = new InvestmentImpl(new InvestmentLoanDataImpl(new MockLoanBuilder().build(),
-                new LoanHealthStatsImpl()),
-                Money.from(200));
         final Investment i1 = getDelinquentInvestment(1);
         final Investment i10 = getDelinquentInvestment(10);
         final Investment i30 = getDelinquentInvestment(30);
         final Investment i60 = getDelinquentInvestment(60);
         final Investment i90 = getDelinquentInvestment(90);
         final Investment defaulted = getDefaultedInvestment();
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i0, i1, i10, i30, i60, i90, defaulted));
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1, i10, i30, i60, i90, defaulted));
         // run test
         payload.accept(tenant);
         assertSoftly(softly -> {
-            softly.assertThat(r.getCategories(i0))
-                .isEmpty();
             softly.assertThat(r.getCategories(i1))
                 .containsExactly(Category.NEW);
             softly.assertThat(r.getCategories(i10))
