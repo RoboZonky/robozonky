@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote;
 import static java.util.Collections.singleton;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -206,11 +205,6 @@ public class Zonky {
 
     public Investment getInvestment(final long id) {
         return portfolioApi.execute(api -> api.getInvestment(id));
-    }
-
-    public Optional<Investment> getInvestmentByLoanId(final int loanId) {
-        final Select s = new Select().equals("loan.id", loanId);
-        return getInvestments(s).findFirst();
     }
 
     public LastPublishedItem getLastPublishedLoanInfo() {

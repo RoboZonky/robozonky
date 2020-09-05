@@ -35,25 +35,24 @@ final class SaleCheck implements TenantPayload {
     private static final Logger LOGGER = LogManager.getLogger(SaleCheck.class);
 
     private synchronized Optional<Investment> retrieveInvestmentIfSold(final SoldParticipationCache cache,
-            final Tenant tenant, final int loanId) {
-        final Optional<Investment> i = tenant.call(z -> z.getInvestmentByLoanId(loanId));
-        if (i.isPresent()) {
-            final Investment actual = i.get();
-            switch (actual.getSellStatus()) {
-                case SOLD:
-                    return Optional.of(actual);
-                case OFFERED:
-                    LOGGER.debug("Investment for loan #{} is still on SMP.", loanId);
-                    return Optional.empty();
-                default:
-                    LOGGER.info("Investment for loan #{} was not sold.", loanId);
-                    cache.unmarkAsOffered(loanId);
-                    return Optional.empty();
-            }
-        } else {
-            LOGGER.warn("Investment for loan #{} not found in the API.", loanId);
-            cache.unmarkAsOffered(loanId);
-            return Optional.empty();
+            final Tenant tenant, final long investmentId) {
+        // Don't use the cached version here, we need to know the very latest info.
+        var investment = tenant.getInvestment(investmentId, true);
+        if (investment == null) {
+            throw new IllegalStateException("Investment #" + investmentId + " not found.");
+        }
+        var loanId = investment.getLoan()
+            .getId();
+        switch (investment.getSellStatus()) {
+            case SOLD:
+                return Optional.of(investment);
+            case OFFERED:
+                LOGGER.debug("Investment #{} for loan #{} is still on SMP.", investmentId, loanId);
+                return Optional.empty();
+            default:
+                LOGGER.info("Investment #{} for loan #{} was not sold.", investmentId, loanId);
+                cache.unmarkAsOffered(investmentId);
+                return Optional.empty();
         }
     }
 
@@ -61,14 +60,13 @@ final class SaleCheck implements TenantPayload {
     public void accept(final Tenant tenant) {
         final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
         cache.getOffered()
-            .mapToObj(id -> retrieveInvestmentIfSold(cache, tenant, id))
+            .mapToObj(investmentId -> retrieveInvestmentIfSold(cache, tenant, investmentId))
             .flatMap(Optional::stream)
             .forEach(sold -> {
-                final int loanId = sold.getLoan()
-                    .getId();
-                cache.markAsSold(loanId);
+                cache.markAsSold(sold.getId());
                 ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
-                    final Loan l = tenant.getLoan(loanId);
+                    final Loan l = tenant.getLoan(sold.getLoan()
+                        .getId());
                     return investmentSold(sold, l, tenant.getPortfolio()
                         .getOverview());
                 }));

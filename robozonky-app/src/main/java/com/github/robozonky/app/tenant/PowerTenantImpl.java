@@ -133,7 +133,7 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public Investment getInvestment(final long investmentId) {
+    public Investment getInvestment(long investmentId, boolean fresh) {
         return investmentCache.get()
             .get(investmentId);
     }

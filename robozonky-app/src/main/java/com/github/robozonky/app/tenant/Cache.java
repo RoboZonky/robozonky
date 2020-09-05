@@ -170,8 +170,14 @@ final class Cache<T> {
     }
 
     public T get(final long id) {
+        return get(id, false);
+    }
+
+    public T get(final long id, final boolean forceLoad) {
         if (isClosed.get()) {
             throw new IllegalStateException("Already closed.");
+        } else if (forceLoad) {
+            storage.remove(id);
         }
         return getFromCache(id).orElseGet(() -> {
             final T item = backend.getItem(id, tenant)

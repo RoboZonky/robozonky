@@ -16,7 +16,6 @@
 
 package com.github.robozonky.internal.remote;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
@@ -168,28 +167,6 @@ class ZonkyTest {
         final Zonky z = new Zonky(p, () -> mock(ZonkyApiTokenImpl.class));
         assertThat(z.getParticipationDetail(1)).isNotNull();
         assertThat(z.getLastPublishedParticipationInfo()).isNotNull();
-    }
-
-    @Test
-    void investmentById() {
-        // prepare data
-        final LoanImpl loan = new LoanImpl();
-        loan.setRating(Rating.A);
-        loan.setAmount(Money.from(200));
-        loan.setRemainingInvestment(Money.from(200));
-        final InvestmentImpl investment = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200));
-        // prepare api
-        final PaginatedApi<InvestmentImpl, PortfolioApi> api = mockApi(singletonList(investment));
-        final ApiProvider provider = mockApiProvider();
-        when(provider.obtainPaginated(eq(PortfolioApi.class), any(), any())).thenReturn(api);
-        final Zonky z = mockZonky(provider);
-        // start test
-        assertThat(z.getInvestmentByLoanId(investment.getLoan()
-            .getId()))
-                .hasValueSatisfying(i -> assertThat(i.getLoan()
-                    .getId()).isEqualTo(investment.getLoan()
-                        .getId()));
-
     }
 
     @Test
