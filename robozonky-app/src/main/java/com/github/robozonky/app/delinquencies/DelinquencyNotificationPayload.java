@@ -160,6 +160,10 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     private void process(final PowerTenant tenant) {
         final Set<Investment> delinquents = tenant.call(Zonky::getDelinquentInvestments)
             .parallel() // possibly many pages' worth of results; fetch in parallel
+            .map(i -> i.getLoan()
+                .getHealthStats()// If we don't have this, we fetch it from an endpoint where it's guaranteed to be.
+                .map(h -> i)
+                .orElseGet(() -> tenant.getInvestment(i.getId())))
             .collect(Collectors.toSet());
         final int count = delinquents.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
