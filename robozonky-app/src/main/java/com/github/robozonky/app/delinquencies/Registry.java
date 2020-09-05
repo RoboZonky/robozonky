@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,8 +67,7 @@ final class Registry {
         return storages.get(Category.NEW)
             .complement(idsToComplement)
             .parallel()
-            .mapToObj(id -> tenant.call(z -> z.getInvestment(id)))
-            .flatMap(Optional::stream)
+            .mapToObj(tenant::getInvestment)
             .collect(Collectors.toList());
     }
 

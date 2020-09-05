@@ -123,7 +123,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
             .sell(any());
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         when(zonky.getSellableInvestments()).thenAnswer(inv -> Stream.of(i));
-        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> Optional.of(i));
+        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> i);
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, false);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
@@ -152,7 +152,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
         when(zonky.getSellableInvestments()).thenAnswer(inv -> Stream.of(i));
-        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> Optional.of(i));
+        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> i);
         when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
         final PowerTenant tenant = mockTenant(zonky, isDryRun);
         when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));

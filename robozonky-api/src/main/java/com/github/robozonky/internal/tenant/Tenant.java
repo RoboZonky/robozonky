@@ -97,8 +97,7 @@ public interface Tenant extends AutoCloseable {
      * @return never null
      */
     default Investment getInvestment(final long investmentId) {
-        return call(zonky -> zonky.getInvestment(investmentId))
-            .orElseThrow();
+        return call(zonky -> zonky.getInvestment(investmentId));
     }
 
     <T> InstanceState<T> getState(final Class<T> clz);

@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -86,7 +85,7 @@ class RegistryTest extends AbstractRoboZonkyTest {
 
     @Test
     void complements() {
-        when(zonky.getInvestment(eq(i.getId()))).thenReturn(Optional.of(i));
+        when(zonky.getInvestment(eq(i.getId()))).thenReturn(i);
         final Registry r = new Registry(tenant);
         r.addCategory(i, Category.DEFAULTED);
         r.persist();

@@ -21,7 +21,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -120,11 +119,17 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void triggersEventsOnNewDelinquents() {
         final Investment i1 = getDelinquentInvestment(1);
+        when(zonky.getInvestment(eq(i1.getId()))).thenReturn(i1);
         final Investment i10 = getDelinquentInvestment(10);
+        when(zonky.getInvestment(eq(i10.getId()))).thenReturn(i10);
         final Investment i30 = getDelinquentInvestment(30);
+        when(zonky.getInvestment(eq(i30.getId()))).thenReturn(i30);
         final Investment i60 = getDelinquentInvestment(60);
+        when(zonky.getInvestment(eq(i60.getId()))).thenReturn(i60);
         final Investment i90 = getDelinquentInvestment(90);
+        when(zonky.getInvestment(eq(i90.getId()))).thenReturn(i90);
         final Investment defaulted = getDefaultedInvestment();
+        when(zonky.getInvestment(eq(defaulted.getId()))).thenReturn(defaulted);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
@@ -135,7 +140,7 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested())
             .extracting(e -> (Object) e.getClass()
                 .getInterfaces()[0])
-            .containsOnly(LoanDefaultedEvent.class,
+            .containsOnly(LoanNoLongerDelinquentEvent.class, LoanDefaultedEvent.class,
                     LoanDelinquent10DaysOrMoreEvent.class, LoanDelinquent30DaysOrMoreEvent.class,
                     LoanDelinquent60DaysOrMoreEvent.class, LoanDelinquent90DaysOrMoreEvent.class);
     }
@@ -143,11 +148,14 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void handlesRegularHealing() {
         final Investment i1 = getDelinquentInvestment(1);
+        when(zonky.getInvestment(eq(i1.getId()))).thenReturn(i1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
+        readPreexistingEvents();
         final Investment i2 = getDelinquentInvestment(1);
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
+        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(i2);
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1, i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
@@ -156,10 +164,9 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
                 .getInterfaces()[0])
             .containsOnly(LoanNowDelinquentEvent.class);
         readPreexistingEvents();
-        // now the same delinquency is no longer available
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
-        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(Optional.of(i2));
-        payload.accept(tenant); // the new delinquency will show up now
+        // now one delinquency is no longer available
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
+        payload.accept(tenant);
         assertThat(getEventsRequested()).hasSize(1)
             .first()
             .isInstanceOf(LoanNoLongerDelinquentEvent.class);
@@ -168,11 +175,13 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void handlesLoss() {
         final Investment i1 = getDefaultedInvestment();
+        when(zonky.getInvestment(eq(i1.getId()))).thenReturn(i1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final Investment i2 = getDefaultedInvestment();
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
+        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(i2);
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1, i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
@@ -182,8 +191,7 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
             .containsOnly(LoanDefaultedEvent.class);
         readPreexistingEvents();
         // now the same delinquency is no longer available
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
-        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(Optional.of(i2));
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         payload.accept(tenant); // the lost loan will show up now
         assertThat(getEventsRequested()).hasSize(1)
             .first()
@@ -193,11 +201,12 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     @Test
     void handlesRepayment() {
         final Investment i1 = getDelinquentInvestment(1);
+        when(zonky.getInvestment(eq(i1.getId()))).thenReturn(i1);
         when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
-        // run test
         payload.accept(tenant); // nothing will happen here, as this is the initializing run
         final InvestmentImpl i2 = getDelinquentInvestment(1);
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i2));
+        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(i2);
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1, i2));
         final Loan fresh = MockLoanBuilder.fresh();
         when(zonky.getLoan(anyInt())).thenReturn(fresh);
         payload.accept(tenant); // the new delinquency will show up now
@@ -208,8 +217,7 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         readPreexistingEvents();
         i2.setPrincipal(new AmountsImpl(Money.ZERO));
         // now the same delinquency is no longer available
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.empty());
-        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(Optional.of(i2));
+        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
         payload.accept(tenant); // nothing happens, repayments are not handled by this class
         assertThat(getEventsRequested()).isEmpty();
     }
