@@ -85,7 +85,7 @@ final class Util {
                                 investment.getSmpSellInfo()
                                     .map(si -> si.getFee()
                                         .getValue())
-                                    .orElse(Money.ZERO));
+                                    .orElseThrow());
                     case HISTORICALLY_IN_DUE:
                     case CURRENTLY_IN_DUE:
                         var investmentWithSellInfo = tenant.getInvestment(investment.getId());
