@@ -94,13 +94,14 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
         if (skipStrategyEvaluation(marketplaceAccessor)) {
             return Collections.emptyList();
         }
-        final Collection<T> marketplace = marketplaceAccessor.getMarketplace();
+        var marketplace = marketplaceAccessor.getMarketplace();
         if (marketplace.isEmpty()) {
+            lastSuccessfulMarketplaceCheck.set(DateUtil.now());
             logger.debug("Marketplace is empty.");
             return Collections.emptyList();
         }
         logger.trace("Processing {} items from the marketplace.", marketplace.size());
-        final Collection<R> result = operationDescriptor.getOperation()
+        var result = operationDescriptor.getOperation()
             .apply(tenant, marketplace, strategy);
         lastSuccessfulMarketplaceCheck.set(DateUtil.now());
         logger.trace("Marketplace processing complete.");
