@@ -31,7 +31,7 @@ import com.github.robozonky.internal.util.json.RegionDeserializer;
 @JsonbTypeDeserializer(RegionDeserializer.class)
 public enum Region implements BaseEnum {
 
-    PRAHA("Praha", "Hlavní město Praha"),
+    HLAVNI_MESTO_PRAHA("Praha", "Hlavní město Praha"),
     STREDOCESKY("Středočeský"),
     JIHOCESKY("Jihočeský"),
     PLZENSKY("Plzeňský"),

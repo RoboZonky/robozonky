@@ -361,6 +361,11 @@
         "code": "java.method.removed",
         "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.Investment::getInvestmentDate()",
         "justification": "Zonky has a brand new API and has deprecated the old one."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.Region.PRAHA",
+        "justification": "The proper name is HLAVNI_MESTO_PRAHA"
       }
     ]
   }
