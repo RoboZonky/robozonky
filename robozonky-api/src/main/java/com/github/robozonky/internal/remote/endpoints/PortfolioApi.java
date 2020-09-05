@@ -42,7 +42,7 @@ public interface PortfolioApi extends EntityCollectionApi<InvestmentImpl> {
     @GET
     StatisticsImpl getStatistics();
 
-    @Path(ApiConstants.INVESTMENTS + "/{investmentId")
+    @Path(ApiConstants.INVESTMENTS + "/{investmentId}")
     @GET
     InvestmentImpl getInvestment(@PathParam("investmentId") long investmentId);
 
