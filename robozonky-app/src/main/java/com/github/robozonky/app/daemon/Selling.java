@@ -77,10 +77,13 @@ final class Selling implements TenantPayload {
         final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
         LOGGER.debug("Starting to query for sellable investments.");
         final Set<InvestmentDescriptor> eligible = tenant.call(Zonky::getSellableInvestments)
+            .parallel()
             .filter(investment -> sold.getOffered()
-                .noneMatch(investmentId -> investmentId == investment.getId())) // to enable dry run
+                .noneMatch(investmentId -> investmentId == investment.getId())) // To enable dry run.
             .filter(i -> !sold.wasOnceSold(i.getId()))
-            .map(i -> tenant.getInvestment(i.getId())) // Make sure we have the proper sell info.
+            .map(i -> i.getSmpSellInfo() // If we don't have sell info right away, request the full investment.
+                .map(s -> i)
+                .orElseGet(() -> tenant.getInvestment(i.getId())))
             .map(i -> {
                 Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()
                     .getId());
