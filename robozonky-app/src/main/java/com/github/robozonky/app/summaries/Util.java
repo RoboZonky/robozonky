@@ -75,6 +75,7 @@ final class Util {
             .map(investment -> {
                 var healthInfo = investment.getLoan()
                     .getHealthStats()
+                    .orElseThrow()// All sellables will always have health stats.
                     .getLoanHealthInfo();
                 switch (healthInfo) {
                     case HEALTHY:

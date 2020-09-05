@@ -71,14 +71,10 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static boolean isDefaulted(final Investment i) {
-        var isDue = i.getLoan()
-            .getHealthStats()
-            .getCurrentDaysDue() > 0;
-        var isTerminated = i.getLoan()
+        return i.getLoan()
             .getLabel()
-            .map(label -> label == Label.TERMINATED)
+            .map(l -> l == Label.TERMINATED)
             .orElse(false);
-        return isDue && isTerminated;
     }
 
     private static void processNoLongerDelinquent(final Registry registry, final Investment investment,
@@ -120,6 +116,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         }
         final int daysPastDue = currentDelinquent.getLoan()
             .getHealthStats()
+            .orElseThrow()
             .getCurrentDaysDue();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
@@ -157,10 +154,11 @@ final class DelinquencyNotificationPayload implements TenantPayload {
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
         return investments.parallelStream()
+            .filter(i -> !isDefaulted(i))
             .filter(i -> i.getLoan()
                 .getHealthStats()
-                .getCurrentDaysDue() > 0)
-            .filter(i -> !isDefaulted(i));
+                .orElseThrow()
+                .getCurrentDaysDue() > 0);
     }
 
     private void process(final PowerTenant tenant) {
@@ -186,6 +184,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
                 for (final Category cat : Category.values()) {
                     int dpd = d.getLoan()
                         .getHealthStats()
+                        .orElseThrow()
                         .getCurrentDaysDue();
                     if (cat.getThresholdInDays() > dpd || cat.getThresholdInDays() < 0) {
                         continue;

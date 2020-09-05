@@ -125,8 +125,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     }
 
     @Override
-    public String getStory() {
-        return requireNonNull(story);
+    public Optional<String> getStory() {
+        return Optional.ofNullable(story);
     }
 
     public void setStory(final String story) {
@@ -134,8 +134,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     }
 
     @Override
-    public Money getAnnuity() {
-        return requireNonNull(annuity);
+    public Optional<Money> getAnnuity() {
+        return Optional.ofNullable(annuity);
     }
 
     public void setAnnuity(final Money annuity) {
@@ -172,8 +172,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     }
 
     @Override
-    public LoanHealthStats getHealthStats() {
-        return requireNonNull(healthStats);
+    public Optional<LoanHealthStats> getHealthStats() {
+        return Optional.ofNullable(healthStats);
     }
 
     public void setHealthStats(final LoanHealthStatsImpl healthStats) {

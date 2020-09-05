@@ -40,6 +40,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
@@ -103,13 +104,16 @@ final class Util {
         return Map.ofEntries(
                 entry("currentDaysDue", investment.getLoan()
                     .getHealthStats()
-                    .getCurrentDaysDue()),
+                    .map(LoanHealthStats::getCurrentDaysDue)
+                    .orElse(Integer.MAX_VALUE)),
                 entry("daysSinceLastDue", investment.getLoan()
                     .getHealthStats()
-                    .getDaysSinceLastInDue()),
+                    .map(LoanHealthStats::getDaysSinceLastInDue)
+                    .orElse(Integer.MAX_VALUE)),
                 entry("longestDaysDue", investment.getLoan()
                     .getHealthStats()
-                    .getLongestDaysDue()));
+                    .map(LoanHealthStats::getLongestDaysDue)
+                    .orElse(Integer.MAX_VALUE)));
     }
 
     public static Map<String, Object> getLoanData(final Investment i, final Loan l) {

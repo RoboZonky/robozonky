@@ -18,6 +18,7 @@ package com.github.robozonky.internal.remote.entities;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.remote.entities.Borrower;
@@ -39,8 +40,8 @@ public class BorrowerImpl implements Borrower {
     }
 
     @Override
-    public MainIncomeType getPrimaryIncomeType() {
-        return requireNonNull(primaryIncomeType);
+    public Optional<MainIncomeType> getPrimaryIncomeType() {
+        return Optional.ofNullable(primaryIncomeType);
     }
 
     public void setPrimaryIncomeType(final MainIncomeType primaryIncomeType) {

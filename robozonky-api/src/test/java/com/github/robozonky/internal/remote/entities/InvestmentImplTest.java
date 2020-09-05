@@ -16,7 +16,6 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import static com.github.robozonky.api.remote.enums.DetailLabel.COVID_19_POSTPONEMENT_PROCESSED;
 import static com.github.robozonky.api.remote.enums.DetailLabel.CURRENTLY_INSURED;
 import static com.github.robozonky.api.remote.enums.DetailLabel.VERIFIED_BORROWER;
 import static com.github.robozonky.api.remote.enums.DetailLabel.VERIFIED_INCOME;
@@ -26,6 +25,7 @@ import static com.github.robozonky.api.remote.enums.Label.PENDING;
 import static com.github.robozonky.api.remote.enums.Label.TERMINATED;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 
 import javax.json.bind.Jsonb;
@@ -61,45 +61,27 @@ class InvestmentImplTest {
             "\"hasCollectionHistory\":false,\"label\":\"PENDING\",\"nextPaymentDate\":\"2020-09-15\"}," +
             "\"smpSellInfo\":null,\"principal\":{\"total\":200.00,\"unpaid\":200.00},\"interest\":{\"total\":26.93," +
             "\"unpaid\":26.93},\"sellStatus\":\"NOT_SELLABLE\",\"timeCreated\":null}";
-    private static final String FINISHED_INVESTMENT_JSON = "{\"id\":13214919,\"loan\":{\"id\":517589," +
-            "\"activeLoanOrdinal\":0,\"contractNo\":\"1006111160\",\"userNo\":\"1000343137\"," +
-            "\"title\":\"Refinancování půjček\",\"story\":\"Peníze použiji na zaplacení všech mých dosavadních " +
-            "závazků, tak abych měl vše přehledně a stručně na jednom místě s jedním úrokem. Půjčku hodlám předčasně " +
-            "splácen mimořádnými vklady. \",\"annuity\":6234.00,\"detailLabels\":[\"CURRENTLY_INSURED\"," +
-            "\"VERIFIED_INCOME\",\"VERIFIED_BORROWER\"],\"borrower\":{\"id\":511107," +
-            "\"primaryIncomeType\":\"EMPLOYMENT\",\"region\":\"JIHOMORAVSKY\"}," +
-            "\"healthStats\":{\"paidInstalments\":13,\"longestDaysDue\":1,\"currentDaysDue\":0," +
-            "\"instalmentsCurrentlyInDue\":null,\"daysSinceLastInDue\":0,\"loanHealthInfo\":\"HEALTHY\"," +
-            "\"dueInstalments\":0},\"purpose\":\"REFINANCING\",\"countryOfOrigin\":\"CZ\",\"currency\":\"CZK\"," +
-            "\"payments\":{\"total\":13,\"unpaid\":0},\"revenueRate\":0.0999,\"interestRate\":0.134900," +
-            "\"hasCollectionHistory\":false,\"label\":null,\"nextPaymentDate\":null},\"smpSellInfo\":null," +
-            "\"principal\":{\"total\":190.60,\"unpaid\":0.00},\"interest\":{\"total\":8.49,\"unpaid\":0.01}," +
-            "\"sellStatus\":\"NOT_SELLABLE\",\"timeCreated\":null}";
-    private static final String SOLD_INVESTMENT_JSON = "{\"id\":10232546,\"loan\":{\"id\":193181," +
-            "\"activeLoanOrdinal\":0,\"contractNo\":\"1002394386\",\"userNo\":\"1000187368\",\"title\":\"SEN\"," +
-            "\"story\":\"Dobrý den, ráda bych peníze použila na rozjezd podnikání,chtěla bych si splnit svůj sen a " +
-            "otevřít malou Trafiku\",\"annuity\":3973.00,\"detailLabels\":[\"COVID_19_POSTPONEMENT_PROCESSED\"," +
-            "\"VERIFIED_INCOME\",\"VERIFIED_BORROWER\"],\"borrower\":{\"id\":193181," +
-            "\"primaryIncomeType\":\"SELF_EMPLOYMENT\",\"region\":\"STREDOCESKY\"}," +
-            "\"healthStats\":{\"paidInstalments\":26,\"longestDaysDue\":1,\"currentDaysDue\":0," +
-            "\"instalmentsCurrentlyInDue\":null,\"daysSinceLastInDue\":0,\"loanHealthInfo\":\"HEALTHY\"," +
-            "\"dueInstalments\":0},\"purpose\":\"OTHER\",\"countryOfOrigin\":\"CZ\",\"currency\":\"CZK\"," +
-            "\"payments\":{\"total\":61,\"unpaid\":34},\"revenueRate\":0.0449,\"interestRate\":0.049900," +
-            "\"hasCollectionHistory\":false,\"label\":null,\"nextPaymentDate\":null},\"smpSellInfo\":null," +
-            "\"principal\":{\"total\":122.23,\"unpaid\":118.90},\"interest\":{\"total\":9.29,\"unpaid\":8.81}," +
-            "\"sellStatus\":\"SOLD\",\"timeCreated\":null}";
-    private static final String DEFAULTED_INVESTMENT_JSON = "{\"id\":6997009,\"loan\":{\"id\":565277," +
-            "\"activeLoanOrdinal\":0,\"contractNo\":\"1006652581\",\"userNo\":\"1000440547\"," +
-            "\"title\":\"Refinancování půjček\",\"story\":\"zonky508708\",\"annuity\":2585.00," +
-            "\"detailLabels\":[\"VERIFIED_INCOME\",\"VERIFIED_BORROWER\"],\"borrower\":{\"id\":552320," +
-            "\"primaryIncomeType\":\"EMPLOYMENT\",\"region\":\"STREDOCESKY\"},\"healthStats\":{\"paidInstalments\":5," +
-            "\"longestDaysDue\":147,\"currentDaysDue\":147,\"instalmentsCurrentlyInDue\":null," +
-            "\"daysSinceLastInDue\":0,\"loanHealthInfo\":\"CURRENTLY_IN_DUE\",\"dueInstalments\":0}," +
-            "\"purpose\":\"REFINANCING\",\"countryOfOrigin\":\"CZ\",\"currency\":\"CZK\",\"payments\":{\"total\":6," +
-            "\"unpaid\":2},\"revenueRate\":0.0629,\"interestRate\":0.084900,\"hasCollectionHistory\":true," +
-            "\"label\":\"TERMINATED\",\"nextPaymentDate\":null},\"smpSellInfo\":null,\"principal\":{\"total\":200.00," +
-            "\"unpaid\":194.99},\"interest\":{\"total\":9.54,\"unpaid\":2.48},\"sellStatus\":\"NOT_SELLABLE\"," +
-            "\"timeCreated\":null}";
+    private static final String FINISHED_INVESTMENT_JSON = "{\"id\":10232542,\"principal\":{\"total\":101.47,\"unpaid\":0"
+            +
+            ".00},\"interest\":{\"total\":1.64,\"unpaid\":0.00},\"sellStatus\":\"NOT_SELLABLE\"," +
+            "\"loan\":{\"id\":385418,\"title\":\"Refinancování úvěru\",\"purpose\":\"REFINANCING\"," +
+            "\"countryOfOrigin\":\"CZ\",\"currency\":\"CZK\",\"payments\":{\"total\":19,\"unpaid\":0}," +
+            "\"revenueRate\":0.0449,\"interestRate\":0.049900,\"hasCollectionHistory\":false,\"dpd\":0," +
+            "\"label\":null,\"nextPaymentDate\":null,\"borrower\":{\"region\":\"JIHOMORAVSKY\"}}," +
+            "\"isBlockedByAB4\":false}";
+    private static final String SOLD_INVESTMENT_JSON = "{\"id\":10083108,\"principal\":{\"total\":72.67,\"unpaid\":72" +
+            ".67},\"interest\":{\"total\":8.69,\"unpaid\":8.69},\"sellStatus\":\"SOLD\",\"loan\":{\"id\":40056," +
+            "\"title\":\"Zdraví\",\"purpose\":\"HEALTH\",\"countryOfOrigin\":\"CZ\",\"currency\":\"CZK\"," +
+            "\"payments\":{\"total\":60,\"unpaid\":17},\"revenueRate\":0.1149,\"interestRate\":0.154900," +
+            "\"hasCollectionHistory\":false,\"dpd\":0,\"label\":null,\"nextPaymentDate\":null," +
+            "\"borrower\":{\"region\":\"USTECKY\"}},\"isBlockedByAB4\":false}";
+    private static final String DEFAULTED_INVESTMENT_JSON = "{\"id\":3042483,\"principal\":{\"total\":188.23," +
+            "\"unpaid\":160.32},\"interest\":{\"total\":27.74,\"unpaid\":7.94},\"sellStatus\":\"NOT_SELLABLE\"," +
+            "\"loan\":{\"id\":204677,\"title\":\"Prosba o finanční pomoc\",\"purpose\":\"REFINANCING\"," +
+            "\"countryOfOrigin\":\"CZ\",\"currency\":\"CZK\",\"payments\":{\"total\":20,\"unpaid\":5}," +
+            "\"revenueRate\":0.0999,\"interestRate\":0.134900,\"hasCollectionHistory\":true,\"dpd\":412," +
+            "\"label\":\"TERMINATED\",\"nextPaymentDate\":null,\"borrower\":{\"region\":\"HLAVNI_MESTO_PRAHA\"}}," +
+            "\"isBlockedByAB4\":false}";
     private static final String LATE_INVESTMENT_JSON = "{\"id\":10011582,\"loan\":{\"id\":685008," +
             "\"activeLoanOrdinal\":0,\"contractNo\":\"1008025194\",\"userNo\":\"10000517730\",\"title\":\"Auto \"," +
             "\"story\":\"zonky592794\",\"annuity\":5263.00,\"detailLabels\":[\"CURRENTLY_INSURED\"," +
@@ -176,11 +158,11 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(740849, InvestmentLoanData::getId)
-                    .returns(Money.from(8419), InvestmentLoanData::getAnnuity)
+                    .returns(Optional.of(Money.from(8419)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(84, 83), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
                     .returns(Rating.B, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                    .returns(Optional.of(MainIncomeType.EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.STREDOCESKY, l -> l.getBorrower()
                         .getRegion())
@@ -194,20 +176,39 @@ class InvestmentImplTest {
                     .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isNotEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are present and contain particular values
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(0, LoanHealthStats::getDueInstalments)
-                    .returns(1, LoanHealthStats::getLongestDaysDue)
-                    .returns(1, LoanHealthStats::getPaidInstalments);
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLoanHealthInfo)
+                    .contains(LoanHealth.HEALTHY);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDaysSinceLastInDue)
+                    .contains(0);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDueInstalments)
+                    .contains(0);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLongestDaysDue)
+                    .contains(1);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getPaidInstalments)
+                    .contains(1);
             });
         }
     }
@@ -245,11 +246,11 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(691603, InvestmentLoanData::getId)
-                    .returns(Money.from(4404), InvestmentLoanData::getAnnuity)
+                    .returns(Optional.of(Money.from(4404)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(66, 62), InvestmentLoanData::getPayments)
                     .returns(Purpose.AUTO_MOTO, InvestmentLoanData::getPurpose)
                     .returns(Rating.B, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.SELF_EMPLOYMENT, l -> l.getBorrower()
+                    .returns(Optional.of(MainIncomeType.SELF_EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.ZLINSKY, l -> l.getBorrower()
                         .getRegion())
@@ -263,20 +264,39 @@ class InvestmentImplTest {
                     .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isNotEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are present and contain particular values
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.HISTORICALLY_IN_DUE, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(17, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(1, LoanHealthStats::getDueInstalments)
-                    .returns(5, LoanHealthStats::getLongestDaysDue)
-                    .returns(4, LoanHealthStats::getPaidInstalments);
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLoanHealthInfo)
+                    .contains(LoanHealth.HISTORICALLY_IN_DUE);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDaysSinceLastInDue)
+                    .contains(17);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDueInstalments)
+                    .contains(1);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLongestDaysDue)
+                    .contains(5);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getPaidInstalments)
+                    .contains(4);
             });
         }
     }
@@ -314,11 +334,11 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(685008, InvestmentLoanData::getId)
-                    .returns(Money.from(5263), InvestmentLoanData::getAnnuity)
+                    .returns(Optional.of(Money.from(5263)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(84, 81), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
                     .returns(Rating.A, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                    .returns(Optional.of(MainIncomeType.EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.PARDUBICKY, l -> l.getBorrower()
                         .getRegion())
@@ -332,20 +352,39 @@ class InvestmentImplTest {
                     .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isNotEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are present and contain particular values
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.CURRENTLY_IN_DUE, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(0, LoanHealthStats::getDueInstalments)
-                    .returns(21, LoanHealthStats::getLongestDaysDue)
-                    .returns(3, LoanHealthStats::getPaidInstalments);
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLoanHealthInfo)
+                    .contains(LoanHealth.CURRENTLY_IN_DUE);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDaysSinceLastInDue)
+                    .contains(0);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDueInstalments)
+                    .contains(0);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLongestDaysDue)
+                    .contains(21);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getPaidInstalments)
+                    .contains(3);
             });
         }
     }
@@ -356,51 +395,45 @@ class InvestmentImplTest {
             Investment investment = jsonb.fromJson(DEFAULTED_INVESTMENT_JSON, InvestmentImpl.class);
             assertSoftly(softly -> {
                 softly.assertThat(investment.getId())
-                    .isEqualTo(6997009);
+                    .isEqualTo(3042483L);
                 softly.assertThat(investment.getSellStatus())
                     .isEqualTo(SellStatus.NOT_SELLABLE);
                 softly.assertThat(investment.getPrincipal())
-                    .isEqualTo(new AmountsImpl(Money.from(200), Money.from(194.99)));
+                    .isEqualTo(new AmountsImpl(Money.from(188.23), Money.from(160.32)));
                 softly.assertThat(investment.getInterest())
-                    .isEqualTo(new AmountsImpl(Money.from(9.54), Money.from(2.48)));
+                    .isEqualTo(new AmountsImpl(Money.from(27.74), Money.from(7.94)));
                 // SellInfo is missing.
                 softly.assertThat(investment.getSmpSellInfo())
                     .isEmpty();
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
-                    .returns(565277, InvestmentLoanData::getId)
-                    .returns(Money.from(2585), InvestmentLoanData::getAnnuity)
-                    .returns(new InstalmentsImpl(6, 2), InvestmentLoanData::getPayments)
+                    .returns(204677, InvestmentLoanData::getId)
+                    .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(20, 5), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
-                    .returns(Rating.AA, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                    .returns(Rating.B, InvestmentLoanData::getRating)
+                    .returns(Optional.empty(), l -> l.getBorrower()
                         .getPrimaryIncomeType())
-                    .returns(Region.STREDOCESKY, l -> l.getBorrower()
+                    .returns(Region.HLAVNI_MESTO_PRAHA, l -> l.getBorrower()
                         .getRegion())
-                    .returns(Ratio.fromPercentage("6.29"), InvestmentLoanData::getRevenueRate)
-                    .returns(Ratio.fromPercentage("8.49"), InvestmentLoanData::getInterestRate);
+                    .returns(Ratio.fromPercentage("9.99"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("13.49"), InvestmentLoanData::getInterestRate);
                 softly.assertThat(investment.getLoan()
                     .getLabel())
                     .contains(TERMINATED);
                 softly.assertThat(investment.getLoan()
                     .getDetailLabels())
-                    .containsOnly(VERIFIED_BORROWER, VERIFIED_INCOME);
+                    .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are missing.
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.CURRENTLY_IN_DUE, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(0, LoanHealthStats::getDueInstalments)
-                    .returns(147, LoanHealthStats::getLongestDaysDue)
-                    .returns(5, LoanHealthStats::getPaidInstalments);
+                    .isEmpty();
             });
         }
     }
@@ -411,51 +444,45 @@ class InvestmentImplTest {
             Investment investment = jsonb.fromJson(SOLD_INVESTMENT_JSON, InvestmentImpl.class);
             assertSoftly(softly -> {
                 softly.assertThat(investment.getId())
-                    .isEqualTo(10232546);
+                    .isEqualTo(10083108);
                 softly.assertThat(investment.getSellStatus())
                     .isEqualTo(SellStatus.SOLD);
                 softly.assertThat(investment.getPrincipal())
-                    .isEqualTo(new AmountsImpl(Money.from(122.23), Money.from(118.9)));
+                    .isEqualTo(new AmountsImpl(Money.from(72.67)));
                 softly.assertThat(investment.getInterest())
-                    .isEqualTo(new AmountsImpl(Money.from(9.29), Money.from(8.81)));
+                    .isEqualTo(new AmountsImpl(Money.from(8.69)));
                 // SellInfo is missing.
                 softly.assertThat(investment.getSmpSellInfo())
                     .isEmpty();
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
-                    .returns(193181, InvestmentLoanData::getId)
-                    .returns(Money.from(3973), InvestmentLoanData::getAnnuity)
-                    .returns(new InstalmentsImpl(61, 34), InvestmentLoanData::getPayments)
-                    .returns(Purpose.OTHER, InvestmentLoanData::getPurpose)
-                    .returns(Rating.AAAA, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.SELF_EMPLOYMENT, l -> l.getBorrower()
+                    .returns(40056, InvestmentLoanData::getId)
+                    .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(60, 17), InvestmentLoanData::getPayments)
+                    .returns(Purpose.HEALTH, InvestmentLoanData::getPurpose)
+                    .returns(Rating.C, InvestmentLoanData::getRating)
+                    .returns(Optional.empty(), l -> l.getBorrower()
                         .getPrimaryIncomeType())
-                    .returns(Region.STREDOCESKY, l -> l.getBorrower()
+                    .returns(Region.USTECKY, l -> l.getBorrower()
                         .getRegion())
-                    .returns(Ratio.fromPercentage("4.49"), InvestmentLoanData::getRevenueRate)
-                    .returns(Ratio.fromPercentage("4.99"), InvestmentLoanData::getInterestRate);
+                    .returns(Ratio.fromPercentage("11.49"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("15.49"), InvestmentLoanData::getInterestRate);
                 softly.assertThat(investment.getLoan()
                     .getLabel())
                     .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getDetailLabels())
-                    .containsOnly(COVID_19_POSTPONEMENT_PROCESSED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                    .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are missing.
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(0, LoanHealthStats::getDueInstalments)
-                    .returns(1, LoanHealthStats::getLongestDaysDue)
-                    .returns(26, LoanHealthStats::getPaidInstalments);
+                    .isEmpty();
             });
         }
     }
@@ -466,51 +493,45 @@ class InvestmentImplTest {
             Investment investment = jsonb.fromJson(FINISHED_INVESTMENT_JSON, InvestmentImpl.class);
             assertSoftly(softly -> {
                 softly.assertThat(investment.getId())
-                    .isEqualTo(13214919);
+                    .isEqualTo(10232542);
                 softly.assertThat(investment.getSellStatus())
                     .isEqualTo(SellStatus.NOT_SELLABLE);
                 softly.assertThat(investment.getPrincipal())
-                    .isEqualTo(new AmountsImpl(Money.from(190.6), Money.ZERO));
+                    .isEqualTo(new AmountsImpl(Money.from(101.47), Money.ZERO));
                 softly.assertThat(investment.getInterest())
-                    .isEqualTo(new AmountsImpl(Money.from(8.49), Money.from(0.01)));
+                    .isEqualTo(new AmountsImpl(Money.from(1.64), Money.ZERO));
                 // SellInfo is missing.
                 softly.assertThat(investment.getSmpSellInfo())
                     .isEmpty();
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
-                    .returns(517589, InvestmentLoanData::getId)
-                    .returns(Money.from(6234), InvestmentLoanData::getAnnuity)
-                    .returns(new InstalmentsImpl(13, 0), InvestmentLoanData::getPayments)
+                    .returns(385418, InvestmentLoanData::getId)
+                    .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
+                    .returns(new InstalmentsImpl(19, 0), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
-                    .returns(Rating.B, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                    .returns(Rating.AAAA, InvestmentLoanData::getRating)
+                    .returns(Optional.empty(), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.JIHOMORAVSKY, l -> l.getBorrower()
                         .getRegion())
-                    .returns(Ratio.fromPercentage("9.99"), InvestmentLoanData::getRevenueRate)
-                    .returns(Ratio.fromPercentage("13.49"), InvestmentLoanData::getInterestRate);
+                    .returns(Ratio.fromPercentage("4.49"), InvestmentLoanData::getRevenueRate)
+                    .returns(Ratio.fromPercentage("4.99"), InvestmentLoanData::getInterestRate);
                 softly.assertThat(investment.getLoan()
                     .getLabel())
                     .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getDetailLabels())
-                    .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
+                    .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are missing.
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(0, LoanHealthStats::getDueInstalments)
-                    .returns(1, LoanHealthStats::getLongestDaysDue)
-                    .returns(13, LoanHealthStats::getPaidInstalments);
+                    .isEmpty();
             });
         }
     }
@@ -534,11 +555,11 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(769283, InvestmentLoanData::getId)
-                    .returns(Money.from(1925), InvestmentLoanData::getAnnuity)
+                    .returns(Optional.of(Money.from(1925)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(60), InvestmentLoanData::getPayments)
                     .returns(Purpose.HOUSEHOLD, InvestmentLoanData::getPurpose)
                     .returns(Rating.AAAA, InvestmentLoanData::getRating)
-                    .returns(MainIncomeType.EMPLOYMENT, l -> l.getBorrower()
+                    .returns(Optional.of(MainIncomeType.EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.JIHOMORAVSKY, l -> l.getBorrower()
                         .getRegion())
@@ -552,20 +573,39 @@ class InvestmentImplTest {
                     .containsOnly(CURRENTLY_INSURED, VERIFIED_BORROWER, VERIFIED_INCOME);
                 softly.assertThat(investment.getLoan()
                     .getStory())
-                    .isNotBlank();
+                    .isNotEmpty();
                 softly.assertThat(investment.getLoan()
                     .getTitle())
                     .isNotBlank();
-                // Health stats are present and contains particular values
+                // Health stats are present and contain particular values
                 softly.assertThat(investment.getLoan()
                     .getHealthStats())
-                    .returns(OptionalInt.empty(), LoanHealthStats::getInstalmentsCurrentlyInDue)
-                    .returns(LoanHealth.HEALTHY, LoanHealthStats::getLoanHealthInfo)
-                    .returns(0, LoanHealthStats::getCurrentDaysDue)
-                    .returns(0, LoanHealthStats::getDaysSinceLastInDue)
-                    .returns(0, LoanHealthStats::getDueInstalments)
-                    .returns(1, LoanHealthStats::getLongestDaysDue)
-                    .returns(0, LoanHealthStats::getPaidInstalments);
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLoanHealthInfo)
+                    .contains(LoanHealth.HEALTHY);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getInstalmentsCurrentlyInDue)
+                    .contains(OptionalInt.empty());
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDaysSinceLastInDue)
+                    .contains(0);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getDueInstalments)
+                    .contains(0);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getLongestDaysDue)
+                    .contains(1);
+                softly.assertThat(investment.getLoan()
+                    .getHealthStats())
+                    .map(LoanHealthStats::getPaidInstalments)
+                    .contains(0);
             });
         }
     }

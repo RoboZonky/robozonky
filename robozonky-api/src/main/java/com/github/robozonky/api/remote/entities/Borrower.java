@@ -16,12 +16,14 @@
 
 package com.github.robozonky.api.remote.entities;
 
+import java.util.Optional;
+
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Region;
 
 public interface Borrower {
 
-    MainIncomeType getPrimaryIncomeType();
+    Optional<MainIncomeType> getPrimaryIncomeType();
 
     Region getRegion();
 

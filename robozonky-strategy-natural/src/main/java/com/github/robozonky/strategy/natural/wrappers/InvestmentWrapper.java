@@ -23,6 +23,7 @@ import java.util.OptionalInt;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
@@ -112,6 +113,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     public int getOriginalAnnuity() {
         return investment.getLoan()
             .getAnnuity()
+            .orElseThrow()
             .getValue()
             .intValue();
     }
@@ -146,10 +148,9 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Optional<LoanHealth> getHealth() {
-        var healthInfo = investment.getLoan()
+        return investment.getLoan()
             .getHealthStats()
-            .getLoanHealthInfo();
-        return Optional.of(healthInfo);
+            .map(LoanHealthStats::getLoanHealthInfo);
     }
 
     @Override
@@ -179,26 +180,26 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public OptionalInt getCurrentDpd() {
-        var currentDpd = investment.getLoan()
+        return investment.getLoan()
             .getHealthStats()
-            .getCurrentDaysDue();
-        return OptionalInt.of(currentDpd);
+            .map(s -> OptionalInt.of(s.getCurrentDaysDue()))
+            .orElseGet(OptionalInt::empty);
     }
 
     @Override
     public OptionalInt getLongestDpd() {
-        int maxDpd = investment.getLoan()
+        return investment.getLoan()
             .getHealthStats()
-            .getLongestDaysDue();
-        return OptionalInt.of(maxDpd);
+            .map(s -> OptionalInt.of(s.getLongestDaysDue()))
+            .orElseGet(OptionalInt::empty);
     }
 
     @Override
     public OptionalInt getDaysSinceDpd() {
-        var daysSinceLastDpd = investment.getLoan()
+        return investment.getLoan()
             .getHealthStats()
-            .getDaysSinceLastInDue();
-        return OptionalInt.of(daysSinceLastDpd);
+            .map(s -> OptionalInt.of(s.getDaysSinceLastInDue()))
+            .orElseGet(OptionalInt::empty);
     }
 
     @Override

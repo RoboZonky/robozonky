@@ -45,6 +45,7 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.SessionEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.tenant.LazyEvent;
@@ -121,7 +122,8 @@ enum Category {
             .toLocalDate()
             .minusDays(investment.getLoan()
                 .getHealthStats()
-                .getCurrentDaysDue());
+                .map(LoanHealthStats::getCurrentDaysDue)
+                .orElseThrow());
         final int loanId = investment.getLoan()
             .getId();
         final Loan loan = tenant.getLoan(loanId);

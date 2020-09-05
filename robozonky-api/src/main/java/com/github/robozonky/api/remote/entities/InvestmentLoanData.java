@@ -36,9 +36,9 @@ public interface InvestmentLoanData {
 
     String getTitle();
 
-    String getStory();
+    Optional<String> getStory();
 
-    Money getAnnuity();
+    Optional<Money> getAnnuity();
 
     Optional<Label> getLabel();
 
@@ -46,7 +46,7 @@ public interface InvestmentLoanData {
 
     Borrower getBorrower();
 
-    LoanHealthStats getHealthStats();
+    Optional<LoanHealthStats> getHealthStats();
 
     Purpose getPurpose();
 
