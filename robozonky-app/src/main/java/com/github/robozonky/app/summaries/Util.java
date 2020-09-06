@@ -72,7 +72,11 @@ final class Util {
     static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
         var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
-            .map(investment -> { // All sellables will always have health stats.
+            .map(i -> i.getLoan()
+                .getHealthStats()
+                .map(h -> i)
+                .orElseGet(() -> tenant.getInvestment(i.getId())))
+            .map(investment -> {
                 var healthInfo = investment.getLoan()
                     .getHealthStats()
                     .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
