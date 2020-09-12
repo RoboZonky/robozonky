@@ -24,8 +24,10 @@ import com.github.robozonky.internal.util.json.DetailLabelDeserializer;
 public enum DetailLabel {
 
     CURRENTLY_INSURED,
+    ADDITIONALLY_INSURED,
     VERIFIED_INCOME,
     VERIFIED_BORROWER,
+    COVID_19_REQUEST_WAITING,
     COVID_19_POSTPONEMENT_PROCESSED,
     UNKNOWN
 
