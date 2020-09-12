@@ -14,7 +14,7 @@ on:
 
 env:
   COMPILE_TIME_JDK_VERSION: 11
-  RUNTIME_JDK_VERSION: 14
+  RUNTIME_JDK_VERSION: 15
   JLINK_SCRIPT_FILENAME: .github/workflows/jlink.sh
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
