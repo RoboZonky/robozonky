@@ -544,7 +544,6 @@
             </goals>
             <configuration>
               <skip>${com.github.robozonky.distribution}</skip>
-              <failOnWarnings>true</failOnWarnings>
             </configuration>
           </execution>
         </executions>
