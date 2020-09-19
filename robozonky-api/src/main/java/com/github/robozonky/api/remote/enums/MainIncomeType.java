@@ -35,7 +35,7 @@ public enum MainIncomeType implements BaseEnum {
     UNEMPLOYED("bez zaměstnání"),
     LIBERAL_PROFESSION("svobodné povolání"),
     RENT("rentiér"),
-    OTHERS_MAIN("jiné");
+    OTHER("jiné");
 
     private final String code;
 

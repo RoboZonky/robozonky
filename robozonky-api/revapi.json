@@ -365,7 +365,12 @@
       {
         "code": "java.field.removed",
         "old": "field com.github.robozonky.api.remote.enums.Region.PRAHA",
-        "justification": "The proper name is HLAVNI_MESTO_PRAHA"
+        "justification": "The proper name is HLAVNI_MESTO_PRAHA now."
+      },
+      {
+        "code": "java.field.removed",
+        "old": "field com.github.robozonky.api.remote.enums.MainIncomeType.OTHERS_MAIN",
+        "justification": "The proper name is OTHER now."
       }
     ]
   }
