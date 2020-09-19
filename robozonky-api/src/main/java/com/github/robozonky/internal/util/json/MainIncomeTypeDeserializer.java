@@ -21,7 +21,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 public final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
 
     public MainIncomeTypeDeserializer() {
-        super(MainIncomeType::valueOf, MainIncomeType.OTHERS_MAIN);
+        super(MainIncomeType::valueOf, MainIncomeType.OTHER);
     }
 
 }
