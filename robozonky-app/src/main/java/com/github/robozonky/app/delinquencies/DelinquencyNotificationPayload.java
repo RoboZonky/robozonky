@@ -16,8 +16,6 @@
 
 package com.github.robozonky.app.delinquencies;
 
-import static com.github.robozonky.app.events.impl.EventFactory.loanLost;
-import static com.github.robozonky.app.events.impl.EventFactory.loanLostLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquent;
 import static com.github.robozonky.app.events.impl.EventFactory.loanNoLongerDelinquentLazy;
 
@@ -42,7 +40,6 @@ import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Label;
-import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -90,15 +87,8 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             LOGGER.debug("Ignoring a repaid investment #{}, will be handled elsewhere.",
                     investment.getId());
             return;
-        } else if (investment.getSellStatus() == SellStatus.NOT_SELLABLE) { // Investment is lost for good.
-            // TODO Try to convince Zonky to add a dedicated status for this eventuality.
-            tenant.fire(loanLostLazy(() -> {
-                final Loan loan = tenant.getLoan(investment.getLoan()
-                    .getId());
-                return loanLost(investment, loan);
-            }));
-            return;
         }
+        // TODO Try to convince Zonky to add a dedicated status for loans that are lost.
         tenant.fire(loanNoLongerDelinquentLazy(() -> {
             final Loan loan = tenant.getLoan(investment.getLoan()
                 .getId());

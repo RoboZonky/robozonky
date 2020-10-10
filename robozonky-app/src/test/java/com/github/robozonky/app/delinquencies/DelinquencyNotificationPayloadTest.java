@@ -31,7 +31,6 @@ import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent30DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent60DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
-import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -165,32 +164,6 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(1)
             .first()
             .isInstanceOf(LoanNoLongerDelinquentEvent.class);
-    }
-
-    @Test
-    void handlesLoss() {
-        final Investment i1 = getDefaultedInvestment();
-        when(zonky.getInvestment(eq(i1.getId()))).thenReturn(i1);
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
-        // run test
-        payload.accept(tenant); // nothing will happen here, as this is the initializing run
-        final Investment i2 = getDefaultedInvestment();
-        when(zonky.getInvestment(eq(i2.getId()))).thenReturn(i2);
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1, i2));
-        final Loan fresh = MockLoanBuilder.fresh();
-        when(zonky.getLoan(anyInt())).thenReturn(fresh);
-        payload.accept(tenant); // the new delinquency will show up now
-        assertThat(getEventsRequested()).hasSize(1)
-            .extracting(e -> (Object) e.getClass()
-                .getInterfaces()[0])
-            .containsOnly(LoanDefaultedEvent.class);
-        readPreexistingEvents();
-        // now the same delinquency is no longer available
-        when(zonky.getDelinquentInvestments()).thenReturn(Stream.of(i1));
-        payload.accept(tenant); // the lost loan will show up now
-        assertThat(getEventsRequested()).hasSize(1)
-            .first()
-            .isInstanceOf(LoanLostEvent.class);
     }
 
     @Test
