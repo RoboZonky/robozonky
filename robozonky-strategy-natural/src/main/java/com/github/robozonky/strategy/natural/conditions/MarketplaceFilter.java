@@ -118,7 +118,14 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
      */
     @Override
     public boolean test(final Wrapper<?> item) {
-        final Predicate<MarketplaceFilterCondition> f = c -> c.test(item);
+        final Predicate<MarketplaceFilterCondition> f = c -> {
+            try {
+                return c.test(item);
+            } catch (final Exception ex) {
+                // This is here for debugging. The stack trace gives no useful information on its own.
+                throw new IllegalStateException("Failed processing " + item + " with " + c + ".");
+            }
+        };
         return when.stream()
             .allMatch(f) &&
                 (butNotWhen.isEmpty() || !butNotWhen.stream()
