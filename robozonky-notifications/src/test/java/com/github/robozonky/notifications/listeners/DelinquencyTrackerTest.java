@@ -76,7 +76,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         .set(LoanImpl::setInterestRate, Ratio.fromPercentage(Rating.A.getCode()))
         .set(LoanImpl::setPurpose, Purpose.TRAVEL)
         .set(LoanImpl::setRegion, Region.JIHOMORAVSKY)
-        .set(LoanImpl::setMainIncomeType, MainIncomeType.OTHER)
+        .set(LoanImpl::setMainIncomeType, MainIncomeType.OTHERS_MAIN)
         .set(LoanImpl::setName, "")
         .set(LoanImpl::setUrl, "http://localhost")
         .build();
