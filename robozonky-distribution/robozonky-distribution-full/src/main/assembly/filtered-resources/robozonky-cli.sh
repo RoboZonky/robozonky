@@ -18,8 +18,7 @@
 ROBOZONKY_EXECUTABLE="${com.github.robozonky.distribution.jar.cli}"
 
 # Find the correct installation directory, regardless of whether it's from the ZIP or from the installer.
-SCRIPT=$(realpath $0)
-HERE=$(dirname $SCRIPT)
+HERE=$(dirname $0)
 if [ -f $HERE/dist/$ROBOZONKY_EXECUTABLE ]; then
     HERE=$HERE/dist
 fi

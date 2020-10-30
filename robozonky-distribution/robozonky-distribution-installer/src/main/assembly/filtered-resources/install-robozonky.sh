@@ -17,8 +17,7 @@
 
 ROBOZONKY_EXECUTABLE="${com.github.robozonky.distribution.jar}"
 
-SCRIPT=$(realpath $0)
-HERE=$(dirname $SCRIPT)
+HERE=$(dirname $0)
 echo "Will run '$ROBOZONKY_EXECUTABLE' from '$HERE'."
 
 # Use Java runtime bundled with RoboZonky, if available.
