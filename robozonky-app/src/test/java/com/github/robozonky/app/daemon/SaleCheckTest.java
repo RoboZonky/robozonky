@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,12 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
     private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
     private final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
+
+    @BeforeEach
+    @AfterEach
+    void resetParticipationCache() {
+        SoldParticipationCache.resetAll();
+    }
 
     @Test
     void nothingIsOffered() {
