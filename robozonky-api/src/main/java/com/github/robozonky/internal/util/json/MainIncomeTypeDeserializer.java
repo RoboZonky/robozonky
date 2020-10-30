@@ -16,12 +16,27 @@
 
 package com.github.robozonky.internal.util.json;
 
+import java.lang.reflect.Type;
+import java.util.Objects;
+
+import javax.json.bind.serializer.DeserializationContext;
+import javax.json.stream.JsonParser;
+
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 
 public final class MainIncomeTypeDeserializer extends AbstractDeserializer<MainIncomeType> {
 
     public MainIncomeTypeDeserializer() {
-        super(MainIncomeType::valueOf, MainIncomeType.OTHERS_MAIN);
+        super(MainIncomeType::valueOf, MainIncomeType.OTHER);
     }
 
+    @Override
+    public MainIncomeType deserialize(JsonParser parser, DeserializationContext ctx, Type rtType) {
+        String id = parser.getString();
+        if (Objects.equals(id, "OTHERS_MAIN")) { // Don't want to pollute the Enum with this faulty Zonky value.
+            return MainIncomeType.OTHER;
+        } else {
+            return super.deserialize(parser, ctx, rtType);
+        }
+    }
 }
