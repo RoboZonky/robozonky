@@ -97,9 +97,7 @@ public interface Tenant extends AutoCloseable {
      * @param fresh        Whether to refresh the cache, if any.
      * @return never null
      */
-    default Investment getInvestment(final long investmentId, final boolean fresh) {
-        return call(zonky -> zonky.getInvestment(investmentId));
-    }
+    Investment getInvestment(final long investmentId, final boolean fresh);
 
     default Investment getInvestment(final long investmentId) {
         return getInvestment(investmentId, false);

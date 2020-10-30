@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -88,6 +89,11 @@ public class TestingTenant implements Tenant {
     @Override
     public Optional<ReservationStrategy> getReservationStrategy() {
         return Optional.empty();
+    }
+
+    @Override
+    public Investment getInvestment(long investmentId, boolean fresh) {
+        return zonky.getInvestment(investmentId);
     }
 
     @Override

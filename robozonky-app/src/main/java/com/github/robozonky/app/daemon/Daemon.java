@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +29,7 @@ import com.github.robozonky.app.runtime.Lifecycle;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.async.Scheduler;
 import com.github.robozonky.internal.extensions.JobServiceLoader;
+import com.github.robozonky.internal.test.DateUtil;
 
 public class Daemon implements InvestmentMode {
 
@@ -68,16 +70,20 @@ public class Daemon implements InvestmentMode {
 
     void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
             final Duration initialDelay, final Duration timeout) {
-        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
-                executor, repeatAfter, initialDelay, timeout);
+        OffsetDateTime startAt = DateUtil.offsetNow()
+            .plus(initialDelay);
+        LOGGER.debug("Submitting {} to {}, start at {}, repeating after {}. Optional timeout of {}.", type,
+                executor, startAt, repeatAfter, timeout);
         final Runnable payload = new Skippable(r, type, tenant, this::triggerShutdownDueToFailure);
         executor.submit(payload, repeatAfter, initialDelay, timeout);
     }
 
     void submitTenantless(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
             final Duration initialDelay, final Duration timeout) {
-        LOGGER.debug("Submitting {} to {}, repeating after {}, starting in {}. Optional timeout of {}.", type,
-                executor, repeatAfter, initialDelay, timeout);
+        OffsetDateTime startAt = DateUtil.offsetNow()
+            .plus(initialDelay);
+        LOGGER.debug("Submitting {} to {}, start at {}, repeating after {}. Optional timeout of {}.", type,
+                executor, startAt, repeatAfter, timeout);
         final Runnable payload = new SimpleSkippable(r, type, this::triggerShutdownDueToFailure);
         executor.submit(payload, repeatAfter, initialDelay, timeout);
     }
