@@ -134,8 +134,12 @@ class PowerTenantImpl implements PowerTenant {
 
     @Override
     public Investment getInvestment(long investmentId, boolean fresh) {
-        return investmentCache.get()
-            .get(investmentId);
+        if (fresh) {
+            return call(zonky -> zonky.getInvestment(investmentId));
+        } else {
+            return investmentCache.get()
+                .get(investmentId);
+        }
     }
 
     @Override

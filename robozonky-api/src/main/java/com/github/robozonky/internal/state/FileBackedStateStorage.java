@@ -95,8 +95,8 @@ class FileBackedStateStorage implements StateStorage {
     }
 
     private boolean containskey(final String section, final String key) {
-        final boolean hasSection = getState().keySet()
-            .contains(section);
+        final boolean hasSection = getState()
+            .containsKey(section);
         return hasSection && getState().get(section)
             .containsKey(key);
     }
