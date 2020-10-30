@@ -45,6 +45,7 @@ final class SaleCheck implements TenantPayload {
             .getId();
         switch (investment.getSellStatus()) {
             case SOLD:
+                cache.markAsSold(investmentId);
                 return Optional.of(investment);
             case OFFERED:
                 LOGGER.debug("Investment #{} for loan #{} is still on SMP.", investmentId, loanId);
@@ -62,14 +63,11 @@ final class SaleCheck implements TenantPayload {
         cache.getOffered()
             .mapToObj(investmentId -> retrieveInvestmentIfSold(cache, tenant, investmentId))
             .flatMap(Optional::stream)
-            .forEach(sold -> {
-                cache.markAsSold(sold.getId());
-                ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
-                    final Loan l = tenant.getLoan(sold.getLoan()
-                        .getId());
-                    return investmentSold(sold, l, tenant.getPortfolio()
-                        .getOverview());
-                }));
-            });
+            .forEach(sold -> ((PowerTenant) tenant).fire(investmentSoldLazy(() -> {
+                final Loan l = tenant.getLoan(sold.getLoan()
+                    .getId());
+                return investmentSold(sold, l, tenant.getPortfolio()
+                    .getOverview());
+            })));
     }
 }

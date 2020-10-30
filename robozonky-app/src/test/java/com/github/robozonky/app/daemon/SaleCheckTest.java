@@ -45,9 +45,7 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
     private final TenantPayload sut = new SaleCheck();
     private final Zonky zonky = harmlessZonky();
     private final Tenant tenant = mockTenant(zonky);
-    private final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
 
-    @BeforeEach
     @AfterEach
     void resetParticipationCache() {
         SoldParticipationCache.resetAll();
@@ -70,6 +68,7 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
         private final Investment onSmp = MockInvestmentBuilder.fresh(MockLoanBuilder.fresh(), 200)
             .set(InvestmentImpl::setSellStatus, SellStatus.OFFERED)
             .build();
+        private final SoldParticipationCache cache = SoldParticipationCache.forTenant(tenant);
 
         @BeforeEach
         void markInvestmentsAsOffered() {
@@ -85,14 +84,17 @@ class SaleCheckTest extends AbstractZonkyLeveragingTest {
         void process() {
             sut.accept(tenant);
             assertSoftly(softly -> {
-                // "regular" not sold and thus not offered; "sold" was sold; "4" invalid and thus no longer offered
-                assertThat(cache.getOffered()).containsOnly(onSmp.getId());
+                softly.assertThat(cache.getOffered())
+                    .containsOnly(onSmp.getId());
                 // this was the only one sold during this session
-                assertThat(cache.wasOnceSold(soldNow.getId())).isTrue();
+                softly.assertThat(cache.wasOnceSold(soldNow.getId()))
+                    .isTrue();
                 // this was offered, but not marked as sold == sold in some previous session
-                assertThat(cache.wasOnceSold(soldEarlier.getId())).isFalse();
+                softly.assertThat(cache.wasOnceSold(soldEarlier.getId()))
+                    .isFalse();
                 // this is still on the marketplace, offered to be sold
-                assertThat(cache.wasOnceSold(onSmp.getId())).isFalse();
+                softly.assertThat(cache.wasOnceSold(onSmp.getId()))
+                    .isFalse();
             });
             final List<Event> events = getEventsRequested();
             assertThat(events)
