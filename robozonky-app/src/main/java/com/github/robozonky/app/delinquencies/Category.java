@@ -117,12 +117,12 @@ enum Category {
 
     private static SessionEvent supplyEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final LocalDate since = DateUtil.localNow()
-            .toLocalDate()
+        final LocalDate since = DateUtil.zonedNow()
             .minusDays(investment.getLoan()
                 .getHealthStats()
                 .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
-                .getCurrentDaysDue());
+                .getCurrentDaysDue())
+            .toLocalDate();
         final int loanId = investment.getLoan()
             .getId();
         final Loan loan = tenant.getLoan(loanId);

@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +36,7 @@ final class LazyEventImpl<T extends Event> implements LazyEvent<T> {
 
     public LazyEventImpl(final Class<T> eventType, final Supplier<T> eventSupplier) {
         this.eventType = eventType;
-        final OffsetDateTime conceivedOn = DateUtil.offsetNow();
+        final ZonedDateTime conceivedOn = DateUtil.zonedNow();
         this.supplier = Memoizer.memoize(() -> {
             LOGGER.trace("Instantiating {}.", eventType);
             final T result = eventSupplier.get();

@@ -58,7 +58,7 @@ final class Util {
     }
 
     public static Date toDate(final LocalDate localDate) {
-        return toDate(localDate.atStartOfDay(Defaults.ZONE_ID)
+        return toDate(localDate.atStartOfDay(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime());
     }
 
@@ -222,7 +222,7 @@ final class Util {
     private static long getMonthsElapsed(final Loan l) {
         return Period.between(l.getDatePublished()
             .toLocalDate(),
-                DateUtil.localNow()
+                DateUtil.zonedNow()
                     .toLocalDate())
             .toTotalMonths();
     }

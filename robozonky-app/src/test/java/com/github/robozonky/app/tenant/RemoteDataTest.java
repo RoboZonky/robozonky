@@ -18,7 +18,6 @@ package com.github.robozonky.app.tenant;
 
 import static org.mockito.Mockito.*;
 
-import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -36,6 +35,7 @@ import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.test.mock.MockLoanBuilder;
@@ -53,7 +53,7 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(data.getBlocked())
                 .isEmpty();
             softly.assertThat(data.getRetrievedOn())
-                .isBeforeOrEqualTo(OffsetDateTime.now());
+                .isBeforeOrEqualTo(DateUtil.zonedNow());
         });
     }
 

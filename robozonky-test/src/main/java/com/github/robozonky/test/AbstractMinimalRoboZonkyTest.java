@@ -52,7 +52,7 @@ public abstract class AbstractMinimalRoboZonkyTest {
     protected void skipAheadBy(final Duration duration) {
         final Instant next = DateUtil.now()
             .plus(duration);
-        setClock(Clock.fixed(next, Defaults.ZONE_ID));
+        setClock(Clock.fixed(next, Defaults.ZONKYCZ_ZONE_ID));
     }
 
     protected void setRandom(final Random random) {

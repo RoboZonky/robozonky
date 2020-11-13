@@ -18,7 +18,6 @@ package com.github.robozonky.app.summaries;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 
@@ -42,13 +41,13 @@ final class SummarizerJob implements TenantJob {
          * 6am is important, since it's long after midnight, when Zonky recalculates.
          * Triggering any such code during recalculation is likely to bring some strange inconsistent values.
          */
-        final LocalDateTime date = DateUtil.localNow()
+        var date = DateUtil.zonedNow()
             .with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
             .withHour(6)
             .truncatedTo(ChronoUnit.HOURS);
-        final Duration untilSunday6am = Duration.between(DateUtil.localNow(), date);
-        final Duration untilNextSunday6am = untilSunday6am.isNegative() ? untilSunday6am.plusDays(7) : untilSunday6am;
-        final int loadBalancingRandomMinutesOffset = RandomUtil.getNextInt(30) - 15;
+        var untilSunday6am = Duration.between(DateUtil.zonedNow(), date);
+        var untilNextSunday6am = untilSunday6am.isNegative() ? untilSunday6am.plusDays(7) : untilSunday6am;
+        var loadBalancingRandomMinutesOffset = RandomUtil.getNextInt(30) - 15;
         return untilNextSunday6am.plusMinutes(loadBalancingRandomMinutesOffset);
     }
 

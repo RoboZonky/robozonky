@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +54,8 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
-        .set(LoanImpl::setDatePublished, DateUtil.offsetNow())
+        .set(LoanImpl::setDatePublished, DateUtil.zonedNow()
+            .toOffsetDateTime())
         .set(LoanImpl::setAmount, Money.from(200))
         .set(LoanImpl::setAnnuity, Money.from(BigDecimal.TEN))
         .set(LoanImpl::setRating, Rating.D)
@@ -133,8 +134,8 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         }
 
         @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
+        public ZonedDateTime getCreatedOn() {
+            return DateUtil.zonedNow();
         }
 
         @Override
@@ -157,8 +158,8 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
         }
 
         @Override
-        public OffsetDateTime getCreatedOn() {
-            return OffsetDateTime.now();
+        public ZonedDateTime getCreatedOn() {
+            return DateUtil.zonedNow();
         }
 
     }

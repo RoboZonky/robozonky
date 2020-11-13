@@ -17,10 +17,7 @@
 package com.github.robozonky.strategy.natural.wrappers;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -28,6 +25,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
 abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
@@ -41,9 +39,10 @@ abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper
     }
 
     protected Ratio estimateRevenueRate() { // Loans with ID < 400k are assumed to have the old pre-2019 fees.
-        LocalDateTime dateForFees = getLoanId() < 400_000 ? LocalDate.of(2019, 2, 28)
-            .atStartOfDay() : DateUtil.localNow();
-        Instant feeInstant = dateForFees.toInstant(ZoneOffset.ofHours(1));
+        var feeDate = getLoanId() < 400_000 ? LocalDate.of(2019, 2, 28)
+            .atStartOfDay()
+            .atZone(Defaults.ZONKYCZ_ZONE_ID) : DateUtil.zonedNow();
+        var feeInstant = feeDate.toInstant();
         return getRating().getMaximalRevenueRate(feeInstant, portfolioOverview.getInvested());
     }
 

@@ -52,7 +52,8 @@ public class StatisticsImpl implements Statistics {
         final StatisticsImpl s = new StatisticsImpl();
         s.profitability = Ratio.ZERO;
         s.riskPortfolio = Collections.emptyList();
-        s.timestamp = DateUtil.offsetNow();
+        s.timestamp = DateUtil.zonedNow()
+            .toOffsetDateTime();
         return s;
     }
 
@@ -61,22 +62,22 @@ public class StatisticsImpl implements Statistics {
         return Optional.ofNullable(profitability);
     }
 
+    public void setProfitability(final Ratio profitability) {
+        this.profitability = profitability;
+    }
+
     @Override
     public List<RiskPortfolio> getRiskPortfolio() { // "riskPortfolio" is null for new Zonky users
         return riskPortfolio == null ? Collections.emptyList() : Collections.unmodifiableList(riskPortfolio);
     }
 
+    public void setRiskPortfolio(final List<RiskPortfolioImpl> riskPortfolio) {
+        this.riskPortfolio = riskPortfolio;
+    }
+
     @Override
     public OffsetDateTime getTimestamp() {
         return timestamp;
-    }
-
-    public void setProfitability(final Ratio profitability) {
-        this.profitability = profitability;
-    }
-
-    public void setRiskPortfolio(final List<RiskPortfolioImpl> riskPortfolio) {
-        this.riskPortfolio = riskPortfolio;
     }
 
     public void setTimestamp(final OffsetDateTime timestamp) {

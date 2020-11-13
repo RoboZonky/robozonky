@@ -20,7 +20,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonR
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -70,12 +70,11 @@ final class Skippable implements Runnable {
         }
         LOGGER.trace("Running {}.", this);
         try {
-            final OffsetDateTime now = DateUtil.offsetNow();
+            final ZonedDateTime now = DateUtil.zonedNow();
             toRun.run();
             final Optional<Instant> becameAvailable = availability.registerSuccess();
             becameAvailable.ifPresent(unavailableSince -> {
-                final OffsetDateTime since = unavailableSince.atZone(Defaults.ZONE_ID)
-                    .toOffsetDateTime();
+                final ZonedDateTime since = unavailableSince.atZone(Defaults.ZONKYCZ_ZONE_ID);
                 LOGGER.debug("Unavailability over, lasted since {}.", since);
                 tenant.fire(roboZonkyDaemonResumed(since, now));
             });

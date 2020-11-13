@@ -68,7 +68,7 @@ class DefaultValues {
             return false;
         } else {
             return exitProperties.getSelloffStart()
-                .isBefore(DateUtil.localNow()
+                .isBefore(DateUtil.zonedNow()
                     .toLocalDate());
         }
     }
@@ -77,7 +77,7 @@ class DefaultValues {
         if (exitProperties == null) {
             return -1;
         } else {
-            return Math.max(0, Period.between(DateUtil.localNow()
+            return Math.max(0, Period.between(DateUtil.zonedNow()
                 .toLocalDate(),
                     exitProperties.getAccountTermination())
                 .toTotalMonths());

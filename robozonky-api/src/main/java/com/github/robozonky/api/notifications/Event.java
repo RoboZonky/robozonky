@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Mandatory parent for any event that may be fired any time during RoboZonky's runtime.
@@ -30,14 +30,14 @@ public interface Event {
      *
      * @return When the event instance was created.
      */
-    OffsetDateTime getCreatedOn();
+    ZonedDateTime getCreatedOn();
 
     /**
      *
      * @return When the event instance was requested to be created. Unless the event was instantiated lazily, will be
      *         the same as {@link #getCreatedOn()}.
      */
-    default OffsetDateTime getConceivedOn() {
+    default ZonedDateTime getConceivedOn() {
         return getCreatedOn();
     }
 

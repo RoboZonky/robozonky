@@ -103,7 +103,8 @@ final class Cache<T> {
             return item.getSmpSellInfo()
                 .flatMap(si -> si.getFee()
                     .getExpiresAt()
-                    .map(expiration -> expiration.isAfter(DateUtil.offsetNow())))
+                    .map(expiration -> expiration.isAfter(DateUtil.zonedNow()
+                        .toOffsetDateTime())))
                 .orElse(true);
         }
     };

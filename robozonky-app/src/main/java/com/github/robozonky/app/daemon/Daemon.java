@@ -17,7 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,7 +70,7 @@ public class Daemon implements InvestmentMode {
 
     void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
             final Duration initialDelay, final Duration timeout) {
-        OffsetDateTime startAt = DateUtil.offsetNow()
+        ZonedDateTime startAt = DateUtil.zonedNow()
             .plus(initialDelay);
         LOGGER.debug("Submitting {} to {}, start at {}, repeating after {}. Optional timeout of {}.", type,
                 executor, startAt, repeatAfter, timeout);
@@ -80,7 +80,7 @@ public class Daemon implements InvestmentMode {
 
     void submitTenantless(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
             final Duration initialDelay, final Duration timeout) {
-        OffsetDateTime startAt = DateUtil.offsetNow()
+        ZonedDateTime startAt = DateUtil.zonedNow()
             .plus(initialDelay);
         LOGGER.debug("Submitting {} to {}, start at {}, repeating after {}. Optional timeout of {}.", type,
                 executor, startAt, repeatAfter, timeout);

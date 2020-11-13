@@ -94,17 +94,17 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void incrementality() {
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID));
         final AbstractMarketplaceAccessor<LoanDescriptor> a = new PrimaryMarketplaceAccessor(null, null);
         Select initial = a.getIncrementalFilter();
         assertThat(initial).isNotNull();
-        DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONKYCZ_ZONE_ID));
         Select anotherFull = a.getIncrementalFilter();
         assertThat(anotherFull)
             .isNotNull()
             .isNotEqualTo(initial);
         DateUtil.setSystemClock(Clock.fixed(Instant.now()
-            .plusSeconds(1), Defaults.ZONE_ID));
+            .plusSeconds(1), Defaults.ZONKYCZ_ZONE_ID));
         Select incremental = a.getIncrementalFilter();
         assertThat(incremental)
             .isNotNull()

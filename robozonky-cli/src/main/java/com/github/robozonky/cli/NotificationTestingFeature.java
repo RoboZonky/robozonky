@@ -65,7 +65,7 @@ public final class NotificationTestingFeature extends AbstractFeature {
         if (listeners.isEmpty()) {
             return false;
         } else {
-            final RoboZonkyTestingEvent evt = DateUtil::offsetNow;
+            final RoboZonkyTestingEvent evt = DateUtil::zonedNow;
             listeners.forEach(l -> l.handle(evt, sessionInfo));
             return true;
         }

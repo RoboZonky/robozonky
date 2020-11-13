@@ -50,10 +50,10 @@ public enum Rating implements BaseEnum {
     D("19.99", "8.15", "5.0");
 
     static final Instant MIDNIGHT_2017_09_01 = LocalDate.of(2017, 9, 1)
-        .atStartOfDay(Defaults.ZONE_ID)
+        .atStartOfDay(Defaults.ZONKYCZ_ZONE_ID)
         .toInstant();
     static final Instant MIDNIGHT_2019_03_18 = LocalDate.of(2019, 3, 18)
-        .atStartOfDay(Defaults.ZONE_ID)
+        .atStartOfDay(Defaults.ZONKYCZ_ZONE_ID)
         .toInstant();
     private static final Ratio ONE_PERCENT = Ratio.fromPercentage(1);
     private static final SortedMap<Integer, Ratio> FEE_DISCOUNTS = new TreeMap<>(Map.ofEntries(

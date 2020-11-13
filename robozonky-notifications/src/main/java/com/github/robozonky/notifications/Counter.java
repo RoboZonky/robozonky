@@ -84,7 +84,8 @@ final class Counter {
     }
 
     private Stream<OffsetDateTime> filterValidTimestamps(final Set<OffsetDateTime> timestamps) {
-        final OffsetDateTime now = DateUtil.offsetNow();
+        final OffsetDateTime now = DateUtil.zonedNow()
+            .toOffsetDateTime();
         return timestamps.stream()
             .filter(timestamp -> timestamp.plus(period)
                 .isAfter(now));
@@ -92,7 +93,8 @@ final class Counter {
 
     public void increase() {
         final Set<OffsetDateTime> stamps = getTimestamps();
-        stamps.add(DateUtil.offsetNow());
+        stamps.add(DateUtil.zonedNow()
+            .toOffsetDateTime());
         store(sessionInfo, id, stamps);
     }
 

@@ -26,7 +26,7 @@ public final class MyLoanDefaultedEvent extends AbstractInvestmentBasedEvent imp
 
     @Override
     public LocalDate getDelinquentSince() {
-        return Instant.EPOCH.atZone(Defaults.ZONE_ID)
+        return Instant.EPOCH.atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toLocalDate();
     }
 

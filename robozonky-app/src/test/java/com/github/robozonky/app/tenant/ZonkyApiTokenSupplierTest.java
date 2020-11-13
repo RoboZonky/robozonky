@@ -54,7 +54,7 @@ class ZonkyApiTokenSupplierTest extends AbstractZonkyLeveragingTest {
                 UUID.randomUUID()
                     .toString(),
                 OffsetDateTime.ofInstant(DateUtil.now()
-                    .plus(duration), Defaults.ZONE_ID));
+                    .plus(duration), Defaults.ZONKYCZ_ZONE_ID));
     }
 
     private static ApiProvider mockApi(final OAuth oAuth, final Zonky zonky) {

@@ -190,7 +190,7 @@ class QuotaMonitorTest extends AbstractRoboZonkyTest {
     void preventMemoryLeaks() {
         add(10);
         setClock(Clock.fixed(Instant.now()
-            .plus(Duration.ofDays(1)), Defaults.ZONE_ID));
+            .plus(Duration.ofDays(1)), Defaults.ZONKYCZ_ZONE_ID));
         add(1);
         assertThat(counter.count()).isEqualTo(1);
     }

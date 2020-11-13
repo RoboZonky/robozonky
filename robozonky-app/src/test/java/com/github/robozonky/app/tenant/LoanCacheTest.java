@@ -59,7 +59,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void load() {
         final Instant instant = Instant.now();
-        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        setClock(Clock.fixed(instant, Defaults.ZONKYCZ_ZONE_ID));
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setRemainingInvestment, Money.from(0))
             .build();
@@ -73,7 +73,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
         assertThat(c.getFromCache(loanId)).contains(loan);
         verify(z, times(1)).getLoan(eq(loanId));
         // and now test eviction
-        setClock(Clock.fixed(instant.plus(Duration.ofHours(25)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(instant.plus(Duration.ofHours(25)), Defaults.ZONKYCZ_ZONE_ID));
         assertThat(c.getFromCache(loanId)).isEmpty();
         assertThat(c.getEvictor()).isNotNull();
     }
@@ -81,7 +81,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void loadUncached() {
         final Instant instant = Instant.now();
-        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        setClock(Clock.fixed(instant, Defaults.ZONKYCZ_ZONE_ID));
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setRemainingInvestment, Money.from(1))
             .build();
@@ -99,7 +99,7 @@ class LoanCacheTest extends AbstractZonkyLeveragingTest {
     @Test
     void fail() {
         final Instant instant = Instant.now();
-        setClock(Clock.fixed(instant, Defaults.ZONE_ID));
+        setClock(Clock.fixed(instant, Defaults.ZONKYCZ_ZONE_ID));
         final int loanId = 3;
         final Zonky z = harmlessZonky();
         doThrow(IllegalStateException.class).when(z)

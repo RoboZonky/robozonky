@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.Event;
@@ -27,19 +27,19 @@ import com.github.robozonky.internal.test.DateUtil;
  */
 abstract class AbstractEventImpl implements Event {
 
-    private final OffsetDateTime creationDateTime = DateUtil.offsetNow();
-    private OffsetDateTime conceptionDateTime = creationDateTime;
+    private final ZonedDateTime creationDateTime = DateUtil.zonedNow();
+    private ZonedDateTime conceptionDateTime = creationDateTime;
 
-    public OffsetDateTime getCreatedOn() {
+    public ZonedDateTime getCreatedOn() {
         return creationDateTime;
     }
 
     @Override
-    public OffsetDateTime getConceivedOn() {
+    public ZonedDateTime getConceivedOn() {
         return conceptionDateTime;
     }
 
-    public void setConceivedOn(final OffsetDateTime offsetDateTime) {
+    public void setConceivedOn(final ZonedDateTime offsetDateTime) {
         conceptionDateTime = offsetDateTime;
     }
 

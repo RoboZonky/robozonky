@@ -54,7 +54,7 @@ class BlockedTest extends AbstractRoboZonkyTest {
         OffsetDateTime loadOn = zonky.getStatistics()
             .getTimestamp()
             .minusSeconds(1);
-        DateUtil.setSystemClock(Clock.fixed(loadOn.toInstant(), Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(loadOn.toInstant(), Defaults.ZONKYCZ_ZONE_ID));
         final Blocked b = new Blocked(0, Money.ZERO, Rating.D, false);
         RemoteData r = RemoteData.load(tenant);
         assertThat(b.isValid(r)).isFalse();

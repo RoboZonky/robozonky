@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +32,7 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class UtilTest {
@@ -77,8 +78,8 @@ class UtilTest {
         final LoanBased l = new LoanDefaultedEvent() {
 
             @Override
-            public OffsetDateTime getCreatedOn() {
-                return OffsetDateTime.now();
+            public ZonedDateTime getCreatedOn() {
+                return DateUtil.zonedNow();
             }
 
             @Override

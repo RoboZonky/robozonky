@@ -40,7 +40,7 @@ public final class Defaults {
     public static final String MEDIA_TYPE = MediaType.APPLICATION_JSON + "; charset=UTF-8";
     public static final Locale LOCALE = Locale.forLanguageTag("cs-CZ");
     public static final Charset CHARSET = StandardCharsets.UTF_8;
-    public static final ZoneId ZONE_ID = ZoneId.of("Europe/Prague");
+    public static final ZoneId ZONKYCZ_ZONE_ID = ZoneId.of("Europe/Prague");
     /**
      * May be null when running from IDE, Maven Surefire etc.; Maven resource filtering may not be applied there.
      */

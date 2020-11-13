@@ -34,7 +34,8 @@ public class LastPublishedItemImpl implements LastPublishedItem {
     }
 
     public LastPublishedItemImpl(final long id) {
-        this(id, DateUtil.offsetNow());
+        this(id, DateUtil.zonedNow()
+            .toOffsetDateTime());
     }
 
     public LastPublishedItemImpl(final long id, final OffsetDateTime datePublished) {
@@ -47,13 +48,13 @@ public class LastPublishedItemImpl implements LastPublishedItem {
         return id;
     }
 
+    public void setId(final long id) {
+        this.id = id;
+    }
+
     @Override
     public OffsetDateTime getDatePublished() {
         return OffsetDateTime.parse(datePublished);
-    }
-
-    public void setId(final long id) {
-        this.id = id;
     }
 
     public void setDatePublished(final OffsetDateTime datePublished) {

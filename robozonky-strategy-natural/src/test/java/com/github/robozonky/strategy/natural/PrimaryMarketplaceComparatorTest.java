@@ -47,7 +47,7 @@ class PrimaryMarketplaceComparatorTest {
 
     @Test
     void sortByRating() {
-        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID);
         final OffsetDateTime second = first.plus(Duration.ofMillis(1));
         final LoanImpl l1 = mockLoan(Rating.D, 100000, first);
         final LoanImpl l2 = mockLoan(Rating.A, l1.getNonReservedRemainingInvestment()
@@ -66,7 +66,7 @@ class PrimaryMarketplaceComparatorTest {
 
     @Test
     void sortByRecencyIfSameRating() {
-        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID);
         final OffsetDateTime second = first.plus(Duration.ofMillis(1));
         final LoanImpl l1 = mockLoan(Rating.A, 100000, first);
         final LoanImpl l2 = mockLoan(Rating.A, l1.getNonReservedRemainingInvestment()
@@ -85,7 +85,7 @@ class PrimaryMarketplaceComparatorTest {
 
     @Test
     void sortByRemainingIfAsRecent() {
-        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONE_ID);
+        final OffsetDateTime first = OffsetDateTime.ofInstant(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID);
         final LoanImpl l1 = mockLoan(Rating.A, 100000, first);
         final LoanImpl l2 = mockLoan(Rating.A, l1.getNonReservedRemainingInvestment()
             .getValue()

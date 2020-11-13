@@ -29,7 +29,7 @@ abstract class AbstractLoanDelinquentEvent extends AbstractInvestmentBasedEvent
 
     protected AbstractLoanDelinquentEvent(final int threshold) {
         this.thresholdInDays = threshold;
-        this.delinquentSince = DateUtil.offsetNow()
+        this.delinquentSince = DateUtil.zonedNow()
             .minusDays(thresholdInDays)
             .toLocalDate();
     }

@@ -95,7 +95,8 @@ public class SessionInfoImpl implements SessionInfo {
         var originalCanAccessSmp = !getRestrictions().isCannotAccessSmp();
         return originalCanAccessSmp && getConsents().getSmpConsent()
             .map(s -> s.getAgreedOn()
-                .isBefore(DateUtil.offsetNow()))
+                .isBefore(DateUtil.zonedNow()
+                    .toOffsetDateTime()))
             .orElse(false);
     }
 
