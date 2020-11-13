@@ -21,8 +21,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.AfterEach;
@@ -36,21 +34,17 @@ class DateUtilTest {
 
     @AfterEach
     void resetClock() {
-        DateUtil.setSystemClock(Clock.system(Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.system(Defaults.ZONKYCZ_ZONE_ID));
     }
 
     @Test
     void replacesWithSynthetic() {
-        DateUtil.setSystemClock(Clock.fixed(INSTANT, Defaults.ZONE_ID)); // all dates will be based on this instant
+        DateUtil.setSystemClock(Clock.fixed(INSTANT, Defaults.ZONKYCZ_ZONE_ID)); // all dates will use this instant
         assertSoftly(softly -> {
             softly.assertThat(DateUtil.now())
                 .isEqualTo(INSTANT);
-            softly.assertThat(DateUtil.localNow())
-                .isEqualTo(LocalDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
-            softly.assertThat(DateUtil.offsetNow())
-                .isEqualTo(OffsetDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
             softly.assertThat(DateUtil.zonedNow())
-                .isEqualTo(ZonedDateTime.ofInstant(INSTANT, Defaults.ZONE_ID));
+                .isEqualTo(ZonedDateTime.ofInstant(INSTANT, Defaults.ZONKYCZ_ZONE_ID));
         });
         DateUtil.resetSystemClock();
         assertThat(DateUtil.now()).isAfter(INSTANT);

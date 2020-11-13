@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -74,6 +73,7 @@ import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.remote.entities.ReservationImpl;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 import com.github.robozonky.test.mock.MockReservationBuilder;
@@ -146,7 +146,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getPortfolioOverview())
                 .isNotNull();
             softly.assertThat(e.getCreatedOn())
-                .isBeforeOrEqualTo(OffsetDateTime.now());
+                .isBeforeOrEqualTo(DateUtil.zonedNow());
             softly.assertThat(e.toString())
                 .isNotEmpty();
         });
@@ -352,13 +352,13 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void robozonkyDaemonResumed() {
-        final RoboZonkyDaemonResumedEvent e = EventFactory.roboZonkyDaemonResumed(OffsetDateTime.MIN,
-                OffsetDateTime.MAX);
+        var dateTime = DateUtil.zonedNow();
+        final RoboZonkyDaemonResumedEvent e = EventFactory.roboZonkyDaemonResumed(dateTime, dateTime.plusDays(1));
         assertSoftly(softly -> {
             softly.assertThat(e.getUnavailableSince())
-                .isEqualTo(OffsetDateTime.MIN);
+                .isEqualTo(dateTime);
             softly.assertThat(e.getUnavailableUntil())
-                .isEqualTo(OffsetDateTime.MAX);
+                .isEqualTo(dateTime.plusDays(1));
         });
     }
 
@@ -437,7 +437,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getPortfolioOverview())
                 .isNotNull();
             softly.assertThat(e.getConceivedOn())
-                .isBeforeOrEqualTo(OffsetDateTime.now());
+                .isBeforeOrEqualTo(DateUtil.zonedNow());
         });
     }
 }

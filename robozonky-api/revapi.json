@@ -12,9 +12,34 @@
     },
     "ignore": [
       {
-        "code": "java.field.removed",
-        "old": "field com.github.robozonky.api.remote.enums.MainIncomeType.OTHER",
-        "justification": "Changed back to OTHERS_MAIN."
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.notifications.Event::getConceivedOn()",
+        "new": "method java.time.ZonedDateTime com.github.robozonky.api.notifications.Event::getConceivedOn()",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.notifications.Event::getCreatedOn()",
+        "new": "method java.time.ZonedDateTime com.github.robozonky.api.notifications.Event::getCreatedOn()",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent::getUnavailableSince()",
+        "new": "method java.time.ZonedDateTime com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent::getUnavailableSince()",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent::getUnavailableUntil()",
+        "new": "method java.time.ZonedDateTime com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent::getUnavailableUntil()",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.ZonkyApiToken::getExpiresOn()",
+        "new": "method java.time.ZonedDateTime com.github.robozonky.api.remote.entities.ZonkyApiToken::getExpiresOn()",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
       }
     ]
   }

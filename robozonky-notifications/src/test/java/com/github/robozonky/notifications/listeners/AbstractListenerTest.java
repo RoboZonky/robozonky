@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +42,7 @@ import com.github.robozonky.api.notifications.EventListenerSupplier;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.extensions.ListenerServiceLoader;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.notifications.AbstractTargetHandler;
 import com.github.robozonky.notifications.ConfigStorage;
 import com.github.robozonky.notifications.NotificationListenerService;
@@ -56,7 +56,7 @@ import freemarker.template.TemplateException;
 public class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final SessionInfo SESSION = mockSessionInfo();
-    private static final RoboZonkyTestingEvent EVENT = OffsetDateTime::now;
+    private static final RoboZonkyTestingEvent EVENT = DateUtil::zonedNow;
 
     private static AbstractListener<? extends Event> getListener(final SupportedListener s,
             final AbstractTargetHandler p) {

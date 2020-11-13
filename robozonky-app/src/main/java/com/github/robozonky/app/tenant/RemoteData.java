@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -38,7 +38,7 @@ final class RemoteData {
 
     private final Statistics statistics;
     private final Map<Integer, Tuple2<Rating, Money>> blocked;
-    private final OffsetDateTime retrievedOn = DateUtil.offsetNow();
+    private final ZonedDateTime retrievedOn = DateUtil.zonedNow();
 
     private RemoteData(final Statistics statistics, final Map<Integer, Tuple2<Rating, Money>> blocked) {
         this.statistics = statistics;
@@ -64,7 +64,7 @@ final class RemoteData {
                                 .getUnpaid())));
     }
 
-    public OffsetDateTime getRetrievedOn() {
+    public ZonedDateTime getRetrievedOn() {
         return retrievedOn;
     }
 

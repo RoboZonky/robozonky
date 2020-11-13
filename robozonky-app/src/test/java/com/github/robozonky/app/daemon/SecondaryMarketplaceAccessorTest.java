@@ -99,17 +99,17 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         when(z.getLastPublishedLoanInfo()).thenThrow(IllegalStateException.class);
         final PowerTenant t = mockTenant(z);
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID));
         final AbstractMarketplaceAccessor<ParticipationDescriptor> a = new SecondaryMarketplaceAccessor(t, null);
         Select initial = a.getIncrementalFilter();
         assertThat(initial).isNotNull();
-        DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(Instant.now(), Defaults.ZONKYCZ_ZONE_ID));
         Select anotherFull = a.getIncrementalFilter();
         assertThat(anotherFull)
             .isNotNull()
             .isNotEqualTo(initial);
         DateUtil.setSystemClock(Clock.fixed(Instant.now()
-            .plusSeconds(1), Defaults.ZONE_ID));
+            .plusSeconds(1), Defaults.ZONKYCZ_ZONE_ID));
         Select incremental = a.getIncrementalFilter();
         assertThat(incremental)
             .isNotNull()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,15 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Fired after daemon recovered following up on {@link RoboZonkyDaemonSuspendedEvent}.
  */
 public interface RoboZonkyDaemonResumedEvent extends GlobalEvent, SessionEvent {
 
-    OffsetDateTime getUnavailableSince();
+    ZonedDateTime getUnavailableSince();
 
-    OffsetDateTime getUnavailableUntil();
+    ZonedDateTime getUnavailableUntil();
 
 }

@@ -49,9 +49,9 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     @Test
     void beforeSunday6am() {
         final Instant sundayEarlyMorning = LocalDateTime.of(2020, 1, 5, 5, 0)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toInstant();
-        setClock(Clock.fixed(sundayEarlyMorning, Defaults.ZONE_ID));
+        setClock(Clock.fixed(sundayEarlyMorning, Defaults.ZONKYCZ_ZONE_ID));
         final Duration untilSundayAround6am = summarizer.startIn();
         assertThat(untilSundayAround6am).isBetween(Duration.ofMinutes(-45), Duration.ofMinutes(75));
     }
@@ -59,9 +59,9 @@ class SummarizerJobTest extends AbstractMinimalRoboZonkyTest {
     @Test
     void afterSunday6am() {
         final Instant sundayLaterMorning = LocalDateTime.of(2020, 1, 5, 7, 0)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toInstant();
-        setClock(Clock.fixed(sundayLaterMorning, Defaults.ZONE_ID));
+        setClock(Clock.fixed(sundayLaterMorning, Defaults.ZONKYCZ_ZONE_ID));
         final Duration untilNextSundayAround6am = summarizer.startIn();
         assertThat(untilNextSundayAround6am)
             .isBetween(Duration.ofDays(7)

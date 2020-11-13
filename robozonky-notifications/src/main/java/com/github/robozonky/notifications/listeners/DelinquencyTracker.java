@@ -41,7 +41,8 @@ class DelinquencyTracker {
         }
         TenantState.of(sessionInfo)
             .in(DelinquencyTracker.class)
-            .update(b -> b.put(toId(investment), DateUtil.offsetNow()
+            .update(b -> b.put(toId(investment), DateUtil.zonedNow()
+                .toOffsetDateTime()
                 .toString()));
     }
 

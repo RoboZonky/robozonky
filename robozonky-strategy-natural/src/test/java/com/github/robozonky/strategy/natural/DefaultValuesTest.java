@@ -62,8 +62,8 @@ class DefaultValuesTest extends AbstractMinimalRoboZonkyTest {
 
     @Test
     void setExitStrategy() {
-        setClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
-        final ExitProperties p = new ExitProperties(DateUtil.localNow()
+        setClock(Clock.fixed(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID));
+        final ExitProperties p = new ExitProperties(DateUtil.zonedNow()
             .plusMonths(1)
             .toLocalDate());
         final DefaultValues v = new DefaultValues(DefaultPortfolio.EMPTY);

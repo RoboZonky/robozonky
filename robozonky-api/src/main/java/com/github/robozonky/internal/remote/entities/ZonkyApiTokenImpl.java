@@ -18,6 +18,7 @@ package com.github.robozonky.internal.remote.entities;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,6 +32,7 @@ import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.json.CharArrayAdapter;
 
@@ -61,7 +63,8 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
      * This is not part of the Zonky API, but it will be useful inside RoboZonky.
      */
     @JsonbTransient
-    private OffsetDateTime obtainedOn = DateUtil.offsetNow();
+    private OffsetDateTime obtainedOn = DateUtil.zonedNow()
+        .toOffsetDateTime();
 
     public ZonkyApiTokenImpl() {
         // fox JAXB
@@ -72,7 +75,8 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
     }
 
     public ZonkyApiTokenImpl(final String accessToken, final String refreshToken, final int expiresIn) {
-        this(accessToken, refreshToken, expiresIn, DateUtil.offsetNow(), REFRESH_TOKEN_STRING);
+        this(accessToken, refreshToken, expiresIn, DateUtil.zonedNow()
+            .toOffsetDateTime(), REFRESH_TOKEN_STRING);
     }
 
     public ZonkyApiTokenImpl(final String accessToken, final String refreshToken, final int expiresIn,
@@ -122,9 +126,17 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
         return accessToken;
     }
 
+    public void setAccessToken(final char[] accessToken) {
+        this.accessToken = accessToken;
+    }
+
     @Override
     public char[] getRefreshToken() {
         return refreshToken;
+    }
+
+    public void setRefreshToken(final char[] refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @Override
@@ -132,9 +144,17 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
         return type;
     }
 
+    public void setType(final String type) {
+        this.type = type;
+    }
+
     @Override
     public int getExpiresIn() {
         return expiresIn;
+    }
+
+    public void setExpiresIn(final int expiresIn) {
+        this.expiresIn = expiresIn;
     }
 
     @Override
@@ -147,45 +167,30 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
         return scope;
     }
 
+    public void setScope(final String scope) {
+        this.scope = scope;
+    }
+
     @Override
     public OffsetDateTime getObtainedOn() {
         return obtainedOn;
     }
 
+    public void setObtainedOn(final OffsetDateTime obtainedOn) {
+        this.obtainedOn = obtainedOn;
+    }
+
     @Override
-    public OffsetDateTime getExpiresOn() {
-        return obtainedOn.plus(Duration.ofSeconds(expiresIn));
+    public ZonedDateTime getExpiresOn() {
+        return obtainedOn.atZoneSameInstant(Defaults.ZONKYCZ_ZONE_ID)
+            .plus(Duration.ofSeconds(expiresIn));
     }
 
     @Override
     public boolean willExpireIn(final TemporalAmount temporalAmount) {
-        final OffsetDateTime maxExpirationDate = DateUtil.offsetNow()
+        final ZonedDateTime maxExpirationDate = DateUtil.zonedNow()
             .plus(temporalAmount);
         return getExpiresOn().isBefore(maxExpirationDate);
-    }
-
-    public void setAccessToken(final char[] accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public void setRefreshToken(final char[] refreshToken) {
-        this.refreshToken = refreshToken;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
-    public void setScope(final String scope) {
-        this.scope = scope;
-    }
-
-    public void setExpiresIn(final int expiresIn) {
-        this.expiresIn = expiresIn;
-    }
-
-    public void setObtainedOn(final OffsetDateTime obtainedOn) {
-        this.obtainedOn = obtainedOn;
     }
 
     @Override

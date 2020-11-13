@@ -28,7 +28,7 @@ import com.github.robozonky.internal.Defaults;
 
 public class ConsentsImpl implements Consents {
 
-    private static final OffsetDateTime EPOCH = Instant.EPOCH.atZone(Defaults.ZONE_ID)
+    private static final OffsetDateTime EPOCH = Instant.EPOCH.atZone(Defaults.ZONKYCZ_ZONE_ID)
         .toOffsetDateTime();
 
     @JsonbProperty(nillable = true)

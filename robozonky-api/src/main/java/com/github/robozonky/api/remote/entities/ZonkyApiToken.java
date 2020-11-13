@@ -17,6 +17,7 @@
 package com.github.robozonky.api.remote.entities;
 
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
 public interface ZonkyApiToken {
@@ -42,7 +43,7 @@ public interface ZonkyApiToken {
 
     OffsetDateTime getObtainedOn();
 
-    OffsetDateTime getExpiresOn();
+    ZonedDateTime getExpiresOn();
 
     boolean willExpireIn(TemporalAmount temporalAmount);
 }

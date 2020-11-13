@@ -342,7 +342,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void forcesMarketplaceCheck() {
         final Instant now = Instant.now();
-        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        setClock(Clock.fixed(now, Defaults.ZONKYCZ_ZONE_ID));
         final Zonky zonky = harmlessZonky();
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setRating, Rating.D)
@@ -361,7 +361,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(e.get()).isEmpty(); // the second time, marketplace wasn't checked but the cache was
         verify(zonky, times(2)).getLastPublishedLoanInfo();
         verify(zonky, times(1)).getAvailableLoans(any());
-        setClock(Clock.fixed(now.plus(Duration.ofMinutes(61)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(61)), Defaults.ZONKYCZ_ZONE_ID));
         assertThat(e.get()).isEmpty(); // after 1 minute, marketplace was force-checked
         verify(zonky, times(3)).getLastPublishedLoanInfo();
         verify(zonky, times(2)).getAvailableLoans(any());

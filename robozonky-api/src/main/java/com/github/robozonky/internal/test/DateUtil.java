@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@ package com.github.robozonky.internal.test;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.github.robozonky.internal.Defaults;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.github.robozonky.internal.Defaults;
 
 /**
  * All RoboZonky code should use this class to retrieve its now. This will ensure that tests will be able to inject
@@ -34,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 public final class DateUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(DateUtil.class);
-    private static final Clock DEFAULT = Clock.system(Defaults.ZONE_ID);
+    private static final Clock DEFAULT = Clock.system(Defaults.ZONKYCZ_ZONE_ID);
     private static final AtomicReference<Clock> CLOCK = new AtomicReference<>(DEFAULT);
 
     private DateUtil() {
@@ -56,15 +55,7 @@ public final class DateUtil {
     }
 
     public static ZonedDateTime zonedNow() {
-        return ZonedDateTime.now(getSystemClock());
-    }
-
-    public static OffsetDateTime offsetNow() {
-        return OffsetDateTime.now(getSystemClock());
-    }
-
-    public static LocalDateTime localNow() {
-        return LocalDateTime.now(getSystemClock());
+        return ZonedDateTime.ofInstant(now(), Defaults.ZONKYCZ_ZONE_ID);
     }
 
     public static Instant now() {

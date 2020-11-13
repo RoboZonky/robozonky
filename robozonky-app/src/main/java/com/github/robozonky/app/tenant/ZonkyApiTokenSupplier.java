@@ -57,7 +57,7 @@ class ZonkyApiTokenSupplier implements Supplier<ZonkyApiToken>,
     }
 
     static Duration reloadAfter(final ZonkyApiToken token) {
-        var now = DateUtil.offsetNow();
+        var now = DateUtil.zonedNow();
         var expiresOn = token.getExpiresOn();
         var halfLife = Duration.between(now, expiresOn)
             .abs()

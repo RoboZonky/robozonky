@@ -1,4 +1,6 @@
 <#setting locale="cs_CZ">
+<#macro date d>${d?string["dd. MM. yyyy"]}</#macro>
+<#macro datetime d>${d?string["dd. MM. yyyy, HH:mm::ss '('zzz')'"]}</#macro>
 <#macro idRating id>
     <#switch id>
         <#case "2.99">
@@ -57,6 +59,6 @@ uvedenou.
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
 
-Vygeneroval ${data.session.userAgent} pro Zonky účet ${data.session.userName} v čase
-${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v čase
-${data.conception?datetime?iso_local_ms}.
+Vygeneroval ${data.session.userAgent} pro Zonky účet ${data.session.userName}
+v čase <@datetime timestamp /> na základě systémové události vytvořené v čase
+<@datetime data.conception />.

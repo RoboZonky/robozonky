@@ -16,7 +16,6 @@
 
 package com.github.robozonky.internal.remote.entities;
 
-import static com.github.robozonky.internal.test.DateUtil.offsetNow;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.Duration;
@@ -24,6 +23,7 @@ import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
+import com.github.robozonky.internal.test.DateUtil;
 
 class LastPublishedItemImplTest {
 
@@ -37,7 +37,9 @@ class LastPublishedItemImplTest {
         final LastPublishedItem equal = new LastPublishedItemImpl(l.getId(), l.getDatePublished());
         assertThat(l).isEqualTo(equal);
         assertThat(equal).isEqualTo(l);
-        final LastPublishedItem diff = new LastPublishedItemImpl(l.getId(), offsetNow().plus(Duration.ofSeconds(1)));
+        final LastPublishedItem diff = new LastPublishedItemImpl(l.getId(), DateUtil.zonedNow()
+            .plus(Duration.ofSeconds(1))
+            .toOffsetDateTime());
         assertThat(diff).isEqualTo(l);
         assertThat(l).isEqualTo(diff);
     }

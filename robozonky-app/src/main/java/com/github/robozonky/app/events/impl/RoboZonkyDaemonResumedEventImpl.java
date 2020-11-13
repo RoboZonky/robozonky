@@ -16,28 +16,28 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
 
 final class RoboZonkyDaemonResumedEventImpl extends AbstractEventImpl implements RoboZonkyDaemonResumedEvent {
 
-    private final OffsetDateTime unavailableSince;
-    private final OffsetDateTime unavailableUntil;
+    private final ZonedDateTime unavailableSince;
+    private final ZonedDateTime unavailableUntil;
 
-    public RoboZonkyDaemonResumedEventImpl(final OffsetDateTime since, final OffsetDateTime until) {
+    public RoboZonkyDaemonResumedEventImpl(final ZonedDateTime since, final ZonedDateTime until) {
         this.unavailableSince = since;
         this.unavailableUntil = until;
     }
 
     @Override
-    public OffsetDateTime getUnavailableSince() {
+    public ZonedDateTime getUnavailableSince() {
         return unavailableSince;
     }
 
     @Override
-    public OffsetDateTime getUnavailableUntil() {
+    public ZonedDateTime getUnavailableUntil() {
         return unavailableUntil;
     }
 

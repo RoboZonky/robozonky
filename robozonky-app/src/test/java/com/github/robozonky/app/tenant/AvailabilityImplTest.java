@@ -59,7 +59,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
     void nextAvailabilityWhileNotPaused() {
         final Availability a = new AvailabilityImpl(s);
         final Instant now = Instant.now();
-        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        setClock(Clock.fixed(now, Defaults.ZONKYCZ_ZONE_ID));
         assertSoftly(softly -> {
             softly.assertThat(a.nextAvailabilityCheck())
                 .isEqualTo(now);
@@ -72,7 +72,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
     void scalingUnavailability() {
         final Availability a = new AvailabilityImpl(s);
         final Instant now = Instant.now();
-        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        setClock(Clock.fixed(now, Defaults.ZONKYCZ_ZONE_ID));
         final Response r = Response.ok()
             .build();
         final boolean reg = a.registerException(new ResponseProcessingException(r, UUID.randomUUID()
@@ -119,15 +119,15 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         final RequestCounter counter = mock(RequestCounter.class);
         final Availability a = new AvailabilityImpl(s, counter);
         final Instant now = Instant.now();
-        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        setClock(Clock.fixed(now, Defaults.ZONKYCZ_ZONE_ID));
         a.registerException(new IllegalStateException());
         assertThat(a.isAvailable()).isFalse();
         // move time, but don't increase the request counter
-        setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(1)), Defaults.ZONKYCZ_ZONE_ID));
         assertThat(a.registerSuccess()).isEmpty();
         assertThat(a.isAvailable()).isFalse();
         // move time and increase the request counter
-        setClock(Clock.fixed(now.plus(Duration.ofMinutes(2)), Defaults.ZONE_ID));
+        setClock(Clock.fixed(now.plus(Duration.ofMinutes(2)), Defaults.ZONKYCZ_ZONE_ID));
         when(counter.hasMoreRecent(notNull())).thenReturn(true);
         assertThat(a.registerSuccess()).contains(now);
         assertThat(a.isAvailable()).isTrue();
@@ -137,7 +137,7 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
     void longerDelayWhenHttp429Encountered() {
         final Availability a = new AvailabilityImpl(s);
         final Instant now = Instant.now();
-        setClock(Clock.fixed(now, Defaults.ZONE_ID));
+        setClock(Clock.fixed(now, Defaults.ZONKYCZ_ZONE_ID));
         final Exception ex = new ClientErrorException(Response.Status.TOO_MANY_REQUESTS);
         final boolean reg = a.registerException(ex);
         assertSoftly(softly -> {

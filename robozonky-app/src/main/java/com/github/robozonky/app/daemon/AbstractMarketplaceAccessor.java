@@ -58,7 +58,7 @@ abstract class AbstractMarketplaceAccessor<T> {
         } else {
             var filter = getBaseFilter()
                 .greaterThanOrEquals("datePublished",
-                        OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONE_ID));
+                        OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONKYCZ_ZONE_ID));
             getLogger().debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
             return filter;
         }

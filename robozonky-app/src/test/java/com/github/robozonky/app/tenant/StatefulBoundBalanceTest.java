@@ -40,13 +40,13 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
         assertThat(balance.get()).isEqualTo(MAXIMUM);
         Instant newNow = Instant.now()
             .plus(Duration.ofDays(1));
-        setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
+        setClock(Clock.fixed(newNow, Defaults.ZONKYCZ_ZONE_ID));
         assertThat(balance.get()).isEqualTo(MAXIMUM); // doesn't change as time moves on
         balance.set(Money.from(1000));
         assertThat(balance.get()).isEqualTo(Money.from(1_000));
         // resets as too much time passes
         newNow = newNow.plus(Duration.ofDays(1));
-        setClock(Clock.fixed(newNow, Defaults.ZONE_ID));
+        setClock(Clock.fixed(newNow, Defaults.ZONKYCZ_ZONE_ID));
         assertThat(balance.get()).isEqualTo(MAXIMUM);
     }
 
@@ -64,7 +64,7 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
         final StatefulBoundedBalance balance = new StatefulBoundedBalance(tenant);
         balance.set(Money.from(199));
         setClock(Clock.fixed(Instant.now()
-            .plus(Duration.ofDays(1)), Defaults.ZONE_ID));
+            .plus(Duration.ofDays(1)), Defaults.ZONKYCZ_ZONE_ID));
         assertThat(balance.get()).isEqualTo(MAXIMUM); // balance is too old, so it is reset to maximum
         balance.set(Money.from(199)); // set it to a different value
         assertThat(balance.get()).isEqualTo(Money.from(199)); // make sure the different value is stored and returned

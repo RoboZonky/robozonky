@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 
 package com.github.robozonky.api.notifications;
 
-import java.time.OffsetDateTime;
+import static org.assertj.core.api.Assertions.*;
+
+import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import com.github.robozonky.internal.test.DateUtil;
 
 class EventTest {
 
     @Test
     void conceptionSameAsCreation() {
-        final OffsetDateTime now = OffsetDateTime.now();
+        final ZonedDateTime now = DateUtil.zonedNow();
         final Event event = () -> now;
         assertThat(event.getConceivedOn()).isEqualTo(event.getCreatedOn());
     }

@@ -16,7 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 import com.github.robozonky.api.Money;
@@ -29,7 +29,7 @@ final class Blocked {
     private final Money amount;
     private final Rating rating;
     private final boolean persistent;
-    private final OffsetDateTime storedOn = DateUtil.offsetNow();
+    private final ZonedDateTime storedOn = DateUtil.zonedNow();
 
     Blocked(final int id, final Money amount, final Rating rating) {
         this(id, amount, rating, false);
@@ -56,8 +56,9 @@ final class Blocked {
     }
 
     public boolean isValid(final RemoteData remoteData) {
-        return persistent || storedOn.isAfter(remoteData.getStatistics()
-            .getTimestamp());
+        return persistent || storedOn.toOffsetDateTime()
+            .isAfter(remoteData.getStatistics()
+                .getTimestamp());
     }
 
     @Override

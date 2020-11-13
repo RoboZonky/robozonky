@@ -16,7 +16,7 @@
 
 package com.github.robozonky.notifications.listeners;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -35,7 +35,7 @@ final class TestingExecutionStartedEvent implements ExecutionStartedEvent {
     }
 
     @Override
-    public OffsetDateTime getCreatedOn() {
+    public ZonedDateTime getCreatedOn() {
         return null;
     }
 }

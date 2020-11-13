@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,22 @@
 
 package com.github.robozonky.notifications.samples;
 
-import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
+import java.time.ZonedDateTime;
 
-import java.time.OffsetDateTime;
+import com.github.robozonky.api.notifications.RoboZonkyDaemonResumedEvent;
+import com.github.robozonky.internal.test.DateUtil;
 
 public final class MyRoboZonkyDaemonResumedEvent extends AbstractEvent implements RoboZonkyDaemonResumedEvent {
 
-    private final OffsetDateTime unavailableUntil = OffsetDateTime.now();
+    private final ZonedDateTime unavailableUntil = DateUtil.zonedNow();
 
     @Override
-    public OffsetDateTime getUnavailableSince() {
+    public ZonedDateTime getUnavailableSince() {
         return unavailableUntil.minusSeconds(4321);
     }
 
     @Override
-    public OffsetDateTime getUnavailableUntil() {
+    public ZonedDateTime getUnavailableUntil() {
         return unavailableUntil;
     }
 }

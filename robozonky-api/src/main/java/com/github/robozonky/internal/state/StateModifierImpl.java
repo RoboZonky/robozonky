@@ -53,7 +53,8 @@ final class StateModifierImpl<T> implements StateModifier<T>,
         final String sectionName = instanceState.getSectionName();
         final StateStorage backend = instanceState.getStorage();
         actions.forEach(a -> a.accept(backend, sectionName));
-        backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.offsetNow()
+        backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.zonedNow()
+            .toOffsetDateTime()
             .toString());
         backend.store();
     }

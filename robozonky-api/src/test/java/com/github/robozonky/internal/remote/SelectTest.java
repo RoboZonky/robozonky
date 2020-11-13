@@ -137,7 +137,7 @@ class SelectTest {
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
         final OffsetDateTime value = LocalDateTime.of(date, time)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime();
         final Select select = new Select().greaterThanOrNull(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
@@ -211,7 +211,7 @@ class SelectTest {
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
         final OffsetDateTime value = LocalDateTime.of(date, time)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime();
         final Select select = new Select().lessThan(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
@@ -225,7 +225,7 @@ class SelectTest {
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
         final OffsetDateTime value = LocalDateTime.of(date, time)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime();
         final Select select = new Select().lessThanOrEquals(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
@@ -239,7 +239,7 @@ class SelectTest {
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
         final OffsetDateTime value = LocalDateTime.of(date, time)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime();
         final Select select = new Select().greaterThan(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
@@ -253,7 +253,7 @@ class SelectTest {
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
         final OffsetDateTime value = LocalDateTime.of(date, time)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime();
         final Select select = new Select().greaterThanOrEquals(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);
@@ -287,7 +287,7 @@ class SelectTest {
         final LocalDate date = LocalDate.of(2000, 01, 02);
         final LocalTime time = LocalTime.of(4, 5, 6);
         final OffsetDateTime value = LocalDateTime.of(date, time)
-            .atZone(Defaults.ZONE_ID)
+            .atZone(Defaults.ZONKYCZ_ZONE_ID)
             .toOffsetDateTime();
         final Select select = new Select().lessThanOrNull(fieldName, value);
         final RoboZonkyFilter filter = mock(RoboZonkyFilter.class);

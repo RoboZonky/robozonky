@@ -40,7 +40,7 @@ class RequestCounterImplTest {
 
     @Test
     void marking() {
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID));
         final RequestCounter counter = new RequestCounterImpl();
         assertSoftly(softly -> {
             softly.assertThat(counter.count())
@@ -59,7 +59,7 @@ class RequestCounterImplTest {
             softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
                 .isFalse();
         });
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONKYCZ_ZONE_ID));
         counter.mark();
         assertSoftly(softly -> {
             softly.assertThat(counter.count())
