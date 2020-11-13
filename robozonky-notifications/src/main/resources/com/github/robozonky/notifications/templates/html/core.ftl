@@ -4,6 +4,9 @@
 </#macro>
 <#macro zonky><em>Zonky</em></#macro>
 <#macro robozonky><em>RoboZonky</em></#macro>
+<#macro date d>${d?string["dd. MM. yyyy"]}</#macro>
+<#macro datetime d>${d?string["dd. MM. yyyy, HH:mm::ss '('zzz')'"]}</#macro>
+
 <#macro idRating id>
     <#switch id>
         <#case "2.99">
@@ -91,8 +94,8 @@
       </ul>
       <p>
         <small>Vygeneroval <em>${data.session.userAgent}</em> pro <@zonky /> účet <em>${data.session.userName}</em>
-        v čase ${timestamp?datetime?iso_local_ms} na základě systémové události vytvořené v čase
-        ${data.conception?datetime?iso_local_ms}.</small>
+        v čase <@datetime timestamp /> na základě systémové události vytvořené v čase
+        <@datetime data.conception />.</small>
       </p>
     </footer>
 </body>
