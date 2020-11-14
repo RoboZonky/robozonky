@@ -44,6 +44,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     private int id;
     private int activeLoanOrdinal;
+    private int dpd;
+    private boolean hasCollectionHistory;
     private Rating rating;
     private String title;
     private String story;
@@ -98,6 +100,24 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     public void setActiveLoanOrdinal(final int activeLoanOrdinal) {
         this.activeLoanOrdinal = activeLoanOrdinal;
+    }
+
+    @Override
+    public int getDpd() {
+        return dpd;
+    }
+
+    public void setDpd(final int dpd) {
+        this.dpd = dpd;
+    }
+
+    @Override
+    public boolean hasCollectionHistory() {
+        return hasCollectionHistory;
+    }
+
+    public void setHasCollectionHistory(final boolean hasCollectionHistory) {
+        this.hasCollectionHistory = hasCollectionHistory;
     }
 
     @Override

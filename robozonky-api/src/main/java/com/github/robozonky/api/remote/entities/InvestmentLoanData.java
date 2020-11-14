@@ -32,6 +32,10 @@ public interface InvestmentLoanData {
 
     int getActiveLoanOrdinal();
 
+    int getDpd();
+
+    boolean hasCollectionHistory();
+
     Rating getRating();
 
     String getTitle();

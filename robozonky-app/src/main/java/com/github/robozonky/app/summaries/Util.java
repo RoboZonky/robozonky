@@ -72,38 +72,25 @@ final class Util {
     static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
         var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
-            .map(i -> i.getLoan()
-                .getHealthStats()
-                .map(h -> i)
-                .orElseGet(() -> tenant.getInvestment(i.getId())))
             .map(investment -> {
-                var healthInfo = investment.getLoan()
-                    .getHealthStats()
-                    .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
-                    .getLoanHealthInfo();
-                switch (healthInfo) {
-                    case HEALTHY:
-                        return Tuple.of(investment.getLoan()
-                            .getRating(),
-                                investment.getPrincipal()
-                                    .getUnpaid(),
-                                investment.getSmpSellInfo()
-                                    .orElseThrow(() -> new IllegalStateException(
-                                            "Investment has no sell info: " + investment))
-                                    .getFee()
-                                    .getValue());
-                    case HISTORICALLY_IN_DUE:
-                    case CURRENTLY_IN_DUE:
-                        var investmentWithSellInfo = tenant.getInvestment(investment.getId());
-                        var sellInfo = investmentWithSellInfo.getSmpSellInfo()
-                            .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment));
-                        return Tuple.of(investmentWithSellInfo.getLoan()
-                            .getRating(), sellInfo.getSellPrice(),
-                                sellInfo.getFee()
-                                    .getValue());
-                    default:
-                        throw new IllegalStateException("Unsupported loan health info: " + healthInfo);
+                var rating = investment.getLoan()
+                    .getRating();
+                var hasCollectionHistory = investment.getLoan()
+                    .hasCollectionHistory();
+                if (!hasCollectionHistory) {
+                    // If no collection history, there is no sale fee.
+                    return Tuple.of(rating,
+                            investment.getPrincipal()
+                                .getUnpaid(),
+                            Money.ZERO);
                 }
+                // If there is a collection history, the sell price needs to be fetched separately.
+                var sellInfo = tenant.getInvestment(investment.getId())
+                    .getSmpSellInfo()
+                    .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment));
+                return Tuple.of(rating, sellInfo.getSellPrice(),
+                        sellInfo.getFee()
+                            .getValue());
             })
             .filter(data -> !data._2.isZero()) // Filter out empty loans. Zonky shouldn't send those, but happened.
             .collect(Collectors.toList());

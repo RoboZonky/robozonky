@@ -45,6 +45,16 @@
         "code": "java.method.removed",
         "old": "method java.time.LocalDate com.github.robozonky.api.notifications.DelinquencyBased::getDelinquentSince()",
         "justification": "The information is now available on Investment directly."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method int com.github.robozonky.api.remote.entities.InvestmentLoanData::getDpd()",
+        "justification": "Now required for some optimizations."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method boolean com.github.robozonky.api.remote.entities.InvestmentLoanData::hasCollectionHistory()",
+        "justification": "Now required for some optimizations."
       }
     ]
   }
