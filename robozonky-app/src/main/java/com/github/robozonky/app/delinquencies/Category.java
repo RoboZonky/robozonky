@@ -117,16 +117,17 @@ enum Category {
 
     private static SessionEvent supplyEvent(final Tenant tenant, final Investment investment, final int threshold) {
         LOGGER.trace("Retrieving event for investment #{}.", investment.getId());
-        final LocalDate since = DateUtil.zonedNow()
+        var since = DateUtil.zonedNow()
             .minusDays(investment.getLoan()
-                .getHealthStats()
-                .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
-                .getCurrentDaysDue())
+                .getDpd())
             .toLocalDate();
-        final int loanId = investment.getLoan()
+        var loanId = investment.getLoan()
             .getId();
-        final Loan loan = tenant.getLoan(loanId);
-        final SessionEvent e = getEventSupplierConstructor(threshold).apply(investment, loan, since);
+        var loan = tenant.getLoan(loanId);
+        // Load full investment, as notifications will require healthStats and the whole shebang.
+        var fullInvestment = tenant.getInvestment(investment.getId());
+        var e = getEventSupplierConstructor(threshold)
+            .apply(fullInvestment, loan, since);
         LOGGER.trace("Done.");
         return e;
     }

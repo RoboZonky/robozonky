@@ -71,6 +71,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     public InvestmentLoanDataImpl(Loan loan, LoanHealthStats loanHealthStats) {
         this.id = loan.getId();
+        this.dpd = loanHealthStats.getCurrentDaysDue();
+        this.hasCollectionHistory = dpd > 0;
         this.title = loan.getName();
         this.story = loan.getStory();
         this.annuity = loan.getAnnuity();

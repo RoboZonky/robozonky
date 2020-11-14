@@ -92,11 +92,9 @@ final class Util {
     }
 
     public static Map<String, Object> getLoanData(final DelinquencyBased event) {
-        Investment investment = event.getInvestment();
-        int currentDaysDue = investment.getLoan()
-            .getHealthStats()
-            .map(LoanHealthStats::getCurrentDaysDue)
-            .orElse(Integer.MAX_VALUE);
+        var investment = event.getInvestment();
+        var currentDaysDue = investment.getLoan()
+            .getDpd();
         Map<String, Object> data = new HashMap<>(getLoanData((InvestmentBased) event));
         data.put("since", toDate(DateUtil.zonedNow()
             .minusDays(currentDaysDue)));

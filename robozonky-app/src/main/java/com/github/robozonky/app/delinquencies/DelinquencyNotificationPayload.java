@@ -105,9 +105,7 @@ final class DelinquencyNotificationPayload implements TenantPayload {
             return;
         }
         final int daysPastDue = delinquent.getLoan()
-            .getHealthStats()
-            .orElseThrow(() -> new IllegalStateException("Delinquent has no health stats: " + delinquent))
-            .getCurrentDaysDue();
+            .getDpd();
         final EnumSet<Category> unusedCategories = EnumSet.complementOf(knownCategories);
         final Optional<Category> firstNextCategory = unusedCategories.stream()
             .filter(c -> c.getThresholdInDays() >= 0) // ignore the DEFAULTED category, which gets special treatment
@@ -138,26 +136,22 @@ final class DelinquencyNotificationPayload implements TenantPayload {
     }
 
     private static Stream<Investment> getDefaulted(final Set<Investment> investments) {
-        return investments.parallelStream()
+        return investments.stream()
             .filter(DelinquencyNotificationPayload::isDefaulted);
     }
 
     private static Stream<Investment> getNonDefaulted(final Set<Investment> investments) {
-        return investments.parallelStream()
+        return investments.stream()
             .filter(i -> !isDefaulted(i));
     }
 
     private void process(final PowerTenant tenant) {
-        final Set<Investment> delinquents = tenant.call(Zonky::getDelinquentInvestments)
+        var delinquents = tenant.call(Zonky::getDelinquentInvestments)
             .parallel() // possibly many pages' worth of results; fetch in parallel
-            .map(i -> i.getLoan()
-                .getHealthStats()// If we don't have this, we fetch it from an endpoint where it's guaranteed to be.
-                .map(h -> i)
-                .orElseGet(() -> tenant.getInvestment(i.getId())))
             .collect(Collectors.toSet());
-        final int count = delinquents.size();
+        var count = delinquents.size();
         LOGGER.debug("There are {} delinquent investments to process.", count);
-        final Registry registry = registryFunction.apply(tenant);
+        var registry = registryFunction.apply(tenant);
         if (registry.isInitialized()) {
             registry.complement(delinquents)
                 .parallelStream()
@@ -171,15 +165,13 @@ final class DelinquencyNotificationPayload implements TenantPayload {
         } else {
             getDefaulted(delinquents).forEach(d -> registry.addCategory(d, Category.DEFAULTED));
             getNonDefaulted(delinquents).forEach(delinquent -> {
-                int dpd = delinquent.getLoan()
-                    .getHealthStats()
-                    .orElseThrow(() -> new IllegalStateException("Delinquent has no health stats: " + delinquent))
-                    .getCurrentDaysDue();
-                for (final Category cat : Category.values()) {
-                    if (cat.getThresholdInDays() > dpd || cat.getThresholdInDays() < 0) {
+                var dpd = delinquent.getLoan()
+                    .getDpd();
+                for (var category : Category.values()) {
+                    if (category.getThresholdInDays() > dpd || category.getThresholdInDays() < 0) {
                         continue;
                     }
-                    registry.addCategory(delinquent, cat);
+                    registry.addCategory(delinquent, category);
                 }
                 LOGGER.debug("No category found for investment #{}.", delinquent.getId());
             });
