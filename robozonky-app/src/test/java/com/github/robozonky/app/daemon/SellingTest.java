@@ -74,7 +74,7 @@ class SellingTest extends AbstractZonkyLeveragingTest {
     void noSaleDueToNoStrategy() {
         new Selling().accept(mockTenant());
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(0);
+        assertThat(e).isEmpty();
     }
 
     @Test

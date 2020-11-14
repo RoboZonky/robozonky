@@ -22,7 +22,7 @@ abstract class AbstractJmxConfiguration implements PropertyConfiguration {
 
     private final boolean jmxEnabled;
 
-    public AbstractJmxConfiguration(final boolean jmxEnabled) {
+    protected AbstractJmxConfiguration(final boolean jmxEnabled) {
         this.jmxEnabled = jmxEnabled;
     }
 

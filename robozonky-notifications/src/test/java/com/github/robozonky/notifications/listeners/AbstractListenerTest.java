@@ -53,7 +53,7 @@ import com.github.robozonky.test.AbstractRoboZonkyTest;
 
 import freemarker.template.TemplateException;
 
-public class AbstractListenerTest extends AbstractRoboZonkyTest {
+class AbstractListenerTest extends AbstractRoboZonkyTest {
 
     private static final SessionInfo SESSION = mockSessionInfo();
     private static final RoboZonkyTestingEvent EVENT = DateUtil::zonedNow;

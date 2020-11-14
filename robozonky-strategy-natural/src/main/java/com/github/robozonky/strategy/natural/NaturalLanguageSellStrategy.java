@@ -20,10 +20,10 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -39,16 +39,16 @@ class NaturalLanguageSellStrategy implements SellStrategy {
 
     private static boolean isFree(final InvestmentDescriptor descriptor) {
         return descriptor.item()
-            .getSmpSellInfo()
-            .map(s -> s.getFee()
-                .getValue())
-            .orElse(Money.ZERO)
-            .isZero();
+            .getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE;
     }
 
     private static boolean isUndiscounted(final InvestmentDescriptor descriptor) {
-        return descriptor.item()
-            .getSmpSellInfo()
+        var investment = descriptor.item();
+        var loan = investment.getLoan();
+        if (loan.getDpd() == 0 && !loan.hasCollectionHistory()) {
+            return true; // The loan was never late; we can safely assume there is no discount.
+        }
+        return investment.getSmpSellInfo()
             .map(SellInfo::getDiscount)
             .orElse(Ratio.ZERO)
             .bigDecimalValue()

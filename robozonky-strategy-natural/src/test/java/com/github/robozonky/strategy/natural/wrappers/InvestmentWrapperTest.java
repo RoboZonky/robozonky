@@ -27,13 +27,13 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
@@ -86,6 +86,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
         final int invested = 200;
         final InvestmentImpl investment = MockInvestmentBuilder
             .fresh(loan, new LoanHealthStatsImpl(LoanHealth.HEALTHY), invested)
+            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .set(InvestmentImpl::setSmpSellInfo, new SellInfoImpl(Money.from(1), Money.from(1)))
             .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(1)))
             .build();
@@ -162,19 +163,19 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
 
     @Test
     void sellInfoValues() {
-        final LoanHealthStats healthInfo = new LoanHealthStatsImpl(LoanHealth.HISTORICALLY_IN_DUE);
         final SellFeeImpl feeInfo = new SellFeeImpl(Money.from(2));
         final SellInfoImpl sellInfo = new SellInfoImpl(Money.from(10));
         sellInfo.setFee(feeInfo);
         sellInfo.setDiscount(Ratio.fromPercentage(10));
-        final Investment investment = MockInvestmentBuilder.fresh(LOAN, healthInfo, BigDecimal.valueOf(200))
+        final Investment investment = MockInvestmentBuilder.fresh(LOAN, BigDecimal.valueOf(200))
+            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .set(InvestmentImpl::setSmpSellInfo, sellInfo)
             .build();
         final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN);
         final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.getHealth())
-                .contains(LoanHealth.HISTORICALLY_IN_DUE);
+                .contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getDiscount())
                 .contains(new BigDecimal("20.00"));
             softly.assertThat(w.getPrice())

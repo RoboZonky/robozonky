@@ -128,7 +128,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
             return rating;
         }
         return Arrays.stream(Rating.values())
-            .filter(rating -> Objects.equals(rating.getInterestRate(), getInterestRate()))
+            .filter(r -> Objects.equals(r.getInterestRate(), getInterestRate()))
             .findAny()
             .orElseThrow(() -> new IllegalStateException("Unknown interest rate: " + getInterestRate()));
     }

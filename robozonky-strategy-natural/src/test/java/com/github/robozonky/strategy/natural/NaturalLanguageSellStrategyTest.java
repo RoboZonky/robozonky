@@ -30,6 +30,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -54,6 +55,8 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static Investment mockInvestment(final BigDecimal fee) {
         return MockInvestmentBuilder.fresh(LOAN, 10)
+            .set(InvestmentImpl::setSellStatus,
+                    fee.equals(BigDecimal.ZERO) ? SellStatus.SELLABLE_WITHOUT_FEE : SellStatus.SELLABLE_WITH_FEE)
             .set(InvestmentImpl::setSmpSellInfo, new SellInfoImpl(Money.from(10), Money.from(fee)))
             .build();
     }

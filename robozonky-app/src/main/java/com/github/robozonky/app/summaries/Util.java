@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
@@ -73,23 +74,23 @@ final class Util {
         var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
             .map(investment -> {
+                // Do everything we can to avoid retrieving the optional remote smpSellInfo.
                 var rating = investment.getLoan()
                     .getRating();
-                var hasCollectionHistory = investment.getLoan()
-                    .hasCollectionHistory();
-                if (!hasCollectionHistory) {
-                    // If no collection history, there is no sale fee.
-                    return Tuple.of(rating,
-                            investment.getPrincipal()
-                                .getUnpaid(),
-                            Money.ZERO);
-                }
-                // If there is a collection history, the sell price needs to be fetched separately.
-                var sellInfo = investment.getSmpSellInfo()
-                    .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment));
-                return Tuple.of(rating, sellInfo.getSellPrice(),
-                        sellInfo.getFee()
-                            .getValue());
+                var fee = investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE ? Money.ZERO
+                        : investment.getSmpSellInfo()
+                            .orElseThrow()
+                            .getFee()
+                            .getValue();
+                var loan = investment.getLoan();
+                var isPossiblyDiscounted = loan.getDpd() > 0 || loan.hasCollectionHistory();
+                var sellPrice = isPossiblyDiscounted ? investment.getSmpSellInfo()
+                    .orElseThrow()
+                    .getFee()
+                    .getValue()
+                        : investment.getPrincipal()
+                            .getUnpaid();
+                return Tuple.of(rating, sellPrice, fee);
             })
             .filter(data -> !data._2.isZero()) // Filter out empty loans. Zonky shouldn't send those, but happened.
             .collect(Collectors.toList());
