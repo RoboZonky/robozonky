@@ -23,8 +23,6 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -37,6 +35,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.notifications.DelinquencyBased;
+import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -45,7 +45,6 @@ import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class Util {
@@ -55,15 +54,6 @@ final class Util {
 
     private Util() {
         // no instances
-    }
-
-    public static Date toDate(final LocalDate localDate) {
-        return toDate(localDate.atStartOfDay(Defaults.ZONKYCZ_ZONE_ID)
-            .toOffsetDateTime());
-    }
-
-    public static Date toDate(final OffsetDateTime offsetDateTime) {
-        return Date.from(offsetDateTime.toInstant());
     }
 
     public static Date toDate(final ZonedDateTime zonedDateTime) {
@@ -81,7 +71,8 @@ final class Util {
         return identifyLoan(event.getLoan());
     }
 
-    public static Map<String, Object> getLoanData(final Loan loan) {
+    public static Map<String, Object> getLoanData(final LoanBased loanBased) {
+        Loan loan = loanBased.getLoan();
         return Map.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()
@@ -100,30 +91,34 @@ final class Util {
                 entry("insurance", loan.isInsuranceActive()));
     }
 
-    public static Map<String, Object> getDelinquencyData(final Investment investment) {
-        return Map.ofEntries(
-                entry("currentDaysDue", investment.getLoan()
-                    .getHealthStats()
-                    .map(LoanHealthStats::getCurrentDaysDue)
-                    .orElse(Integer.MAX_VALUE)),
-                entry("daysSinceLastDue", investment.getLoan()
-                    .getHealthStats()
-                    .map(LoanHealthStats::getDaysSinceLastInDue)
-                    .orElse(Integer.MAX_VALUE)),
-                entry("longestDaysDue", investment.getLoan()
-                    .getHealthStats()
-                    .map(LoanHealthStats::getLongestDaysDue)
-                    .orElse(Integer.MAX_VALUE)));
+    public static Map<String, Object> getLoanData(final DelinquencyBased event) {
+        var investment = event.getInvestment();
+        var currentDaysDue = investment.getLoan()
+            .getDpd();
+        Map<String, Object> data = new HashMap<>(getLoanData((InvestmentBased) event));
+        data.put("since", toDate(DateUtil.zonedNow()
+            .minusDays(currentDaysDue)));
+        data.put("currentDaysDue", currentDaysDue);
+        data.put("daysSinceLastDue", investment.getLoan()
+            .getHealthStats()
+            .map(LoanHealthStats::getDaysSinceLastInDue)
+            .orElse(Integer.MAX_VALUE));
+        data.put("longestDaysDue", investment.getLoan()
+            .getHealthStats()
+            .map(LoanHealthStats::getLongestDaysDue)
+            .orElse(Integer.MAX_VALUE));
+        return data;
     }
 
-    public static Map<String, Object> getLoanData(final Investment i, final Loan l) {
+    public static Map<String, Object> getLoanData(final InvestmentBased investmentBased) {
+        final Investment i = investmentBased.getInvestment();
         final Money returned = getReturned(i);
         final Money originalPrincipal = i.getPrincipal()
             .getTotal();
         // TODO Convince Zonky to include the actual sell price in the new API.
         // TODO Convince Zonky to include penalty data in the new API.
         final Money balance = returned.subtract(originalPrincipal);
-        final Map<String, Object> loanData = new HashMap<>(getLoanData(l));
+        final Map<String, Object> loanData = new HashMap<>(getLoanData((LoanBased) investmentBased));
         loanData.put("loanTermRemaining", i.getLoan()
             .getPayments()
             .getUnpaid());
@@ -142,7 +137,7 @@ final class Util {
         loanData.put("interestPaid", i.getInterest()
             .getPaid()
             .getValue());
-        loanData.put("monthsElapsed", getMonthsElapsed(l));
+        loanData.put("monthsElapsed", getMonthsElapsed(investmentBased.getLoan()));
         loanData.put("insurance", i.getLoan()
             .getDetailLabels()
             .contains(DetailLabel.CURRENTLY_INSURED));
@@ -225,12 +220,6 @@ final class Util {
                 DateUtil.zonedNow()
                     .toLocalDate())
             .toTotalMonths();
-    }
-
-    public static Map<String, Object> getDelinquentData(final Investment i, final Loan loan, final LocalDate date) {
-        final Map<String, Object> result = new HashMap<>(getLoanData(i, loan));
-        result.put("since", toDate(date));
-        return result;
     }
 
     public static String stackTraceToString(final Throwable t) {

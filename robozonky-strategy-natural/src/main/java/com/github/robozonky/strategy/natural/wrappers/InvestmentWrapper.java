@@ -23,13 +23,13 @@ import java.util.OptionalInt;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
@@ -138,6 +138,9 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Optional<BigDecimal> getSellFee() {
+        if (investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE) {
+            return Optional.of(BigDecimal.ZERO);
+        }
         var fee = investment.getSmpSellInfo()
             .map(sellInfo -> sellInfo.getFee()
                 .getValue())
@@ -148,9 +151,15 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Optional<LoanHealth> getHealth() {
-        return investment.getLoan()
-            .getHealthStats()
-            .map(LoanHealthStats::getLoanHealthInfo);
+        if (investment.getLoan()
+            .getDpd() > 0) {
+            return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
+        } else if (investment.getLoan()
+            .hasCollectionHistory()) {
+            return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
+        } else {
+            return Optional.of(LoanHealth.HEALTHY);
+        }
     }
 
     @Override
@@ -180,10 +189,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public OptionalInt getCurrentDpd() {
-        return investment.getLoan()
-            .getHealthStats()
-            .map(s -> OptionalInt.of(s.getCurrentDaysDue()))
-            .orElseGet(OptionalInt::empty);
+        return OptionalInt.of(investment.getLoan()
+            .getDpd());
     }
 
     @Override

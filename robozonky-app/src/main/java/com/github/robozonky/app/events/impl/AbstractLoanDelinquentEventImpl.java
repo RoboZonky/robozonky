@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.time.LocalDate;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.LoanDelinquentEvent;
@@ -41,16 +40,6 @@ abstract class AbstractLoanDelinquentEventImpl extends AbstractEventImpl impleme
     @Override
     public Loan getLoan() {
         return loan;
-    }
-
-    @Override
-    public LocalDate getDelinquentSince() {
-        var currentDaysInDue = investment.getLoan()
-            .getHealthStats()
-            .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
-            .getCurrentDaysDue();
-        return LocalDate.now()
-            .minusDays(currentDaysInDue);
     }
 
     @Override

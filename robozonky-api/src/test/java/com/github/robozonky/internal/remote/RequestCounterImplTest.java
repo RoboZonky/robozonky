@@ -74,7 +74,7 @@ class RequestCounterImplTest {
         counter.keepOnly(Duration.ZERO); // clear everything
         assertThat(counter.count()).isEqualTo(1);
         counter.cut(1);
-        assertThat(counter.count()).isEqualTo(0);
+        assertThat(counter.count()).isZero();
     }
 
 }

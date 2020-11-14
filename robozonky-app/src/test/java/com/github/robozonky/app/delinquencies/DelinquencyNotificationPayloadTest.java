@@ -55,10 +55,8 @@ class DelinquencyNotificationPayloadTest extends AbstractZonkyLeveragingTest {
     private final DelinquencyNotificationPayload payload = new DelinquencyNotificationPayload(t -> r, true);
 
     private static InvestmentImpl getDelinquentInvestment(int dpd) {
-        LoanHealthStatsImpl loanHealthStats = new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE);
-        loanHealthStats.setCurrentDaysInDue(dpd);
-        InvestmentLoanDataImpl investmentLoanData = new InvestmentLoanDataImpl(new MockLoanBuilder().build(),
-                loanHealthStats);
+        InvestmentLoanDataImpl investmentLoanData = new InvestmentLoanDataImpl(new MockLoanBuilder().build());
+        investmentLoanData.setDpd(dpd);
         InvestmentImpl investment = new InvestmentImpl(investmentLoanData, Money.from(200));
         investment.setId((int) (Math.random() * 1_000_000));
         investment.setSellStatus(SellStatus.SELLABLE_WITH_FEE);

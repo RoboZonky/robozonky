@@ -1,4 +1,4 @@
-<p>Půjčka <@idLoan data=data /> byla zesplatněna. Po splatnosti byla od <@date data.since />.</p>
+<p>Půjčka <@idLoan data=data /> byla zesplatněna.</p>
 
 <#include "additional-investment-info.ftl">
 

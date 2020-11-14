@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
@@ -72,38 +73,24 @@ final class Util {
     static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
         var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
-            .map(i -> i.getLoan()
-                .getHealthStats()
-                .map(h -> i)
-                .orElseGet(() -> tenant.getInvestment(i.getId())))
             .map(investment -> {
-                var healthInfo = investment.getLoan()
-                    .getHealthStats()
-                    .orElseThrow(() -> new IllegalStateException("Investment has no health stats: " + investment))
-                    .getLoanHealthInfo();
-                switch (healthInfo) {
-                    case HEALTHY:
-                        return Tuple.of(investment.getLoan()
-                            .getRating(),
-                                investment.getPrincipal()
-                                    .getUnpaid(),
-                                investment.getSmpSellInfo()
-                                    .orElseThrow(() -> new IllegalStateException(
-                                            "Investment has no sell info: " + investment))
-                                    .getFee()
-                                    .getValue());
-                    case HISTORICALLY_IN_DUE:
-                    case CURRENTLY_IN_DUE:
-                        var investmentWithSellInfo = tenant.getInvestment(investment.getId());
-                        var sellInfo = investmentWithSellInfo.getSmpSellInfo()
-                            .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment));
-                        return Tuple.of(investmentWithSellInfo.getLoan()
-                            .getRating(), sellInfo.getSellPrice(),
-                                sellInfo.getFee()
-                                    .getValue());
-                    default:
-                        throw new IllegalStateException("Unsupported loan health info: " + healthInfo);
-                }
+                // Do everything we can to avoid retrieving the optional remote smpSellInfo.
+                var rating = investment.getLoan()
+                    .getRating();
+                var fee = investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE ? Money.ZERO
+                        : investment.getSmpSellInfo()
+                            .orElseThrow()
+                            .getFee()
+                            .getValue();
+                var loan = investment.getLoan();
+                var isPossiblyDiscounted = loan.getDpd() > 0 || loan.hasCollectionHistory();
+                var sellPrice = isPossiblyDiscounted ? investment.getSmpSellInfo()
+                    .orElseThrow()
+                    .getFee()
+                    .getValue()
+                        : investment.getPrincipal()
+                            .getUnpaid();
+                return Tuple.of(rating, sellPrice, fee);
             })
             .filter(data -> !data._2.isZero()) // Filter out empty loans. Zonky shouldn't send those, but happened.
             .collect(Collectors.toList());

@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -117,11 +116,6 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     }
 
     private static class MyLoanDelinquent10DaysOrMoreEvent implements LoanDelinquent10DaysOrMoreEvent {
-
-        @Override
-        public LocalDate getDelinquentSince() {
-            return LocalDate.now();
-        }
 
         @Override
         public Investment getInvestment() {

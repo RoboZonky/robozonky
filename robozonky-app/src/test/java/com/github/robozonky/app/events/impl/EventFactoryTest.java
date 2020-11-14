@@ -213,8 +213,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
                 .isNotNull();
             softly.assertThat(e.getInvestment())
                 .isNotNull();
-            softly.assertThat(e.getDelinquentSince())
-                .isNotNull();
         });
     }
 
@@ -242,8 +240,6 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
             softly.assertThat(e.getLoan())
                 .isNotNull();
             softly.assertThat(e.getInvestment())
-                .isNotNull();
-            softly.assertThat(e.getDelinquentSince())
                 .isNotNull();
             softly.assertThat(e.getThresholdInDays())
                 .isEqualTo(0);

@@ -37,7 +37,7 @@ final class SaleCheck implements TenantPayload {
     private synchronized Optional<Investment> retrieveInvestmentIfSold(final SoldParticipationCache cache,
             final Tenant tenant, final long investmentId) {
         // Don't use the cached version here, we need to know the very latest info.
-        var investment = tenant.getInvestment(investmentId, true);
+        var investment = tenant.call(z -> z.getInvestment(investmentId));
         if (investment == null) {
             throw new IllegalStateException("Investment #" + investmentId + " not found.");
         }

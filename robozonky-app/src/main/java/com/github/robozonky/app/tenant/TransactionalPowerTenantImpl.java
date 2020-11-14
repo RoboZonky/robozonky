@@ -28,7 +28,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -143,16 +142,6 @@ class TransactionalPowerTenantImpl implements TransactionalPowerTenant {
     @Override
     public Loan getLoan(final int loanId) {
         return parent.getLoan(loanId);
-    }
-
-    @Override
-    public Investment getInvestment(final long investmentId) {
-        return parent.getInvestment(investmentId);
-    }
-
-    @Override
-    public Investment getInvestment(long investmentId, boolean fresh) {
-        return parent.getInvestment(investmentId, fresh);
     }
 
     @Override

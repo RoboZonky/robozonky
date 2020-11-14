@@ -81,9 +81,6 @@ final class Selling implements TenantPayload {
             .filter(investment -> sold.getOffered()
                 .noneMatch(investmentId -> investmentId == investment.getId())) // To enable dry run.
             .filter(i -> !sold.wasOnceSold(i.getId()))
-            .map(i -> i.getSmpSellInfo() // If we don't have sell info right away, request the full investment.
-                .map(s -> i)
-                .orElseGet(() -> tenant.getInvestment(i.getId())))
             .map(i -> {
                 Supplier<Loan> loanSupplier = () -> tenant.getLoan(i.getLoan()
                     .getId());

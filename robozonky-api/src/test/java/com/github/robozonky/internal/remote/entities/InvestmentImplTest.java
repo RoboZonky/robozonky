@@ -158,6 +158,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(740849, InvestmentLoanData::getId)
+                    .returns(0, InvestmentLoanData::getDpd)
+                    .returns(false, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.of(Money.from(8419)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(84, 83), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
@@ -246,6 +248,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(691603, InvestmentLoanData::getId)
+                    .returns(0, InvestmentLoanData::getDpd)
+                    .returns(true, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.of(Money.from(4404)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(66, 62), InvestmentLoanData::getPayments)
                     .returns(Purpose.AUTO_MOTO, InvestmentLoanData::getPurpose)
@@ -334,6 +338,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(685008, InvestmentLoanData::getId)
+                    .returns(0, InvestmentLoanData::getDpd)
+                    .returns(true, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.of(Money.from(5263)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(84, 81), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
@@ -408,6 +414,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(204677, InvestmentLoanData::getId)
+                    .returns(412, InvestmentLoanData::getDpd)
+                    .returns(true, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(20, 5), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
@@ -457,6 +465,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(40056, InvestmentLoanData::getId)
+                    .returns(0, InvestmentLoanData::getDpd)
+                    .returns(false, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(60, 17), InvestmentLoanData::getPayments)
                     .returns(Purpose.HEALTH, InvestmentLoanData::getPurpose)
@@ -506,6 +516,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(385418, InvestmentLoanData::getId)
+                    .returns(0, InvestmentLoanData::getDpd)
+                    .returns(false, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(19, 0), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
@@ -555,6 +567,8 @@ class InvestmentImplTest {
                 // Loan data is present and contains particular values
                 softly.assertThat(investment.getLoan())
                     .returns(769283, InvestmentLoanData::getId)
+                    .returns(0, InvestmentLoanData::getDpd)
+                    .returns(false, InvestmentLoanData::hasCollectionHistory)
                     .returns(Optional.of(Money.from(1925)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(60), InvestmentLoanData::getPayments)
                     .returns(Purpose.HOUSEHOLD, InvestmentLoanData::getPurpose)

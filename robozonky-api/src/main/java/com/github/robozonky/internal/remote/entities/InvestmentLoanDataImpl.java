@@ -44,6 +44,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     private int id;
     private int activeLoanOrdinal;
+    private int dpd;
+    private boolean hasCollectionHistory;
     private Rating rating;
     private String title;
     private String story;
@@ -69,6 +71,8 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     public InvestmentLoanDataImpl(Loan loan, LoanHealthStats loanHealthStats) {
         this.id = loan.getId();
+        this.dpd = loanHealthStats == null ? 0 : loanHealthStats.getCurrentDaysDue();
+        this.hasCollectionHistory = dpd > 0;
         this.title = loan.getName();
         this.story = loan.getStory();
         this.annuity = loan.getAnnuity();
@@ -101,12 +105,30 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     }
 
     @Override
+    public int getDpd() {
+        return dpd;
+    }
+
+    public void setDpd(final int dpd) {
+        this.dpd = dpd;
+    }
+
+    @Override
+    public boolean hasCollectionHistory() {
+        return hasCollectionHistory;
+    }
+
+    public void setHasCollectionHistory(final boolean hasCollectionHistory) {
+        this.hasCollectionHistory = hasCollectionHistory;
+    }
+
+    @Override
     public Rating getRating() { // TODO try to convince Zonky to make this available on the API.
         if (rating != null) {
             return rating;
         }
         return Arrays.stream(Rating.values())
-            .filter(rating -> Objects.equals(rating.getInterestRate(), getInterestRate()))
+            .filter(r -> Objects.equals(r.getInterestRate(), getInterestRate()))
             .findAny()
             .orElseThrow(() -> new IllegalStateException("Unknown interest rate: " + getInterestRate()));
     }

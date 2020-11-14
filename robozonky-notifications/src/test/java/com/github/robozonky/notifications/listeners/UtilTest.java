@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -93,11 +92,6 @@ class UtilTest {
             @Override
             public Investment getInvestment() {
                 return null;
-            }
-
-            @Override
-            public LocalDate getDelinquentSince() {
-                return LocalDate.now();
             }
 
         };
