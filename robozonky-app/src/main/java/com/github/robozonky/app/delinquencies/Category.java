@@ -124,10 +124,8 @@ enum Category {
         var loanId = investment.getLoan()
             .getId();
         var loan = tenant.getLoan(loanId);
-        // Load full investment, as notifications will require healthStats and the whole shebang.
-        var fullInvestment = tenant.getInvestment(investment.getId());
         var e = getEventSupplierConstructor(threshold)
-            .apply(fullInvestment, loan, since);
+            .apply(investment, loan, since);
         LOGGER.trace("Done.");
         return e;
     }

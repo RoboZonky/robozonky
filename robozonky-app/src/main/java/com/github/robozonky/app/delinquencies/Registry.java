@@ -67,7 +67,7 @@ final class Registry {
         return storages.get(Category.NEW)
             .complement(idsToComplement)
             .parallel()
-            .mapToObj(tenant::getInvestment)
+            .mapToObj(id -> tenant.call(z -> z.getInvestment(id)))
             .collect(Collectors.toList());
     }
 

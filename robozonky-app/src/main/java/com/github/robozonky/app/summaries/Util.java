@@ -85,8 +85,7 @@ final class Util {
                             Money.ZERO);
                 }
                 // If there is a collection history, the sell price needs to be fetched separately.
-                var sellInfo = tenant.getInvestment(investment.getId())
-                    .getSmpSellInfo()
+                var sellInfo = investment.getSmpSellInfo()
                     .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment));
                 return Tuple.of(rating, sellInfo.getSellPrice(),
                         sellInfo.getFee()

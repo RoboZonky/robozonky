@@ -168,7 +168,8 @@ public class Zonky {
      * @return All items from the remote API, lazy-loaded.
      */
     public Stream<Investment> getInvestments(final Select select) {
-        return getStream(portfolioApi, PortfolioApi::items, select);
+        return getStream(portfolioApi, PortfolioApi::items, select)
+            .map(i -> new AutoExtendingInvestmentImpl(i, this));
     }
 
     public Stream<Investment> getPendingInvestments() {

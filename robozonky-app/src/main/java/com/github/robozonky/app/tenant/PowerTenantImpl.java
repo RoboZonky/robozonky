@@ -133,16 +133,6 @@ class PowerTenantImpl implements PowerTenant {
     }
 
     @Override
-    public Investment getInvestment(long investmentId, boolean fresh) {
-        if (fresh) {
-            return call(zonky -> zonky.getInvestment(investmentId));
-        } else {
-            return investmentCache.get()
-                .get(investmentId);
-        }
-    }
-
-    @Override
     public <T> InstanceState<T> getState(final Class<T> clz) {
         return TenantState.of(getSessionInfo())
             .in(clz);
