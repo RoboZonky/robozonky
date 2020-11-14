@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class LoanDefaultedEventListener extends AbstractListener<LoanDefaultedEv
 
     @Override
     protected Map<String, Object> getData(final LoanDefaultedEvent event) {
-        return Util.getDelinquentData(event.getInvestment(), event.getLoan(), event.getDelinquentSince());
+        return Util.getLoanData(event);
     }
 
     @Override

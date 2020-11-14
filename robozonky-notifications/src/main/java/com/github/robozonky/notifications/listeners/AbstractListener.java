@@ -88,13 +88,11 @@ public abstract class AbstractListener<T extends Event> implements EventListener
         if (event instanceof LoanBased) {
             if (event instanceof InvestmentBased) {
                 var e = (InvestmentBased) event;
-                Util.getLoanData(e.getInvestment(), e.getLoan())
-                    .forEach(data::put);
-                Util.getDelinquencyData(e.getInvestment())
+                Util.getLoanData(e)
                     .forEach(data::put);
             } else {
                 var e = (LoanBased) event;
-                Util.getLoanData(e.getLoan())
+                Util.getLoanData(e)
                     .forEach(data::put);
             }
         }

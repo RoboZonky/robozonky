@@ -46,11 +46,6 @@ final class LoanDefaultedEventImpl extends AbstractEventImpl implements LoanDefa
     }
 
     @Override
-    public LocalDate getDelinquentSince() {
-        return delinquentSince;
-    }
-
-    @Override
     public String toString() {
         return new StringJoiner(", ", LoanDefaultedEventImpl.class.getSimpleName() + "[", "]")
             .add("loan=" + loan)
