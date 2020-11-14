@@ -28,7 +28,6 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.SessionEvent;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -57,7 +56,6 @@ class PowerTenantImpl implements PowerTenant {
     private final ZonkyApiTokenSupplier token;
     private final StrategyProvider strategyProvider;
     private final Supplier<Cache<Loan>> loanCache = Memoizer.memoize(() -> Cache.forLoan(this));
-    private final Supplier<Cache<Investment>> investmentCache = Memoizer.memoize(() -> Cache.forInvestment(this));
     private final StatefulBoundedBalance balance;
     private final Supplier<Availability> availability;
 

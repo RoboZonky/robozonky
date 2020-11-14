@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
@@ -73,42 +72,6 @@ final class Cache<T> {
         }
     };
 
-    private static final Backend<Investment> INVESTMENT_BACKEND = new Backend<>() {
-        @Override
-        public Duration getEvictEvery() {
-            return Duration.ofHours(1);
-        }
-
-        @Override
-        public Duration getEvictAfter() {
-            return Duration.ofHours(1);
-        }
-
-        @Override
-        public Class<Investment> getItemClass() {
-            return Investment.class;
-        }
-
-        @Override
-        public Either<Exception, Investment> getItem(final long id, final Tenant tenant) {
-            try {
-                return tenant.call(zonky -> Either.right(zonky.getInvestment(id)));
-            } catch (final Exception ex) {
-                return Either.left(ex);
-            }
-        }
-
-        @Override
-        public boolean shouldCache(final Investment item) {
-            return item.getSmpSellInfo()
-                .flatMap(si -> si.getFee()
-                    .getExpiresAt()
-                    .map(expiration -> expiration.isAfter(DateUtil.zonedNow()
-                        .toOffsetDateTime())))
-                .orElse(true);
-        }
-    };
-
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final Tenant tenant;
     private final Backend<T> backend;
@@ -124,10 +87,6 @@ final class Cache<T> {
 
     public static Cache<Loan> forLoan(final Tenant tenant) {
         return new Cache<>(tenant, LOAN_BACKEND);
-    }
-
-    public static Cache<Investment> forInvestment(final Tenant tenant) {
-        return new Cache<>(tenant, INVESTMENT_BACKEND);
     }
 
     private static String identify(final Class<?> clz, final long id) {

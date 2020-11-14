@@ -63,10 +63,6 @@ class ZonkyTest {
         return mockApi(Collections.emptyList());
     }
 
-    private static InvestmentImpl mockInvestment(final Loan loan, final int amount) {
-        return new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(amount));
-    }
-
     @SuppressWarnings("unchecked")
     private static <T, S> PaginatedApi<T, S> mockApi(final List<T> toReturn) {
         final PaginatedApi<T, S> api = mock(PaginatedApi.class);
@@ -120,10 +116,6 @@ class ZonkyTest {
 
     private static Zonky mockZonky() {
         final ApiProvider apiProvider = mockApiProvider();
-        return new Zonky(apiProvider, () -> mock(ZonkyApiTokenImpl.class));
-    }
-
-    private static Zonky mockZonky(final ApiProvider apiProvider) {
         return new Zonky(apiProvider, () -> mock(ZonkyApiTokenImpl.class));
     }
 
