@@ -70,12 +70,13 @@ final class StatefulBoundedBalance {
         LOGGER.trace("Loaded {} from {}", lastKnownValue, lastModified);
     }
 
-    public synchronized void set(final Money value) {
+    public synchronized Money set(final Money value) {
         final Money newValue = value.max(Money.from(1));
         currentValue.set(newValue);
         lastModificationDate.set(DateUtil.now());
         state.update(m -> m.put(VALUE_KEY, newValue.getValue()
             .toPlainString()));
+        return newValue;
     }
 
     private Duration getTimeBetweenLastBalanceCheckAndNow() {
@@ -97,6 +98,6 @@ final class StatefulBoundedBalance {
             return balance;
         }
         LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
-        return MAXIMUM;
+        return set(MAXIMUM);
     }
 }

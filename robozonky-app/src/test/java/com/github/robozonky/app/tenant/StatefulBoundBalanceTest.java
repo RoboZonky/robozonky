@@ -42,7 +42,7 @@ class StatefulBoundBalanceTest extends AbstractRoboZonkyTest {
             .plus(Duration.ofDays(1));
         setClock(Clock.fixed(newNow, Defaults.ZONKYCZ_ZONE_ID));
         assertThat(balance.get()).isEqualTo(MAXIMUM); // doesn't change as time moves on
-        balance.set(Money.from(1000));
+        assertThat(balance.set(Money.from(1000))).isEqualTo(Money.from(1000));
         assertThat(balance.get()).isEqualTo(Money.from(1_000));
         // resets as too much time passes
         newNow = newNow.plus(Duration.ofDays(1));
