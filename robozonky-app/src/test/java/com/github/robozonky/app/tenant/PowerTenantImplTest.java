@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -151,8 +150,7 @@ class PowerTenantImplTest extends AbstractZonkyLeveragingTest {
         try (final PowerTenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(SECRETS)
             .build(false)) {
-            tenant.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                    mockPortfolioOverview())))
+            tenant.fire(sellingCompletedLazy(() -> sellingCompleted(mockPortfolioOverview())))
                 .join();
         }
         assertThat(this.getEventsRequested())

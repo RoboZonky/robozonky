@@ -59,7 +59,7 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
             s.process(strategy);
         }
         // make sure we get fresh portfolio reference here
-        s.tenant.fire(reservationCheckCompleted(s.result, tenant.getPortfolio()
+        s.tenant.fire(reservationCheckCompleted(tenant.getPortfolio()
             .getOverview()));
         return Collections.unmodifiableCollection(s.result);
     }

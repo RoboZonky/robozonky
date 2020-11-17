@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,9 @@
 
 package com.github.robozonky.api.notifications;
 
-import com.github.robozonky.api.remote.entities.Participation;
-
-import java.util.Collection;
-
 /**
  * Fired immediately after the investing algorithm is finished purchasing participations in the secondary marketplace.
  */
 public interface PurchasingCompletedEvent extends Financial {
-
-    /**
-     * @return The investments that were made.
-     */
-    Collection<Participation> getParticipationsPurchased();
 
 }

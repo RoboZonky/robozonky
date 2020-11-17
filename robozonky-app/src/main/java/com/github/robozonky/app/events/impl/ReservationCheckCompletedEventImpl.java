@@ -16,33 +16,22 @@
 
 package com.github.robozonky.app.events.impl;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
-import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class ReservationCheckCompletedEventImpl extends AbstractEventImpl implements ReservationCheckCompletedEvent {
 
-    private final Collection<Reservation> investments;
     private final PortfolioOverview portfolioOverview;
 
-    public ReservationCheckCompletedEventImpl(final Collection<Reservation> reservations,
-            final PortfolioOverview portfolio) {
-        this.investments = Collections.unmodifiableCollection(reservations);
+    public ReservationCheckCompletedEventImpl(final PortfolioOverview portfolio) {
         this.portfolioOverview = portfolio;
     }
 
     @Override
     public PortfolioOverview getPortfolioOverview() {
         return portfolioOverview;
-    }
-
-    @Override
-    public Collection<Reservation> getReservationsAccepted() {
-        return investments;
     }
 
     @Override

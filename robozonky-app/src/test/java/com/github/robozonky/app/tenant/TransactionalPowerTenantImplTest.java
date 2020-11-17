@@ -23,7 +23,6 @@ import static com.github.robozonky.app.tenant.PowerTenant.transactional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -148,11 +147,10 @@ class TransactionalPowerTenantImplTest extends AbstractZonkyLeveragingTest {
         final PowerTenant tenant = new TenantBuilder().withApi(api)
             .withSecrets(SECRETS)
             .build(false);
-        try (final TransactionalPowerTenant t = transactional(tenant)) {
-            final CompletableFuture<?> f = t.fire(sellingCompletedLazy(() -> sellingCompleted(Collections.emptyList(),
-                    mockPortfolioOverview())));
-            t.commit();
-            f.join();
+        try (var transactional = transactional(tenant)) {
+            var future = transactional.fire(sellingCompletedLazy(() -> sellingCompleted(mockPortfolioOverview())));
+            transactional.commit();
+            future.join();
         }
         assertThat(this.getEventsRequested())
             .hasSize(1)

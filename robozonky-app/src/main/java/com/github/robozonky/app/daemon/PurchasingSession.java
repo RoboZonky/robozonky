@@ -64,7 +64,7 @@ final class PurchasingSession extends
             .getOverview())));
         s.purchase(strategy);
         final Collection<Participation> result = s.getResult();
-        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio()
+        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(auth.getPortfolio()
             .getOverview())));
         return Collections.unmodifiableCollection(result);
     }

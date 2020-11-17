@@ -67,7 +67,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         }
         final Collection<Loan> result = s.getResult();
         // make sure we get fresh portfolio reference here
-        s.tenant.fire(executionCompletedLazy(() -> executionCompleted(result, tenant.getPortfolio()
+        s.tenant.fire(executionCompletedLazy(() -> executionCompleted(tenant.getPortfolio()
             .getOverview())));
         return Collections.unmodifiableCollection(result);
     }
