@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,22 +31,27 @@ import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.Recommended;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
 
     protected final PowerTenant tenant;
     protected final Logger logger;
     protected final List<X> result = new ArrayList<>(0);
-    private final SessionState<S> discarded;
-    private final Collection<S> stillAvailable;
+    private final Supplier<List<S>> stillAvailable;
+    private final Supplier<SessionState<S>> discarded;
 
     protected AbstractSession(final Stream<S> originallyAvailable, final PowerTenant tenant,
             final ToLongFunction<S> idSupplier, final String stateId, final Logger logger) {
         this.tenant = tenant;
-        this.stillAvailable = originallyAvailable.collect(Collectors.toList());
-        logger.debug("Found {} items to process.", stillAvailable.size());
-        this.discarded = new SessionState<>(tenant, stillAvailable, idSupplier, stateId);
         this.logger = logger;
+        // These are only instantiated on-demand, so that the stream is only collected when absolutely necessary.
+        this.stillAvailable = Memoizer.memoize(() -> {
+            var available = originallyAvailable.collect(Collectors.toList());
+            logger.debug("Found {} items to process.", available.size());
+            return available;
+        });
+        this.discarded = Memoizer.memoize(() -> new SessionState<>(tenant, stillAvailable.get(), idSupplier, stateId));
     }
 
     /**
@@ -55,13 +61,16 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
      * @return Items in the marketplace in which the user could still potentially invest. Unmodifiable.
      */
     Collection<S> getAvailable() {
-        stillAvailable.removeIf(discarded::contains);
-        return Collections.unmodifiableCollection(stillAvailable);
+        var actuallyStillAvailable = stillAvailable.get();
+        var actuallyDiscarded = discarded.get();
+        actuallyStillAvailable.removeIf(actuallyDiscarded::contains);
+        return Collections.unmodifiableCollection(actuallyStillAvailable);
     }
 
     protected void discard(final S item) {
         logger.debug("Will not show {} again.", item);
-        discarded.put(item);
+        discarded.get()
+            .put(item);
     }
 
     protected boolean isBalanceAcceptable(final T item) {
