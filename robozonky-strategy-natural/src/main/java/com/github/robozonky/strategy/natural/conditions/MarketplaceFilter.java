@@ -50,7 +50,7 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
     private static final Comparator<MarketplaceFilter> COMPARATOR = Comparator
         .comparing(MarketplaceFilter::mayRequireRemoteRequests)
         .thenComparing(f -> f.id);
-    private static AtomicInteger COUNTER = new AtomicInteger(0);
+    private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
     private final int id = COUNTER.incrementAndGet();
     private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
@@ -118,14 +118,7 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
      */
     @Override
     public boolean test(final Wrapper<?> item) {
-        final Predicate<MarketplaceFilterCondition> f = c -> {
-            try {
-                return c.test(item);
-            } catch (final Exception ex) {
-                // This is here for debugging. The stack trace gives no useful information on its own.
-                throw new IllegalStateException("Failed processing " + item + " with " + c + ".");
-            }
-        };
+        final Predicate<MarketplaceFilterCondition> f = new DebuggingMarketplaceFilterConditionPredicate(item);
         return when.stream()
             .allMatch(f) &&
                 (butNotWhen.isEmpty() || !butNotWhen.stream()
@@ -142,5 +135,24 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
         final String description = getDescription().orElse("N/A.");
         return this.getClass()
             .getSimpleName() + " (" + description + ")";
+    }
+
+    private static class DebuggingMarketplaceFilterConditionPredicate implements Predicate<MarketplaceFilterCondition> {
+
+        private final Wrapper<?> item;
+
+        public DebuggingMarketplaceFilterConditionPredicate(Wrapper<?> item) {
+            this.item = item;
+        }
+
+        @Override
+        public boolean test(MarketplaceFilterCondition c) {
+            try {
+                return c.test(item);
+            } catch (final Exception ex) {
+                // This is here for debugging. The stack trace gives no useful information on its own.
+                throw new IllegalStateException("Failed processing " + item + " with " + c + ".");
+            }
+        }
     }
 }

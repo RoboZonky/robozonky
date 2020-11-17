@@ -60,7 +60,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             .sorted(preferences.getPrimaryMarketplaceComparator())
             .flatMap(d -> { // recommend amount to invest per strategy
                 final Money recommendedAmount = recommender.apply(d.item(), sessionInfo);
-                if (recommendedAmount.compareTo(recommendedAmount.getZero()) > 0) {
+                if (!recommendedAmount.isZero()) {
                     return d.recommend(recommendedAmount)
                         .stream();
                 } else {
