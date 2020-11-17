@@ -18,7 +18,6 @@ package com.github.robozonky.app.daemon;
 
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -48,7 +47,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
+        public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
                 final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return Stream.empty();
         }
@@ -60,7 +59,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
+        public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
                 final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return Stream.empty();
         }

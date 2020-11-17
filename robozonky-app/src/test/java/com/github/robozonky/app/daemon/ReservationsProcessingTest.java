@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -56,15 +55,14 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
+        public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
                 final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
-            return available.stream()
-                .map(r -> {
-                    final Money amount = r.item()
-                        .getMyReservation()
-                        .getReservedAmount();
-                    return r.recommend(amount);
-                })
+            return available.map(r -> {
+                final Money amount = r.item()
+                    .getMyReservation()
+                    .getReservedAmount();
+                return r.recommend(amount);
+            })
                 .flatMap(Optional::stream);
         }
     };

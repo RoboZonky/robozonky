@@ -53,9 +53,8 @@ import com.github.robozonky.internal.remote.Zonky;
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        return (l, p, r) -> l.stream()
-            .filter(i -> i.item()
-                .getId() == loanToRecommend)
+        return (l, p, r) -> l.filter(i -> i.item()
+            .getId() == loanToRecommend)
             .flatMap(i -> i.recommend(Money.from(recommend))
                 .stream());
     }

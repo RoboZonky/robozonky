@@ -62,11 +62,10 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     private static final PurchaseStrategy NONE_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> a.stream()
-        .map(d -> d.recommend()
-            .get());
+    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> a.map(d -> d.recommend()
+        .get());
     private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> a.stream()
+    private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> a
         .map(d -> d.recommend(Money.from(200))
             .get());
 
@@ -97,7 +96,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
     @Test
     void purchasingNoStrategy() {
         final Participation mock = mock(ParticipationImpl.class);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(mock, () -> MockLoanBuilder.fresh());
+        final ParticipationDescriptor pd = new ParticipationDescriptor(mock, MockLoanBuilder::fresh);
         final PowerTenant tenant = mockTenant();
         final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor(pd);
         final StrategyExecutor<ParticipationDescriptor, PurchaseStrategy, Participation> exec = new StrategyExecutor<>(

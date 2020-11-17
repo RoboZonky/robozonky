@@ -69,7 +69,7 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
         do {
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
-            invested = strategy.recommend(getAvailable(), portfolioOverview, tenant.getSessionInfo())
+            invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
                 .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted

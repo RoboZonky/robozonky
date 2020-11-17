@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
@@ -69,8 +68,7 @@ class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTes
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
         final Stream<RecommendedReservation> result = s.recommend(
-                singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                portfolio, mockSessionInfo());
+                Stream.of(new ReservationDescriptor(mockReservation(200), () -> null)), portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -84,8 +82,7 @@ class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTes
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
         final Stream<RecommendedReservation> result = s.recommend(
-                singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                portfolio, mockSessionInfo());
+                Stream.of(new ReservationDescriptor(mockReservation(200), () -> null)), portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -98,8 +95,7 @@ class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTes
             .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Stream<RecommendedReservation> result = s.recommend(
-                singletonList(new ReservationDescriptor(mockReservation(200), () -> null)),
-                portfolio, mockSessionInfo());
+                Stream.of(new ReservationDescriptor(mockReservation(200), () -> null)), portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
         assertThatThrownBy(s::getMode).isInstanceOf(IllegalStateException.class);
     }
@@ -114,8 +110,7 @@ class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTes
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Reservation l = mockReservation(200);
         final ReservationDescriptor ld = new ReservationDescriptor(l, () -> null);
-        final List<RecommendedReservation> result = s
-            .recommend(Collections.singleton(ld), portfolio, mockSessionInfo())
+        final List<RecommendedReservation> result = s.recommend(Stream.of(ld), portfolio, mockSessionInfo())
             .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedReservation r = result.get(0);

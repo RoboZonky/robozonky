@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
@@ -69,8 +68,8 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
         final PurchaseStrategy s = new NaturalLanguagePurchaseStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
-        final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor()),
-                portfolio, mockSessionInfo());
+        final Stream<RecommendedParticipation> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
+                mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -86,8 +85,8 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
-        final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor()),
-                portfolio, mockSessionInfo());
+        final Stream<RecommendedParticipation> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
+                mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -102,8 +101,8 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
         final Participation l = mockParticipation();
         doReturn(Rating.A).when(l)
             .getRating();
-        final Stream<RecommendedParticipation> result = s.recommend(Collections.singletonList(mockDescriptor(l)),
-                portfolio, mockSessionInfo());
+        final Stream<RecommendedParticipation> result = s.recommend(Stream.of(mockDescriptor(l)), portfolio,
+                mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -131,7 +130,7 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
             .getRating();
         final ParticipationDescriptor pd = mockDescriptor(p2);
         final List<RecommendedParticipation> result = s
-            .recommend(asList(mockDescriptor(participation), pd), portfolio, mockSessionInfo())
+            .recommend(Stream.of(mockDescriptor(participation), pd), portfolio, mockSessionInfo())
             .collect(Collectors.toList());
         assertThat(result).hasSize(1);
         final RecommendedParticipation r = result.get(0);

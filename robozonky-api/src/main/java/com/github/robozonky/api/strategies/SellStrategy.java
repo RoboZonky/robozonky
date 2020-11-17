@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -36,6 +35,6 @@ public interface SellStrategy {
      * @param sessionInfo Information about the current session.
      * @return Acceptable investments, in the order of their decreasing priority, mapped to the recommended sell price.
      */
-    Stream<RecommendedInvestment> recommend(Collection<InvestmentDescriptor> available, PortfolioOverview portfolio,
+    Stream<RecommendedInvestment> recommend(Stream<InvestmentDescriptor> available, PortfolioOverview portfolio,
             SessionInfo sessionInfo);
 }

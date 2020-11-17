@@ -75,6 +75,30 @@
         "code": "java.method.removed",
         "old": "method java.util.Collection<com.github.robozonky.api.remote.entities.Investment> com.github.robozonky.api.notifications.SellingCompletedEvent::getInvestments()",
         "justification": "No longer provide result collections in events."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(===java.util.stream.Stream<com.github.robozonky.api.strategies.LoanDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategies now receive stream instead of a collection."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(===java.util.stream.Stream<com.github.robozonky.api.strategies.ParticipationDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategies now receive stream instead of a collection."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.ReservationDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationStrategy::recommend(===java.util.stream.Stream<com.github.robozonky.api.strategies.ReservationDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategies now receive stream instead of a collection."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(===java.util.stream.Stream<com.github.robozonky.api.strategies.InvestmentDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategies now receive stream instead of a collection."
       }
     ]
   }
