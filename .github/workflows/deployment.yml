@@ -75,20 +75,20 @@ jobs:
             org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
           )
           echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
-          echo "::set-env name=ROBOZONKY_VERSION::$ROBOZONKY_VERSION"
+          echo "ROBOZONKY_VERSION=$ROBOZONKY_VERSION" >> $GITHUB_ENV
       # Avoid proliferation of Ubuntu and remove the -latest suffix.
       - name: This is Mac OS X
         if: startsWith(matrix.os, 'macos')
         run: |
-          echo "::set-env name=ROBOZONKY_OS::macos"
+          echo "ROBOZONKY_OS=macos" >> $GITHUB_ENV
       - name: This is Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          echo "::set-env name=ROBOZONKY_OS::windows"
+          echo "ROBOZONKY_OS=windows" >> $GITHUB_ENV
       - name: This is Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          echo "::set-env name=ROBOZONKY_OS::linux"
+          echo "ROBOZONKY_OS=linux" >> $GITHUB_ENV
       # Build and publish the JLinked JRE.
       - name: Run JLink for the JARs
         run: |
