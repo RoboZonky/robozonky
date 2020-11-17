@@ -17,18 +17,15 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
-import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Settings;
@@ -45,6 +42,7 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
 
     public SecondaryMarketplaceAccessor(final PowerTenant tenant,
             final UnaryOperator<LastPublishedItem> stateAccessor) {
+        super(LOGGER);
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
     }
@@ -74,10 +72,9 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     }
 
     @Override
-    public Collection<ParticipationDescriptor> getMarketplace() {
+    public Stream<ParticipationDescriptor> getMarketplace() {
         var cache = SoldParticipationCache.forTenant(tenant);
-        Stream<Participation> participations = tenant
-            .call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
+        var participations = tenant.call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
             .filter(p -> { // never re-purchase what was once sold
                 final int loanId = p.getLoanId();
                 if (cache.wasOnceSold(p.getInvestmentId())) {
@@ -88,17 +85,15 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
                 }
             });
         if (getMaximumItemsToRead().isPresent()) {
-            int limit = getMaximumItemsToRead().orElseThrow();
+            var limit = getMaximumItemsToRead().orElseThrow();
             LOGGER.trace("Enforcing read limit of {} latest items.", limit);
             participations = participations.limit(limit);
         }
-        return participations
-            .map(p -> {
-                var loanId = p.getLoanId();
-                return new ParticipationDescriptor(p, () -> tenant.getLoan(loanId),
-                        () -> tenant.call(a -> a.getParticipationDetail(loanId)));
-            })
-            .collect(Collectors.toList());
+        return participations.map(p -> {
+            var loanId = p.getLoanId();
+            return new ParticipationDescriptor(p, () -> tenant.getLoan(loanId),
+                    () -> tenant.call(a -> a.getParticipationDetail(loanId)));
+        });
     }
 
     @Override
@@ -114,8 +109,4 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
         }
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
 }

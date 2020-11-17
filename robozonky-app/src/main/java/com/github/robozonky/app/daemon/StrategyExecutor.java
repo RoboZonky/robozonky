@@ -95,14 +95,8 @@ class StrategyExecutor<T, S, R> implements Supplier<Stream<R>> {
         }
         var marketplaceCheckTimestamp = DateUtil.now();
         var marketplace = marketplaceAccessor.getMarketplace();
-        if (marketplace.isEmpty()) {
-            lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
-            logger.debug("Marketplace is empty.");
-            return Stream.empty();
-        }
-        logger.trace("Processing {} items from the marketplace.", marketplace.size());
         var result = operationDescriptor.getOperation()
-            .apply(tenant, marketplace.stream(), strategy);
+            .apply(tenant, marketplace, strategy);
         lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
         logger.trace("Marketplace processing complete.");
         return result;

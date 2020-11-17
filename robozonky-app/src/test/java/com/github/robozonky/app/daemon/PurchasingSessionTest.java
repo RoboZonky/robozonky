@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -72,9 +71,8 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {
-            final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-            return participations.stream()
-                .map(ParticipationDescriptor::recommend)
+            final Stream<ParticipationDescriptor> participations = i.getArgument(0);
+            return participations.map(ParticipationDescriptor::recommend)
                 .flatMap(Optional::stream);
         });
         final Zonky z = harmlessZonky();
@@ -106,9 +104,8 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {
-            final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-            return participations.stream()
-                .map(ParticipationDescriptor::recommend)
+            final Stream<ParticipationDescriptor> participations = i.getArgument(0);
+            return participations.map(ParticipationDescriptor::recommend)
                 .flatMap(Optional::stream);
         });
         final Zonky z = harmlessZonky();
@@ -141,9 +138,8 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenAnswer(i -> {
-            final Collection<ParticipationDescriptor> participations = i.getArgument(0);
-            return participations.stream()
-                .map(ParticipationDescriptor::recommend)
+            final Stream<ParticipationDescriptor> participations = i.getArgument(0);
+            return participations.map(ParticipationDescriptor::recommend)
                 .flatMap(Optional::stream);
         });
         final Zonky z = harmlessZonky();

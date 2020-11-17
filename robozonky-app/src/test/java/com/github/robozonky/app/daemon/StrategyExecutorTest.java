@@ -24,7 +24,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +73,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final PurchasingOperationDescriptor spied = spy(d);
         final AbstractMarketplaceAccessor<ParticipationDescriptor> marketplace = mock(
                 AbstractMarketplaceAccessor.class);
-        when(marketplace.getMarketplace()).thenReturn(pd.length == 0 ? Collections.emptyList() : Arrays.asList(pd));
+        when(marketplace.getMarketplace()).thenAnswer(i -> pd.length == 0 ? Stream.empty() : Stream.of(pd));
         when(marketplace.hasUpdates()).thenReturn(true);
         doReturn(marketplace).when(spied)
             .newMarketplaceAccessor(any());
@@ -85,7 +84,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final InvestingOperationDescriptor d = new InvestingOperationDescriptor();
         final InvestingOperationDescriptor spied = spy(d);
         final AbstractMarketplaceAccessor<LoanDescriptor> marketplace = mock(AbstractMarketplaceAccessor.class);
-        when(marketplace.getMarketplace()).thenReturn(ld.length == 0 ? Collections.emptyList() : Arrays.asList(ld));
+        when(marketplace.getMarketplace()).thenAnswer(i -> ld.length == 0 ? Stream.empty() : Stream.of(ld));
         when(marketplace.hasUpdates()).thenReturn(true);
         doReturn(marketplace).when(spied)
             .newMarketplaceAccessor(any());

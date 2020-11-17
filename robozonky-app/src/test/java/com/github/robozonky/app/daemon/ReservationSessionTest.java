@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -75,9 +74,8 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
             .thenAnswer(i -> {
-                final Collection<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.stream()
-                    .map(r -> r.recommend(Money.from(200)))
+                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
+                return reservations.map(r -> r.recommend(Money.from(200)))
                     .flatMap(Optional::stream);
             });
         final Zonky z = harmlessZonky();
@@ -107,9 +105,8 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
             .thenAnswer(i -> {
-                final Collection<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.stream()
-                    .map(r -> r.recommend(Money.from(200)))
+                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
+                return reservations.map(r -> r.recommend(Money.from(200)))
                     .flatMap(Optional::stream);
             });
         final Zonky z = harmlessZonky();
@@ -140,9 +137,8 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
             .thenAnswer(i -> {
-                final Collection<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.stream()
-                    .map(r -> r.recommend(Money.from(200)))
+                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
+                return reservations.map(r -> r.recommend(Money.from(200)))
                     .flatMap(Optional::stream);
             });
         final Zonky z = harmlessZonky();

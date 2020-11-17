@@ -55,6 +55,7 @@ final class PurchasingSession extends
         final PurchasingSession s = new PurchasingSession(items, auth);
         final Collection<ParticipationDescriptor> c = s.getAvailable();
         if (c.isEmpty()) {
+            s.logger.debug("Skipping purchasing as no participations are available.");
             return Stream.empty();
         }
         s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(auth.getPortfolio()

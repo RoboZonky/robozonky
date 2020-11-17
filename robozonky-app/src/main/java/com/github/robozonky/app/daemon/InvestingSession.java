@@ -24,6 +24,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
@@ -56,13 +57,14 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     public static Stream<Loan> invest(final PowerTenant tenant, final Stream<LoanDescriptor> loans,
             final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, tenant);
-        final PortfolioOverview portfolioOverview = tenant.getPortfolio()
-            .getOverview();
-        s.tenant.fire(executionStartedLazy(() -> executionStarted(portfolioOverview)));
-        if (!s.getAvailable()
-            .isEmpty()) {
-            s.invest(strategy);
+        final Collection<LoanDescriptor> c = s.getAvailable();
+        if (c.isEmpty()) {
+            s.logger.debug("Skipping investing as no loans are available.");
+            return Stream.empty();
         }
+        s.tenant.fire(executionStartedLazy(() -> executionStarted(tenant.getPortfolio()
+            .getOverview())));
+        s.invest(strategy);
         // make sure we get fresh portfolio reference here
         s.tenant.fire(executionCompletedLazy(() -> executionCompleted(tenant.getPortfolio()
             .getOverview())));

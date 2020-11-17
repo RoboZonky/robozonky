@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -59,15 +58,11 @@ class SecondaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final PowerTenant tenant = mockTenant(zonky);
         final AbstractMarketplaceAccessor<ParticipationDescriptor> d = new SecondaryMarketplaceAccessor(tenant,
                 UnaryOperator.identity());
-        final Collection<ParticipationDescriptor> pd = d.getMarketplace();
+        final Stream<ParticipationDescriptor> pd = d.getMarketplace();
         assertThat(pd).hasSize(1)
-            .element(0)
-            .extracting(ParticipationDescriptor::item)
-            .isSameAs(p);
-        assertThat(pd)
-            .element(0)
-            .extracting(ParticipationDescriptor::related)
-            .isSameAs(l);
+            .first()
+            .extracting(ParticipationDescriptor::item, ParticipationDescriptor::related)
+            .containsExactly(p, l);
     }
 
     @Test

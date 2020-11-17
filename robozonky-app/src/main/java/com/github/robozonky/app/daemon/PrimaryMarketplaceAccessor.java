@@ -17,17 +17,14 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
-import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.remote.Select;
@@ -42,6 +39,7 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     private final UnaryOperator<LastPublishedItem> stateAccessor;
 
     public PrimaryMarketplaceAccessor(final Tenant tenant, final UnaryOperator<LastPublishedItem> stateAccessor) {
+        super(LOGGER);
         this.tenant = tenant;
         this.stateAccessor = stateAccessor;
     }
@@ -65,17 +63,16 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     }
 
     @Override
-    public Collection<LoanDescriptor> getMarketplace() {
-        Stream<Loan> loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
+    public Stream<LoanDescriptor> getMarketplace() {
+        var loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
             .filter(l -> l.getMyInvestment()
                 .isEmpty()); // re-investing would fail
         if (getMaximumItemsToRead().isPresent()) {
-            int limit = getMaximumItemsToRead().orElseThrow();
+            var limit = getMaximumItemsToRead().orElseThrow();
             LOGGER.trace("Enforcing read limit of {} latest items.", limit);
             loans = loans.limit(limit);
         }
-        return loans.map(LoanDescriptor::new)
-            .collect(Collectors.toList());
+        return loans.map(LoanDescriptor::new);
     }
 
     @Override
@@ -91,8 +88,4 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
         }
     }
 
-    @Override
-    protected Logger getLogger() {
-        return LOGGER;
-    }
 }

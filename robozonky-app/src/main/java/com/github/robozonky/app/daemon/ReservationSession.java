@@ -22,6 +22,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationAccep
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckStarted;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Reservation;
@@ -48,13 +49,14 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
     public static Stream<Reservation> process(final PowerTenant tenant, final Stream<ReservationDescriptor> loans,
             final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
-        final PortfolioOverview portfolioOverview = tenant.getPortfolio()
-            .getOverview();
-        s.tenant.fire(reservationCheckStarted(portfolioOverview));
-        if (!s.getAvailable()
-            .isEmpty()) {
-            s.process(strategy);
+        final Collection<ReservationDescriptor> c = s.getAvailable();
+        if (c.isEmpty()) {
+            s.logger.debug("Skipping reservations as none are available.");
+            return Stream.empty();
         }
+        s.tenant.fire(reservationCheckStarted(tenant.getPortfolio()
+            .getOverview()));
+        s.process(strategy);
         // make sure we get fresh portfolio reference here
         s.tenant.fire(reservationCheckCompleted(tenant.getPortfolio()
             .getOverview()));

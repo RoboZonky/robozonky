@@ -43,6 +43,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
             final ToLongFunction<S> idSupplier, final String stateId, final Logger logger) {
         this.tenant = tenant;
         this.stillAvailable = originallyAvailable.collect(Collectors.toList());
+        logger.debug("Found {} items to process.", stillAvailable.size());
         this.discarded = new SessionState<>(tenant, stillAvailable, idSupplier, stateId);
         this.logger = logger;
     }
