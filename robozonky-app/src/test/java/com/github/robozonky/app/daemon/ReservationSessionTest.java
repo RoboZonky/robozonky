@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +57,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
-        final Collection<Reservation> i = ReservationSession.process(auth, Collections.emptyList(), null);
+        final Stream<Reservation> i = ReservationSession.process(auth, Stream.empty(), null);
         assertThat(i).isEmpty();
     }
 
@@ -84,7 +84,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);
+        final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(4);
         verify(z).accept(eq(p));
@@ -116,7 +116,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);
+        final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(4);
         verify(z, never()).accept(eq(p));
@@ -151,7 +151,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
             .accept(any());
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
-        final Collection<Reservation> i = ReservationSession.process(auth, Collections.singleton(pd), s);
+        final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).isEmpty();
         assertThat(getEventsRequested()).hasSize(3);
         verify(z).accept(eq(p));

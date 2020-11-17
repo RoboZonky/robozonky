@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.ToLongFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
@@ -36,11 +39,11 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
     private final SessionState<S> discarded;
     private final Collection<S> stillAvailable;
 
-    protected AbstractSession(final Collection<S> originallyAvailable, final PowerTenant tenant,
-            final SessionState<S> state, final Logger logger) {
+    protected AbstractSession(final Stream<S> originallyAvailable, final PowerTenant tenant,
+            final ToLongFunction<S> idSupplier, final String stateId, final Logger logger) {
         this.tenant = tenant;
-        this.discarded = state;
-        this.stillAvailable = new ArrayList<>(originallyAvailable);
+        this.stillAvailable = originallyAvailable.collect(Collectors.toList());
+        this.discarded = new SessionState<>(tenant, stillAvailable, idSupplier, stateId);
         this.logger = logger;
     }
 
@@ -79,7 +82,7 @@ abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descrip
      * 
      * @return Investments made so far during this session. Unmodifiable.
      */
-    List<X> getResult() {
-        return Collections.unmodifiableList(result);
+    Stream<X> getResult() {
+        return result.stream();
     }
 }

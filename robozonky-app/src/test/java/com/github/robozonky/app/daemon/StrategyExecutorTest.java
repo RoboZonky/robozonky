@@ -25,7 +25,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -314,7 +313,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         final StrategyExecutor<LoanDescriptor, InvestmentStrategy, Loan> exec = new StrategyExecutor<>(tenant, d);
-        final Collection<Loan> result = exec.get();
+        final Stream<Loan> result = exec.get();
         verify(z, never()).invest(any(), anyInt()); // dry run
         assertThat(result)
             .extracting(Loan::getId)

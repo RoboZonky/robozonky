@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
@@ -51,7 +51,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     void empty() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
-        final Collection<Participation> i = PurchasingSession.purchase(auth, Collections.emptyList(), null);
+        final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.empty(), null);
         assertThat(i).isEmpty();
     }
 
@@ -81,7 +81,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Collection<Participation> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
+        final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
         assertThat(getEventsRequested()).hasSize(4);
         verify(z).purchase(eq(p));
@@ -121,7 +121,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.purchase(any())).thenReturn(PurchaseResult.failure(thrown));
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        final Collection<Participation> i = PurchasingSession.purchase(auth, Collections.singleton(pd), s);
+        final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.of(pd), s);
         assertThat(i).isEmpty();
         assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(Money.from(199));
     }
@@ -156,7 +156,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(z.purchase(any())).thenReturn(PurchaseResult.failure(thrown));
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        assertThatThrownBy(() -> PurchasingSession.purchase(auth, Collections.singleton(pd), s))
+        assertThatThrownBy(() -> PurchasingSession.purchase(auth, Stream.of(pd), s))
             .isInstanceOf(IllegalStateException.class);
     }
 

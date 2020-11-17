@@ -24,8 +24,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -48,14 +47,13 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     private final Investor investor;
 
-    InvestingSession(final Collection<LoanDescriptor> marketplace, final PowerTenant tenant) {
-        super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item()
-            .getId(), "discardedLoans"),
-                Audit.investing());
+    InvestingSession(final Stream<LoanDescriptor> marketplace, final PowerTenant tenant) {
+        super(marketplace, tenant, d -> d.item()
+            .getId(), "discardedLoans", Audit.investing());
         this.investor = Investor.build(tenant);
     }
 
-    public static Collection<Loan> invest(final PowerTenant tenant, final Collection<LoanDescriptor> loans,
+    public static Stream<Loan> invest(final PowerTenant tenant, final Stream<LoanDescriptor> loans,
             final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio()
@@ -65,11 +63,10 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             .isEmpty()) {
             s.invest(strategy);
         }
-        final Collection<Loan> result = s.getResult();
         // make sure we get fresh portfolio reference here
         s.tenant.fire(executionCompletedLazy(() -> executionCompleted(tenant.getPortfolio()
             .getOverview())));
-        return Collections.unmodifiableCollection(result);
+        return s.getResult();
     }
 
     private void invest(final InvestmentStrategy strategy) {

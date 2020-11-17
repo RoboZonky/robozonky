@@ -22,8 +22,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationAccep
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckStarted;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -41,14 +40,12 @@ import com.github.robozonky.app.tenant.PowerTenant;
  */
 final class ReservationSession extends AbstractSession<RecommendedReservation, ReservationDescriptor, Reservation> {
 
-    ReservationSession(final Collection<ReservationDescriptor> marketplace, final PowerTenant tenant) {
-        super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item()
-            .getId(), "seenReservations"),
-                Audit.reservations());
+    ReservationSession(final Stream<ReservationDescriptor> marketplace, final PowerTenant tenant) {
+        super(marketplace, tenant, d -> d.item()
+            .getId(), "seenReservations", Audit.reservations());
     }
 
-    public static Collection<Reservation> process(final PowerTenant tenant,
-            final Collection<ReservationDescriptor> loans,
+    public static Stream<Reservation> process(final PowerTenant tenant, final Stream<ReservationDescriptor> loans,
             final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
         final PortfolioOverview portfolioOverview = tenant.getPortfolio()
@@ -61,7 +58,7 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
         // make sure we get fresh portfolio reference here
         s.tenant.fire(reservationCheckCompleted(tenant.getPortfolio()
             .getOverview()));
-        return Collections.unmodifiableCollection(s.result);
+        return s.getResult();
     }
 
     private void process(final ReservationStrategy strategy) {
