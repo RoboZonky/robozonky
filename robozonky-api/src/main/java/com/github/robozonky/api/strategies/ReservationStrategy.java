@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -42,6 +41,6 @@ public interface ReservationStrategy {
      * @return Acceptable reservations, in the order of their decreasing priority, mapped to the recommended investment
      *         amounts.
      */
-    Stream<RecommendedReservation> recommend(Collection<ReservationDescriptor> available, PortfolioOverview portfolio,
+    Stream<RecommendedReservation> recommend(Stream<ReservationDescriptor> available, PortfolioOverview portfolio,
             SessionInfo sessionInfo);
 }

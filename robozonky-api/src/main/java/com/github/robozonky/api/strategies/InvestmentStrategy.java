@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -38,6 +37,6 @@ public interface InvestmentStrategy {
      * @return Acceptable loans, in the order of their decreasing priority, mapped to the recommended investment
      *         amounts.
      */
-    Stream<RecommendedLoan> recommend(Collection<LoanDescriptor> available, PortfolioOverview portfolio,
+    Stream<RecommendedLoan> recommend(Stream<LoanDescriptor> available, PortfolioOverview portfolio,
             SessionInfo sessionInfo);
 }

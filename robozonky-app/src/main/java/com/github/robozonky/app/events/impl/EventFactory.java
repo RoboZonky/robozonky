@@ -18,7 +18,6 @@ package com.github.robozonky.app.events.impl;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.Money;
@@ -61,7 +60,6 @@ import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.RecommendedInvestment;
@@ -81,9 +79,8 @@ public final class EventFactory {
         // no instances
     }
 
-    public static ExecutionCompletedEvent executionCompleted(final Collection<Loan> investments,
-            final PortfolioOverview portfolioOverview) {
-        return new ExecutionCompletedEventImpl(investments, portfolioOverview);
+    public static ExecutionCompletedEvent executionCompleted(final PortfolioOverview portfolioOverview) {
+        return new ExecutionCompletedEventImpl(portfolioOverview);
     }
 
     public static ExecutionStartedEvent executionStarted(final PortfolioOverview portfolioOverview) {
@@ -96,8 +93,7 @@ public final class EventFactory {
     }
 
     public static InvestmentPurchasedEvent investmentPurchased(final Participation participation, final Loan loan,
-            final Money purchasedAmount,
-            final PortfolioOverview portfolioOverview) {
+            final Money purchasedAmount, final PortfolioOverview portfolioOverview) {
         return new InvestmentPurchasedEventImpl(participation, loan, purchasedAmount, portfolioOverview);
     }
 
@@ -147,9 +143,8 @@ public final class EventFactory {
         return new PurchaseRecommendedEventImpl(recommendation);
     }
 
-    public static PurchasingCompletedEvent purchasingCompleted(final Collection<Participation> investment,
-            final PortfolioOverview portfolio) {
-        return new PurchasingCompletedEventImpl(investment, portfolio);
+    public static PurchasingCompletedEvent purchasingCompleted(final PortfolioOverview portfolio) {
+        return new PurchasingCompletedEventImpl(portfolio);
     }
 
     public static PurchasingStartedEvent purchasingStarted(final PortfolioOverview portfolio) {
@@ -205,9 +200,8 @@ public final class EventFactory {
         return new SaleRecommendedEventImpl(recommendation);
     }
 
-    public static SellingCompletedEvent sellingCompleted(final Collection<Investment> investments,
-            final PortfolioOverview portfolio) {
-        return new SellingCompletedEventImpl(investments, portfolio);
+    public static SellingCompletedEvent sellingCompleted(final PortfolioOverview portfolio) {
+        return new SellingCompletedEventImpl(portfolio);
     }
 
     public static SellingStartedEvent sellingStarted(final PortfolioOverview portfolio) {
@@ -218,9 +212,8 @@ public final class EventFactory {
         return new ReservationCheckStartedEventImpl(portfolioOverview);
     }
 
-    public static ReservationCheckCompletedEvent reservationCheckCompleted(final Collection<Reservation> investments,
-            final PortfolioOverview portfolioOverview) {
-        return new ReservationCheckCompletedEventImpl(investments, portfolioOverview);
+    public static ReservationCheckCompletedEvent reservationCheckCompleted(final PortfolioOverview portfolioOverview) {
+        return new ReservationCheckCompletedEventImpl(portfolioOverview);
     }
 
     public static ReservationAcceptationRecommendedEvent reservationAcceptationRecommended(

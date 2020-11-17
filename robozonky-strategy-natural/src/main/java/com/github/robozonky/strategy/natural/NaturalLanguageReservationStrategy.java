@@ -18,7 +18,6 @@ package com.github.robozonky.strategy.natural;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
@@ -44,13 +43,13 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
     }
 
     @Override
-    public Stream<RecommendedReservation> recommend(final Collection<ReservationDescriptor> available,
+    public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
             final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
         }
         var preferences = Preferences.get(strategy, portfolio);
-        var withoutUndesirable = available.parallelStream()
+        var withoutUndesirable = available.parallel()
             .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
             .filter(d -> { // skip loans in ratings which are not required by the strategy
                 boolean isAcceptable = preferences.getDesirableRatings()

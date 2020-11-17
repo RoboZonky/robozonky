@@ -20,9 +20,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +39,12 @@ import com.github.robozonky.internal.test.DateUtil;
  */
 abstract class AbstractMarketplaceAccessor<T> {
 
+    private final Logger logger;
     private final AtomicReference<Instant> lastFullMarketplaceCheckReference = new AtomicReference<>(Instant.EPOCH);
+
+    protected AbstractMarketplaceAccessor(Logger logger) {
+        this.logger = logger;
+    }
 
     protected OptionalInt sanitizeMaximumItemCount(int max) {
         return max >= 0 ? OptionalInt.of(max) : OptionalInt.empty();
@@ -52,14 +57,14 @@ abstract class AbstractMarketplaceAccessor<T> {
             .isBefore(now)) {
             Instant newTimestamp = now.truncatedTo(ChronoUnit.SECONDS); // Go a couple millis back.
             lastFullMarketplaceCheckReference.set(newTimestamp);
-            getLogger().debug("Running full marketplace check with timestamp of {}, previous was {}.", newTimestamp,
+            logger.debug("Running full marketplace check with timestamp of {}, previous was {}.", newTimestamp,
                     lastFullMarketplaceCheck);
             return getBaseFilter();
         } else {
             var filter = getBaseFilter()
                 .greaterThanOrEquals("datePublished",
                         OffsetDateTime.ofInstant(lastFullMarketplaceCheck, Defaults.ZONKYCZ_ZONE_ID));
-            getLogger().debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
+            logger.debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
             return filter;
         }
     }
@@ -70,10 +75,8 @@ abstract class AbstractMarketplaceAccessor<T> {
 
     public abstract Duration getForcedMarketplaceCheckInterval();
 
-    public abstract Collection<T> getMarketplace();
+    public abstract Stream<T> getMarketplace();
 
     public abstract boolean hasUpdates();
-
-    protected abstract Logger getLogger();
 
 }

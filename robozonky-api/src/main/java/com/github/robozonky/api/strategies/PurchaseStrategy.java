@@ -16,7 +16,6 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.SessionInfo;
@@ -38,6 +37,6 @@ public interface PurchaseStrategy {
      * @return Acceptable participations, in the order of their decreasing priority, mapped to the recommended
      *         purchase value.
      */
-    Stream<RecommendedParticipation> recommend(Collection<ParticipationDescriptor> available,
+    Stream<RecommendedParticipation> recommend(Stream<ParticipationDescriptor> available,
             PortfolioOverview portfolio, SessionInfo sessionInfo);
 }

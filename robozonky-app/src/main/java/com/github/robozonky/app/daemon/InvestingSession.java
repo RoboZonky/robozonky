@@ -25,7 +25,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLa
 import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -48,28 +48,27 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     private final Investor investor;
 
-    InvestingSession(final Collection<LoanDescriptor> marketplace, final PowerTenant tenant) {
-        super(marketplace, tenant, new SessionState<>(tenant, marketplace, d -> d.item()
-            .getId(), "discardedLoans"),
-                Audit.investing());
+    InvestingSession(final Stream<LoanDescriptor> marketplace, final PowerTenant tenant) {
+        super(marketplace, tenant, d -> d.item()
+            .getId(), "discardedLoans", Audit.investing());
         this.investor = Investor.build(tenant);
     }
 
-    public static Collection<Loan> invest(final PowerTenant tenant, final Collection<LoanDescriptor> loans,
+    public static Stream<Loan> invest(final PowerTenant tenant, final Stream<LoanDescriptor> loans,
             final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, tenant);
-        final PortfolioOverview portfolioOverview = tenant.getPortfolio()
-            .getOverview();
-        s.tenant.fire(executionStartedLazy(() -> executionStarted(portfolioOverview)));
-        if (!s.getAvailable()
-            .isEmpty()) {
-            s.invest(strategy);
+        final Collection<LoanDescriptor> c = s.getAvailable();
+        if (c.isEmpty()) {
+            s.logger.debug("Skipping investing as no loans are available.");
+            return Stream.empty();
         }
-        final Collection<Loan> result = s.getResult();
-        // make sure we get fresh portfolio reference here
-        s.tenant.fire(executionCompletedLazy(() -> executionCompleted(result, tenant.getPortfolio()
+        s.tenant.fire(executionStartedLazy(() -> executionStarted(tenant.getPortfolio()
             .getOverview())));
-        return Collections.unmodifiableCollection(result);
+        s.invest(strategy);
+        // make sure we get fresh portfolio reference here
+        s.tenant.fire(executionCompletedLazy(() -> executionCompleted(tenant.getPortfolio()
+            .getOverview())));
+        return s.getResult();
     }
 
     private void invest(final InvestmentStrategy strategy) {
@@ -79,7 +78,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         do {
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
-            invested = strategy.recommend(getAvailable(), portfolioOverview, tenant.getSessionInfo())
+            invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
                 .peek(r -> tenant.fire(loanRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted

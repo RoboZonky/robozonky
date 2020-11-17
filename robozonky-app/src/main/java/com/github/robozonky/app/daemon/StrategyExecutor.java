@@ -17,10 +17,9 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +33,7 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.test.DateUtil;
 
-class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
+class StrategyExecutor<T, S, R> implements Supplier<Stream<R>> {
 
     private final Logger logger;
     private final PowerTenant tenant;
@@ -90,18 +89,12 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
             .isBefore(DateUtil.now());
     }
 
-    private Collection<R> invest(final S strategy) {
+    private Stream<R> invest(final S strategy) {
         if (skipStrategyEvaluation(marketplaceAccessor)) {
-            return Collections.emptyList();
+            return Stream.empty();
         }
         var marketplaceCheckTimestamp = DateUtil.now();
         var marketplace = marketplaceAccessor.getMarketplace();
-        if (marketplace.isEmpty()) {
-            lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
-            logger.debug("Marketplace is empty.");
-            return Collections.emptyList();
-        }
-        logger.trace("Processing {} items from the marketplace.", marketplace.size());
         var result = operationDescriptor.getOperation()
             .apply(tenant, marketplace, strategy);
         lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
@@ -110,22 +103,22 @@ class StrategyExecutor<T, S, R> implements Supplier<Collection<R>> {
     }
 
     @Override
-    public Collection<R> get() {
+    public Stream<R> get() {
         if (!operationDescriptor.isEnabled(tenant)) {
             logger.debug("Access to marketplace disabled by Zonky.");
-            return Collections.emptyList();
+            return Stream.empty();
         }
         final Money currentBalance = tenant.getKnownBalanceUpperBound();
         final Money minimum = operationDescriptor.getMinimumBalance(tenant);
         if (currentBalance.compareTo(minimum) < 0) {
             logger.debug("Asleep due to balance estimated below minimum. ({} < {})", currentBalance, minimum);
-            return Collections.emptyList();
+            return Stream.empty();
         }
         return operationDescriptor.getStrategy(tenant)
             .map(this::invest)
             .orElseGet(() -> {
                 logger.debug("Asleep as there is no strategy.");
-                return Collections.emptyList();
+                return Stream.empty();
             });
     }
 }

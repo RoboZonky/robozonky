@@ -18,7 +18,6 @@ package com.github.robozonky.app.daemon;
 
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -90,16 +89,12 @@ final class Selling implements TenantPayload {
         final PortfolioOverview overview = tenant.getPortfolio()
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
-        var recommended = strategy.recommend(eligible, overview, tenant.getSessionInfo())
+        var recommended = strategy.recommend(eligible.stream(), overview, tenant.getSessionInfo())
             .peek(r -> tenant.fire(EventFactory.saleRecommended(r)));
-        var throttled = new SellingThrottle().apply(recommended, overview);
-        final Collection<Investment> investmentsSold = throttled
-            .map(r -> processSale(tenant, r, sold))
-            .flatMap(Optional::stream)
-            .collect(Collectors.toSet());
-        tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(investmentsSold,
-                tenant.getPortfolio()
-                    .getOverview())));
+        new SellingThrottle().apply(recommended, overview)
+            .forEach(r -> processSale(tenant, r, sold));
+        tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(tenant.getPortfolio()
+            .getOverview())));
     }
 
     @Override

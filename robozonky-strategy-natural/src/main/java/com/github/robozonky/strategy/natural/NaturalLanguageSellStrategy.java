@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -55,20 +54,20 @@ class NaturalLanguageSellStrategy implements SellStrategy {
             .signum() == 0;
     }
 
-    private Stream<InvestmentDescriptor> getFreeAndOutsideStrategy(final Collection<InvestmentDescriptor> available,
+    private Stream<InvestmentDescriptor> getFreeAndOutsideStrategy(final Stream<InvestmentDescriptor> available,
             final PortfolioOverview portfolio) {
-        return strategy.getMatchingPrimaryMarketplaceFilters(available.stream(), portfolio)
+        return strategy.getMatchingPrimaryMarketplaceFilters(available, portfolio)
             .filter(NaturalLanguageSellStrategy::isFree);
     }
 
     @Override
-    public Stream<RecommendedInvestment> recommend(final Collection<InvestmentDescriptor> available,
+    public Stream<RecommendedInvestment> recommend(final Stream<InvestmentDescriptor> available,
             final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         return strategy.getSellingMode()
             .map(mode -> {
                 switch (mode) {
                     case SELL_FILTERS:
-                        return strategy.getMatchingSellFilters(available.stream(), portfolio);
+                        return strategy.getMatchingSellFilters(available, portfolio);
                     case FREE_AND_OUTSIDE_STRATEGY:
                         return getFreeAndOutsideStrategy(available, portfolio);
                     case FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY:

@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -101,8 +100,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @SuppressWarnings("unchecked")
     @Test
     void callsListeners() {
-        final ExecutionCompletedEvent s = EventFactory.executionCompleted(Collections.emptyList(),
-                mockPortfolioOverview());
+        final ExecutionCompletedEvent s = EventFactory.executionCompleted(mockPortfolioOverview());
         final SessionEvents events = Events.forSession(tenant);
         final EventFiringListener e = mock(EventFiringListener.class);
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
@@ -119,8 +117,7 @@ class SessionEventsTest extends AbstractEventLeveragingTest {
     @SuppressWarnings("unchecked")
     @Test
     void callsListenersOnError() {
-        final ExecutionCompletedEvent s = EventFactory.executionCompleted(Collections.emptyList(),
-                mockPortfolioOverview());
+        final ExecutionCompletedEvent s = EventFactory.executionCompleted(mockPortfolioOverview());
         final SessionEvents events = Events.forSession(tenant);
         final EventListener<ExecutionCompletedEvent> l = mock(EventListener.class);
         doThrow(IllegalStateException.class).when(l)

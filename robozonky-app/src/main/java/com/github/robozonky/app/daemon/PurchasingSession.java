@@ -25,7 +25,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarte
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Participation;
@@ -45,28 +45,25 @@ import com.github.robozonky.internal.remote.PurchaseResult;
 final class PurchasingSession extends
         AbstractSession<RecommendedParticipation, ParticipationDescriptor, Participation> {
 
-    PurchasingSession(final Collection<ParticipationDescriptor> marketplace, final PowerTenant tenant) {
-        super(marketplace, tenant,
-                new SessionState<>(tenant, marketplace, d -> d.item()
-                    .getId(), "discardedParticipations"),
-                Audit.purchasing());
+    PurchasingSession(final Stream<ParticipationDescriptor> marketplace, final PowerTenant tenant) {
+        super(marketplace, tenant, d -> d.item()
+            .getId(), "discardedParticipations", Audit.purchasing());
     }
 
-    public static Collection<Participation> purchase(final PowerTenant auth,
-            final Collection<ParticipationDescriptor> items,
+    public static Stream<Participation> purchase(final PowerTenant auth, final Stream<ParticipationDescriptor> items,
             final PurchaseStrategy strategy) {
         final PurchasingSession s = new PurchasingSession(items, auth);
         final Collection<ParticipationDescriptor> c = s.getAvailable();
         if (c.isEmpty()) {
-            return Collections.emptyList();
+            s.logger.debug("Skipping purchasing as no participations are available.");
+            return Stream.empty();
         }
         s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(auth.getPortfolio()
             .getOverview())));
         s.purchase(strategy);
-        final Collection<Participation> result = s.getResult();
-        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(result, auth.getPortfolio()
+        s.tenant.fire(purchasingCompletedLazy(() -> purchasingCompleted(auth.getPortfolio()
             .getOverview())));
-        return Collections.unmodifiableCollection(result);
+        return s.getResult();
     }
 
     private void purchase(final PurchaseStrategy strategy) {
@@ -74,7 +71,7 @@ final class PurchasingSession extends
         do {
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
-            invested = strategy.recommend(getAvailable(), portfolioOverview, tenant.getSessionInfo())
+            invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
                 .peek(r -> tenant.fire(purchaseRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted

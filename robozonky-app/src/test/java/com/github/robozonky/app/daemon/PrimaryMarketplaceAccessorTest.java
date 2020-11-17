@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -63,9 +62,9 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
         final Tenant tenant = mockTenant(zonky);
         final AbstractMarketplaceAccessor<LoanDescriptor> d = new PrimaryMarketplaceAccessor(tenant,
                 UnaryOperator.identity());
-        final Collection<LoanDescriptor> ld = d.getMarketplace();
+        final Stream<LoanDescriptor> ld = d.getMarketplace();
         assertThat(ld).hasSize(1)
-            .element(0)
+            .first()
             .extracting(LoanDescriptor::item)
             .isSameAs(normal);
     }
