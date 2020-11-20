@@ -37,12 +37,6 @@ DEPENDENCIES=$($JDEPS_CMD)
 echo "jdeps returned:"
 echo "$DEPENDENCIES"
 
-# Remove some JDK modules we think we won't need, even though some of the 3rd party deps actually ask for them.
-DEPENDENCIES=$(echo $DEPENDENCIES | sed s/"java.scripting,"//)
-DEPENDENCIES=$(echo $DEPENDENCIES | sed s/"java.sql,"//)
-echo "reduced dependencies:"
-echo "$DEPENDENCIES"
-
 # Call JLink with these dependencies; add locales and crypto, also JMX and JFR on top, as those are runtime monitoring dependencies.
 # We could use --bind-services instead, but that makes the runtime huge and includes stuff like javac etc.
 JLINK_CMD="$JAVA_HOME/bin/jlink --compress=2 --no-header-files --no-man-pages
