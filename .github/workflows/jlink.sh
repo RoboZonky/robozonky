@@ -1,5 +1,21 @@
 #!/bin/sh
 
+#
+# Copyright 2020 The RoboZonky Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 if [ $# -ne 2 ]; then
     echo "Expecting two arguments, the JAR and the target directory."
     exit 1
@@ -19,6 +35,12 @@ echo "Calling jdeps like so: "
 echo "  $JDEPS_CMD"
 DEPENDENCIES=$($JDEPS_CMD)
 echo "jdeps returned:"
+echo "$DEPENDENCIES"
+
+# Remove some JDK modules we think we won't need, even though some of the 3rd party deps actually ask for them.
+DEPENDENCIES=$(echo $DEPENDENCIES | sed s/"java.scripting,"//)
+DEPENDENCIES=$(echo $DEPENDENCIES | sed s/"java.sql,"//)
+echo "reduced dependencies:"
 echo "$DEPENDENCIES"
 
 # Call JLink with these dependencies; add locales and crypto, also JMX and JFR on top, as those are runtime monitoring dependencies.
