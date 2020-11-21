@@ -18,7 +18,6 @@ package com.github.robozonky.app.daemon;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +41,7 @@ class SessionStateTest extends AbstractZonkyLeveragingTest {
 
     @BeforeEach
     void newState() {
-        state = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN), Loan::getId, INITIAL_ID);
+        state = new SessionState<>(TENANT, Loan::getId, INITIAL_ID);
         state.put(INITIAL_LOAN);
     }
 
@@ -59,8 +58,7 @@ class SessionStateTest extends AbstractZonkyLeveragingTest {
         @Test
         @DisplayName("does not interfere with original.")
         void createDifferentAndMakeSureIsEmpty() {
-            final SessionState<Loan> another = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN),
-                    Loan::getId, INITIAL_ID.substring(1));
+            final SessionState<Loan> another = new SessionState<>(TENANT, Loan::getId, INITIAL_ID.substring(1));
             assertThat(another.contains(INITIAL_LOAN)).isFalse();
         }
     }
@@ -72,21 +70,9 @@ class SessionStateTest extends AbstractZonkyLeveragingTest {
         @Test
         @DisplayName("reads what original stored.")
         void createSameAndMakeSureHasSame() {
-            final SessionState<Loan> another = new SessionState<>(TENANT, Collections.singleton(INITIAL_LOAN),
-                    Loan::getId, INITIAL_ID);
+            final SessionState<Loan> another = new SessionState<>(TENANT, Loan::getId, INITIAL_ID);
             assertThat(another.contains(INITIAL_LOAN)).isTrue();
         }
     }
 
-    @Nested
-    @DisplayName("clean new instance with same key")
-    class WhenNoneRetainedTest {
-
-        @Test
-        @DisplayName("does not contain what was stored before.")
-        void createSameAndMakeSureIsEmpty() {
-            final SessionState<Loan> another = new SessionState<>(TENANT, Loan::getId, INITIAL_ID);
-            assertThat(another.contains(INITIAL_LOAN)).isFalse();
-        }
-    }
 }

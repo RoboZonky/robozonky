@@ -109,27 +109,4 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
     }
 
-    @Test
-    void skipsInvestmentsProperly() { // simulate skipping investments by introducing one of them twice
-        final Zonky z = harmlessZonky();
-        final Reservation simple = new MockReservationBuilder()
-            .set(ReservationImpl::setMyReservation, mockMyReservation())
-            .build();
-        final Reservation simple2 = new MockReservationBuilder()
-            .set(ReservationImpl::setMyReservation, mockMyReservation())
-            .build();
-        final Loan fresh1 = MockLoanBuilder.fresh();
-        final Loan fresh2 = MockLoanBuilder.fresh();
-        when(z.getLoan(eq(simple.getId()))).thenReturn(fresh1);
-        when(z.getLoan(eq(simple2.getId()))).thenReturn(fresh2);
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(SOME_PREFERENCE));
-        when(z.getPendingReservations()).thenReturn(Stream.of(simple, simple, simple2));
-        final Tenant t = mockTenant(z, false);
-        when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
-        final TenantPayload p = new ReservationsProcessing();
-        p.accept(t);
-        verify(z, times(1)).accept(eq(simple));
-        verify(z, times(1)).accept(eq(simple2));
-        assertThat(getEventsRequested()).hasSize(4);
-    }
 }

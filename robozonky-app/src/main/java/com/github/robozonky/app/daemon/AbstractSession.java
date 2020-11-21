@@ -18,9 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Logger;
@@ -28,27 +26,22 @@ import org.apache.logging.log4j.Logger;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
-import com.github.robozonky.internal.util.functional.Memoizer;
 
 abstract class AbstractSession<T extends Recommended<S, X>, S extends Descriptor<X>, X> {
 
     protected final PowerTenant tenant;
     protected final Logger logger;
     protected final List<X> result = new ArrayList<>(0);
-    private final Supplier<List<S>> stillAvailable;
-    private final Supplier<SessionState<S>> discarded;
+    private final Stream<S> stillAvailable;
+    private final SessionState<S> discarded;
 
     protected AbstractSession(final Stream<S> originallyAvailable, final PowerTenant tenant,
             final ToLongFunction<S> idSupplier, final String stateId, final Logger logger) {
         this.tenant = tenant;
         this.logger = logger;
         // These are only instantiated on-demand, so that the stream is only collected when absolutely necessary.
-        this.stillAvailable = Memoizer.memoize(() -> {
-            var available = originallyAvailable.collect(Collectors.toList());
-            logger.debug("Found {} items to process.", available.size());
-            return available;
-        });
-        this.discarded = Memoizer.memoize(() -> new SessionState<>(tenant, stillAvailable.get(), idSupplier, stateId));
+        this.stillAvailable = originallyAvailable;
+        this.discarded = new SessionState<>(tenant, idSupplier, stateId);
     }
 
     /**
@@ -58,16 +51,13 @@ abstract class AbstractSession<T extends Recommended<S, X>, S extends Descriptor
      * @return Items in the marketplace in which the user could still potentially invest.
      */
     Stream<S> getAvailable() {
-        var actuallyStillAvailable = stillAvailable.get();
-        var actuallyDiscarded = discarded.get();
-        return actuallyStillAvailable.stream()
-            .filter(s -> !actuallyDiscarded.contains(s));
+        return stillAvailable
+            .filter(s -> !discarded.contains(s));
     }
 
     protected void discard(final S item) {
         logger.debug("Will not show {} again.", item);
-        discarded.get()
-            .put(item);
+        discarded.put(item);
     }
 
     protected boolean isBalanceAcceptable(final T item) {
