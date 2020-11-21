@@ -19,7 +19,6 @@ package com.github.robozonky.api.strategies;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.util.functional.Memoizer;
@@ -51,11 +50,6 @@ public final class InvestmentDescriptor implements Descriptor<Investment> {
     @Override
     public Loan related() {
         return related.get();
-    }
-
-    private Money getRemainingPrincipal() {
-        return investment.getPrincipal()
-            .getUnpaid();
     }
 
     @Override

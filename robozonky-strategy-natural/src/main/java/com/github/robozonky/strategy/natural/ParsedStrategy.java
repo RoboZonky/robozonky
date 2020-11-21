@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -147,15 +146,6 @@ class ParsedStrategy {
 
     public Money getMaximumPurchaseSize(final Rating rating) {
         return getPurchaseSize(rating).getMaximumInvestment();
-    }
-
-    private <T> Stream<T> getApplicable(final Stream<Wrapper<T>> wrappers, final String type) {
-        var loanFilters = filters.getPrimaryMarketplaceFilters();
-        var investmentFilters = filters.getSellFilters();
-        return wrappers
-            .filter(w -> !matchesFilter(w, loanFilters, type + " #{} skipped due to primary marketplace filter {}."))
-            .filter(w -> !matchesFilter(w, investmentFilters, type + " #{} skipped due to sell filter {}."))
-            .map(Wrapper::getOriginal);
     }
 
     private <T> boolean isApplicable(final Wrapper<T> wrapper, final String type) {

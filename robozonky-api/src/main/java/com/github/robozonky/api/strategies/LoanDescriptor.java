@@ -18,17 +18,12 @@ package com.github.robozonky.api.strategies;
 
 import java.util.Objects;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.github.robozonky.api.remote.entities.Loan;
 
 /**
  * Carries metadata regarding a {@link Loan}.
  */
 public final class LoanDescriptor implements Descriptor<Loan> {
-
-    private static final Logger LOGGER = LogManager.getLogger(LoanDescriptor.class);
 
     private final Loan loan;
 
