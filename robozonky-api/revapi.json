@@ -99,6 +99,26 @@
         "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
         "new": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(===java.util.stream.Stream<com.github.robozonky.api.strategies.InvestmentDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
         "justification": "Strategies now receive stream instead of a collection."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.LoanRecommendedEvent",
+        "justification": "Recommendation events were removed without replacement."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.PurchaseRecommendedEvent",
+        "justification": "Recommendation events were removed without replacement."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent",
+        "justification": "Recommendation events were removed without replacement."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.notifications.SaleRecommendedEvent",
+        "justification": "Recommendation events were removed without replacement."
       }
     ]
   }

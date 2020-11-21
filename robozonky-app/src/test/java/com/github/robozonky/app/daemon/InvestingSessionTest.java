@@ -36,7 +36,6 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -85,15 +84,13 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         // check that one investment was made
         assertThat(i).hasSize(1);
         final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(4);
+        assertThat(newEvents).hasSize(3);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0))
                 .isInstanceOf(ExecutionStartedEvent.class);
             softly.assertThat(newEvents.get(1))
-                .isInstanceOf(LoanRecommendedEvent.class);
-            softly.assertThat(newEvents.get(2))
                 .isInstanceOf(InvestmentMadeEvent.class);
-            softly.assertThat(newEvents.get(3))
+            softly.assertThat(newEvents.get(2))
                 .isInstanceOf(ExecutionCompletedEvent.class);
         });
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));

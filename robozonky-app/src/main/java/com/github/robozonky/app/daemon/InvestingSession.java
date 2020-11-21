@@ -22,7 +22,6 @@ import static com.github.robozonky.app.events.impl.EventFactory.executionStarted
 import static com.github.robozonky.app.events.impl.EventFactory.executionStartedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -79,7 +78,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
             invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
-                .peek(r -> tenant.fire(loanRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);

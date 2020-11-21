@@ -16,7 +16,6 @@
 
 package com.github.robozonky.app.daemon;
 
-import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptationRecommended;
 import static com.github.robozonky.app.events.impl.EventFactory.reservationAccepted;
 import static com.github.robozonky.app.events.impl.EventFactory.reservationAcceptedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
@@ -69,7 +68,6 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
             invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
-                .peek(r -> tenant.fire(reservationAcceptationRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);

@@ -18,7 +18,6 @@ package com.github.robozonky.app.daemon;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
@@ -72,7 +71,6 @@ final class PurchasingSession extends
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
             invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
-                .peek(r -> tenant.fire(purchaseRecommended(r)))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);

@@ -81,7 +81,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
         verify(z).purchase(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();

@@ -33,7 +33,6 @@ import org.mockito.verification.VerificationMode;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -130,13 +129,11 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Selling s = new Selling();
         s.accept(tenant);
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(3);
+        assertThat(e).hasSize(2);
         assertSoftly(softly -> {
             softly.assertThat(e.get(0))
                 .isInstanceOf(SellingStartedEvent.class);
             softly.assertThat(e.get(1))
-                .isInstanceOf(SaleRecommendedEvent.class);
-            softly.assertThat(e.get(2))
                 .isInstanceOf(SellingCompletedEvent.class);
         });
         verify(zonky, times(1)).sell(argThat(inv -> i.getLoan()
@@ -159,15 +156,13 @@ class SellingTest extends AbstractZonkyLeveragingTest {
         final Selling s = new Selling();
         s.accept(tenant);
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(4);
+        assertThat(e).hasSize(3);
         assertSoftly(softly -> {
             softly.assertThat(e.get(0))
                 .isInstanceOf(SellingStartedEvent.class);
             softly.assertThat(e.get(1))
-                .isInstanceOf(SaleRecommendedEvent.class);
-            softly.assertThat(e.get(2))
                 .isInstanceOf(SaleOfferedEvent.class);
-            softly.assertThat(e.get(3))
+            softly.assertThat(e.get(2))
                 .isInstanceOf(SellingCompletedEvent.class);
         });
         final VerificationMode m = isDryRun ? never() : times(1);

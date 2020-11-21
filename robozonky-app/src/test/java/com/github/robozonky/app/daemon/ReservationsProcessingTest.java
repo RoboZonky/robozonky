@@ -112,7 +112,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         final TenantPayload p = new ReservationsProcessing();
         p.accept(t);
         verify(z).accept(eq(simple));
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
     }
 
     @Test
@@ -136,6 +136,6 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         p.accept(t);
         verify(z, times(1)).accept(eq(simple));
         verify(z, times(1)).accept(eq(simple2));
-        assertThat(getEventsRequested()).hasSize(6);
+        assertThat(getEventsRequested()).hasSize(4);
     }
 }

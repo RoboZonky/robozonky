@@ -84,7 +84,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();
@@ -115,7 +115,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
         verify(z, never()).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         Rating rating = l.getRating();
@@ -149,7 +149,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).isEmpty();
-        assertThat(getEventsRequested()).hasSize(3);
+        assertThat(getEventsRequested()).hasSize(2);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();

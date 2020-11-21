@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -158,14 +157,12 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(exec.get()).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(4);
+        assertThat(e).hasSize(3);
         assertSoftly(softly -> {
             softly.assertThat(e)
                 .first()
                 .isInstanceOf(PurchasingStartedEvent.class);
             softly.assertThat(e.get(1))
-                .isInstanceOf(PurchaseRecommendedEvent.class);
-            softly.assertThat(e.get(2))
                 .isInstanceOf(InvestmentPurchasedEvent.class);
             softly.assertThat(e)
                 .last()
