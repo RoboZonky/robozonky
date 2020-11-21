@@ -364,7 +364,7 @@
       },
       {
         "code": "java.class.removed",
-        "old": "interface com.github.robozonky.api.strategies.ExtendedPortfolioOverview (archive = MavenArchive[gav=com.github.robozonky:robozonky-api:jar:6.1.1, file=\/home\/triceo\/.m2\/repository\/com\/github\/robozonky\/robozonky-api\/6.1.1\/robozonky-api-6.1.1.jar], in api = true, through use = false)",
+        "old": "interface com.github.robozonky.api.strategies.ExtendedPortfolioOverview",
         "justification": "Moved the interface to a package where it is being used."
       }
     ]
