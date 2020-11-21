@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
+
+import java.util.Objects;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
-
-import java.util.Objects;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.LoanDescriptor;
 
 /**
  * Represents the decision of the {@link InvestmentStrategy} to recommend a {@link Loan} for investing.
  */
-public final class RecommendedLoan implements Recommended<RecommendedLoan, LoanDescriptor, Loan> {
+final class RecommendedLoan implements Recommended<LoanDescriptor, Loan> {
 
     private final LoanDescriptor loanDescriptor;
     private final Money recommendedInvestment;

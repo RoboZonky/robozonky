@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
 
@@ -71,6 +70,7 @@ final class PurchasingSession extends
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
             invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
+                .map(RecommendedParticipation::new)
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);

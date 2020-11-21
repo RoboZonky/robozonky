@@ -21,7 +21,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -68,27 +67,4 @@ class LoanDescriptorTest {
         assertThat(ld).isEqualTo(ld2);
     }
 
-    @Test
-    void recommendAmount() {
-        final LoanImpl mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<RecommendedLoan> r = ld.recommend(Money.from(200));
-        assertThat(r).isPresent();
-        final RecommendedLoan recommendation = r.get();
-        assertSoftly(softly -> {
-            softly.assertThat(recommendation.descriptor())
-                .isSameAs(ld);
-            softly.assertThat(recommendation.amount())
-                .isEqualTo(Money.from(200));
-        });
-    }
-
-    @Test
-    void recommendWrongAmount() {
-        final LoanImpl mockedLoan = LoanDescriptorTest.mockLoan();
-        final LoanDescriptor ld = new LoanDescriptor(mockedLoan);
-        final Optional<RecommendedLoan> r = ld.recommend(mockedLoan.getNonReservedRemainingInvestment()
-            .add(1));
-        assertThat(r).isEmpty();
-    }
 }

@@ -20,10 +20,8 @@ import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -43,7 +41,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
     }
 
     @Override
-    public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
+    public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
             final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
@@ -62,13 +60,6 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
                 return isAcceptable;
             });
         return strategy.getApplicableReservations(withoutUndesirable, portfolio)
-            .sorted(preferences.getReservationComparator())
-            .flatMap(d -> { // recommend amount to invest per strategy
-                final Money amount = d.item()
-                    .getMyReservation()
-                    .getReservedAmount();
-                return d.recommend(amount)
-                    .stream();
-            });
+            .sorted(preferences.getReservationComparator());
     }
 }

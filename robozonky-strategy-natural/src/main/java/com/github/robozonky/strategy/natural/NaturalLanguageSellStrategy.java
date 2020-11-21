@@ -16,7 +16,6 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Ratio;
@@ -25,7 +24,6 @@ import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 
 class NaturalLanguageSellStrategy implements SellStrategy {
@@ -61,7 +59,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
     }
 
     @Override
-    public Stream<RecommendedInvestment> recommend(final Stream<InvestmentDescriptor> available,
+    public Stream<InvestmentDescriptor> recommend(final Stream<InvestmentDescriptor> available,
             final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         return strategy.getSellingMode()
             .map(mode -> {
@@ -77,8 +75,6 @@ class NaturalLanguageSellStrategy implements SellStrategy {
                         throw new IllegalStateException("Impossible.");
                 }
             })
-            .orElse(Stream.empty())
-            .map(InvestmentDescriptor::recommend) // must do full amount; Zonky enforces
-            .flatMap(Optional::stream);
+            .orElse(Stream.empty());
     }
 }

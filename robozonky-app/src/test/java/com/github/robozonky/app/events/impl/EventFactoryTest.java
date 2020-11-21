@@ -48,69 +48,18 @@ import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
-import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
-import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.api.strategies.RecommendedReservation;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
-import com.github.robozonky.internal.remote.entities.AmountsImpl;
-import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
-import com.github.robozonky.internal.remote.entities.MyReservationImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
-import com.github.robozonky.internal.remote.entities.ReservationImpl;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.mock.MockInvestmentBuilder;
 import com.github.robozonky.test.mock.MockLoanBuilder;
-import com.github.robozonky.test.mock.MockReservationBuilder;
 
 class EventFactoryTest extends AbstractZonkyLeveragingTest {
-
-    private static RecommendedLoan recommendedLoan() {
-        final LoanImpl loan = new MockLoanBuilder()
-            .set(LoanImpl::setRemainingInvestment, Money.from(2_000))
-            .set(LoanImpl::setReservedAmount, Money.from(0))
-            .build();
-        return new LoanDescriptor(loan).recommend(Money.from(200))
-            .orElse(null);
-    }
-
-    private static RecommendedParticipation recommendedParticipation() {
-        final Participation p = mock(ParticipationImpl.class);
-        when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
-        return new ParticipationDescriptor(p, MockLoanBuilder::fresh).recommend()
-            .orElse(null);
-    }
-
-    private static RecommendedInvestment recommendedInvestment() {
-        return new InvestmentDescriptor(MockInvestmentBuilder.fresh()
-            .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN)))
-            .build(),
-                MockLoanBuilder::fresh).recommend()
-                    .orElse(null);
-    }
-
-    private static RecommendedReservation recommendedReservation() {
-        final MyReservationImpl mr = mock(MyReservationImpl.class);
-        when(mr.getReservedAmount()).thenReturn(Money.from(200));
-        final Reservation r = new MockReservationBuilder()
-            .set(ReservationImpl::setMyReservation, mr)
-            .build();
-        final Loan l = MockLoanBuilder.fresh();
-        return new ReservationDescriptor(r, () -> l)
-            .recommend(r.getMyReservation()
-                .getReservedAmount())
-            .orElse(null);
-    }
 
     @Test
     void thresholds() {

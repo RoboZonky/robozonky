@@ -41,6 +41,6 @@ public interface ReservationStrategy {
      * @return Acceptable reservations, in the order of their decreasing priority, mapped to the recommended investment
      *         amounts.
      */
-    Stream<RecommendedReservation> recommend(Stream<ReservationDescriptor> available, PortfolioOverview portfolio,
+    Stream<ReservationDescriptor> recommend(Stream<ReservationDescriptor> available, PortfolioOverview portfolio,
             SessionInfo sessionInfo);
 }

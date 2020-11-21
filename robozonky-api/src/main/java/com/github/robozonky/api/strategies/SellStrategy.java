@@ -35,6 +35,6 @@ public interface SellStrategy {
      * @param sessionInfo Information about the current session.
      * @return Acceptable investments, in the order of their decreasing priority, mapped to the recommended sell price.
      */
-    Stream<RecommendedInvestment> recommend(Stream<InvestmentDescriptor> available, PortfolioOverview portfolio,
+    Stream<InvestmentDescriptor> recommend(Stream<InvestmentDescriptor> available, PortfolioOverview portfolio,
             SessionInfo sessionInfo);
 }

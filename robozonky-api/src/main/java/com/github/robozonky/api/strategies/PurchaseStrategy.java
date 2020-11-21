@@ -37,6 +37,6 @@ public interface PurchaseStrategy {
      * @return Acceptable participations, in the order of their decreasing priority, mapped to the recommended
      *         purchase value.
      */
-    Stream<RecommendedParticipation> recommend(Stream<ParticipationDescriptor> available,
+    Stream<ParticipationDescriptor> recommend(Stream<ParticipationDescriptor> available,
             PortfolioOverview portfolio, SessionInfo sessionInfo);
 }

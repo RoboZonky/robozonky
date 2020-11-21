@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -73,11 +72,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> {
-                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.map(r -> r.recommend(Money.from(200)))
-                    .flatMap(Optional::stream);
-            });
+            .thenAnswer(i -> i.getArgument(0));
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
@@ -104,11 +99,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> {
-                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.map(r -> r.recommend(Money.from(200)))
-                    .flatMap(Optional::stream);
-            });
+            .thenAnswer(i -> i.getArgument(0));
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
@@ -136,11 +127,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
         when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> {
-                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.map(r -> r.recommend(Money.from(200)))
-                    .flatMap(Optional::stream);
-            });
+            .thenAnswer(i -> i.getArgument(0));
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         doThrow(IllegalStateException.class).when(z)

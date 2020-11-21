@@ -21,7 +21,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -40,37 +39,6 @@ class InvestmentDescriptorTest {
         final Investment i = mock(Investment.class);
         when(i.getPrincipal()).thenReturn(new AmountsImpl(Money.from(amount)));
         return i;
-    }
-
-    @Test
-    void recommend() {
-        final BigDecimal remainingPrincipal = BigDecimal.TEN;
-        final Investment i = mockInvestment(remainingPrincipal);
-        final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
-        assertThat(id.item()).isSameAs(i);
-        final Optional<RecommendedInvestment> r = id.recommend();
-        assertThat(r).isPresent();
-        assertSoftly(softly -> {
-            softly.assertThat(r.get()
-                .amount())
-                .isEqualTo(Money.from(remainingPrincipal));
-            softly.assertThat(r.get()
-                .descriptor())
-                .isEqualTo(id);
-            softly.assertThat(r.get()
-                .descriptor()
-                .related())
-                .isSameAs(LOAN);
-        });
-    }
-
-    @Test
-    void recommendWrong() {
-        final BigDecimal remainingPrincipal = BigDecimal.TEN;
-        final Investment i = mockInvestment(remainingPrincipal);
-        final InvestmentDescriptor id = new InvestmentDescriptor(i, () -> LOAN);
-        final Optional<RecommendedInvestment> r = id.recommend(Money.from(remainingPrincipal.subtract(BigDecimal.ONE)));
-        assertThat(r).isEmpty();
     }
 
     @Test

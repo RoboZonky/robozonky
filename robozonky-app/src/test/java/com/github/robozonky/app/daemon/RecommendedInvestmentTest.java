@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -28,12 +28,14 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
+import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class RecommendedInvestmentTest {
 
-    private static final Loan LOAN = LoanDescriptorTest.mockLoan();
+    private static final Loan LOAN = MockLoanBuilder.fresh();
 
     private static Investment mockInvestment(final BigDecimal remainingPrincipal) {
         return new InvestmentImpl(mock(InvestmentLoanDataImpl.class), Money.from(remainingPrincipal));
@@ -44,7 +46,7 @@ class RecommendedInvestmentTest {
         final BigDecimal remainingPrincipal = BigDecimal.TEN;
         final Investment i = mockInvestment(remainingPrincipal);
         final InvestmentDescriptor d = new InvestmentDescriptor(i, () -> LOAN);
-        final RecommendedInvestment r = new RecommendedInvestment(d, Money.from(remainingPrincipal));
+        final RecommendedInvestment r = new RecommendedInvestment(d);
         assertSoftly(softly -> {
             softly.assertThat(r)
                 .isNotEqualTo(null);
@@ -54,7 +56,7 @@ class RecommendedInvestmentTest {
             softly.assertThat(r)
                 .isEqualTo(r);
         });
-        final RecommendedInvestment r2 = new RecommendedInvestment(d, Money.from(remainingPrincipal));
+        final RecommendedInvestment r2 = new RecommendedInvestment(d);
         assertSoftly(softly -> {
             softly.assertThat(r)
                 .isEqualTo(r2);
@@ -62,8 +64,7 @@ class RecommendedInvestmentTest {
                 .isEqualTo(r);
         });
         final RecommendedInvestment r3 = new RecommendedInvestment(
-                new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN),
-                Money.from(remainingPrincipal));
+                new InvestmentDescriptor(mockInvestment(remainingPrincipal), () -> LOAN));
         assertThat(r).isNotEqualTo(r3);
     }
 }

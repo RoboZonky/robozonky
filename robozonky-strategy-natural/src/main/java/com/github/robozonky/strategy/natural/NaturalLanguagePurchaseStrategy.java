@@ -27,7 +27,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
 
 class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
 
@@ -66,7 +65,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     }
 
     @Override
-    public Stream<RecommendedParticipation> recommend(final Stream<ParticipationDescriptor> available,
+    public Stream<ParticipationDescriptor> recommend(final Stream<ParticipationDescriptor> available,
             final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
@@ -86,8 +85,6 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
             });
         return strategy.getApplicableParticipations(withoutUndesirable, portfolio)
             .filter(d -> sizeMatchesStrategy(d.item()))
-            .sorted(preferences.getSecondaryMarketplaceComparator())
-            .flatMap(d -> d.recommend()
-                .stream());
+            .sorted(preferences.getSecondaryMarketplaceComparator());
     }
 }

@@ -28,12 +28,11 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.strategies.Descriptor;
-import com.github.robozonky.api.strategies.Recommended;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
-abstract class AbstractSession<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
+abstract class AbstractSession<T extends Recommended<S, X>, S extends Descriptor<X>, X> {
 
     protected final PowerTenant tenant;
     protected final Logger logger;

@@ -23,7 +23,7 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-abstract class AbstractLoanWrapper<T extends Descriptor<?, ?, ?>> extends AbstractWrapper<T> {
+abstract class AbstractLoanWrapper<T extends Descriptor<?>> extends AbstractWrapper<T> {
 
     private final Supplier<Loan> loan;
 

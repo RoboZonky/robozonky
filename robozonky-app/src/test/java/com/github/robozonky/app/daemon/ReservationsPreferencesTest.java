@@ -27,7 +27,6 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -47,7 +46,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
+        public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
                 final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return Stream.empty();
         }
@@ -59,7 +58,7 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
+        public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
                 final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
             return Stream.empty();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.strategies.Descriptor;
 
-public interface Recommended<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
+public interface Recommended<S extends Descriptor<X>, X> {
 
     S descriptor();
 

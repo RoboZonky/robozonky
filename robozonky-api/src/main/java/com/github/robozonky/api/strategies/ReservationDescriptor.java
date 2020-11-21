@@ -17,23 +17,15 @@
 package com.github.robozonky.api.strategies;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Reservation;
 
 /**
  * Carries metadata regarding a {@link Reservation}.
  */
-public final class ReservationDescriptor
-        implements Descriptor<RecommendedReservation, ReservationDescriptor, Reservation> {
-
-    private static final Logger LOGGER = LogManager.getLogger(ReservationDescriptor.class);
+public final class ReservationDescriptor implements Descriptor<Reservation> {
 
     private final Reservation reservation;
     private final Supplier<Loan> loanSupplier;
@@ -51,18 +43,6 @@ public final class ReservationDescriptor
     @Override
     public Loan related() {
         return loanSupplier.get();
-    }
-
-    @Override
-    public Optional<RecommendedReservation> recommend(final Money amount) {
-        final Money actual = reservation.getMyReservation()
-            .getReservedAmount();
-        if (amount.equals(actual)) {
-            return Optional.of(new RecommendedReservation(this, amount));
-        } else {
-            LOGGER.warn("Requested reservation of {} while it is worth {}. ", amount, actual);
-            return Optional.empty();
-        }
     }
 
     @Override

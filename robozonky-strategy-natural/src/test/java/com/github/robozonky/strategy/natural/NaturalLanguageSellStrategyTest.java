@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
@@ -76,7 +75,7 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
             .getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        final Stream<RecommendedInvestment> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
+        final Stream<InvestmentDescriptor> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
                 mockSessionInfo());
         assertThat(result).isEmpty();
     }
@@ -90,7 +89,7 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
             .getMatchingSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        final Stream<RecommendedInvestment> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
+        final Stream<InvestmentDescriptor> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
                 mockSessionInfo());
         assertThat(result).hasSize(1);
     }
@@ -106,10 +105,9 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Investment i1 = mockInvestment();
         final Investment i2 = mockInvestment(BigDecimal.ZERO);
-        final Stream<RecommendedInvestment> result = s.recommend(Stream.of(mockDescriptor(i1), mockDescriptor(i2)),
+        final Stream<InvestmentDescriptor> result = s.recommend(Stream.of(mockDescriptor(i1), mockDescriptor(i2)),
                 portfolio, mockSessionInfo());
-        assertThat(result).extracting(d -> d.descriptor()
-            .item())
+        assertThat(result).extracting(InvestmentDescriptor::item)
             .containsOnly(i2);
     }
 

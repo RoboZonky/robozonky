@@ -34,8 +34,8 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.internal.util.functional.Tuple2;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
 import com.github.robozonky.test.AbstractMinimalRoboZonkyTest;
@@ -62,7 +62,8 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
-        final Stream<RecommendedLoan> result = s.recommend(Stream.of(new LoanDescriptor(mockLoan(2))), portfolio,
+        final Stream<Tuple2<LoanDescriptor, Money>> result = s.recommend(Stream.of(new LoanDescriptor(mockLoan(2))),
+                portfolio,
                 mockSessionInfo());
         assertThat(result).isEmpty();
     }
@@ -76,7 +77,8 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
-        final Stream<RecommendedLoan> result = s.recommend(Stream.of(new LoanDescriptor(mockLoan(2))), portfolio,
+        final Stream<Tuple2<LoanDescriptor, Money>> result = s.recommend(Stream.of(new LoanDescriptor(mockLoan(2))),
+                portfolio,
                 mockSessionInfo());
         assertThat(result).isEmpty();
     }
@@ -92,7 +94,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         final LoanImpl l = mockLoan(1000);
         final Rating r = l.getRating();
         when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
-        final Stream<RecommendedLoan> result = s.recommend(Stream.of(new LoanDescriptor(l)), portfolio,
+        final Stream<Tuple2<LoanDescriptor, Money>> result = s.recommend(Stream.of(new LoanDescriptor(l)), portfolio,
                 mockSessionInfo());
         assertThat(result).isEmpty();
     }
@@ -108,15 +110,16 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         final LoanImpl l = mockLoan(100_000);
         final LoanImpl l2 = mockLoan(100);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        final List<RecommendedLoan> result = s
+        final List<Tuple2<LoanDescriptor, Money>> result = s
             .recommend(Stream.of(new LoanDescriptor(l2), ld), portfolio, mockSessionInfo())
             .collect(Collectors.toList());
         assertThat(result).hasSize(1);
-        final RecommendedLoan r = result.get(0);
+        final LoanDescriptor r = result.get(0)._1;
+        final Money a = result.get(0)._2;
         assertSoftly(softly -> {
-            softly.assertThat(r.descriptor())
+            softly.assertThat(r)
                 .isEqualTo(ld);
-            softly.assertThat(r.amount())
+            softly.assertThat(a)
                 .isEqualTo(Money.from(20_000)); // maximum allowed investment
         });
     }

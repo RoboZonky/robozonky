@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -22,12 +22,14 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class RecommendedLoanTest {
 
     private static LoanDescriptor mockLoanDescriptor() {
-        final LoanImpl loan = LoanDescriptorTest.mockLoan();
+        final LoanImpl loan = MockLoanBuilder.fresh();
         return new LoanDescriptor(loan);
     }
 

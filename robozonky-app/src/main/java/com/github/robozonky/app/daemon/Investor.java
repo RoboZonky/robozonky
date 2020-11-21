@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;

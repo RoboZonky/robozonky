@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.util.functional.Either;
@@ -78,6 +77,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             PortfolioOverview portfolioOverview = tenant.getPortfolio()
                 .getOverview();
             invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
+                .map(i -> new RecommendedLoan(i._1, i._2))
                 .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
                 .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
         } while (invested);

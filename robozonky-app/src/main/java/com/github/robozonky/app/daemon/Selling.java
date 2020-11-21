@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -89,7 +88,8 @@ final class Selling implements TenantPayload {
         final PortfolioOverview overview = tenant.getPortfolio()
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
-        var recommended = strategy.recommend(eligible.stream(), overview, tenant.getSessionInfo());
+        var recommended = strategy.recommend(eligible.stream(), overview, tenant.getSessionInfo())
+            .map(i -> new RecommendedInvestment(i));
         new SellingThrottle().apply(recommended, overview)
             .forEach(r -> processSale(tenant, r, sold));
         tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(tenant.getPortfolio()

@@ -18,7 +18,9 @@ package com.github.robozonky.api.strategies;
 
 import java.util.stream.Stream;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.internal.util.functional.Tuple2;
 
 /**
  * Determines which loans will be invested into, and how much. What the strategy does or does not allow depends on the
@@ -37,6 +39,6 @@ public interface InvestmentStrategy {
      * @return Acceptable loans, in the order of their decreasing priority, mapped to the recommended investment
      *         amounts.
      */
-    Stream<RecommendedLoan> recommend(Stream<LoanDescriptor> available, PortfolioOverview portfolio,
+    Stream<Tuple2<LoanDescriptor, Money>> recommend(Stream<LoanDescriptor> available, PortfolioOverview portfolio,
             SessionInfo sessionInfo);
 }

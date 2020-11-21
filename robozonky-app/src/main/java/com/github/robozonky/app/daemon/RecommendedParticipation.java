@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
 
 import java.util.Objects;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Investment;
+import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
 
-public final class RecommendedInvestment
-        implements Recommended<RecommendedInvestment, InvestmentDescriptor, Investment> {
+final class RecommendedParticipation implements Recommended<ParticipationDescriptor, Participation> {
 
-    private final InvestmentDescriptor descriptor;
-    private final Money amount;
+    private final ParticipationDescriptor participationDescriptor;
 
-    RecommendedInvestment(final InvestmentDescriptor participationDescriptor, final Money amount) {
-        this.descriptor = participationDescriptor;
-        this.amount = amount;
+    RecommendedParticipation(final ParticipationDescriptor participationDescriptor) {
+        this.participationDescriptor = participationDescriptor;
     }
 
     @Override
-    public InvestmentDescriptor descriptor() {
-        return descriptor;
+    public ParticipationDescriptor descriptor() {
+        return participationDescriptor;
     }
 
     @Override
     public Money amount() {
-        return amount;
+        return participationDescriptor.item()
+            .getRemainingPrincipal();
     }
 
     @Override
@@ -50,19 +49,19 @@ public final class RecommendedInvestment
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final RecommendedInvestment that = (RecommendedInvestment) o;
-        return Objects.equals(descriptor, that.descriptor);
+        final RecommendedParticipation that = (RecommendedParticipation) o;
+        return Objects.equals(participationDescriptor, that.participationDescriptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(descriptor);
+        return Objects.hash(participationDescriptor);
     }
 
     @Override
     public String toString() {
-        return "RecommendedInvestment{" +
-                "descriptor=" + descriptor +
+        return "RecommendedParticipation{" +
+                "participationDescriptor=" + participationDescriptor +
                 '}';
     }
 }

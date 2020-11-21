@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 
-import java.util.Optional;
-
-public interface Descriptor<T extends Recommended<T, S, X>, S extends Descriptor<T, S, X>, X> {
+public interface Descriptor<X> {
 
     X item();
 
     Loan related();
 
-    Optional<T> recommend(final Money amount);
 }

@@ -25,7 +25,8 @@ import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
+import com.github.robozonky.internal.util.functional.Tuple;
+import com.github.robozonky.internal.util.functional.Tuple2;
 
 class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
@@ -38,7 +39,8 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public Stream<RecommendedLoan> recommend(final Stream<LoanDescriptor> available, final PortfolioOverview portfolio,
+    public Stream<Tuple2<LoanDescriptor, Money>> recommend(final Stream<LoanDescriptor> available,
+            final PortfolioOverview portfolio,
             final SessionInfo sessionInfo) {
         if (!Util.isAcceptable(strategy, portfolio)) {
             return Stream.empty();
@@ -61,8 +63,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
             .flatMap(d -> { // recommend amount to invest per strategy
                 final Money recommendedAmount = recommender.apply(d.item(), sessionInfo);
                 if (!recommendedAmount.isZero()) {
-                    return d.recommend(recommendedAmount)
-                        .stream();
+                    return Stream.of(Tuple.of(d, recommendedAmount));
                 } else {
                     return Stream.empty();
                 }

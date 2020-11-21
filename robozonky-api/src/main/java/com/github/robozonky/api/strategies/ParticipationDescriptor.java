@@ -20,14 +20,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
-public final class ParticipationDescriptor
-        implements Descriptor<RecommendedParticipation, ParticipationDescriptor, Participation> {
+public final class ParticipationDescriptor implements Descriptor<Participation> {
 
     private final Participation participation;
     private final Supplier<Loan> related;
@@ -71,19 +69,6 @@ public final class ParticipationDescriptor
     public Optional<ParticipationDetail> detail() {
         return Optional.ofNullable(detail)
             .map(Supplier::get);
-    }
-
-    public Optional<RecommendedParticipation> recommend() {
-        return recommend(participation.getRemainingPrincipal());
-    }
-
-    @Override
-    public Optional<RecommendedParticipation> recommend(final Money amount) {
-        if (participation.isWillExceedLoanInvestmentLimit() ||
-                !Objects.equals(amount, participation.getRemainingPrincipal())) {
-            return Optional.empty(); // TODO Why do we query for limit here? should be excluded much earlier.
-        }
-        return Optional.of(new RecommendedParticipation(this));
     }
 
     @Override

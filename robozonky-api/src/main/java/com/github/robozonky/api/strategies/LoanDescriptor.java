@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,17 @@
 
 package com.github.robozonky.api.strategies;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.Loan;
+import java.util.Objects;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Objects;
-import java.util.Optional;
+import com.github.robozonky.api.remote.entities.Loan;
 
 /**
  * Carries metadata regarding a {@link Loan}.
  */
-public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDescriptor, Loan> {
+public final class LoanDescriptor implements Descriptor<Loan> {
 
     private static final Logger LOGGER = LogManager.getLogger(LoanDescriptor.class);
 
@@ -71,14 +70,4 @@ public final class LoanDescriptor implements Descriptor<RecommendedLoan, LoanDes
         return loan;
     }
 
-    @Override
-    public Optional<RecommendedLoan> recommend(final Money toInvest) {
-        final Money remaining = loan.getNonReservedRemainingInvestment();
-        if (toInvest.compareTo(remaining) <= 0) {
-            return Optional.of(new RecommendedLoan(this, toInvest));
-        } else {
-            LOGGER.warn("Can not recommend {} with {} remaining in loan #{}.", toInvest, remaining, loan.getId());
-            return Optional.empty();
-        }
-    }
 }

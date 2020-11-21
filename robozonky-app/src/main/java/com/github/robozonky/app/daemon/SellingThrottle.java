@@ -31,7 +31,6 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
 
 /**
  * The goal of this class is to only sell investments in small amounts, so that the entire {@link PortfolioOverview} is

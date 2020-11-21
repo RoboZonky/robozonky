@@ -53,9 +53,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class SellingTest extends AbstractZonkyLeveragingTest {
 
-    private static final SellStrategy ALL_ACCEPTING_STRATEGY = (available, portfolio, sessionInfo) -> available
-        .map(d -> d.recommend()
-            .get());
+    private static final SellStrategy ALL_ACCEPTING_STRATEGY = (available, portfolio, sessionInfo) -> available;
     private static final SellStrategy NONE_ACCEPTING_STRATEGY = (available, portfolio, sessionInfo) -> Stream.empty();
 
     private static Investment mockInvestment(final Loan loan) {

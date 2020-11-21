@@ -54,17 +54,16 @@ import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     private static final PurchaseStrategy NONE_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> a.map(d -> d.recommend()
-        .get());
+    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> a;
     private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Stream.empty();
     private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> a
-        .map(d -> d.recommend(Money.from(200))
-            .get());
+        .map(s -> Tuple.of(s, Money.from(200)));
 
     private static PurchasingOperationDescriptor mockPurchasingOperationDescriptor(
             final ParticipationDescriptor... pd) {
