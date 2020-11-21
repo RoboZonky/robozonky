@@ -17,8 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
@@ -57,13 +55,13 @@ abstract class AbstractSession<T extends Recommended<S, X>, S extends Descriptor
      * Get items that are available to be evaluated by the strategy. These are items that come from the marketplace,
      * minus items that are already {@link #discard(Descriptor)}ed.
      * 
-     * @return Items in the marketplace in which the user could still potentially invest. Unmodifiable.
+     * @return Items in the marketplace in which the user could still potentially invest.
      */
-    Collection<S> getAvailable() {
+    Stream<S> getAvailable() {
         var actuallyStillAvailable = stillAvailable.get();
         var actuallyDiscarded = discarded.get();
-        actuallyStillAvailable.removeIf(actuallyDiscarded::contains);
-        return Collections.unmodifiableCollection(actuallyStillAvailable);
+        return actuallyStillAvailable.stream()
+            .filter(s -> !actuallyDiscarded.contains(s));
     }
 
     protected void discard(final S item) {

@@ -158,28 +158,29 @@ class ParsedStrategy {
             .map(Wrapper::getOriginal);
     }
 
-    public Stream<LoanDescriptor> getApplicableLoans(final Stream<LoanDescriptor> l,
-            final PortfolioOverview portfolioOverview) {
-        return getApplicable(l.parallel()
-            .map(d -> Wrapper.wrap(d, portfolioOverview)), "Loan");
+    private <T> boolean isApplicable(final Wrapper<T> wrapper, final String type) {
+        if (matchesFilter(wrapper, filters.getPrimaryMarketplaceFilters(),
+                type + " #{} skipped due to primary marketplace filter {}.")) {
+            return false;
+        }
+        return !matchesFilter(wrapper, filters.getSellFilters(), type + " #{} skipped due to sell filter {}.");
     }
 
-    public Stream<ReservationDescriptor> getApplicableReservations(final Stream<ReservationDescriptor> r,
-            final PortfolioOverview portfolioOverview) {
-        return getApplicable(r.parallel()
-            .map(d -> Wrapper.wrap(d, portfolioOverview)), "Reservation");
+    public boolean isApplicable(final LoanDescriptor d, final PortfolioOverview portfolioOverview) {
+        return isApplicable(Wrapper.wrap(d, portfolioOverview), "Loan");
     }
 
-    public Stream<ParticipationDescriptor> getApplicableParticipations(final Stream<ParticipationDescriptor> p,
-            final PortfolioOverview portfolioOverview) {
-        var participationFilters = filters.getSecondaryMarketplaceFilters();
-        var sellFilters = filters.getSellFilters();
-        return p.parallel()
-            .map(d -> Wrapper.wrap(d, portfolioOverview))
-            .filter(w -> !matchesFilter(w, participationFilters,
-                    "Participation #{} skipped due to secondary marketplace filter {}."))
-            .filter(w -> !matchesFilter(w, sellFilters, "Participation #{} skipped due to sell filter {}."))
-            .map(Wrapper::getOriginal);
+    public boolean isApplicable(final ParticipationDescriptor d, final PortfolioOverview portfolioOverview) {
+        var wrapper = Wrapper.wrap(d, portfolioOverview);
+        if (matchesFilter(wrapper, filters.getSecondaryMarketplaceFilters(),
+                "Participation #{} skipped due to secondary marketplace filter {}.")) {
+            return false;
+        }
+        return !matchesFilter(wrapper, filters.getSellFilters(), "Participation #{} skipped due to sell filter {}.");
+    }
+
+    public boolean isApplicable(final ReservationDescriptor d, final PortfolioOverview portfolioOverview) {
+        return isApplicable(Wrapper.wrap(d, portfolioOverview), "Reservation");
     }
 
     public boolean isPurchasingEnabled() {
@@ -198,22 +199,15 @@ class ParsedStrategy {
         return defaults.getSellingMode();
     }
 
-    public Stream<InvestmentDescriptor> getMatchingSellFilters(final Stream<InvestmentDescriptor> i,
-            final PortfolioOverview portfolioOverview) {
-        var investmentFilters = filters.getSellFilters();
-        return i.parallel()
-            .map(d -> Wrapper.wrap(d, portfolioOverview))
-            .filter(w -> matchesFilter(w, investmentFilters, "Investment #{} to be sold due to sell filter {}."))
-            .map(Wrapper::getOriginal);
+    public boolean matchesSellFilters(final InvestmentDescriptor d, final PortfolioOverview portfolioOverview) {
+        return matchesFilter(Wrapper.wrap(d, portfolioOverview), filters.getSellFilters(),
+                "Investment #{} to be sold due to sell filter {}.");
     }
 
-    public Stream<InvestmentDescriptor> getMatchingPrimaryMarketplaceFilters(final Stream<InvestmentDescriptor> i,
+    public boolean matchesPrimaryMarketplaceFilters(final InvestmentDescriptor d,
             final PortfolioOverview portfolioOverview) {
-        var loanFilters = filters.getPrimaryMarketplaceFilters();
-        return i.parallel()
-            .map(d -> Wrapper.wrap(d, portfolioOverview))
-            .filter(w -> matchesFilter(w, loanFilters, "Investment #{} sellable due to primary marketplace filter {}."))
-            .map(Wrapper::getOriginal);
+        return matchesFilter(Wrapper.wrap(d, portfolioOverview), filters.getPrimaryMarketplaceFilters(),
+                "Investment #{} sellable due to primary marketplace filter {}.");
     }
 
     @Override

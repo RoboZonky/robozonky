@@ -283,6 +283,78 @@
         "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
         "new": "method java.util.stream.Stream<com.github.robozonky.api.strategies.InvestmentDescriptor> com.github.robozonky.api.strategies.SellStrategy::recommend(java.util.stream.Stream<com.github.robozonky.api.strategies.InvestmentDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
         "justification": "Recommendations have been removed from the public API without replacement."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(===com.github.robozonky.api.strategies.LoanDescriptor===, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>, ===com.github.robozonky.api.strategies.PortfolioOverview===, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(com.github.robozonky.api.strategies.LoanDescriptor, ===java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>===, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedLoan> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.LoanDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "method java.util.Optional<com.github.robozonky.api.Money> com.github.robozonky.api.strategies.InvestmentStrategy::recommend(com.github.robozonky.api.strategies.LoanDescriptor, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter boolean com.github.robozonky.api.strategies.PurchaseStrategy::recommend(===com.github.robozonky.api.strategies.ParticipationDescriptor===, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>, ===com.github.robozonky.api.strategies.PortfolioOverview===, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter boolean com.github.robozonky.api.strategies.PurchaseStrategy::recommend(com.github.robozonky.api.strategies.ParticipationDescriptor, ===java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>===, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedParticipation> com.github.robozonky.api.strategies.PurchaseStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ParticipationDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "method boolean com.github.robozonky.api.strategies.PurchaseStrategy::recommend(com.github.robozonky.api.strategies.ParticipationDescriptor, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.ReservationDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter boolean com.github.robozonky.api.strategies.ReservationStrategy::recommend(===com.github.robozonky.api.strategies.ReservationDescriptor===, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ReservationDescriptor>, ===com.github.robozonky.api.strategies.PortfolioOverview===, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter boolean com.github.robozonky.api.strategies.ReservationStrategy::recommend(com.github.robozonky.api.strategies.ReservationDescriptor, ===java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>===, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedReservation> com.github.robozonky.api.strategies.ReservationStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.ReservationDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "method boolean com.github.robozonky.api.strategies.ReservationStrategy::recommend(com.github.robozonky.api.strategies.ReservationDescriptor, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(===java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>===, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter boolean com.github.robozonky.api.strategies.SellStrategy::recommend(===com.github.robozonky.api.strategies.InvestmentDescriptor===, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>, ===com.github.robozonky.api.strategies.PortfolioOverview===, com.github.robozonky.api.SessionInfo)",
+        "new": "parameter boolean com.github.robozonky.api.strategies.SellStrategy::recommend(com.github.robozonky.api.strategies.InvestmentDescriptor, ===java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>===, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
+        "new": "method boolean com.github.robozonky.api.strategies.SellStrategy::recommend(com.github.robozonky.api.strategies.InvestmentDescriptor, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
+        "justification": "Strategy interface is simplified for increased RoboZonky performance."
       }
     ]
   }

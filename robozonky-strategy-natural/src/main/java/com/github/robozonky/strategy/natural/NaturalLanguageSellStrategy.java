@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
@@ -52,29 +52,30 @@ class NaturalLanguageSellStrategy implements SellStrategy {
             .signum() == 0;
     }
 
-    private Stream<InvestmentDescriptor> getFreeAndOutsideStrategy(final Stream<InvestmentDescriptor> available,
-            final PortfolioOverview portfolio) {
-        return strategy.getMatchingPrimaryMarketplaceFilters(available, portfolio)
-            .filter(NaturalLanguageSellStrategy::isFree);
+    private boolean getFreeAndOutsideStrategy(final InvestmentDescriptor available, final PortfolioOverview portfolio) {
+        return isFree(available) &&
+                strategy.matchesPrimaryMarketplaceFilters(available, portfolio);
     }
 
     @Override
-    public Stream<InvestmentDescriptor> recommend(final Stream<InvestmentDescriptor> available,
-            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
+    public boolean recommend(final InvestmentDescriptor investmentDescriptor,
+            final Supplier<PortfolioOverview> portfolioOverviewSupplier,
+            final SessionInfo sessionInfo) {
         return strategy.getSellingMode()
             .map(mode -> {
+                var portfolio = portfolioOverviewSupplier.get();
                 switch (mode) {
                     case SELL_FILTERS:
-                        return strategy.getMatchingSellFilters(available, portfolio);
+                        return strategy.matchesSellFilters(investmentDescriptor, portfolio);
                     case FREE_AND_OUTSIDE_STRATEGY:
-                        return getFreeAndOutsideStrategy(available, portfolio);
+                        return getFreeAndOutsideStrategy(investmentDescriptor, portfolio);
                     case FREE_UNDISCOUNTED_AND_OUTSIDE_STRATEGY:
-                        return getFreeAndOutsideStrategy(available, portfolio)
-                            .filter(NaturalLanguageSellStrategy::isUndiscounted);
+                        return isUndiscounted(investmentDescriptor) &&
+                                getFreeAndOutsideStrategy(investmentDescriptor, portfolio);
                     default:
                         throw new IllegalStateException("Impossible.");
                 }
             })
-            .orElse(Stream.empty());
+            .orElse(false);
     }
 }

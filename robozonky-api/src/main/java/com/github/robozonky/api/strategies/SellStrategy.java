@@ -16,25 +16,24 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 
 /**
- * Determines which investments will be sold, and for how much. What the strategy does or does not allow depends
- * on the {@link StrategyService} implementation.
+ * Determines which investments will be sold, and for how much.
+ * What the strategy does or does not allow depends on the {@link StrategyService} implementation.
  */
 public interface SellStrategy {
 
     /**
-     * Retrieve investments that are acceptable by the strategy, in the order in which they are to be sold. After
-     * selling any of these investments, the strategy should be called again to re-evaluate the resulting situation.
+     * Determine whether a participation is acceptable by the strategy.
      * 
-     * @param available   Investments to be evaluated for acceptability.
-     * @param portfolio   Aggregation of information as to the user's current portfolio.
-     * @param sessionInfo Information about the current session.
-     * @return Acceptable investments, in the order of their decreasing priority, mapped to the recommended sell price.
+     * @param investmentDescriptor      Investment to be evaluated for sellability.
+     * @param portfolioOverviewSupplier Retrieves the latest available information on-demand.
+     * @param sessionInfo               Information about the current session.
+     * @return If true, participation should be sold.
      */
-    Stream<InvestmentDescriptor> recommend(Stream<InvestmentDescriptor> available, PortfolioOverview portfolio,
-            SessionInfo sessionInfo);
+    boolean recommend(InvestmentDescriptor investmentDescriptor,
+            Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo);
 }

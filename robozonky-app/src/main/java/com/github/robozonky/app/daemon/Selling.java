@@ -88,8 +88,10 @@ final class Selling implements TenantPayload {
         final PortfolioOverview overview = tenant.getPortfolio()
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
-        var recommended = strategy.recommend(eligible.stream(), overview, tenant.getSessionInfo())
-            .map(i -> new RecommendedInvestment(i));
+        var recommended = eligible.stream()
+            .filter(i -> strategy.recommend(i, () -> tenant.getPortfolio()
+                .getOverview(), tenant.getSessionInfo()))
+            .map(RecommendedInvestment::new);
         new SellingThrottle().apply(recommended, overview)
             .forEach(r -> processSale(tenant, r, sold));
         tenant.fire(sellingCompletedLazy(() -> EventFactory.sellingCompleted(tenant.getPortfolio()

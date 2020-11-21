@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
@@ -65,26 +65,23 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     }
 
     @Override
-    public Stream<ParticipationDescriptor> recommend(final Stream<ParticipationDescriptor> available,
-            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
+    public boolean recommend(final ParticipationDescriptor participationDescriptor,
+            final Supplier<PortfolioOverview> portfolioOverviewSupplier, final SessionInfo sessionInfo) {
+        var portfolio = portfolioOverviewSupplier.get();
         if (!Util.isAcceptable(strategy, portfolio)) {
-            return Stream.empty();
+            return false;
         }
+        var participation = participationDescriptor.item();
+        LOGGER.trace("Evaluating {}.", participation);
         var preferences = Preferences.get(strategy, portfolio);
-        var withoutUndesirable = available.parallel()
-            .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
-            .filter(d -> { // skip loans in ratings which are not required by the strategy
-                boolean isAcceptable = preferences.getDesirableRatings()
-                    .contains(d.item()
-                        .getRating());
-                if (!isAcceptable) {
-                    LOGGER.debug("Participation #{} skipped due to an undesirable rating.", d.item()
-                        .getId());
-                }
-                return isAcceptable;
-            });
-        return strategy.getApplicableParticipations(withoutUndesirable, portfolio)
-            .filter(d -> sizeMatchesStrategy(d.item()))
-            .sorted(preferences.getSecondaryMarketplaceComparator());
+        var isAcceptable = preferences.getDesirableRatings()
+            .contains(participation.getRating());
+        if (!isAcceptable) {
+            LOGGER.debug("Participation #{} skipped due to an undesirable rating.", participation.getId());
+            return false;
+        } else if (!strategy.isApplicable(participationDescriptor, portfolio)) {
+            return false;
+        }
+        return sizeMatchesStrategy(participation);
     }
 }

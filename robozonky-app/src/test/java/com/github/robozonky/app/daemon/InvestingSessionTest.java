@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
@@ -44,14 +45,12 @@ import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
-import com.github.robozonky.internal.util.functional.Tuple;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        return (l, p, r) -> l.filter(i -> i.item()
-            .getId() == loanToRecommend)
-            .map(i -> Tuple.of(i, Money.from(recommend)));
+        return (l, p, r) -> l.item()
+            .getId() == loanToRecommend ? Optional.of(Money.from(recommend)) : Optional.empty();
     }
 
     @Test

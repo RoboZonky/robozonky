@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -108,12 +107,12 @@ class ParsedStrategyTest {
                 .isFalse();
             softly.assertThat(strategy.isInvestingEnabled())
                 .isTrue();
-            softly.assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO))
-                .isEmpty();
-            softly.assertThat(strategy.getApplicableParticipations(Stream.of(pd), FOLIO))
-                .isEmpty();
-            softly.assertThat(strategy.getMatchingSellFilters(Stream.of(id), FOLIO))
-                .containsOnly(id);
+            softly.assertThat(strategy.isApplicable(ld, FOLIO))
+                .isFalse();
+            softly.assertThat(strategy.isApplicable(pd, FOLIO))
+                .isFalse();
+            softly.assertThat(strategy.matchesSellFilters(id, FOLIO))
+                .isTrue();
         });
     }
 
@@ -150,29 +149,34 @@ class ParsedStrategyTest {
                 .isTrue();
             softly.assertThat(strategy.isInvestingEnabled())
                 .isTrue();
-            softly.assertThat(strategy.getApplicableLoans(Stream.of(ldOver, ldUnder), FOLIO))
-                .containsOnly(ldUnder);
-            softly.assertThat(strategy.getApplicableParticipations(Stream.of(pdOver, pdUnder), FOLIO))
-                .containsOnly(pdUnder);
-            softly.assertThat(strategy.getMatchingSellFilters(Stream.of(idOver, idUnder), FOLIO))
-                .isEmpty();
+            softly.assertThat(strategy.isApplicable(ldOver, FOLIO))
+                .isFalse();
+            softly.assertThat(strategy.isApplicable(ldUnder, FOLIO))
+                .isTrue();
+            softly.assertThat(strategy.isApplicable(pdOver, FOLIO))
+                .isFalse();
+            softly.assertThat(strategy.isApplicable(pdUnder, FOLIO))
+                .isTrue();
+            softly.assertThat(strategy.matchesSellFilters(idOver, FOLIO))
+                .isFalse();
+            softly.assertThat(strategy.matchesSellFilters(idUnder, FOLIO))
+                .isFalse();
         });
     }
 
     @Test
     void conditions() {
         final DefaultPortfolio portfolio = DefaultPortfolio.PROGRESSIVE;
-        final ParsedStrategy strategy = new ParsedStrategy(portfolio); // test for default values
-        assertThat(strategy.getApplicableLoans(Stream.empty(), FOLIO)).isEmpty();
+        final ParsedStrategy strategy = new ParsedStrategy(portfolio);
         // add loan; without filters, should be applicable
         final LoanImpl loan = ParsedStrategyTest.mockLoan(2);
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        assertThat(strategy.getApplicableLoans(Stream.of(ld), FOLIO)).contains(ld);
+        assertThat(strategy.isApplicable(ld, FOLIO)).isTrue();
         // now add a filter and see no loans applicable
         final MarketplaceFilter f = mock(MarketplaceFilter.class);
         when(f.test(ArgumentMatchers.eq(Wrapper.wrap(ld, FOLIO)))).thenReturn(true);
         final ParsedStrategy strategy2 = new ParsedStrategy(portfolio, Collections.singleton(f));
-        assertThat(strategy2.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
+        assertThat(strategy2.isApplicable(ld, FOLIO)).isFalse();
     }
 
     @Test
@@ -226,9 +230,9 @@ class ParsedStrategyTest {
                 Collections.emptyMap(), s);
         final LoanImpl l = ParsedStrategyTest.mockLoan(200_000);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        assertThat(ps.getApplicableLoans(Stream.of(ld), FOLIO)).isEmpty();
+        assertThat(ps.isApplicable(ld, FOLIO)).isFalse();
         final Participation p = mock(ParticipationImpl.class);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        assertThat(ps.getApplicableParticipations(Stream.of(pd), FOLIO)).isEmpty();
+        assertThat(ps.isApplicable(pd, FOLIO)).isFalse();
     }
 }

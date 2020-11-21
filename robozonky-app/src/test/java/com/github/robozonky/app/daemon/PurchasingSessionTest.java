@@ -69,7 +69,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(p.getRating()).thenReturn(Rating.D);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
@@ -98,7 +98,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
             .getLoanId();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Response response = Response.status(400)
@@ -128,7 +128,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
             .getLoanId();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any())).thenAnswer(i -> i.getArgument(0));
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Response response = Response.status(400)

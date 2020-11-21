@@ -54,16 +54,15 @@ import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
-import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
-    private static final PurchaseStrategy NONE_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> a;
-    private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> a
-        .map(s -> Tuple.of(s, Money.from(200)));
+    private static final PurchaseStrategy NONE_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> false;
+    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> true;
+    private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Optional.empty();
+    private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Optional
+        .of(Money.from(200));
 
     private static PurchasingOperationDescriptor mockPurchasingOperationDescriptor(
             final ParticipationDescriptor... pd) {
@@ -237,8 +236,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         var exec = new StrategyExecutor<>(tenant, d);
         when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_PURCHASE_STRATEGY));
         assertThat(exec.get()).isEmpty();
-        final List<Event> e = getEventsRequested();
-        assertThat(e).isEmpty();
     }
 
     @Test
@@ -247,7 +244,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setAmount, Money.from(2))
             .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
+        final Zonky z = harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         var exec = new StrategyExecutor<>(tenant, d);
@@ -259,7 +256,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoItems() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
+        final Zonky z = harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor();
@@ -339,7 +336,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(tenant.getAvailability()
             .isAvailable()).thenReturn(true);
         when(tenant.getInvestmentStrategy())
-            .thenReturn(Optional.of((available, portfolio, restrictions) -> Stream.empty()));
+            .thenReturn(Optional.of(NONE_ACCEPTING_INVESTMENT_STRATEGY));
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy, Loan> d = new InvestingOperationDescriptor();
         var e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();

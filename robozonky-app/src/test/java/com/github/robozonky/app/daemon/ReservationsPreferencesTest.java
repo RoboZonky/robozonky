@@ -19,7 +19,7 @@ package com.github.robozonky.app.daemon;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,9 +46,9 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
-                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
-            return Stream.empty();
+        public boolean recommend(ReservationDescriptor reservationDescriptor,
+                Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo) {
+            return false;
         }
     };
     private static final ReservationStrategy CORRECT_STRATEGY = new ReservationStrategy() {
@@ -58,9 +58,9 @@ class ReservationsPreferencesTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
-                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
-            return Stream.empty();
+        public boolean recommend(ReservationDescriptor reservationDescriptor,
+                Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo) {
+            return false;
         }
     };
 

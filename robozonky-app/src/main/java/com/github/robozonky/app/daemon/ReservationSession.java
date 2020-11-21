@@ -21,11 +21,9 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationAccep
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.reservationCheckStarted;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Reservation;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -47,11 +45,6 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
     public static Stream<Reservation> process(final PowerTenant tenant, final Stream<ReservationDescriptor> loans,
             final ReservationStrategy strategy) {
         final ReservationSession s = new ReservationSession(loans, tenant);
-        final Collection<ReservationDescriptor> c = s.getAvailable();
-        if (c.isEmpty()) {
-            s.logger.debug("Skipping reservations as none are available.");
-            return Stream.empty();
-        }
         s.tenant.fire(reservationCheckStarted(tenant.getPortfolio()
             .getOverview()));
         s.process(strategy);
@@ -62,15 +55,12 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
     }
 
     private void process(final ReservationStrategy strategy) {
-        boolean invested;
-        do {
-            PortfolioOverview portfolioOverview = tenant.getPortfolio()
-                .getOverview();
-            invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
-                .map(RecommendedReservation::new)
-                .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
-                .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
-        } while (invested);
+        getAvailable()
+            .filter(i -> strategy.recommend(i, () -> tenant.getPortfolio()
+                .getOverview(), tenant.getSessionInfo()))
+            .map(RecommendedReservation::new)
+            .takeWhile(this::isBalanceAcceptable) // no need to try if we don't have enough money
+            .forEach(this::accept); // keep trying until investment opportunities are exhausted
     }
 
     private boolean actuallyAccept(final RecommendedReservation recommendation) {

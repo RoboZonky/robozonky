@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -41,25 +41,23 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
     }
 
     @Override
-    public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
-            final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
+    public boolean recommend(final ReservationDescriptor reservationDescriptor,
+            final Supplier<PortfolioOverview> portfolioOverviewSupplier,
+            final SessionInfo sessionInfo) {
+        var portfolio = portfolioOverviewSupplier.get();
         if (!Util.isAcceptable(strategy, portfolio)) {
-            return Stream.empty();
+            return false;
         }
+        var reservation = reservationDescriptor.item();
+        LOGGER.trace("Evaluating {}.", reservation);
         var preferences = Preferences.get(strategy, portfolio);
-        var withoutUndesirable = available.parallel()
-            .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
-            .filter(d -> { // skip loans in ratings which are not required by the strategy
-                boolean isAcceptable = preferences.getDesirableRatings()
-                    .contains(d.item()
-                        .getRating());
-                if (!isAcceptable) {
-                    LOGGER.debug("Reservation #{} skipped due to an undesirable rating.", d.item()
-                        .getId());
-                }
-                return isAcceptable;
-            });
-        return strategy.getApplicableReservations(withoutUndesirable, portfolio)
-            .sorted(preferences.getReservationComparator());
+        var isAcceptable = preferences.getDesirableRatings()
+            .contains(reservation.getRating());
+        if (!isAcceptable) {
+            LOGGER.debug("Reservation #{} skipped due to an undesirable rating.", reservation.getId());
+            return false;
+        }
+        return strategy.isApplicable(reservationDescriptor, portfolio);
     }
+
 }

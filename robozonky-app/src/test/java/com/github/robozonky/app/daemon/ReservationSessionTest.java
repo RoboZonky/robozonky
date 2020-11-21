@@ -71,8 +71,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
-        when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> i.getArgument(0));
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
@@ -98,8 +97,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
-        when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> i.getArgument(0));
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
@@ -126,8 +124,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
-        when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> i.getArgument(0));
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         doThrow(IllegalStateException.class).when(z)

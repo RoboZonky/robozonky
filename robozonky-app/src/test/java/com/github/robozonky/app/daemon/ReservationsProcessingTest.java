@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -54,9 +55,9 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<ReservationDescriptor> recommend(final Stream<ReservationDescriptor> available,
-                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
-            return available;
+        public boolean recommend(ReservationDescriptor reservationDescriptor,
+                Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo) {
+            return true;
         }
     };
     private static final ReservationPreferenceImpl SOME_PREFERENCE = new ReservationPreferenceImpl(
