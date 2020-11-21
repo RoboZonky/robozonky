@@ -18,8 +18,8 @@ package com.github.robozonky.app.events.impl;
 
 import java.util.StringJoiner;
 
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 
 final class WeeklySummaryEventImpl extends AbstractEventImpl implements WeeklySummaryEvent {
 

@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
@@ -70,18 +69,14 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(p.getRating()).thenReturn(Rating.D);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any())).thenAnswer(i -> {
-            final Stream<ParticipationDescriptor> participations = i.getArgument(0);
-            return participations.map(ParticipationDescriptor::recommend)
-                .flatMap(Optional::stream);
-        });
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
         verify(z).purchase(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();
@@ -103,11 +98,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
             .getLoanId();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any())).thenAnswer(i -> {
-            final Stream<ParticipationDescriptor> participations = i.getArgument(0);
-            return participations.map(ParticipationDescriptor::recommend)
-                .flatMap(Optional::stream);
-        });
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Response response = Response.status(400)
@@ -137,11 +128,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
             .getLoanId();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
-        when(s.recommend(any(), any(), any())).thenAnswer(i -> {
-            final Stream<ParticipationDescriptor> participations = i.getArgument(0);
-            return participations.map(ParticipationDescriptor::recommend)
-                .flatMap(Optional::stream);
-        });
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Response response = Response.status(400)

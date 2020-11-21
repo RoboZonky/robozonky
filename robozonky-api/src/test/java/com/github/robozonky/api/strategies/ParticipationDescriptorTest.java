@@ -16,12 +16,10 @@
 
 package com.github.robozonky.api.strategies;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -40,35 +38,6 @@ class ParticipationDescriptorTest {
     }
 
     private static final Loan LOAN = LoanDescriptorTest.mockLoan();
-
-    @Test
-    void recommend() {
-        final Participation p = mockParticipation(BigDecimal.TEN);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
-        final Optional<RecommendedParticipation> r = pd.recommend();
-        assertThat(r).isPresent();
-        assertSoftly(softly -> {
-            softly.assertThat(r.get()
-                .amount())
-                .isEqualTo(p.getRemainingPrincipal());
-            softly.assertThat(r.get()
-                .descriptor()
-                .related())
-                .isSameAs(LOAN);
-            softly.assertThat(r.get()
-                .descriptor())
-                .isEqualTo(pd);
-        });
-    }
-
-    @Test
-    void recommendWrong() {
-        final Participation p = mockParticipation(BigDecimal.TEN);
-        final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> LOAN);
-        final Optional<RecommendedParticipation> r = pd.recommend(p.getRemainingPrincipal()
-            .subtract(1));
-        assertThat(r).isEmpty();
-    }
 
     @Test
     void equals() {

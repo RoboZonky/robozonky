@@ -16,17 +16,11 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.ReservationDescriptor;
-import com.github.robozonky.internal.util.functional.Memoizer;
 
 final class Preferences {
 
@@ -34,20 +28,10 @@ final class Preferences {
 
     private final PortfolioOverview referencePortfolio;
     private final Set<Rating> ratingRanking;
-    private final Supplier<Comparator<Rating>> ratingComparator;
-    private final Supplier<Comparator<LoanDescriptor>> primaryMarketplaceComparator;
-    private final Supplier<Comparator<ReservationDescriptor>> reservationComparator;
-    private final Supplier<Comparator<ParticipationDescriptor>> secondaryMarketplaceComparator;
 
     private Preferences(PortfolioOverview portfolio, Set<Rating> ratingRanking) {
         this.referencePortfolio = portfolio;
         this.ratingRanking = ratingRanking;
-        this.ratingComparator = Memoizer.memoize(() -> Util.getRatingByDemandComparator(ratingRanking));
-        this.primaryMarketplaceComparator = Memoizer
-            .memoize(() -> new PrimaryMarketplaceComparator(ratingComparator.get()));
-        this.reservationComparator = Memoizer.memoize(() -> new ReservationComparator(ratingComparator.get()));
-        this.secondaryMarketplaceComparator = Memoizer
-            .memoize(() -> new SecondaryMarketplaceComparator(ratingComparator.get()));
     }
 
     public static synchronized Preferences get(ParsedStrategy strategy, PortfolioOverview portfolio) {
@@ -58,7 +42,7 @@ final class Preferences {
         if (Objects.equals(INSTANCE.referencePortfolio, portfolio)) {
             return INSTANCE;
         }
-        Set<Rating> ratingRanking = Util.rankRatingsByDemand(strategy, portfolio);
+        var ratingRanking = Util.rankRatingsByDemand(strategy, portfolio);
         if (Objects.equals(INSTANCE.ratingRanking, ratingRanking)) {
             return INSTANCE;
         }
@@ -78,15 +62,4 @@ final class Preferences {
         return ratingRanking;
     }
 
-    public Comparator<LoanDescriptor> getPrimaryMarketplaceComparator() {
-        return primaryMarketplaceComparator.get();
-    }
-
-    public Comparator<ReservationDescriptor> getReservationComparator() {
-        return reservationComparator.get();
-    }
-
-    public Comparator<ParticipationDescriptor> getSecondaryMarketplaceComparator() {
-        return secondaryMarketplaceComparator.get();
-    }
 }

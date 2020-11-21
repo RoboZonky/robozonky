@@ -23,7 +23,6 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -82,7 +81,7 @@ class StrategyLoaderTest {
 
     @Test
     void loading() {
-        final InvestmentStrategy is = (availableLoans, portfolio, restrictions) -> Stream.empty();
+        final InvestmentStrategy is = (availableLoans, portfolio, restrictions) -> Optional.empty();
         final StrategyService iss = new StrategyService() {
             @Override
             public Optional<InvestmentStrategy> toInvest(final String strategy) {

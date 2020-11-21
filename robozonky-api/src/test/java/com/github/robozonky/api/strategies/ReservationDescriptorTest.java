@@ -17,11 +17,9 @@
 package com.github.robozonky.api.strategies;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -73,26 +71,4 @@ class ReservationDescriptorTest {
         assertThat(ld).isEqualTo(ld2);
     }
 
-    @Test
-    void recommendAmount() {
-        final Reservation mockedReservation = ReservationDescriptorTest.mockReservation();
-        final ReservationDescriptor ld = new ReservationDescriptor(mockedReservation, () -> null);
-        final Optional<RecommendedReservation> r = ld.recommend(Money.from(1_000));
-        assertThat(r).isPresent();
-        final RecommendedReservation recommendation = r.get();
-        assertSoftly(softly -> {
-            softly.assertThat(recommendation.descriptor())
-                .isSameAs(ld);
-            softly.assertThat(recommendation.amount())
-                .isEqualTo(Money.from(1_000));
-        });
-    }
-
-    @Test
-    void recommendWrongAmount() {
-        final Reservation mockedReservation = ReservationDescriptorTest.mockReservation();
-        final ReservationDescriptor ld = new ReservationDescriptor(mockedReservation, () -> null);
-        final Optional<RecommendedReservation> r = ld.recommend(Money.from(1));
-        assertThat(r).isEmpty();
-    }
 }

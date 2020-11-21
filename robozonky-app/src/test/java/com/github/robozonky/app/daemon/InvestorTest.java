@@ -36,7 +36,6 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.remote.InvestmentResult;
@@ -63,8 +62,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
     void proper(final SessionInfo sessionType) {
         final Tenant t = mockTenant(zonky, sessionType.isDryRun());
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
-            .orElse(null);
+        final RecommendedLoan r = new RecommendedLoan(DESCRIPTOR, Money.from(200));
         final Either<InvestmentFailureType, Money> result = i.invest(r);
         assertThat(result.get()).isEqualTo(Money.from(200));
     }
@@ -80,8 +78,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
             .build();
         when(zonky.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
-            .orElse(null);
+        final RecommendedLoan r = new RecommendedLoan(DESCRIPTOR, Money.from(200));
         final Either<InvestmentFailureType, Money> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
             assertThat(result.get()).isEqualTo(Money.from(200));
@@ -100,8 +97,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
             .build();
         when(zonky.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(new BadRequestException(failure)));
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
-            .orElse(null);
+        final RecommendedLoan r = new RecommendedLoan(DESCRIPTOR, Money.from(200));
         final Either<InvestmentFailureType, Money> result = i.invest(r);
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
             assertThat(result.get()).isEqualTo(Money.from(200));
@@ -118,8 +114,7 @@ class InvestorTest extends AbstractZonkyLeveragingTest {
         doThrow(IllegalStateException.class).when(zonky)
             .invest(notNull(), anyInt());
         final Investor i = Investor.build(t);
-        final RecommendedLoan r = DESCRIPTOR.recommend(Money.from(200))
-            .orElse(null);
+        final RecommendedLoan r = new RecommendedLoan(DESCRIPTOR, Money.from(200));
         if (isDryRun) { // the endpoint is not actually called, therefore cannot return error
             assertThat(i.invest(r)
                 .get()).isEqualTo(Money.from(200));

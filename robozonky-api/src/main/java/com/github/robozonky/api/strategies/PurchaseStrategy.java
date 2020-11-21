@@ -16,27 +16,24 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 
 /**
- * Determines which participation will be purchased, and for how much. What the strategy does or does not allow depends
- * on the {@link StrategyService} implementation.
+ * Determines which participation will be purchased, and for how much.
+ * What the strategy does or does not allow depends on the {@link StrategyService} implementation.
  */
 public interface PurchaseStrategy {
 
     /**
-     * Retrieve participations that are acceptable by the strategy, in the order in which they are to be evaluated.
-     * After purchasing any one of these participations, the strategy should be called again to re-evaluate the
-     * resulting situation.
+     * Determine whether a participation is acceptable by the strategy.
      * 
-     * @param available   Participations to be evaluated for acceptability.
-     * @param portfolio   Aggregation of information as to the user's current portfolio.
-     * @param sessionInfo Information about the current session.
-     * @return Acceptable participations, in the order of their decreasing priority, mapped to the recommended
-     *         purchase value.
+     * @param participationDescriptor   Participation to be evaluated for acceptability.
+     * @param portfolioOverviewSupplier Retrieves the latest available information on-demand.
+     * @param sessionInfo               Information about the current session.
+     * @return True if acceptable.
      */
-    Stream<RecommendedParticipation> recommend(Stream<ParticipationDescriptor> available,
-            PortfolioOverview portfolio, SessionInfo sessionInfo);
+    boolean recommend(ParticipationDescriptor participationDescriptor,
+            Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo);
 }

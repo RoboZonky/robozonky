@@ -16,31 +16,28 @@
 
 package com.github.robozonky.api.strategies;
 
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Reservation;
 
 /**
  * Determines which {@link Reservation}s will be invested into out of those coming through the reservation system,
- * and how much will be invested. What the strategy does or does not allow depends on the {@link StrategyService}
- * implementation.
+ * and how much will be invested.
+ * What the strategy does or does not allow depends on the {@link StrategyService} implementation.
  */
 public interface ReservationStrategy {
 
     ReservationMode getMode();
 
     /**
-     * Retrieve reservations that are acceptable by the strategy, in the order in which they are to be evaluated. After
-     * an investment has been made into any single one of these reservations, the strategy should be called again to
-     * re-evaluate the resulting situation.
+     * Determine whether a participation is acceptable by the strategy.
      * 
-     * @param available   Reservations to be evaluated for acceptability.
-     * @param portfolio   Aggregation of information as to the user's current portfolio.
-     * @param sessionInfo Information about the current session.
-     * @return Acceptable reservations, in the order of their decreasing priority, mapped to the recommended investment
-     *         amounts.
+     * @param reservationDescriptor     Reservation to be evaluated for acceptability.
+     * @param portfolioOverviewSupplier Retrieves the latest available information on-demand.
+     * @param sessionInfo               Information about the current session.
+     * @return True if acceptable.
      */
-    Stream<RecommendedReservation> recommend(Stream<ReservationDescriptor> available, PortfolioOverview portfolio,
-            SessionInfo sessionInfo);
+    boolean recommend(ReservationDescriptor reservationDescriptor,
+            Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo);
 }

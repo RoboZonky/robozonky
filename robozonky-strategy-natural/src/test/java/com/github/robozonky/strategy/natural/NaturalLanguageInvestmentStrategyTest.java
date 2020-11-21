@@ -17,14 +17,11 @@
 package com.github.robozonky.strategy.natural;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +31,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilter;
 import com.github.robozonky.strategy.natural.conditions.MarketplaceFilterCondition;
@@ -62,8 +58,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         final InvestmentStrategy s = new NaturalLanguageInvestmentStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize());
-        final Stream<RecommendedLoan> result = s.recommend(Stream.of(new LoanDescriptor(mockLoan(2))), portfolio,
-                mockSessionInfo());
+        final Optional<Money> result = s.recommend(new LoanDescriptor(mockLoan(2)), () -> portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -76,8 +71,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
-        final Stream<RecommendedLoan> result = s.recommend(Stream.of(new LoanDescriptor(mockLoan(2))), portfolio,
-                mockSessionInfo());
+        final Optional<Money> result = s.recommend(new LoanDescriptor(mockLoan(2)), () -> portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -92,8 +86,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         final LoanImpl l = mockLoan(1000);
         final Rating r = l.getRating();
         when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
-        final Stream<RecommendedLoan> result = s.recommend(Stream.of(new LoanDescriptor(l)), portfolio,
-                mockSessionInfo());
+        final Optional<Money> result = s.recommend(new LoanDescriptor(l), () -> portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }
 
@@ -108,16 +101,9 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         final LoanImpl l = mockLoan(100_000);
         final LoanImpl l2 = mockLoan(100);
         final LoanDescriptor ld = new LoanDescriptor(l);
-        final List<RecommendedLoan> result = s
-            .recommend(Stream.of(new LoanDescriptor(l2), ld), portfolio, mockSessionInfo())
-            .collect(Collectors.toList());
-        assertThat(result).hasSize(1);
-        final RecommendedLoan r = result.get(0);
-        assertSoftly(softly -> {
-            softly.assertThat(r.descriptor())
-                .isEqualTo(ld);
-            softly.assertThat(r.amount())
-                .isEqualTo(Money.from(20_000)); // maximum allowed investment
-        });
+        final Optional<Money> result = s.recommend(new LoanDescriptor(l2), () -> portfolio, mockSessionInfo());
+        assertThat(result).isEmpty();
+        final Optional<Money> result2 = s.recommend(ld, () -> portfolio, mockSessionInfo());
+        assertThat(result2).contains(Money.from(20_000));
     }
 }

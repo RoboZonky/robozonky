@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +30,6 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
@@ -72,13 +70,12 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setSellingMode(SellingMode.SELL_FILTERS);
         final ParsedStrategy p = spy(new ParsedStrategy(v));
-        doReturn(Stream.empty()).when(p)
-            .getMatchingSellFilters(any(), any());
+        doReturn(false).when(p)
+            .matchesSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        final Stream<RecommendedInvestment> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
-                mockSessionInfo());
-        assertThat(result).isEmpty();
+        final boolean result = s.recommend(mockDescriptor(), () -> portfolio, mockSessionInfo());
+        assertThat(result).isFalse();
     }
 
     @Test
@@ -86,13 +83,12 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setSellingMode(SellingMode.SELL_FILTERS);
         final ParsedStrategy p = spy(new ParsedStrategy(v));
-        doAnswer(e -> e.getArgument(0)).when(p)
-            .getMatchingSellFilters(any(), any());
+        doAnswer(e -> true).when(p)
+            .matchesSellFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
-        final Stream<RecommendedInvestment> result = s.recommend(Stream.of(mockDescriptor()), portfolio,
-                mockSessionInfo());
-        assertThat(result).hasSize(1);
+        final boolean result = s.recommend(mockDescriptor(), () -> portfolio, mockSessionInfo());
+        assertThat(result).isTrue();
     }
 
     @Test
@@ -100,17 +96,16 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
         final DefaultValues v = new DefaultValues(DefaultPortfolio.PROGRESSIVE);
         v.setSellingMode(SellingMode.FREE_AND_OUTSIDE_STRATEGY);
         final ParsedStrategy p = spy(new ParsedStrategy(v));
-        doAnswer(e -> e.getArgument(0)).when(p)
-            .getMatchingPrimaryMarketplaceFilters(any(), any());
+        doAnswer(e -> true).when(p)
+            .matchesPrimaryMarketplaceFilters(any(), any());
         final SellStrategy s = new NaturalLanguageSellStrategy(p);
         final PortfolioOverview portfolio = mock(PortfolioOverview.class);
         final Investment i1 = mockInvestment();
         final Investment i2 = mockInvestment(BigDecimal.ZERO);
-        final Stream<RecommendedInvestment> result = s.recommend(Stream.of(mockDescriptor(i1), mockDescriptor(i2)),
-                portfolio, mockSessionInfo());
-        assertThat(result).extracting(d -> d.descriptor()
-            .item())
-            .containsOnly(i2);
+        final boolean result = s.recommend(mockDescriptor(i1), () -> portfolio, mockSessionInfo());
+        assertThat(result).isFalse();
+        final boolean result2 = s.recommend(mockDescriptor(i2), () -> portfolio, mockSessionInfo());
+        assertThat(result2).isTrue();
     }
 
 }

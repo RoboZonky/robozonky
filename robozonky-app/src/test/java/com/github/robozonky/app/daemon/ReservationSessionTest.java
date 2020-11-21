@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -72,19 +71,14 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
-        when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> {
-                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.map(r -> r.recommend(Money.from(200)))
-                    .flatMap(Optional::stream);
-            });
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final PowerTenant auth = mockTenant(z, false);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();
@@ -103,19 +97,14 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
-        when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> {
-                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.map(r -> r.recommend(Money.from(200)))
-                    .flatMap(Optional::stream);
-            });
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         final PowerTenant auth = mockTenant(z);
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).hasSize(1);
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
         verify(z, never()).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         Rating rating = l.getRating();
@@ -135,12 +124,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final int loanId = l.getId();
         final Reservation p = mockReservation(l);
         final ReservationStrategy s = mock(ReservationStrategy.class);
-        when(s.recommend(any(), any(), any()))
-            .thenAnswer(i -> {
-                final Stream<ReservationDescriptor> reservations = i.getArgument(0);
-                return reservations.map(r -> r.recommend(Money.from(200)))
-                    .flatMap(Optional::stream);
-            });
+        when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(loanId))).thenReturn(l);
         doThrow(IllegalStateException.class).when(z)
@@ -149,7 +133,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         final ReservationDescriptor pd = new ReservationDescriptor(p, () -> l);
         final Stream<Reservation> i = ReservationSession.process(auth, Stream.of(pd), s);
         assertThat(i).isEmpty();
-        assertThat(getEventsRequested()).hasSize(3);
+        assertThat(getEventsRequested()).hasSize(2);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
         final Rating rating = l.getRating();

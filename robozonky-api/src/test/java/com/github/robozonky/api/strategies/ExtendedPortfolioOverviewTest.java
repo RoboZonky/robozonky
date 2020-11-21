@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.remote.enums.Rating;
 
 class ExtendedPortfolioOverviewTest {

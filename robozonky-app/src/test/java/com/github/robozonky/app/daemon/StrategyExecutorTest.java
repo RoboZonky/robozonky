@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
-import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -59,13 +58,11 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
-    private static final PurchaseStrategy NONE_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> a.map(d -> d.recommend()
-        .get());
-    private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Stream.empty();
-    private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> a
-        .map(d -> d.recommend(Money.from(200))
-            .get());
+    private static final PurchaseStrategy NONE_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> false;
+    private static final PurchaseStrategy ALL_ACCEPTING_PURCHASE_STRATEGY = (a, p, r) -> true;
+    private static final InvestmentStrategy NONE_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Optional.empty();
+    private static final InvestmentStrategy ALL_ACCEPTING_INVESTMENT_STRATEGY = (a, p, r) -> Optional
+        .of(Money.from(200));
 
     private static PurchasingOperationDescriptor mockPurchasingOperationDescriptor(
             final ParticipationDescriptor... pd) {
@@ -158,14 +155,12 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         assertThat(exec.get()).isNotEmpty();
         verify(zonky, never()).purchase(eq(mock)); // do not purchase as we're in dry run
         final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(4);
+        assertThat(e).hasSize(3);
         assertSoftly(softly -> {
             softly.assertThat(e)
                 .first()
                 .isInstanceOf(PurchasingStartedEvent.class);
             softly.assertThat(e.get(1))
-                .isInstanceOf(PurchaseRecommendedEvent.class);
-            softly.assertThat(e.get(2))
                 .isInstanceOf(InvestmentPurchasedEvent.class);
             softly.assertThat(e)
                 .last()
@@ -241,8 +236,6 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         var exec = new StrategyExecutor<>(tenant, d);
         when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_PURCHASE_STRATEGY));
         assertThat(exec.get()).isEmpty();
-        final List<Event> e = getEventsRequested();
-        assertThat(e).isEmpty();
     }
 
     @Test
@@ -251,7 +244,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
             .set(LoanImpl::setAmount, Money.from(2))
             .build();
         final LoanDescriptor ld = new LoanDescriptor(loan);
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
+        final Zonky z = harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor(ld);
         var exec = new StrategyExecutor<>(tenant, d);
@@ -263,7 +256,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void investingNoItems() {
-        final Zonky z = AbstractZonkyLeveragingTest.harmlessZonky();
+        final Zonky z = harmlessZonky();
         final PowerTenant tenant = mockTenant(z);
         when(tenant.getInvestmentStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_INVESTMENT_STRATEGY));
         final InvestingOperationDescriptor d = mockInvestingOperationDescriptor();
@@ -343,7 +336,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(tenant.getAvailability()
             .isAvailable()).thenReturn(true);
         when(tenant.getInvestmentStrategy())
-            .thenReturn(Optional.of((available, portfolio, restrictions) -> Stream.empty()));
+            .thenReturn(Optional.of(NONE_ACCEPTING_INVESTMENT_STRATEGY));
         final OperationDescriptor<LoanDescriptor, InvestmentStrategy, Loan> d = new InvestingOperationDescriptor();
         var e = new StrategyExecutor<>(tenant, d);
         assertThat(e.get()).isEmpty();

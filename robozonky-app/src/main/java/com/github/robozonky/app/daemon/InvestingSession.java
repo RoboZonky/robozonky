@@ -22,17 +22,13 @@ import static com.github.robozonky.app.events.impl.EventFactory.executionStarted
 import static com.github.robozonky.app.events.impl.EventFactory.executionStartedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMade;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.loanRecommended;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
 import com.github.robozonky.internal.util.functional.Either;
@@ -57,11 +53,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     public static Stream<Loan> invest(final PowerTenant tenant, final Stream<LoanDescriptor> loans,
             final InvestmentStrategy strategy) {
         final InvestingSession s = new InvestingSession(loans, tenant);
-        final Collection<LoanDescriptor> c = s.getAvailable();
-        if (c.isEmpty()) {
-            s.logger.debug("Skipping investing as no loans are available.");
-            return Stream.empty();
-        }
         s.tenant.fire(executionStartedLazy(() -> executionStarted(tenant.getPortfolio()
             .getOverview())));
         s.invest(strategy);
@@ -74,15 +65,13 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
     private void invest(final InvestmentStrategy strategy) {
         logger.debug("Starting the investing mechanism with balance upper bound of {}.",
                 tenant.getKnownBalanceUpperBound());
-        boolean invested;
-        do {
-            PortfolioOverview portfolioOverview = tenant.getPortfolio()
-                .getOverview();
-            invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
-                .peek(r -> tenant.fire(loanRecommended(r)))
-                .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
-                .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
-        } while (invested);
+        getAvailable()
+            .flatMap(i -> strategy.recommend(i, () -> tenant.getPortfolio()
+                .getOverview(), tenant.getSessionInfo())
+                .map(amount -> new RecommendedLoan(i, amount))
+                .stream())
+            .takeWhile(this::isBalanceAcceptable) // no need to try if we don't have enough money
+            .forEach(this::accept); // keep trying until investment opportunities are exhausted
     }
 
     private boolean successfulInvestment(final RecommendedLoan recommendation, final Money amount) {

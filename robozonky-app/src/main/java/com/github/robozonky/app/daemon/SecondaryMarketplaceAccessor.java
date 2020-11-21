@@ -74,6 +74,12 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     @Override
     public Stream<ParticipationDescriptor> getMarketplace() {
         var cache = SoldParticipationCache.forTenant(tenant);
+        /*
+         * Do not make this parallel.
+         * Each participation will be processed individually and if done in parallel, the portfolio structure could go
+         * haywire.
+         * The code is designed to purchase, rebuild the portfolio structure, and then purchase again.
+         */
         var participations = tenant.call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
             .filter(p -> { // never re-purchase what was once sold
                 final int loanId = p.getLoanId();

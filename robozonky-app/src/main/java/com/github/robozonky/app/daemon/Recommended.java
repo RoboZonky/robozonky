@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.notifications;
+package com.github.robozonky.app.daemon;
 
-import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.strategies.Descriptor;
 
-/**
- * Fired immediately after {@link PurchaseStrategy} has recommended a particular loan.
- * {@link InvestmentPurchasedEvent} may be fired next.
- */
-public interface PurchaseRecommendedEvent extends ParticipationBased,
-        Recommending {
+public interface Recommended<S extends Descriptor<X>, X> {
 
+    S descriptor();
+
+    Money amount();
 }

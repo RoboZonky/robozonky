@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,6 @@ import com.github.robozonky.api.remote.entities.Reservation;
 import com.github.robozonky.api.remote.enums.LoanTermInterval;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
@@ -55,15 +55,9 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         }
 
         @Override
-        public Stream<RecommendedReservation> recommend(final Stream<ReservationDescriptor> available,
-                final PortfolioOverview portfolio, final SessionInfo sessionInfo) {
-            return available.map(r -> {
-                final Money amount = r.item()
-                    .getMyReservation()
-                    .getReservedAmount();
-                return r.recommend(amount);
-            })
-                .flatMap(Optional::stream);
+        public boolean recommend(ReservationDescriptor reservationDescriptor,
+                Supplier<PortfolioOverview> portfolioOverviewSupplier, SessionInfo sessionInfo) {
+            return true;
         }
     };
     private static final ReservationPreferenceImpl SOME_PREFERENCE = new ReservationPreferenceImpl(
@@ -112,30 +106,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
         final TenantPayload p = new ReservationsProcessing();
         p.accept(t);
         verify(z).accept(eq(simple));
-        assertThat(getEventsRequested()).hasSize(4);
+        assertThat(getEventsRequested()).hasSize(3);
     }
 
-    @Test
-    void skipsInvestmentsProperly() { // simulate skipping investments by introducing one of them twice
-        final Zonky z = harmlessZonky();
-        final Reservation simple = new MockReservationBuilder()
-            .set(ReservationImpl::setMyReservation, mockMyReservation())
-            .build();
-        final Reservation simple2 = new MockReservationBuilder()
-            .set(ReservationImpl::setMyReservation, mockMyReservation())
-            .build();
-        final Loan fresh1 = MockLoanBuilder.fresh();
-        final Loan fresh2 = MockLoanBuilder.fresh();
-        when(z.getLoan(eq(simple.getId()))).thenReturn(fresh1);
-        when(z.getLoan(eq(simple2.getId()))).thenReturn(fresh2);
-        when(z.getReservationPreferences()).thenReturn(new ReservationPreferencesImpl(SOME_PREFERENCE));
-        when(z.getPendingReservations()).thenReturn(Stream.of(simple, simple, simple2));
-        final Tenant t = mockTenant(z, false);
-        when(t.getReservationStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
-        final TenantPayload p = new ReservationsProcessing();
-        p.accept(t);
-        verify(z, times(1)).accept(eq(simple));
-        verify(z, times(1)).accept(eq(simple2));
-        assertThat(getEventsRequested()).hasSize(6);
-    }
 }

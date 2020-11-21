@@ -24,6 +24,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
@@ -35,11 +36,8 @@ import com.github.robozonky.api.notifications.LoanDelinquent90DaysOrMoreEvent;
 import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
-import com.github.robozonky.api.notifications.PurchaseRecommendedEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
-import com.github.robozonky.api.notifications.ReservationAcceptationRecommendedEvent;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
@@ -53,19 +51,13 @@ import com.github.robozonky.api.notifications.RoboZonkyStartingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyTestingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 import com.github.robozonky.api.notifications.SaleOfferedEvent;
-import com.github.robozonky.api.notifications.SaleRecommendedEvent;
 import com.github.robozonky.api.notifications.SellingCompletedEvent;
 import com.github.robozonky.api.notifications.SellingStartedEvent;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
-import com.github.robozonky.api.strategies.RecommendedLoan;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
-import com.github.robozonky.api.strategies.RecommendedReservation;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.tenant.LazyEvent;
 
@@ -135,14 +127,6 @@ public final class EventFactory {
         return new LoanNoLongerDelinquentEventImpl(investment, loan);
     }
 
-    public static LoanRecommendedEvent loanRecommended(final RecommendedLoan recommendation) {
-        return new LoanRecommendedEventImpl(recommendation);
-    }
-
-    public static PurchaseRecommendedEvent purchaseRecommended(final RecommendedParticipation recommendation) {
-        return new PurchaseRecommendedEventImpl(recommendation);
-    }
-
     public static PurchasingCompletedEvent purchasingCompleted(final PortfolioOverview portfolio) {
         return new PurchasingCompletedEventImpl(portfolio);
     }
@@ -196,10 +180,6 @@ public final class EventFactory {
         return new SaleOfferedEventImpl(investment, loan);
     }
 
-    public static SaleRecommendedEvent saleRecommended(final RecommendedInvestment recommendation) {
-        return new SaleRecommendedEventImpl(recommendation);
-    }
-
     public static SellingCompletedEvent sellingCompleted(final PortfolioOverview portfolio) {
         return new SellingCompletedEventImpl(portfolio);
     }
@@ -214,11 +194,6 @@ public final class EventFactory {
 
     public static ReservationCheckCompletedEvent reservationCheckCompleted(final PortfolioOverview portfolioOverview) {
         return new ReservationCheckCompletedEventImpl(portfolioOverview);
-    }
-
-    public static ReservationAcceptationRecommendedEvent reservationAcceptationRecommended(
-            final RecommendedReservation recommendation) {
-        return new ReservationAcceptationRecommendedEventImpl(recommendation);
     }
 
     public static ReservationAcceptedEvent reservationAccepted(final Loan loan, final Money investedAmount,

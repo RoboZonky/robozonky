@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2020 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
+
+import java.util.Objects;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Reservation;
-
-import java.util.Objects;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.api.strategies.ReservationStrategy;
 
 /**
  * Represents the decision of the {@link ReservationStrategy} to recommend a {@link Reservation} for investing.
  */
-public final class RecommendedReservation
-        implements Recommended<RecommendedReservation, ReservationDescriptor, Reservation> {
+final class RecommendedReservation implements Recommended<ReservationDescriptor, Reservation> {
 
     private final ReservationDescriptor reservationDescriptor;
-    private final Money recommendedInvestment;
 
-    RecommendedReservation(final ReservationDescriptor reservationDescriptor, final Money amount) {
-        if (reservationDescriptor == null) {
-            throw new IllegalArgumentException("Reservation descriptor must not be null.");
-        }
+    RecommendedReservation(final ReservationDescriptor reservationDescriptor) {
         this.reservationDescriptor = reservationDescriptor;
-        this.recommendedInvestment = amount;
     }
 
     @Override
@@ -45,7 +41,9 @@ public final class RecommendedReservation
 
     @Override
     public Money amount() {
-        return recommendedInvestment;
+        return reservationDescriptor.item()
+            .getMyReservation()
+            .getReservedAmount();
     }
 
     @Override
@@ -57,20 +55,18 @@ public final class RecommendedReservation
             return false;
         }
         final RecommendedReservation that = (RecommendedReservation) o;
-        return Objects.equals(recommendedInvestment, that.recommendedInvestment) &&
-                Objects.equals(reservationDescriptor, that.reservationDescriptor);
+        return Objects.equals(reservationDescriptor, that.reservationDescriptor);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(reservationDescriptor, recommendedInvestment);
+        return Objects.hash(reservationDescriptor);
     }
 
     @Override
     public String toString() {
         return "RecommendedReservation{" +
-                "recommendedInvestmentAmount=" + recommendedInvestment +
-                ", reservationDescriptor=" + reservationDescriptor +
+                "reservationDescriptor=" + reservationDescriptor +
                 '}';
     }
 }

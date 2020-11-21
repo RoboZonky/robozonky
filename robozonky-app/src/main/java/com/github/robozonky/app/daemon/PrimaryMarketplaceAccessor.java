@@ -64,6 +64,11 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
 
     @Override
     public Stream<LoanDescriptor> getMarketplace() {
+        /*
+         * Do not make this parallel.
+         * Each loan will be processed individually and if done in parallel, the portfolio structure could go haywire.
+         * The code is designed to invest, rebuild the portfolio structure, and then invest again.
+         */
         var loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
             .filter(l -> l.getMyInvestment()
                 .isEmpty()); // re-investing would fail

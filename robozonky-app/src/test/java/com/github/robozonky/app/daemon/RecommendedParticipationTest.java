@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.app.daemon;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
@@ -27,11 +27,13 @@ import org.junit.jupiter.api.Test;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.test.mock.MockLoanBuilder;
 
 class RecommendedParticipationTest {
 
-    private static final Loan LOAN = LoanDescriptorTest.mockLoan();
+    private static final Loan LOAN = MockLoanBuilder.fresh();
 
     private static Participation mockParticipation() {
         final Participation p = mock(ParticipationImpl.class);

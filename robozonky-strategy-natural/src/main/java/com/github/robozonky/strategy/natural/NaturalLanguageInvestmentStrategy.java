@@ -18,14 +18,14 @@ package com.github.robozonky.strategy.natural;
 
 import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 
 class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
 
@@ -38,34 +38,27 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
     }
 
     @Override
-    public Stream<RecommendedLoan> recommend(final Stream<LoanDescriptor> available, final PortfolioOverview portfolio,
-            final SessionInfo sessionInfo) {
+    public Optional<Money> recommend(final LoanDescriptor loanDescriptor,
+            final Supplier<PortfolioOverview> portfolioOverviewSupplier, final SessionInfo sessionInfo) {
+        var portfolio = portfolioOverviewSupplier.get();
         if (!Util.isAcceptable(strategy, portfolio)) {
-            return Stream.empty();
+            return Optional.empty();
         }
+        var loan = loanDescriptor.item();
+        LOGGER.trace("Evaluating {}.", loan);
         var preferences = Preferences.get(strategy, portfolio);
-        var withoutUndesirable = available.parallel()
-            .peek(d -> LOGGER.trace("Evaluating {}.", d.item()))
-            .filter(d -> { // skip loans in ratings which are not required by the strategy
-                boolean isAcceptable = preferences.getDesirableRatings()
-                    .contains(d.item()
-                        .getRating());
-                if (!isAcceptable) {
-                    LOGGER.debug("Loan #{} skipped due to an undesirable rating.", d.item()
-                        .getId());
-                }
-                return isAcceptable;
-            });
-        return strategy.getApplicableLoans(withoutUndesirable, portfolio)
-            .sorted(preferences.getPrimaryMarketplaceComparator())
-            .flatMap(d -> { // recommend amount to invest per strategy
-                final Money recommendedAmount = recommender.apply(d.item(), sessionInfo);
-                if (!recommendedAmount.isZero()) {
-                    return d.recommend(recommendedAmount)
-                        .stream();
-                } else {
-                    return Stream.empty();
-                }
-            });
+        var isAcceptable = preferences.getDesirableRatings()
+            .contains(loan.getRating());
+        if (!isAcceptable) {
+            LOGGER.debug("Loan #{} skipped due to an undesirable rating.", loan.getId());
+            return Optional.empty();
+        } else if (!strategy.isApplicable(loanDescriptor, portfolio)) {
+            return Optional.empty();
+        }
+        var recommendedAmount = recommender.apply(loan, sessionInfo);
+        if (recommendedAmount.isZero()) {
+            return Optional.empty();
+        }
+        return Optional.of(recommendedAmount);
     }
 }

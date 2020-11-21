@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
@@ -36,11 +37,9 @@ import com.github.robozonky.api.notifications.Event;
 import com.github.robozonky.api.notifications.ExecutionCompletedEvent;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
-import com.github.robozonky.api.notifications.LoanRecommendedEvent;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
-import com.github.robozonky.api.strategies.RecommendedLoan;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.InvestmentFailureType;
@@ -50,10 +49,8 @@ import com.github.robozonky.internal.remote.Zonky;
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
 
     private static InvestmentStrategy mockStrategy(final int loanToRecommend, final int recommend) {
-        return (l, p, r) -> l.filter(i -> i.item()
-            .getId() == loanToRecommend)
-            .flatMap(i -> i.recommend(Money.from(recommend))
-                .stream());
+        return (l, p, r) -> l.item()
+            .getId() == loanToRecommend ? Optional.of(Money.from(recommend)) : Optional.empty();
     }
 
     @Test
@@ -85,15 +82,13 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         // check that one investment was made
         assertThat(i).hasSize(1);
         final List<Event> newEvents = getEventsRequested();
-        assertThat(newEvents).hasSize(4);
+        assertThat(newEvents).hasSize(3);
         assertSoftly(softly -> {
             softly.assertThat(newEvents.get(0))
                 .isInstanceOf(ExecutionStartedEvent.class);
             softly.assertThat(newEvents.get(1))
-                .isInstanceOf(LoanRecommendedEvent.class);
-            softly.assertThat(newEvents.get(2))
                 .isInstanceOf(InvestmentMadeEvent.class);
-            softly.assertThat(newEvents.get(3))
+            softly.assertThat(newEvents.get(2))
                 .isInstanceOf(ExecutionCompletedEvent.class);
         });
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
@@ -103,8 +98,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void failedDueToUnknownError() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200))
-            .get();
+        final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(200));
         final Exception thrown = new ServiceUnavailableException();
         doThrow(thrown).when(z)
             .invest(notNull(), anyInt());
@@ -117,8 +111,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void failedDueToTooManyRequests() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200))
-            .get();
+        final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(200));
         final Response response = Response.status(400)
             .entity(InvestmentFailureType.TOO_MANY_REQUESTS.getReason()
                 .get())
@@ -134,8 +127,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     void failedDueToLowBalance() {
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z, false);
-        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(200))
-            .get();
+        final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(200));
         final Response response = Response.status(400)
             .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason()
                 .get())
@@ -150,8 +142,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
     @Test
     void successful() {
         final int amountToInvest = 200;
-        final RecommendedLoan r = mockLoanDescriptor().recommend(Money.from(amountToInvest))
-            .get();
+        final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(amountToInvest));
         final Zonky z = harmlessZonky();
         final PowerTenant auth = mockTenant(z);
         final InvestingSession t = new InvestingSession(Stream.empty(), auth);

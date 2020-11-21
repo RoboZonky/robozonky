@@ -36,6 +36,12 @@ final class ReservationsProcessing implements TenantPayload {
             LOGGER.info("Reservation system is disabled or there are no active categories.");
             return;
         }
+        /*
+         * Do not make this parallel.
+         * Each reservation will be processed individually and if done in parallel, the portfolio structure could go
+         * haywire.
+         * The code is designed to invest, rebuild the portfolio structure, and then invest again.
+         */
         var reservations = tenant.call(Zonky::getPendingReservations)
             .map(r -> new ReservationDescriptor(r, () -> tenant.getLoan(r.getId())));
         ReservationSession.process(tenant, reservations, strategy);

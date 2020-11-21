@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
-import com.github.robozonky.api.strategies.RecommendedInvestment;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
@@ -59,10 +57,7 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
         when(portfolioOverview.getInvested(eq(rating))).thenReturn(Money.from(10));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
             .map(i -> new InvestmentDescriptor(i, () -> null))
-            .map(d -> d.recommend(d.item()
-                .getPrincipal()
-                .getUnpaid()))
-            .flatMap(Optional::stream);
+            .map(RecommendedInvestment::new);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
         assertThat(throttled)
@@ -89,10 +84,7 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
         when(portfolioOverview.getInvested()).thenReturn(Money.from(2200));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
             .map(i -> new InvestmentDescriptor(i, () -> null))
-            .map(d -> d.recommend(d.item()
-                .getPrincipal()
-                .getUnpaid()))
-            .flatMap(Optional::stream);
+            .map(RecommendedInvestment::new);
         final SellingThrottle t = new SellingThrottle();
         final Stream<RecommendedInvestment> throttled = t.apply(recommendations, portfolioOverview);
         assertThat(throttled)

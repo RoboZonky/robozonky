@@ -18,21 +18,17 @@ package com.github.robozonky.app.daemon;
 
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchased;
 import static com.github.robozonky.app.events.impl.EventFactory.investmentPurchasedLazy;
-import static com.github.robozonky.app.events.impl.EventFactory.purchaseRecommended;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompleted;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingCompletedLazy;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarted;
 import static com.github.robozonky.app.events.impl.EventFactory.purchasingStartedLazy;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
-import com.github.robozonky.api.strategies.RecommendedParticipation;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.PurchaseResult;
 
@@ -53,11 +49,6 @@ final class PurchasingSession extends
     public static Stream<Participation> purchase(final PowerTenant auth, final Stream<ParticipationDescriptor> items,
             final PurchaseStrategy strategy) {
         final PurchasingSession s = new PurchasingSession(items, auth);
-        final Collection<ParticipationDescriptor> c = s.getAvailable();
-        if (c.isEmpty()) {
-            s.logger.debug("Skipping purchasing as no participations are available.");
-            return Stream.empty();
-        }
         s.tenant.fire(purchasingStartedLazy(() -> purchasingStarted(auth.getPortfolio()
             .getOverview())));
         s.purchase(strategy);
@@ -67,15 +58,12 @@ final class PurchasingSession extends
     }
 
     private void purchase(final PurchaseStrategy strategy) {
-        boolean invested;
-        do {
-            PortfolioOverview portfolioOverview = tenant.getPortfolio()
-                .getOverview();
-            invested = strategy.recommend(getAvailable().stream(), portfolioOverview, tenant.getSessionInfo())
-                .peek(r -> tenant.fire(purchaseRecommended(r)))
-                .filter(this::isBalanceAcceptable) // no need to try if we don't have enough money
-                .anyMatch(this::accept); // keep trying until investment opportunities are exhausted
-        } while (invested);
+        getAvailable()
+            .filter(i -> strategy.recommend(i, () -> tenant.getPortfolio()
+                .getOverview(), tenant.getSessionInfo()))
+            .map(RecommendedParticipation::new)
+            .takeWhile(this::isBalanceAcceptable) // no need to try if we don't have enough money
+            .forEach(this::accept); // keep trying until investment opportunities are exhausted
     }
 
     private boolean actualPurchase(final Participation participation) {

@@ -31,11 +31,12 @@ import com.github.robozonky.internal.tenant.Tenant;
 
 /**
  * The purpose of this class is to keep a certain number of elements, and to persist those across many repeated
- * runs of RoboZonky. This is primarily used to store information to facilitate a dry run.
+ * runs of RoboZonky.
+ * This is used to store information to facilitate a dry run.
  * <p>
- * For example, when selling participations, the sell commands don't actually make it to Zonky. (Dry run!) So, for the
- * robot to not attempt to sell the same participation over and over again, the participation will be stored here and
- * kept for eternity.
+ * For example, when selling participations, the sell commands don't actually make it to Zonky. (Dry run!)
+ * So, for the robot to not attempt to sell the same participation over and over again,
+ * the participation ID will be stored here and kept for eternity.
  * 
  * @param <T> Type of elements to store.
  */
@@ -44,6 +45,7 @@ final class SessionState<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(SessionState.class);
     private static final long[] NO_LONGS = new long[0];
+    private final boolean isEnabled;
     private final Collection<Long> items;
     private final ToLongFunction<T> idSupplier;
     private final String key;
@@ -58,33 +60,17 @@ final class SessionState<T> {
      *                   underlying storage.
      */
     public SessionState(final Tenant tenant, final ToLongFunction<T> idSupplier, final String key) {
-        this(tenant, Collections.emptyList(), idSupplier, key);
-    }
-
-    /**
-     * Create an instance, potentially retaining some elements from the underlying storage.
-     * 
-     * @param tenant     Session identifier.
-     * @param retain     Elements to retain.
-     * @param idSupplier Supplies ID of the element to be stored, which will be used as a traditional primary key.
-     * @param key        Name of this collection elements. Different instances with the same value operate on the same
-     *                   underlying storage.
-     */
-    public SessionState(final Tenant tenant, final Collection<T> retain, final ToLongFunction<T> idSupplier,
-            final String key) {
+        this.isEnabled = tenant.getSessionInfo()
+            .isDryRun();
         this.state = tenant.getState(SessionState.class);
         this.key = key;
         this.idSupplier = idSupplier;
-        this.items = read();
-        this.items.retainAll(retain.stream()
-            .mapToLong(idSupplier)
-            .boxed()
-            .collect(Collectors.toSet()));
+        this.items = isEnabled ? read() : Collections.emptyList(); // Only do work in dry run.
         LOGGER.debug("'{}' contains {}.", key, items);
     }
 
     private Set<Long> read() {
-        final long[] result = state.getValues(key)
+        var result = state.getValues(key)
             .map(s -> s.mapToLong(Long::parseLong)
                 .toArray())
             .orElse(NO_LONGS);
@@ -95,9 +81,13 @@ final class SessionState<T> {
     }
 
     private void write(final Collection<Long> items) {
-        state.update(b -> b.put(key, items.stream()
-            .map(String::valueOf)));
-        final String value = state.getValue(key)
+        if (items.isEmpty()) {
+            state.update(c -> c.remove(key));
+        } else {
+            state.update(b -> b.put(key, items.stream()
+                .map(String::valueOf)));
+        }
+        var value = state.getValue(key)
             .orElse("nothing");
         LOGGER.trace("'{}' wrote '{}'.", key, value);
     }
@@ -108,8 +98,10 @@ final class SessionState<T> {
      * @param item
      */
     public synchronized void put(final T item) {
-        items.add(idSupplier.applyAsLong(item));
-        write(items);
+        if (isEnabled) { // Only do work in dry run.
+            items.add(idSupplier.applyAsLong(item));
+        }
+        write(items); // But store the results anyway, so that the stale dry run data is removed.
     }
 
     /**

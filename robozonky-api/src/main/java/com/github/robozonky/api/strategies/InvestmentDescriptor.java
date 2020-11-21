@@ -17,10 +17,8 @@
 package com.github.robozonky.api.strategies;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.internal.util.functional.Memoizer;
@@ -28,7 +26,7 @@ import com.github.robozonky.internal.util.functional.Memoizer;
 /**
  * Carries metadata regarding an {@link Investment}.
  */
-public final class InvestmentDescriptor implements Descriptor<RecommendedInvestment, InvestmentDescriptor, Investment> {
+public final class InvestmentDescriptor implements Descriptor<Investment> {
 
     private final Investment investment;
     private final Supplier<Loan> related;
@@ -52,24 +50,6 @@ public final class InvestmentDescriptor implements Descriptor<RecommendedInvestm
     @Override
     public Loan related() {
         return related.get();
-    }
-
-    private Money getRemainingPrincipal() {
-        return investment.getPrincipal()
-            .getUnpaid();
-    }
-
-    public Optional<RecommendedInvestment> recommend() {
-        return recommend(getRemainingPrincipal());
-    }
-
-    @Override
-    public Optional<RecommendedInvestment> recommend(final Money amount) {
-        if (Objects.equals(amount, getRemainingPrincipal())) {
-            return Optional.of(new RecommendedInvestment(this, amount));
-        } else {
-            return Optional.empty();
-        }
     }
 
     @Override

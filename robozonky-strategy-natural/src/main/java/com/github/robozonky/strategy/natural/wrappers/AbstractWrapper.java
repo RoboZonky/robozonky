@@ -28,7 +28,7 @@ import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
-abstract class AbstractWrapper<T extends Descriptor<?, ?, ?>> implements Wrapper<T> {
+abstract class AbstractWrapper<T extends Descriptor<?>> implements Wrapper<T> {
 
     private final T original;
     private final PortfolioOverview portfolioOverview;
