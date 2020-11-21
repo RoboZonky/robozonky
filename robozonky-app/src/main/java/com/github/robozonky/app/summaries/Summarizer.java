@@ -24,9 +24,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.events.impl.EventFactory;

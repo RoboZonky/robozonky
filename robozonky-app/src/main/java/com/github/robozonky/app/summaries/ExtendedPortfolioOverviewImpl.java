@@ -22,8 +22,8 @@ import java.util.Map;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {

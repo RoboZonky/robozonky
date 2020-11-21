@@ -355,6 +355,17 @@
         "old": "method java.util.stream.Stream<com.github.robozonky.api.strategies.RecommendedInvestment> com.github.robozonky.api.strategies.SellStrategy::recommend(java.util.Collection<com.github.robozonky.api.strategies.InvestmentDescriptor>, com.github.robozonky.api.strategies.PortfolioOverview, com.github.robozonky.api.SessionInfo)",
         "new": "method boolean com.github.robozonky.api.strategies.SellStrategy::recommend(com.github.robozonky.api.strategies.InvestmentDescriptor, java.util.function.Supplier<com.github.robozonky.api.strategies.PortfolioOverview>, com.github.robozonky.api.SessionInfo)",
         "justification": "Strategy interface is simplified for increased RoboZonky performance."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.strategies.ExtendedPortfolioOverview com.github.robozonky.api.notifications.WeeklySummaryEvent::getPortfolioOverview()",
+        "new": "method com.github.robozonky.api.notifications.ExtendedPortfolioOverview com.github.robozonky.api.notifications.WeeklySummaryEvent::getPortfolioOverview()",
+        "justification": "Moved the interface to a package where it is being used."
+      },
+      {
+        "code": "java.class.removed",
+        "old": "interface com.github.robozonky.api.strategies.ExtendedPortfolioOverview (archive = MavenArchive[gav=com.github.robozonky:robozonky-api:jar:6.1.1, file=\/home\/triceo\/.m2\/repository\/com\/github\/robozonky\/robozonky-api\/6.1.1\/robozonky-api-6.1.1.jar], in api = true, through use = false)",
+        "justification": "Moved the interface to a package where it is being used."
       }
     ]
   }

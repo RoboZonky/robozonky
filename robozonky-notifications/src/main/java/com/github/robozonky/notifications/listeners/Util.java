@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.DelinquencyBased;
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -43,7 +44,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
 

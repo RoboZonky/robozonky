@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.api.strategies;
+package com.github.robozonky.api.notifications;
 
 import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
  * Class with some aggregate statistics about user's portfolio. Used primarily as the main input into

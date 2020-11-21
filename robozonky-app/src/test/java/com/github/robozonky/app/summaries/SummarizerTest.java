@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.remote.Zonky;

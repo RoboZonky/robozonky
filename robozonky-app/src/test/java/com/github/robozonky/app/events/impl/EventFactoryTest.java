@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.ExecutionStartedEvent;
+import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.InvestmentMadeEvent;
 import com.github.robozonky.api.notifications.InvestmentPurchasedEvent;
 import com.github.robozonky.api.notifications.InvestmentSoldEvent;
@@ -50,7 +51,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.strategies.ExtendedPortfolioOverview;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
