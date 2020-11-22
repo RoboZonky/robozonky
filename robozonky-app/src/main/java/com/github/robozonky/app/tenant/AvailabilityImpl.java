@@ -98,14 +98,14 @@ final class AvailabilityImpl implements Availability {
         if (isAvailable()) {
             return Optional.empty();
         }
-        final Status paused = pause.get();
+        var paused = pause.get();
         var pausedOn = paused.getExceptionRegisteredOn();
         if (hasNewerRequest.test(pausedOn)) {
             pause.set(null);
-            LOGGER.info("Resumed after a forced pause at {}.", pausedOn);
+            LOGGER.info(() -> "Resumed after a forced pause on " + DateUtil.asHumanReadableString(pausedOn) + ".");
             return Optional.of(paused.getExceptionRegisteredOn());
         } else { // make sure we have actually performed a metered operation, safeguarding against HTTP 429
-            LOGGER.info("Not resuming after a forced pause at {}.", pausedOn);
+            LOGGER.info(() -> "Not resumed after a forced pause on " + DateUtil.asHumanReadableString(pausedOn) + ".");
             return Optional.empty();
         }
     }

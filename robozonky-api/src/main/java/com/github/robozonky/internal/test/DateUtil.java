@@ -19,6 +19,7 @@ package com.github.robozonky.internal.test;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.LogManager;
@@ -60,5 +61,9 @@ public final class DateUtil {
 
     public static Instant now() {
         return Instant.now(getSystemClock());
+    }
+
+    public static String asHumanReadableString(ZonedDateTime zonedDateTime) {
+        return zonedDateTime.format(DateTimeFormatter.RFC_1123_DATE_TIME);
     }
 }
