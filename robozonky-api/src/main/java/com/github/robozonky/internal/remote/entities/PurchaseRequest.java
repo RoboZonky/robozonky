@@ -24,9 +24,12 @@ import com.github.robozonky.api.remote.entities.Participation;
 public class PurchaseRequest {
 
     private BigDecimal amount;
+    private BigDecimal discount;
 
     public PurchaseRequest(final Participation participation) {
         this.amount = participation.getRemainingPrincipal()
+            .getValue();
+        this.discount = participation.getDiscount()
             .getValue();
     }
 
@@ -38,10 +41,19 @@ public class PurchaseRequest {
         this.amount = amount;
     }
 
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(final BigDecimal discount) {
+        this.discount = discount;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", PurchaseRequest.class.getSimpleName() + "[", "]")
             .add("amount=" + amount)
+            .add("discount=" + discount)
             .toString();
     }
 }

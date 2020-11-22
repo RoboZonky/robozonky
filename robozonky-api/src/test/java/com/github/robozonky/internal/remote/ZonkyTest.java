@@ -223,6 +223,7 @@ class ZonkyTest {
         final Zonky z = mockZonkyControl(ca);
         final Participation p = mock(ParticipationImpl.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
+        when(p.getDiscount()).thenReturn(Money.ZERO);
         when(p.getId()).thenReturn(1L);
         assertThat(z.purchase(p)).isEqualTo(PurchaseResult.success());
     }
@@ -236,6 +237,7 @@ class ZonkyTest {
         final Zonky z = mockZonkyControl(ca);
         final Participation p = mock(ParticipationImpl.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
+        when(p.getDiscount()).thenReturn(Money.ZERO);
         when(p.getId()).thenReturn(1L);
         assertThat(z.purchase(p)
             .getFailureType()).contains(PurchaseFailureType.UNKNOWN);

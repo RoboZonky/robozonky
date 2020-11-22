@@ -79,15 +79,14 @@ final class PurchasingSession extends
                 // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
                 throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.");
             case INSUFFICIENT_BALANCE:
-                logger.debug("Failed purchasing a participation worth {}. We don't have enough account balance.",
-                        amount);
+                logger.debug("Failed purchasing participation worth {}. We don't have sufficient balance.", amount);
                 tenant.setKnownBalanceUpperBound(amount.subtract(1));
                 break;
             case ALREADY_HAVE_INVESTMENT:
-                logger.debug("Failed purchasing a participation worth {}. Someone's beaten us to it.", amount);
+                logger.debug("Failed purchasing participation worth {}. Someone's beaten us to it.", amount);
                 break;
             default:
-                logger.debug("Failed purchasing a participation worth {}. Reason unknown.", amount);
+                throw new IllegalStateException("Unknown problem when purchasing participation worth " + amount + ".");
         }
         return false;
     }
