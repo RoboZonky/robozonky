@@ -55,12 +55,7 @@ final class Counter {
         this.period = period;
         this.timestamps = Reloadable.with(() -> {
             var result = load(sessionInfo, id);
-            LOGGER.debug(() -> {
-                var toString = result.stream()
-                    .map(DateUtil::toString)
-                    .collect(Collectors.joining("; ", "[", "]"));
-                return "Loaded timestamps: " + toString + ".";
-            });
+            LOGGER.debug(() -> "Loaded timestamps: " + toString(result) + ".");
             return result;
         })
             .reloadAfter(period)
@@ -80,7 +75,7 @@ final class Counter {
     }
 
     private void store(final SessionInfo sessionInfo, final String id, final Set<ZonedDateTime> timestamps) {
-        LOGGER.trace("Storing timestamps: {}.", timestamps);
+        LOGGER.trace(() -> "Storing timestamps: " + toString(timestamps) + ".");
         TenantState.of(sessionInfo)
             .in(Counter.class)
             .reset(b -> b.put(id, filterValidTimestamps(timestamps)
@@ -108,5 +103,11 @@ final class Counter {
 
     public boolean allow() {
         return filterValidTimestamps(getTimestamps()).count() < maxItems;
+    }
+
+    private static String toString(Set<ZonedDateTime> timestamps) {
+        return timestamps.stream()
+            .map(DateUtil::toString)
+            .collect(Collectors.joining("; ", "[", "]"));
     }
 }

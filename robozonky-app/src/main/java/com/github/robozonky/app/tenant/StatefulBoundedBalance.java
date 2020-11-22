@@ -95,10 +95,10 @@ final class StatefulBoundedBalance {
         var lastModified = lastModificationDate.get();
         var timeBetweenLastBalanceCheckAndNow = getTimeBetweenLastBalanceCheckAndNow();
         if (timeBetweenLastBalanceCheckAndNow.compareTo(BALANCE_INCREASE_INTERVAL_STEP) < 0) {
-            LOGGER.trace("Balance of {} is still fresh ({}).", balance, lastModified);
+            LOGGER.trace(() -> "Balance of " + balance + " is still fresh (" + DateUtil.toString(lastModified) + ").");
             return balance;
         }
-        LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
+        LOGGER.trace(() -> "Resetting stale upper bound; too long since " + DateUtil.toString(lastModified) + ".");
         return set(MAXIMUM);
     }
 }
