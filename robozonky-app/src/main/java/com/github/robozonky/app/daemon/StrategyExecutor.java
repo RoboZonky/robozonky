@@ -17,6 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -31,13 +32,15 @@ import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
 
 class StrategyExecutor<T, S, R> implements Supplier<Stream<R>> {
 
     private final Logger logger;
     private final PowerTenant tenant;
-    private final AtomicReference<Instant> lastSuccessfulMarketplaceCheck = new AtomicReference<>(Instant.EPOCH);
+    private final AtomicReference<ZonedDateTime> lastSuccessfulMarketplaceCheck = new AtomicReference<>(
+            Instant.EPOCH.atZone(Defaults.ZONKYCZ_ZONE_ID));
     private final OperationDescriptor<T, S, R> operationDescriptor;
     private final AbstractMarketplaceAccessor<T> marketplaceAccessor;
 
@@ -86,14 +89,14 @@ class StrategyExecutor<T, S, R> implements Supplier<Stream<R>> {
     private boolean needsToForceMarketplaceCheck(final AbstractMarketplaceAccessor<T> marketplace) {
         return lastSuccessfulMarketplaceCheck.get()
             .plus(marketplace.getForcedMarketplaceCheckInterval())
-            .isBefore(DateUtil.now());
+            .isBefore(DateUtil.zonedNow());
     }
 
     private Stream<R> invest(final S strategy) {
         if (skipStrategyEvaluation(marketplaceAccessor)) {
             return Stream.empty();
         }
-        var marketplaceCheckTimestamp = DateUtil.now();
+        var marketplaceCheckTimestamp = DateUtil.zonedNow();
         var marketplace = marketplaceAccessor.getMarketplace();
         var result = operationDescriptor.getOperation()
             .apply(tenant, marketplace, strategy);

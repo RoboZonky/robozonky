@@ -17,7 +17,7 @@
 package com.github.robozonky.internal.remote;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,11 +79,11 @@ public class Select implements Consumer<RoboZonkyFilter> {
         addObject(field, operation, String.valueOf(value));
     }
 
-    private void addLocalDate(final String field, final String operation, final LocalDate value) {
+    private void addDate(final String field, final String operation, final LocalDate value) {
         addObject(field, operation, DateTimeFormatter.ISO_DATE.format(value));
     }
 
-    private void addOffsetDateTime(final String field, final String operation, final OffsetDateTime value) {
+    private void addDateTime(final String field, final String operation, final ZonedDateTime value) {
         addObject(field, operation, DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(value));
     }
 
@@ -168,12 +168,12 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     public Select greaterThan(final String field, final LocalDate value) {
-        addLocalDate(field, "gt", value);
+        addDate(field, "gt", value);
         return this;
     }
 
-    public Select greaterThan(final String field, final OffsetDateTime value) {
-        addOffsetDateTime(field, "gt", value);
+    public Select greaterThan(final String field, final ZonedDateTime value) {
+        addDateTime(field, "gt", value);
         return this;
     }
 
@@ -183,22 +183,22 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     public Select greaterThanOrEquals(final String field, final LocalDate value) {
-        addLocalDate(field, "gte", value);
+        addDate(field, "gte", value);
         return this;
     }
 
-    public Select greaterThanOrEquals(final String field, final OffsetDateTime value) {
-        addOffsetDateTime(field, "gte", value);
+    public Select greaterThanOrEquals(final String field, final ZonedDateTime value) {
+        addDateTime(field, "gte", value);
         return this;
     }
 
     public Select greaterThanOrNull(final String field, final LocalDate value) {
-        addLocalDate(field, "gteornull", value);
+        addDate(field, "gteornull", value);
         return this;
     }
 
-    public Select greaterThanOrNull(final String field, final OffsetDateTime value) {
-        addOffsetDateTime(field, "gteornull", value);
+    public Select greaterThanOrNull(final String field, final ZonedDateTime value) {
+        addDateTime(field, "gteornull", value);
         return this;
     }
 
@@ -213,12 +213,12 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     public Select lessThan(final String field, final LocalDate value) {
-        addLocalDate(field, "lt", value);
+        addDate(field, "lt", value);
         return this;
     }
 
-    public Select lessThan(final String field, final OffsetDateTime value) {
-        addOffsetDateTime(field, "lt", value);
+    public Select lessThan(final String field, final ZonedDateTime value) {
+        addDateTime(field, "lt", value);
         return this;
     }
 
@@ -228,22 +228,22 @@ public class Select implements Consumer<RoboZonkyFilter> {
     }
 
     public Select lessThanOrEquals(final String field, final LocalDate value) {
-        addLocalDate(field, "lte", value);
+        addDate(field, "lte", value);
         return this;
     }
 
-    public Select lessThanOrEquals(final String field, final OffsetDateTime value) {
-        addOffsetDateTime(field, "lte", value);
+    public Select lessThanOrEquals(final String field, final ZonedDateTime value) {
+        addDateTime(field, "lte", value);
         return this;
     }
 
     public Select lessThanOrNull(final String field, final LocalDate value) {
-        addLocalDate(field, "lteornull", value);
+        addDate(field, "lteornull", value);
         return this;
     }
 
-    public Select lessThanOrNull(final String field, final OffsetDateTime value) {
-        addOffsetDateTime(field, "lteornull", value);
+    public Select lessThanOrNull(final String field, final ZonedDateTime value) {
+        addDateTime(field, "lteornull", value);
         return this;
     }
 
