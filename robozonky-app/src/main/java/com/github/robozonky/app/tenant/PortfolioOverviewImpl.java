@@ -47,7 +47,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
         if (invested.isZero()) {
             this.investedPerRating = Collections.emptyMap();
         } else {
-            this.investedPerRating = investedPerRating;
+            this.investedPerRating = Collections.unmodifiableMap(investedPerRating);
         }
     }
 

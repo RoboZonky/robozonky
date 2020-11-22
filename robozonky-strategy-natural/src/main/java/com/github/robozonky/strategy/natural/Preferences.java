@@ -16,50 +16,43 @@
 
 package com.github.robozonky.strategy.natural;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class Preferences {
 
-    private static Preferences INSTANCE = null;
+    private static final Logger LOGGER = LogManager.getLogger(Preferences.class);
+    private static final AtomicReference<Preferences> INSTANCE = new AtomicReference<>();
 
     private final PortfolioOverview referencePortfolio;
-    private final Set<Rating> ratingRanking;
+    private final Set<Rating> desirableRatings;
 
-    private Preferences(PortfolioOverview portfolio, Set<Rating> ratingRanking) {
+    private Preferences(PortfolioOverview portfolio, Set<Rating> desirableRatings) {
         this.referencePortfolio = portfolio;
-        this.ratingRanking = ratingRanking;
+        this.desirableRatings = Collections.unmodifiableSet(desirableRatings);
     }
 
-    public static synchronized Preferences get(ParsedStrategy strategy, PortfolioOverview portfolio) {
-        if (INSTANCE == null) {
-            INSTANCE = createInstance(portfolio, Util.rankRatingsByDemand(strategy, portfolio));
-            return INSTANCE;
-        }
-        if (Objects.equals(INSTANCE.referencePortfolio, portfolio)) {
-            return INSTANCE;
-        }
-        var ratingRanking = Util.rankRatingsByDemand(strategy, portfolio);
-        if (Objects.equals(INSTANCE.ratingRanking, ratingRanking)) {
-            return INSTANCE;
-        }
-        INSTANCE = createInstance(portfolio, ratingRanking);
-        return INSTANCE;
+    public static Preferences get(ParsedStrategy strategy, PortfolioOverview portfolio) {
+        return INSTANCE.updateAndGet(old -> {
+            if (old != null && Objects.equals(old.referencePortfolio, portfolio)) {
+                LOGGER.trace("Reusing {} for {}.", old, portfolio);
+                return old;
+            }
+            LOGGER.debug("Created new instance for {}.", portfolio);
+            return new Preferences(portfolio, Util.getRatingsInDemand(strategy, portfolio));
+        });
     }
 
-    private static Preferences createInstance(PortfolioOverview portfolio, Set<Rating> ratingRanking) {
-        return new Preferences(portfolio, ratingRanking);
-    }
-
-    /**
-     *
-     * @return Iteration order from the most desirable to the least.
-     */
     public Set<Rating> getDesirableRatings() {
-        return ratingRanking;
+        return desirableRatings;
     }
 
 }

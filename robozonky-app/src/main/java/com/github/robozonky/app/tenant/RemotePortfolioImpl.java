@@ -52,7 +52,10 @@ class RemotePortfolioImpl implements RemotePortfolio {
             .reloadAfter(Duration.ofMinutes(5))
             .finishWith(this::refresh)
             .build();
-        this.portfolioOverview = Reloadable.with(() -> new PortfolioOverviewImpl(this))
+        this.portfolioOverview = Reloadable.with(() -> {
+            LOGGER.debug("Building new portfolio overview.");
+            return new PortfolioOverviewImpl(this);
+        })
             .reloadAfter(Duration.ofHours(1))
             .build();
     }

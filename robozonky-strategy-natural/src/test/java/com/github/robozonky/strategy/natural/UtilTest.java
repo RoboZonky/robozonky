@@ -19,16 +19,11 @@ package com.github.robozonky.strategy.natural;
 import static com.github.robozonky.api.Ratio.fromPercentage;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -52,40 +47,8 @@ class UtilTest extends AbstractRoboZonkyTest {
         return portfolioOverview;
     }
 
-    private static void assertOrder(final Set<Rating> result, final Rating... ratingsOrderedDown) {
-        assertOrder(new ArrayList<>(result), ratingsOrderedDown);
-    }
-
-    private static void assertOrder(final List<Rating> result, final Rating... ratingsOrderedDown) {
-        final Rating first = result.get(0);
-        final Rating last = result.get(ratingsOrderedDown.length - 1);
-        assertSoftly(softly -> {
-            softly.assertThat(first)
-                .isEqualTo(ratingsOrderedDown[0]);
-            softly.assertThat(last)
-                .isEqualTo(ratingsOrderedDown[ratingsOrderedDown.length - 1]);
-        });
-    }
-
-    private static <T> Set<T> inOrder(T... items) {
-        Set<T> result = new LinkedHashSet<>(items.length);
-        result.addAll(asList(items));
-        return result;
-    }
-
     @Test
-    void comparator() {
-        Comparator<Rating> comparator = Util.getRatingByDemandComparator(inOrder(Rating.A, Rating.D, Rating.AAAAA));
-        assertSoftly(softly -> softly.assertThat(Rating.D)
-            .usingComparator(comparator)
-            .isGreaterThan(Rating.A)
-            .isLessThan(Rating.AAAAA)
-            .isLessThan(Rating.AAAAAA) // Not included == greatest.
-            .isLessThan(Rating.C));
-    }
-
-    @Test
-    void properRankingOfRatings() {
+    void acceptsRatingsProperly() {
         final int targetShareA = 1;
         final int targetShareB = targetShareA * 5;
         final int targetShareC = targetShareB * 5;
@@ -98,15 +61,15 @@ class UtilTest extends AbstractRoboZonkyTest {
         // all ratings have zero share; C > B > A
         final Set<Rating> ratings = EnumSet.of(Rating.A, Rating.B, Rating.C);
         PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
-        assertOrder(Util.rankRatingsByDemand(parsed, portfolio), Rating.C, Rating.B, Rating.A);
+        assertThat(Util.getRatingsInDemand(parsed, portfolio)).containsOnly(Rating.C, Rating.B, Rating.A);
 
         // A only; B, C overinvested
         portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.valueOf(10), BigDecimal.valueOf(30));
-        assertOrder(Util.rankRatingsByDemand(parsed, portfolio), Rating.A);
+        assertThat(Util.getRatingsInDemand(parsed, portfolio)).containsOnly(Rating.A);
 
         // B > A > C
         portfolio = preparePortfolio(BigDecimal.valueOf(0.99), BigDecimal.ZERO, BigDecimal.valueOf(24.9));
-        assertOrder(Util.rankRatingsByDemand(parsed, portfolio), Rating.B, Rating.A, Rating.C);
+        assertThat(Util.getRatingsInDemand(parsed, portfolio)).containsOnly(Rating.B, Rating.A, Rating.C);
     }
 
     @Test
