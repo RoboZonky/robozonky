@@ -63,7 +63,7 @@ public final class DateUtil {
         return Instant.now(getSystemClock());
     }
 
-    public static String asHumanReadableString(ZonedDateTime zonedDateTime) {
+    public static String toString(ZonedDateTime zonedDateTime) {
         return zonedDateTime.format(DateTimeFormatter.RFC_1123_DATE_TIME);
     }
 }

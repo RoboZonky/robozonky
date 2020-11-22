@@ -89,7 +89,7 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
             .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
         secrets.setToken(newToken);
         LOGGER.info(() -> "Access token for '" + secrets.getUsername() +
-                "' will expire on " + DateUtil.asHumanReadableString(newToken.getExpiresOn()) + ".");
+                "' will expire on " + DateUtil.toString(newToken.getExpiresOn()) + ".");
     }
 
     public static void outputToken(final KeyStoreHandler keyStoreHandler, final Path target) throws IOException {

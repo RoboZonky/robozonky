@@ -58,14 +58,15 @@ abstract class AbstractMarketplaceAccessor<T> {
             .isBefore(now)) {
             var newFullMarketplaceCheck = now.truncatedTo(ChronoUnit.SECONDS); // Go a couple millis back.
             lastFullMarketplaceCheckReference.set(newFullMarketplaceCheck);
-            logger.debug("Running full marketplace check with timestamp of {}, previous was {}.",
-                    newFullMarketplaceCheck,
-                    lastFullMarketplaceCheck);
+            logger.debug(() -> "Running full marketplace check with timestamp of "
+                    + DateUtil.toString(newFullMarketplaceCheck)
+                    + ", previous was " + DateUtil.toString(lastFullMarketplaceCheck) + ".");
             return getBaseFilter();
         } else {
             var filter = getBaseFilter()
                 .greaterThanOrEquals("datePublished", lastFullMarketplaceCheck);
-            logger.debug("Running incremental marketplace check, starting from {}.", lastFullMarketplaceCheck);
+            logger.debug(() -> "Running incremental marketplace check, starting from " +
+                    DateUtil.toString(lastFullMarketplaceCheck) + ".");
             return filter;
         }
     }

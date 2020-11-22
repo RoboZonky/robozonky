@@ -55,7 +55,12 @@ final class Counter {
         this.period = period;
         this.timestamps = Reloadable.with(() -> {
             var result = load(sessionInfo, id);
-            LOGGER.debug("Loaded timestamps: {}.", result);
+            LOGGER.debug(() -> {
+                var toString = result.stream()
+                    .map(DateUtil::toString)
+                    .collect(Collectors.joining("; ", "[", "]"));
+                return "Loaded timestamps: " + toString + ".";
+            });
             return result;
         })
             .reloadAfter(period)

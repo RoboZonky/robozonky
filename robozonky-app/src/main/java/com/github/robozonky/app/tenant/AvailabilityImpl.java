@@ -102,10 +102,10 @@ final class AvailabilityImpl implements Availability {
         var pausedOn = paused.getExceptionRegisteredOn();
         if (hasNewerRequest.test(pausedOn)) {
             pause.set(null);
-            LOGGER.info(() -> "Resumed after a forced pause on " + DateUtil.asHumanReadableString(pausedOn) + ".");
+            LOGGER.info(() -> "Resumed after a forced pause on " + DateUtil.toString(pausedOn) + ".");
             return Optional.of(paused.getExceptionRegisteredOn());
         } else { // make sure we have actually performed a metered operation, safeguarding against HTTP 429
-            LOGGER.info(() -> "Not resumed after a forced pause on " + DateUtil.asHumanReadableString(pausedOn) + ".");
+            LOGGER.info(() -> "Not resumed after a forced pause on " + DateUtil.toString(pausedOn) + ".");
             return Optional.empty();
         }
     }
@@ -119,9 +119,9 @@ final class AvailabilityImpl implements Availability {
             LOGGER.warn("Forcing a pause due to a remote failure.");
             return true;
         } else {
-            final Status paused = pause.updateAndGet(Status::anotherFailure);
-            LOGGER.debug("Forced pause in effect since {}, {} failed retries.", paused.getExceptionRegisteredOn(),
-                    paused.getFailedRetries(), ex);
+            var paused = pause.updateAndGet(Status::anotherFailure);
+            LOGGER.debug(() -> "Forced pause in effect since " + DateUtil.toString(paused.getExceptionRegisteredOn())
+                    + ", " + paused.getFailedRetries() + " failed retries.", ex);
             return false;
         }
     }
