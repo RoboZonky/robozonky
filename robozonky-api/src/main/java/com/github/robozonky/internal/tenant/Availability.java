@@ -16,7 +16,7 @@
 
 package com.github.robozonky.internal.tenant;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 public interface Availability {
@@ -25,7 +25,7 @@ public interface Availability {
      * @return The next time when the app should check for availability. In the meantime, no operations should
      *         be attempted.
      */
-    Instant nextAvailabilityCheck();
+    ZonedDateTime nextAvailabilityCheck();
 
     /**
      * Whether or not the app is available.
@@ -40,7 +40,7 @@ public interface Availability {
      * @return Empty if {@link #isAvailable()} is true, or when it is decided that the unavailability should continue.
      *         Otherwise {@link #isAvailable()} becomes true.
      */
-    Optional<Instant> registerSuccess();
+    Optional<ZonedDateTime> registerSuccess();
 
     /**
      * Report an error during the app's operation.
