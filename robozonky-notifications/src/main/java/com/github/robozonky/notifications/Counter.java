@@ -18,6 +18,7 @@ package com.github.robozonky.notifications;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Collections;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.test.DateUtil;
@@ -40,7 +42,7 @@ final class Counter {
     private final long maxItems;
     private final TemporalAmount period;
     private final SessionInfo sessionInfo;
-    private final Reloadable<Set<OffsetDateTime>> timestamps;
+    private final Reloadable<Set<ZonedDateTime>> timestamps;
 
     public Counter(final SessionInfo sessionInfo, final String id, final int maxItems) {
         this(sessionInfo, id, maxItems, Duration.ofHours(1));
@@ -52,7 +54,7 @@ final class Counter {
         this.maxItems = maxItems;
         this.period = period;
         this.timestamps = Reloadable.with(() -> {
-            final Set<OffsetDateTime> result = load(sessionInfo, id);
+            var result = load(sessionInfo, id);
             LOGGER.debug("Loaded timestamps: {}.", result);
             return result;
         })
@@ -60,41 +62,42 @@ final class Counter {
             .build();
     }
 
-    private static Set<OffsetDateTime> load(final SessionInfo sessionInfo, final String id) {
+    private static Set<ZonedDateTime> load(final SessionInfo sessionInfo, final String id) {
         return TenantState.of(sessionInfo)
             .in(Counter.class)
             .getValues(id)
             .map(value -> value
                 .map(String::trim)
                 .map(OffsetDateTime::parse)
+                .map(t -> t.atZoneSameInstant(Defaults.ZONKYCZ_ZONE_ID))
                 .collect(Collectors.toSet()))
             .orElse(new HashSet<>(0));
     }
 
-    private void store(final SessionInfo sessionInfo, final String id, final Set<OffsetDateTime> timestamps) {
+    private void store(final SessionInfo sessionInfo, final String id, final Set<ZonedDateTime> timestamps) {
         LOGGER.trace("Storing timestamps: {}.", timestamps);
         TenantState.of(sessionInfo)
             .in(Counter.class)
-            .reset(b -> b.put(id, filterValidTimestamps(timestamps).map(OffsetDateTime::toString)));
+            .reset(b -> b.put(id, filterValidTimestamps(timestamps)
+                .map(ZonedDateTime::toOffsetDateTime)
+                .map(OffsetDateTime::toString)));
     }
 
-    private Set<OffsetDateTime> getTimestamps() {
+    private Set<ZonedDateTime> getTimestamps() {
         return timestamps.get()
             .getOrElse(Collections.emptySet());
     }
 
-    private Stream<OffsetDateTime> filterValidTimestamps(final Set<OffsetDateTime> timestamps) {
-        final OffsetDateTime now = DateUtil.zonedNow()
-            .toOffsetDateTime();
+    private Stream<ZonedDateTime> filterValidTimestamps(final Set<ZonedDateTime> timestamps) {
+        var now = DateUtil.zonedNow();
         return timestamps.stream()
             .filter(timestamp -> timestamp.plus(period)
                 .isAfter(now));
     }
 
     public void increase() {
-        final Set<OffsetDateTime> stamps = getTimestamps();
-        stamps.add(DateUtil.zonedNow()
-            .toOffsetDateTime());
+        var stamps = getTimestamps();
+        stamps.add(DateUtil.zonedNow());
         store(sessionInfo, id, stamps);
     }
 
