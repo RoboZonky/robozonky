@@ -17,7 +17,7 @@
 package com.github.robozonky.internal.async;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -31,7 +31,7 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(TimeBasedReload.class);
 
-    private final AtomicReference<Instant> lastReloaded = new AtomicReference<>();
+    private final AtomicReference<ZonedDateTime> lastReloaded = new AtomicReference<>();
     private final AtomicReference<Duration> reloadAfter = new AtomicReference<>();
     private final Function<T, Duration> reloadFunction;
 
@@ -41,10 +41,10 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     @Override
     public boolean getAsBoolean() {
-        final Instant lastReloadedInstant = lastReloaded.get();
-        return lastReloadedInstant == null ||
-                lastReloadedInstant.plus(reloadAfter.get())
-                    .isBefore(DateUtil.now());
+        var lastReloaded = this.lastReloaded.get();
+        return lastReloaded == null ||
+                lastReloaded.plus(reloadAfter.get())
+                    .isBefore(DateUtil.zonedNow());
     }
 
     Optional<Duration> getReloadAfter() {
@@ -53,8 +53,8 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     @Override
     public void markReloaded(final T newValue) {
-        final Duration newReload = reloadFunction.apply(newValue);
-        lastReloaded.set(DateUtil.now());
+        var newReload = reloadFunction.apply(newValue);
+        lastReloaded.set(DateUtil.zonedNow());
         reloadAfter.set(newReload);
         LOGGER.trace("Marked reloaded on {}, will be reloaded after {}.", this, newReload);
     }
