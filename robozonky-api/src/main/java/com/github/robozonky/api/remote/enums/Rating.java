@@ -21,8 +21,8 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import static java.util.Map.entry;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -49,12 +49,10 @@ public enum Rating implements BaseEnum {
     C("15.49", "5.23", "4.0"),
     D("19.99", "8.15", "5.0");
 
-    static final Instant MIDNIGHT_2017_09_01 = LocalDate.of(2017, 9, 1)
-        .atStartOfDay(Defaults.ZONKYCZ_ZONE_ID)
-        .toInstant();
-    static final Instant MIDNIGHT_2019_03_18 = LocalDate.of(2019, 3, 18)
-        .atStartOfDay(Defaults.ZONKYCZ_ZONE_ID)
-        .toInstant();
+    static final ZonedDateTime MIDNIGHT_2017_09_01 = LocalDate.of(2017, 9, 1)
+        .atStartOfDay(Defaults.ZONKYCZ_ZONE_ID);
+    static final ZonedDateTime MIDNIGHT_2019_03_18 = LocalDate.of(2019, 3, 18)
+        .atStartOfDay(Defaults.ZONKYCZ_ZONE_ID);
     private static final Ratio ONE_PERCENT = Ratio.fromPercentage(1);
     private static final SortedMap<Integer, Ratio> FEE_DISCOUNTS = new TreeMap<>(Map.ofEntries(
             entry(150_000, Ratio.fromPercentage(5)),
@@ -108,7 +106,7 @@ public enum Rating implements BaseEnum {
             .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
     }
 
-    private static boolean isBeforeLatestFeeChange(final Instant dateForFees) {
+    private static boolean isBeforeLatestFeeChange(final ZonedDateTime dateForFees) {
         return dateForFees.isBefore(MIDNIGHT_2019_03_18);
     }
 
@@ -122,19 +120,19 @@ public enum Rating implements BaseEnum {
         return interestRate;
     }
 
-    public Ratio getFee(final Instant dateForFees) {
+    public Ratio getFee(final ZonedDateTime dateForFees) {
         return getFee(dateForFees, Money.ZERO);
     }
 
     public Ratio getFee() {
-        return getFee(DateUtil.now());
+        return getFee(DateUtil.zonedNow());
     }
 
     public Ratio getFee(final Money totalInvested) {
-        return getFee(DateUtil.now(), totalInvested);
+        return getFee(DateUtil.zonedNow(), totalInvested);
     }
 
-    public Ratio getFee(final Instant dateForFees, final Money totalInvested) {
+    public Ratio getFee(final ZonedDateTime dateForFees, final Money totalInvested) {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         } else if (dateForFees.isBefore(MIDNIGHT_2017_09_01)) {
@@ -146,11 +144,11 @@ public enum Rating implements BaseEnum {
         }
     }
 
-    private boolean isInvalid(final Instant dateForFees) {
+    private boolean isInvalid(final ZonedDateTime dateForFees) {
         return isBeforeLatestFeeChange(dateForFees) && (this == Rating.AAE || this == Rating.AE);
     }
 
-    public Ratio getMinimalRevenueRate(final Instant dateForFees, final Money totalInvested) {
+    public Ratio getMinimalRevenueRate(final ZonedDateTime dateForFees, final Money totalInvested) {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         }
@@ -161,18 +159,18 @@ public enum Rating implements BaseEnum {
     }
 
     public Ratio getMinimalRevenueRate() {
-        return getMinimalRevenueRate(DateUtil.now());
+        return getMinimalRevenueRate(DateUtil.zonedNow());
     }
 
-    public Ratio getMinimalRevenueRate(final Instant dateForFees) {
+    public Ratio getMinimalRevenueRate(final ZonedDateTime dateForFees) {
         return getMinimalRevenueRate(dateForFees, Money.ZERO);
     }
 
     public Ratio getMinimalRevenueRate(final Money totalInvested) {
-        return getMinimalRevenueRate(DateUtil.now(), totalInvested);
+        return getMinimalRevenueRate(DateUtil.zonedNow(), totalInvested);
     }
 
-    public Ratio getMaximalRevenueRate(final Instant dateForFees, final Money totalInvested) {
+    public Ratio getMaximalRevenueRate(final ZonedDateTime dateForFees, final Money totalInvested) {
         if (isInvalid(dateForFees)) {
             return Ratio.ZERO;
         }
@@ -183,14 +181,14 @@ public enum Rating implements BaseEnum {
     }
 
     public Ratio getMaximalRevenueRate() {
-        return getMaximalRevenueRate(DateUtil.now());
+        return getMaximalRevenueRate(DateUtil.zonedNow());
     }
 
     public Ratio getMaximalRevenueRate(final Money totalInvested) {
-        return getMaximalRevenueRate(DateUtil.now(), totalInvested);
+        return getMaximalRevenueRate(DateUtil.zonedNow(), totalInvested);
     }
 
-    public Ratio getMaximalRevenueRate(final Instant dateForFees) {
+    public Ratio getMaximalRevenueRate(final ZonedDateTime dateForFees) {
         return getMaximalRevenueRate(dateForFees, Money.ZERO);
     }
 
