@@ -366,6 +366,42 @@
         "code": "java.class.removed",
         "old": "interface com.github.robozonky.api.strategies.ExtendedPortfolioOverview",
         "justification": "Moved the interface to a package where it is being used."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(===java.time.Instant===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(===java.time.ZonedDateTime===)",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(===java.time.Instant===, com.github.robozonky.api.Money)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getFee(===java.time.ZonedDateTime===, com.github.robozonky.api.Money)",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(===java.time.Instant===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(===java.time.ZonedDateTime===)",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(===java.time.Instant===, com.github.robozonky.api.Money)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMaximalRevenueRate(===java.time.ZonedDateTime===, com.github.robozonky.api.Money)",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===java.time.Instant===)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===java.time.ZonedDateTime===)",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===java.time.Instant===, com.github.robozonky.api.Money)",
+        "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===java.time.ZonedDateTime===, com.github.robozonky.api.Money)",
+        "justification": "Switched internal representation of date and time to ZonedDateTime."
       }
     ]
   }
