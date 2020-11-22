@@ -52,9 +52,6 @@ platné ani úplné!
 Tuto zprávu dostáváte, protože je tak Váš robot nakonfigurován. Neodpovídejte na ni.
 
 Údaje v této zprávě jsou pouze orientační a mohou obsahovat chyby. Směrodatná data poskytuje výhradně Zonky dashboard.
-Výnosy jsou uváděny po započtení investorských poplatků vč. případných slev a před zdaněním. Na celé portfolio je
-aplikována aktuální platná výše poplatků, stará portfolia s nižšími poplatky tedy mohou vykazovat výkonnost vyšší než
-uvedenou.
 
 Dotazy k RoboZonky pokládejte v uživatelské skupině:
 https://groups.google.com/forum/#!forum/robozonky-users
