@@ -18,6 +18,7 @@ package com.github.robozonky.internal.test;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
@@ -64,6 +65,11 @@ public final class DateUtil {
     }
 
     public static String toString(ZonedDateTime zonedDateTime) {
-        return zonedDateTime.format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        if (zonedDateTime.toLocalDate()
+            .equals(LocalDate.now())) { // It's today, don't bother with full date.
+            return zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_TIME);
+        } else {
+            return zonedDateTime.format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        }
     }
 }
