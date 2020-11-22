@@ -17,7 +17,7 @@
 package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -75,7 +75,7 @@ final class Cache<T> {
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private final Tenant tenant;
     private final Backend<T> backend;
-    private final Map<Long, Tuple2<T, Instant>> storage = new ConcurrentHashMap<>(20);
+    private final Map<Long, Tuple2<T, ZonedDateTime>> storage = new ConcurrentHashMap<>(20);
     private final Executor evictor;
 
     private Cache(final Tenant tenant, final Backend<T> backend) {
@@ -93,16 +93,16 @@ final class Cache<T> {
         return clz.getCanonicalName() + " #" + id;
     }
 
-    private boolean isExpired(final Tuple2<T, Instant> p) {
-        final Instant now = DateUtil.now();
-        final Instant expiration = p._2()
+    private boolean isExpired(final Tuple2<T, ZonedDateTime> p) {
+        var now = DateUtil.zonedNow();
+        var expiration = p._2()
             .plus(backend.getEvictAfter());
         return expiration.isBefore(now);
     }
 
     private void evict() {
         LOGGER.trace("Evicting {}, total: {}.", backend.getItemClass(), storage.size());
-        final long evictedCount = storage.entrySet()
+        var evictedCount = storage.entrySet()
             .stream()
             .filter(e -> isExpired(e.getValue()))
             .peek(e -> storage.remove(e.getKey()))
@@ -111,7 +111,7 @@ final class Cache<T> {
     }
 
     Optional<T> getFromCache(final long id) {
-        final Tuple2<T, Instant> result = storage.get(id);
+        var result = storage.get(id);
         if (result == null || isExpired(result)) {
             LOGGER.trace("Miss for {}.", identify(id));
             return Optional.empty();
@@ -126,7 +126,7 @@ final class Cache<T> {
     }
 
     private void add(final long id, final T item) {
-        storage.put(id, Tuple.of(item, DateUtil.now()));
+        storage.put(id, Tuple.of(item, DateUtil.zonedNow()));
     }
 
     public T get(final long id) {
@@ -140,7 +140,7 @@ final class Cache<T> {
             storage.remove(id);
         }
         return getFromCache(id).orElseGet(() -> {
-            final T item = backend.getItem(id, tenant)
+            var item = backend.getItem(id, tenant)
                 .getOrElseThrow(e -> new IllegalStateException("Can not read " + identify(id) + " from Zonky.", e));
             if (backend.shouldCache(item)) {
                 add(id, item);
