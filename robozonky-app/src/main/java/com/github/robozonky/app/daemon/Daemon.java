@@ -17,7 +17,6 @@
 package com.github.robozonky.app.daemon;
 
 import java.time.Duration;
-import java.time.ZonedDateTime;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,20 +69,24 @@ public class Daemon implements InvestmentMode {
 
     void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
             final Duration initialDelay, final Duration timeout) {
-        ZonedDateTime startAt = DateUtil.zonedNow()
+        var startAt = DateUtil.zonedNow()
             .plus(initialDelay);
-        LOGGER.debug("Submitting {} to {}, start at {}, repeating after {}. Optional timeout of {}.", type,
-                executor, startAt, repeatAfter, timeout);
+        LOGGER.debug(() -> "Submitting " + type + " to " + executor
+                + ", start on " + DateUtil.toString(startAt)
+                + ", repeating after " + repeatAfter
+                + ". Optional timeout of " + timeout + ".");
         final Runnable payload = new Skippable(r, type, tenant, this::triggerShutdownDueToFailure);
         executor.submit(payload, repeatAfter, initialDelay, timeout);
     }
 
     void submitTenantless(final Scheduler executor, final Runnable r, final Class<?> type, final Duration repeatAfter,
             final Duration initialDelay, final Duration timeout) {
-        ZonedDateTime startAt = DateUtil.zonedNow()
+        var startAt = DateUtil.zonedNow()
             .plus(initialDelay);
-        LOGGER.debug("Submitting {} to {}, start at {}, repeating after {}. Optional timeout of {}.", type,
-                executor, startAt, repeatAfter, timeout);
+        LOGGER.debug(() -> "Submitting " + type + " to " + executor
+                + ", start on " + DateUtil.toString(startAt)
+                + ", repeating after " + repeatAfter
+                + ". Optional timeout of " + timeout + ".");
         final Runnable payload = new SimpleSkippable(r, type, this::triggerShutdownDueToFailure);
         executor.submit(payload, repeatAfter, initialDelay, timeout);
     }

@@ -18,6 +18,7 @@ package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
@@ -28,6 +29,7 @@ import javax.ws.rs.ClientErrorException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
@@ -38,7 +40,7 @@ final class AvailabilityImpl implements Availability {
     private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
     private final AtomicReference<Status> pause = new AtomicReference<>();
-    private final Predicate<Instant> hasNewerRequest;
+    private final Predicate<ZonedDateTime> hasNewerRequest;
 
     public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final RequestCounter requestCounter) {
         this.zonkyApiTokenSupplier = zonkyTokenSupplier;
@@ -68,12 +70,13 @@ final class AvailabilityImpl implements Availability {
     }
 
     @Override
-    public Instant nextAvailabilityCheck() {
+    public ZonedDateTime nextAvailabilityCheck() {
         if (zonkyApiTokenSupplier.isClosed()) {
             LOGGER.debug("Zonky OAuth2 token already closed, can not perform any more operations.");
-            return Instant.MAX;
+            return Instant.ofEpochMilli(Long.MAX_VALUE)
+                .atZone(Defaults.ZONKYCZ_ZONE_ID);
         } else if (isAvailable()) { // no waiting for anything
-            return DateUtil.now();
+            return DateUtil.zonedNow();
         }
         final Status paused = pause.get();
         // add 5 seconds of initial delay to give time to recover from HTTP 429 or whatever other problem there was
@@ -91,18 +94,18 @@ final class AvailabilityImpl implements Availability {
     }
 
     @Override
-    public Optional<Instant> registerSuccess() {
+    public Optional<ZonedDateTime> registerSuccess() {
         if (isAvailable()) {
             return Optional.empty();
         }
-        final Status paused = pause.get();
+        var paused = pause.get();
         var pausedOn = paused.getExceptionRegisteredOn();
         if (hasNewerRequest.test(pausedOn)) {
             pause.set(null);
-            LOGGER.info("Resumed after a forced pause at {}.", pausedOn);
+            LOGGER.info(() -> "Resumed after a forced pause on " + DateUtil.toString(pausedOn) + ".");
             return Optional.of(paused.getExceptionRegisteredOn());
         } else { // make sure we have actually performed a metered operation, safeguarding against HTTP 429
-            LOGGER.info("Not resuming after a forced pause at {}.", pausedOn);
+            LOGGER.info(() -> "Not resumed after a forced pause on " + DateUtil.toString(pausedOn) + ".");
             return Optional.empty();
         }
     }
@@ -116,34 +119,35 @@ final class AvailabilityImpl implements Availability {
             LOGGER.warn("Forcing a pause due to a remote failure.");
             return true;
         } else {
-            final Status paused = pause.updateAndGet(Status::anotherFailure);
-            LOGGER.debug("Forced pause in effect since {}, {} failed retries.", paused.getExceptionRegisteredOn(),
-                    paused.getFailedRetries(), ex);
+            var paused = pause.updateAndGet(Status::anotherFailure);
+            LOGGER.debug(() -> "Forced pause in effect since " + DateUtil.toString(paused.getExceptionRegisteredOn())
+                    + ", " + paused.getFailedRetries() + " failed retries.", ex);
             return false;
         }
     }
 
     private static final class Status {
 
-        private final Instant exceptionRegisteredOn;
+        private final ZonedDateTime exceptionRegisteredOn;
         private final int failedRetries;
         private final boolean isQuotaLimited;
 
-        public Status(final Instant exceptionRegisteredOn, final int failedRetries, final boolean isQuotaLimited) {
+        public Status(final ZonedDateTime exceptionRegisteredOn, final int failedRetries,
+                final boolean isQuotaLimited) {
             this.exceptionRegisteredOn = exceptionRegisteredOn;
             this.failedRetries = failedRetries;
             this.isQuotaLimited = isQuotaLimited;
         }
 
         public Status(final boolean isQuotaLimited) {
-            this(DateUtil.now(), 0, isQuotaLimited);
+            this(DateUtil.zonedNow(), 0, isQuotaLimited);
         }
 
         public Status anotherFailure() {
             return new Status(exceptionRegisteredOn, failedRetries + 1, isQuotaLimited);
         }
 
-        public Instant getExceptionRegisteredOn() {
+        public ZonedDateTime getExceptionRegisteredOn() {
             return exceptionRegisteredOn;
         }
 

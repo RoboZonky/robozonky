@@ -17,13 +17,13 @@
 package com.github.robozonky.internal.remote;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 public interface RequestCounter {
 
     void mark();
 
-    boolean hasMoreRecent(Instant request);
+    boolean hasMoreRecent(ZonedDateTime request);
 
     int count();
 

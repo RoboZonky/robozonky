@@ -17,7 +17,7 @@
 package com.github.robozonky.internal.remote;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Stream;
@@ -31,15 +31,15 @@ final class RequestCounterImpl implements RequestCounter {
 
     private static final Logger LOGGER = LogManager.getLogger(RequestCounterImpl.class);
 
-    private SortedSet<Instant> requests = new ConcurrentSkipListSet<>();
+    private SortedSet<ZonedDateTime> requests = new ConcurrentSkipListSet<>();
 
     @Override
     public void mark() {
-        requests.add(DateUtil.now());
+        requests.add(DateUtil.zonedNow());
     }
 
     @Override
-    public boolean hasMoreRecent(final Instant request) {
+    public boolean hasMoreRecent(final ZonedDateTime request) {
         var thisRequestOrNewer = requests.tailSet(request);
         if (thisRequestOrNewer.isEmpty()) {
             return false;
@@ -57,7 +57,7 @@ final class RequestCounterImpl implements RequestCounter {
 
     @Override
     public int count(final Duration interval) {
-        var threshold = DateUtil.now()
+        var threshold = DateUtil.zonedNow()
             .minus(interval);
         return requests.tailSet(threshold)
             .size();
@@ -76,7 +76,7 @@ final class RequestCounterImpl implements RequestCounter {
     @Override
     public void keepOnly(final Duration interval) {
         LOGGER.trace("Resetting to within the last interval: {}.", interval);
-        var threshold = DateUtil.now()
+        var threshold = DateUtil.zonedNow()
             .minus(interval);
         // Copy the tail set into a new collection, preventing leaking of the stale data.
         requests = new ConcurrentSkipListSet<>(requests.tailSet(threshold));

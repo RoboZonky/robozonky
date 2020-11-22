@@ -89,7 +89,7 @@ public class StatisticsImpl implements Statistics {
         return new StringJoiner(", ", StatisticsImpl.class.getSimpleName() + "[", "]")
             .add("profitability=" + profitability)
             .add("riskPortfolio=" + riskPortfolio)
-            .add("timestamp=" + timestamp)
+            .add("timestamp='" + DateUtil.toString(timestamp) + "'")
             .toString();
     }
 }

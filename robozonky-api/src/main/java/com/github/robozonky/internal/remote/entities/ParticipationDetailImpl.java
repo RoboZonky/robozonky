@@ -29,6 +29,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.test.DateUtil;
 
 public class ParticipationDetailImpl implements ParticipationDetail {
 
@@ -232,7 +233,7 @@ public class ParticipationDetailImpl implements ParticipationDetail {
             .add("loanHealthStats=" + loanHealthStats)
             .add("mainIncomeIndustry=" + mainIncomeIndustry)
             .add("name='" + name + "'")
-            .add("nextPaymentDate='" + nextPaymentDate + "'")
+            .add("nextPaymentDate='" + DateUtil.toString(getNextPaymentDate()) + "'")
             .add("purpose=" + purpose)
             .add("rating=" + rating)
             .add("region=" + region)

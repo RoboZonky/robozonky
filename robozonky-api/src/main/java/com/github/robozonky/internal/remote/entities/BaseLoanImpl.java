@@ -28,6 +28,7 @@ import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
+import com.github.robozonky.internal.test.DateUtil;
 
 public abstract class BaseLoanImpl implements BaseLoan {
 
@@ -249,7 +250,7 @@ public abstract class BaseLoanImpl implements BaseLoan {
             .add("amount='" + amount + "'")
             .add("annuity='" + annuity + "'")
             .add("annuityWithInsurance='" + annuityWithInsurance + "'")
-            .add("datePublished='" + datePublished + "'")
+            .add("datePublished='" + DateUtil.toString(getDatePublished()) + "'")
             .add("insuranceActive=" + insuranceActive)
             .add("interestRate=" + interestRate)
             .add("mainIncomeType=" + mainIncomeType)

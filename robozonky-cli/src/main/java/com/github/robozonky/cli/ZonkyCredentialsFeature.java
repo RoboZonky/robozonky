@@ -33,6 +33,7 @@ import com.github.robozonky.internal.remote.ApiProvider;
 import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 import com.github.robozonky.internal.secrets.KeyStoreHandler;
 import com.github.robozonky.internal.secrets.SecretProvider;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.FileUtil;
 
 @Command(name = "zonky-credentials", description = ZonkyCredentialsFeature.DESCRIPTION)
@@ -82,12 +83,13 @@ public final class ZonkyCredentialsFeature extends KeyStoreLeveragingFeature {
     }
 
     public static void refreshToken(final KeyStoreHandler keyStoreHandler, final ApiProvider api) {
-        final SecretProvider s = SecretProvider.keyStoreBased(keyStoreHandler);
-        final ZonkyApiToken newToken = s.getToken()
+        var secrets = SecretProvider.keyStoreBased(keyStoreHandler);
+        var newToken = secrets.getToken()
             .map(token -> api.oauth(oAuth -> oAuth.refresh(token)))
             .orElseThrow(() -> new IllegalStateException("Zonky API token missing."));
-        s.setToken(newToken);
-        LOGGER.info("Access token for '{}' will expire on {}.", s.getUsername(), newToken.getExpiresOn());
+        secrets.setToken(newToken);
+        LOGGER.info(() -> "Access token for '" + secrets.getUsername() +
+                "' will expire on " + DateUtil.toString(newToken.getExpiresOn()) + ".");
     }
 
     public static void outputToken(final KeyStoreHandler keyStoreHandler, final Path target) throws IOException {

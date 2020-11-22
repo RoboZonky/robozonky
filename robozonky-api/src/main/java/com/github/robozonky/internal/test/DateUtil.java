@@ -18,7 +18,10 @@ package com.github.robozonky.internal.test;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.LogManager;
@@ -61,4 +64,22 @@ public final class DateUtil {
     public static Instant now() {
         return Instant.now(getSystemClock());
     }
+
+    public static String toString(ZonedDateTime dateTime) {
+        var isToday = dateTime.toLocalDate()
+            .equals(LocalDate.now());
+        if (isToday) { // Don't bother with full date.
+            return dateTime.format(DateTimeFormatter.ISO_OFFSET_TIME);
+        } else {
+            return dateTime.format(DateTimeFormatter.RFC_1123_DATE_TIME);
+        }
+    }
+
+    public static String toString(OffsetDateTime dateTime) {
+        if (dateTime == null) { // This often comes from Zonky API; guard against nulls.
+            return "N/A";
+        }
+        return toString(dateTime.atZoneSameInstant(Defaults.ZONKYCZ_ZONE_ID));
+    }
+
 }

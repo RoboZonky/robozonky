@@ -219,7 +219,7 @@ public class ZonkyApiTokenImpl implements ZonkyApiToken {
             .add("id=" + id)
             .add("type='" + type + "'")
             .add("expiresIn=" + expiresIn)
-            .add("obtainedOn=" + obtainedOn)
+            .add("obtainedOn='" + DateUtil.toString(obtainedOn) + "'")
             .add("scope='" + scope + "'")
             .toString();
     }

@@ -23,6 +23,7 @@ import java.util.StringJoiner;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.LoanInvestmentData;
 import com.github.robozonky.api.remote.enums.InvestmentStatus;
+import com.github.robozonky.internal.test.DateUtil;
 
 /**
  * Used to represent a participation in the authenticated bit of the API. Even
@@ -102,7 +103,7 @@ public class LoanInvestmentDataImpl implements LoanInvestmentData {
             .add("loanId=" + loanId)
             .add("amount=" + amount)
             .add("status=" + status)
-            .add("timeCreated=" + timeCreated)
+            .add("timeCreated='" + DateUtil.toString(getTimeCreated()) + "'")
             .toString();
     }
 }

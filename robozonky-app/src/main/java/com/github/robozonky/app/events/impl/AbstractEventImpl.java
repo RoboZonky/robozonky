@@ -39,8 +39,8 @@ abstract class AbstractEventImpl implements Event {
         return conceptionDateTime;
     }
 
-    public void setConceivedOn(final ZonedDateTime offsetDateTime) {
-        conceptionDateTime = offsetDateTime;
+    public void setConceivedOn(final ZonedDateTime dateTime) {
+        conceptionDateTime = dateTime;
     }
 
     @Override

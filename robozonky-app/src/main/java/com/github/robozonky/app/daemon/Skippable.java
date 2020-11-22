@@ -19,17 +19,12 @@ package com.github.robozonky.app.daemon;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonResumed;
 import static com.github.robozonky.app.events.impl.EventFactory.roboZonkyDaemonSuspended;
 
-import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class Skippable implements Runnable {
@@ -61,28 +56,27 @@ final class Skippable implements Runnable {
 
     @Override
     public void run() {
-        final Availability availability = tenant.getAvailability();
-        final Instant nextCheck = availability.nextAvailabilityCheck();
-        LOGGER.trace("Next availability check: {}.", nextCheck);
-        if (nextCheck.isAfter(DateUtil.now())) {
+        var availability = tenant.getAvailability();
+        var nextCheck = availability.nextAvailabilityCheck();
+        LOGGER.trace(() -> "Next availability check: " + DateUtil.toString(nextCheck) + ".");
+        if (nextCheck.isAfter(DateUtil.zonedNow())) {
             LOGGER.debug("Not running {} on account of the robot being temporarily suspended.", this);
             return;
         }
         LOGGER.trace("Running {}.", this);
         try {
-            final ZonedDateTime now = DateUtil.zonedNow();
+            var now = DateUtil.zonedNow();
             toRun.run();
-            final Optional<Instant> becameAvailable = availability.registerSuccess();
+            var becameAvailable = availability.registerSuccess();
             becameAvailable.ifPresent(unavailableSince -> {
-                final ZonedDateTime since = unavailableSince.atZone(Defaults.ZONKYCZ_ZONE_ID);
-                LOGGER.debug("Unavailability over, lasted since {}.", since);
-                tenant.fire(roboZonkyDaemonResumed(since, now));
+                LOGGER.debug(() -> "Unavailability over, lasted since " + DateUtil.toString(unavailableSince) + ".");
+                tenant.fire(roboZonkyDaemonResumed(unavailableSince, now));
             });
             LOGGER.trace("Successfully finished {}.", this);
         } catch (final Throwable t) {
             if (SimpleSkippable.isRecoverable(t)) {
-                final Exception ex = (Exception) t; // errors are never recoverable
-                final boolean becameUnavailable = availability.registerException(ex);
+                var ex = (Exception) t; // errors are never recoverable
+                var becameUnavailable = availability.registerException(ex);
                 if (becameUnavailable) {
                     LOGGER.debug("Unavailability starting.");
                     tenant.fire(roboZonkyDaemonSuspended(ex));

@@ -22,6 +22,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,14 +41,16 @@ class RequestCounterImplTest {
 
     @Test
     void marking() {
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID));
+        ZonedDateTime zonedNow = DateUtil.zonedNow();
+        Instant now = zonedNow.toInstant();
+        DateUtil.setSystemClock(Clock.fixed(now, Defaults.ZONKYCZ_ZONE_ID));
         final RequestCounter counter = new RequestCounterImpl();
         assertSoftly(softly -> {
             softly.assertThat(counter.count())
                 .isEqualTo(0);
             softly.assertThat(counter.count(Duration.ZERO))
                 .isEqualTo(0);
-            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+            softly.assertThat(counter.hasMoreRecent(zonedNow))
                 .isFalse();
         });
         counter.mark();
@@ -56,10 +59,10 @@ class RequestCounterImplTest {
                 .isEqualTo(1);
             softly.assertThat(counter.count(Duration.ZERO))
                 .isEqualTo(1);
-            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+            softly.assertThat(counter.hasMoreRecent(zonedNow))
                 .isFalse();
         });
-        DateUtil.setSystemClock(Clock.fixed(Instant.EPOCH.plus(Duration.ofMillis(1)), Defaults.ZONKYCZ_ZONE_ID));
+        DateUtil.setSystemClock(Clock.fixed(now.plus(Duration.ofMillis(1)), Defaults.ZONKYCZ_ZONE_ID));
         counter.mark();
         assertSoftly(softly -> {
             softly.assertThat(counter.count())
@@ -68,7 +71,7 @@ class RequestCounterImplTest {
                 .isEqualTo(2);
             softly.assertThat(counter.count(Duration.ZERO))
                 .isEqualTo(1);
-            softly.assertThat(counter.hasMoreRecent(Instant.EPOCH))
+            softly.assertThat(counter.hasMoreRecent(zonedNow))
                 .isTrue();
         });
         counter.keepOnly(Duration.ZERO); // clear everything

@@ -18,7 +18,6 @@ package com.github.robozonky.test;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,8 +33,8 @@ import com.github.robozonky.internal.test.RandomUtil;
 
 public abstract class AbstractMinimalRoboZonkyTest {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
     protected static final String USERNAME = "someone@robozonky.cz";
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     protected static SessionInfo mockSessionInfo() {
         return mockSessionInfo(false);
@@ -50,8 +49,9 @@ public abstract class AbstractMinimalRoboZonkyTest {
     }
 
     protected void skipAheadBy(final Duration duration) {
-        final Instant next = DateUtil.now()
-            .plus(duration);
+        var next = DateUtil.zonedNow()
+            .plus(duration)
+            .toInstant();
         setClock(Clock.fixed(next, Defaults.ZONKYCZ_ZONE_ID));
     }
 

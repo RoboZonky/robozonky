@@ -17,7 +17,7 @@
 package com.github.robozonky.internal.async;
 
 import java.time.Duration;
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -31,8 +31,8 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(TimeBasedReload.class);
 
-    private final AtomicReference<Instant> lastReloaded = new AtomicReference<>();
-    private final AtomicReference<Duration> reloadAfter = new AtomicReference<>();
+    private final AtomicReference<ZonedDateTime> lastReloadedRef = new AtomicReference<>();
+    private final AtomicReference<Duration> reloadAfterRef = new AtomicReference<>();
     private final Function<T, Duration> reloadFunction;
 
     public TimeBasedReload(final Function<T, Duration> reloadAfter) {
@@ -41,28 +41,28 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     @Override
     public boolean getAsBoolean() {
-        final Instant lastReloadedInstant = lastReloaded.get();
-        return lastReloadedInstant == null ||
-                lastReloadedInstant.plus(reloadAfter.get())
-                    .isBefore(DateUtil.now());
+        var lastReloaded = this.lastReloadedRef.get();
+        return lastReloaded == null ||
+                lastReloaded.plus(reloadAfterRef.get())
+                    .isBefore(DateUtil.zonedNow());
     }
 
     Optional<Duration> getReloadAfter() {
-        return Optional.ofNullable(reloadAfter.get());
+        return Optional.ofNullable(reloadAfterRef.get());
     }
 
     @Override
     public void markReloaded(final T newValue) {
-        final Duration newReload = reloadFunction.apply(newValue);
-        lastReloaded.set(DateUtil.now());
-        reloadAfter.set(newReload);
+        var newReload = reloadFunction.apply(newValue);
+        lastReloadedRef.set(DateUtil.zonedNow());
+        reloadAfterRef.set(newReload);
         LOGGER.trace("Marked reloaded on {}, will be reloaded after {}.", this, newReload);
     }
 
     @Override
     public void forceReload() {
-        lastReloaded.set(null);
-        reloadAfter.set(null);
+        lastReloadedRef.set(null);
+        reloadAfterRef.set(null);
         LOGGER.trace("Forcing reload on {}.", this);
     }
 }

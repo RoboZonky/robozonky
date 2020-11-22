@@ -19,7 +19,7 @@ package com.github.robozonky.test;
 import static com.github.robozonky.test.AbstractRoboZonkyTest.mockPortfolio;
 import static org.mockito.Mockito.*;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -35,6 +35,7 @@ import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
+import com.github.robozonky.internal.test.DateUtil;
 
 public class TestingTenant implements Tenant {
 
@@ -104,8 +105,8 @@ public class TestingTenant implements Tenant {
     private static class MyAvailability implements Availability {
 
         @Override
-        public Instant nextAvailabilityCheck() {
-            return Instant.now();
+        public ZonedDateTime nextAvailabilityCheck() {
+            return DateUtil.zonedNow();
         }
 
         @Override
@@ -114,7 +115,7 @@ public class TestingTenant implements Tenant {
         }
 
         @Override
-        public Optional<Instant> registerSuccess() {
+        public Optional<ZonedDateTime> registerSuccess() {
             return Optional.empty();
         }
 

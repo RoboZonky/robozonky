@@ -18,13 +18,14 @@ package com.github.robozonky.app.tenant;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.state.InstanceState;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.test.DateUtil;
@@ -51,7 +52,7 @@ final class StatefulBoundedBalance {
 
     private final InstanceState<StatefulBoundedBalance> state;
     private final AtomicReference<Money> currentValue = new AtomicReference<>();
-    private final AtomicReference<Instant> lastModificationDate = new AtomicReference<>();
+    private final AtomicReference<ZonedDateTime> lastModificationDate = new AtomicReference<>();
 
     public StatefulBoundedBalance(final Tenant tenant) {
         this.state = tenant.getState(StatefulBoundedBalance.class);
@@ -59,11 +60,11 @@ final class StatefulBoundedBalance {
     }
 
     private synchronized void reloadFromState() {
-        final Instant lastModified = state.getLastUpdated()
-            .map(OffsetDateTime::toInstant)
-            .orElse(Instant.EPOCH);
+        var lastModified = state.getLastUpdated()
+            .map(i -> i.atZoneSameInstant(Defaults.ZONKYCZ_ZONE_ID))
+            .orElseGet(() -> ZonedDateTime.ofInstant(Instant.EPOCH, Defaults.ZONKYCZ_ZONE_ID));
         lastModificationDate.set(lastModified);
-        final Money lastKnownValue = state.getValue(VALUE_KEY)
+        var lastKnownValue = state.getValue(VALUE_KEY)
             .map(Money::from)
             .orElse(MAXIMUM);
         currentValue.set(lastKnownValue);
@@ -71,33 +72,33 @@ final class StatefulBoundedBalance {
     }
 
     public synchronized Money set(final Money value) {
-        final Money newValue = value.max(Money.from(1));
+        var newValue = value.max(Money.from(1));
         currentValue.set(newValue);
-        lastModificationDate.set(DateUtil.now());
+        lastModificationDate.set(DateUtil.zonedNow());
         state.update(m -> m.put(VALUE_KEY, newValue.getValue()
             .toPlainString()));
         return newValue;
     }
 
     private Duration getTimeBetweenLastBalanceCheckAndNow() {
-        final Instant lastModified = lastModificationDate.get();
-        return Duration.between(DateUtil.now(), lastModified)
+        var lastModified = lastModificationDate.get();
+        return Duration.between(DateUtil.zonedNow(), lastModified)
             .abs();
     }
 
     public synchronized Money get() {
-        final Money balance = currentValue.get();
+        var balance = currentValue.get();
         if (balance.equals(MAXIMUM)) { // no need to do any other magic
             LOGGER.trace("Balance already at maximum.");
             return balance;
         }
-        final Instant lastModified = lastModificationDate.get();
-        final Duration timeBetweenLastBalanceCheckAndNow = getTimeBetweenLastBalanceCheckAndNow();
+        var lastModified = lastModificationDate.get();
+        var timeBetweenLastBalanceCheckAndNow = getTimeBetweenLastBalanceCheckAndNow();
         if (timeBetweenLastBalanceCheckAndNow.compareTo(BALANCE_INCREASE_INTERVAL_STEP) < 0) {
-            LOGGER.trace("Balance of {} is still fresh ({}).", balance, lastModified);
+            LOGGER.trace(() -> "Balance of " + balance + " is still fresh (" + DateUtil.toString(lastModified) + ").");
             return balance;
         }
-        LOGGER.trace("Resetting balance upper bound as it's been too long since {}.", lastModified);
+        LOGGER.trace(() -> "Resetting stale upper bound; too long since " + DateUtil.toString(lastModified) + ".");
         return set(MAXIMUM);
     }
 }

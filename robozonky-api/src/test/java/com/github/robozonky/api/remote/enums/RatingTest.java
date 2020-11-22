@@ -17,13 +17,11 @@
 package com.github.robozonky.api.remote.enums;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import java.time.Instant;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 
@@ -34,17 +32,17 @@ class RatingTest {
 
     @Test
     void someRatingsUnavailableBefore2019() {
-        final Instant ratingsChange = Rating.MIDNIGHT_2019_03_18.minusSeconds(1);
-        SoftAssertions.assertSoftly(softly -> {
-            for (final Rating r : new Rating[] { Rating.AAE, Rating.AE }) {
-                softly.assertThat(r.getMaximalRevenueRate(ratingsChange))
-                    .as("Max revenue rate for " + r)
+        var ratingsChange = Rating.MIDNIGHT_2019_03_18.minusSeconds(1);
+        assertSoftly(softly -> {
+            for (var rating : new Rating[] { Rating.AAE, Rating.AE }) {
+                softly.assertThat(rating.getMaximalRevenueRate(ratingsChange))
+                    .as("Max revenue rate for " + rating)
                     .isEqualTo(Ratio.ZERO);
-                softly.assertThat(r.getMinimalRevenueRate(ratingsChange))
-                    .as("Min revenue rate for " + r)
+                softly.assertThat(rating.getMinimalRevenueRate(ratingsChange))
+                    .as("Min revenue rate for " + rating)
                     .isEqualTo(Ratio.ZERO);
-                softly.assertThat(r.getFee(ratingsChange))
-                    .as("Fee for " + r)
+                softly.assertThat(rating.getFee(ratingsChange))
+                    .as("Fee for " + rating)
                     .isEqualTo(Ratio.ZERO);
             }
         });
@@ -52,12 +50,12 @@ class RatingTest {
 
     @Test
     void feesBefore2018() {
-        final Instant ratingsChange = Rating.MIDNIGHT_2017_09_01.minusSeconds(1);
-        SoftAssertions.assertSoftly(softly -> {
-            for (final Rating r : new Rating[] { Rating.AAAAA, Rating.AAAA, Rating.AAA, Rating.AA, Rating.A, Rating.B,
+        var ratingsChange = Rating.MIDNIGHT_2017_09_01.minusSeconds(1);
+        assertSoftly(softly -> {
+            for (var rating : new Rating[] { Rating.AAAAA, Rating.AAAA, Rating.AAA, Rating.AA, Rating.A, Rating.B,
                     Rating.C, Rating.D }) {
-                softly.assertThat(r.getFee(ratingsChange))
-                    .as("Fee for " + r)
+                softly.assertThat(rating.getFee(ratingsChange))
+                    .as("Fee for " + rating)
                     .isEqualTo(Ratio.fromPercentage(1));
             }
         });
@@ -65,19 +63,19 @@ class RatingTest {
 
     @Test
     void allRatingsNowAvailable() {
-        SoftAssertions.assertSoftly(softly -> {
-            for (final Rating r : Rating.values()) {
-                softly.assertThat(r.getMaximalRevenueRate())
-                    .as("Max revenue rate for " + r)
+        assertSoftly(softly -> {
+            for (var rating : Rating.values()) {
+                softly.assertThat(rating.getMaximalRevenueRate())
+                    .as("Max revenue rate for " + rating)
                     .isGreaterThan(Ratio.ZERO);
-                softly.assertThat(r.getMinimalRevenueRate())
-                    .as("Min revenue rate for " + r)
+                softly.assertThat(rating.getMinimalRevenueRate())
+                    .as("Min revenue rate for " + rating)
                     .isGreaterThan(Ratio.ZERO);
-                softly.assertThat(r.getFee())
-                    .as("Fee for " + r)
+                softly.assertThat(rating.getFee())
+                    .as("Fee for " + rating)
                     .isGreaterThan(Ratio.ZERO);
-                softly.assertThat(r.getInterestRate())
-                    .as("Interest rate for " + r)
+                softly.assertThat(rating.getInterestRate())
+                    .as("Interest rate for " + rating)
                     .isGreaterThan(Ratio.ZERO);
             }
         });
@@ -85,24 +83,24 @@ class RatingTest {
 
     @Test
     void feesDecreasing() {
-        SoftAssertions.assertSoftly(softly -> {
-            for (final Rating r : Rating.values()) {
-                final Ratio fee0 = r.getFee(Money.from(0));
-                final Ratio fee1 = r.getFee(Money.from(150_000));
-                final Ratio fee2 = r.getFee(Money.from(200_000));
-                final Ratio fee3 = r.getFee(Money.from(500_000));
-                final Ratio fee4 = r.getFee(Money.from(1_000_000));
+        assertSoftly(softly -> {
+            for (var rating : Rating.values()) {
+                var fee0 = rating.getFee(Money.from(0));
+                var fee1 = rating.getFee(Money.from(150_000));
+                var fee2 = rating.getFee(Money.from(200_000));
+                var fee3 = rating.getFee(Money.from(500_000));
+                var fee4 = rating.getFee(Money.from(1_000_000));
                 softly.assertThat(fee1)
-                    .as("Fee for " + r + " at 150 000")
+                    .as("Fee for " + rating + " at 150 000")
                     .isLessThan(fee0);
                 softly.assertThat(fee2)
-                    .as("Fee for " + r + " at 200 000")
+                    .as("Fee for " + rating + " at 200 000")
                     .isLessThan(fee1);
                 softly.assertThat(fee3)
-                    .as("Fee for " + r + " at 500 000")
+                    .as("Fee for " + rating + " at 500 000")
                     .isLessThan(fee2);
                 softly.assertThat(fee4)
-                    .as("Fee for " + r + " at 1 000 000")
+                    .as("Fee for " + rating + " at 1 000 000")
                     .isLessThan(fee3);
             }
         });
@@ -110,7 +108,7 @@ class RatingTest {
 
     @Test
     void noRatingCodeTwice() {
-        final Set<String> codes = Stream.of(Rating.values())
+        var codes = Stream.of(Rating.values())
             .map(Rating::getCode)
             .collect(Collectors.toSet());
         assertThat(codes).hasSize(Rating.values().length);
@@ -118,13 +116,13 @@ class RatingTest {
 
     @Test
     void maxFeeDiscount() {
-        final Ratio revenue = Rating.D.getMaximalRevenueRate(Money.from(Long.MAX_VALUE));
+        var revenue = Rating.D.getMaximalRevenueRate(Money.from(Long.MAX_VALUE));
         assertThat(revenue.doubleValue()).isEqualTo(0.1599, Offset.offset(0.0001));
     }
 
     @Test
     void minFeeDiscount() {
-        final Ratio revenue = Rating.AAAAAA.getMinimalRevenueRate();
+        var revenue = Rating.AAAAAA.getMinimalRevenueRate();
         assertThat(revenue.doubleValue()).isEqualTo(0.0234, Offset.offset(0.0001));
     }
 
