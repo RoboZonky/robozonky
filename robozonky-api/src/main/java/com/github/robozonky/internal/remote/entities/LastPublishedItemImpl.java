@@ -82,7 +82,7 @@ public class LastPublishedItemImpl implements LastPublishedItem {
     public String toString() {
         return new StringJoiner(", ", LastPublishedItemImpl.class.getSimpleName() + "[", "]")
             .add("id=" + id)
-            .add("datePublished=" + datePublished)
+            .add("datePublished='" + DateUtil.toString(getDatePublished()) + "'")
             .toString();
     }
 }

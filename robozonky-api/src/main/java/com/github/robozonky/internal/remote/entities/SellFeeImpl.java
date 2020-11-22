@@ -25,6 +25,7 @@ import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.SellFee;
+import com.github.robozonky.internal.test.DateUtil;
 
 public class SellFeeImpl implements SellFee {
 
@@ -61,6 +62,10 @@ public class SellFeeImpl implements SellFee {
 
     @Override
     public String toString() {
+        var expiresAt = getExpiresAt()
+            .map(DateUtil::toString)
+            .map(s -> '\'' + s + '\'')
+            .orElse("N/A");
         return new StringJoiner(", ", SellFeeImpl.class.getSimpleName() + "[", "]")
             .add("value='" + value + "'")
             .add("expiresAt=" + expiresAt)
