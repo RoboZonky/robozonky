@@ -62,13 +62,13 @@ public class SellFeeImpl implements SellFee {
 
     @Override
     public String toString() {
-        var expiresAt = getExpiresAt()
+        var expiryString = getExpiresAt()
             .map(DateUtil::toString)
             .map(s -> '\'' + s + '\'')
             .orElse("N/A");
         return new StringJoiner(", ", SellFeeImpl.class.getSimpleName() + "[", "]")
             .add("value='" + value + "'")
-            .add("expiresAt=" + expiresAt)
+            .add("expiresAt=" + expiryString)
             .toString();
     }
 }

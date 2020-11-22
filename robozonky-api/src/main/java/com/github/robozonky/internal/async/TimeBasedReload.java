@@ -31,8 +31,8 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     private static final Logger LOGGER = LogManager.getLogger(TimeBasedReload.class);
 
-    private final AtomicReference<ZonedDateTime> lastReloaded = new AtomicReference<>();
-    private final AtomicReference<Duration> reloadAfter = new AtomicReference<>();
+    private final AtomicReference<ZonedDateTime> lastReloadedRef = new AtomicReference<>();
+    private final AtomicReference<Duration> reloadAfterRef = new AtomicReference<>();
     private final Function<T, Duration> reloadFunction;
 
     public TimeBasedReload(final Function<T, Duration> reloadAfter) {
@@ -41,28 +41,28 @@ final class TimeBasedReload<T> implements ReloadDetection<T> {
 
     @Override
     public boolean getAsBoolean() {
-        var lastReloaded = this.lastReloaded.get();
+        var lastReloaded = this.lastReloadedRef.get();
         return lastReloaded == null ||
-                lastReloaded.plus(reloadAfter.get())
+                lastReloaded.plus(reloadAfterRef.get())
                     .isBefore(DateUtil.zonedNow());
     }
 
     Optional<Duration> getReloadAfter() {
-        return Optional.ofNullable(reloadAfter.get());
+        return Optional.ofNullable(reloadAfterRef.get());
     }
 
     @Override
     public void markReloaded(final T newValue) {
         var newReload = reloadFunction.apply(newValue);
-        lastReloaded.set(DateUtil.zonedNow());
-        reloadAfter.set(newReload);
+        lastReloadedRef.set(DateUtil.zonedNow());
+        reloadAfterRef.set(newReload);
         LOGGER.trace("Marked reloaded on {}, will be reloaded after {}.", this, newReload);
     }
 
     @Override
     public void forceReload() {
-        lastReloaded.set(null);
-        reloadAfter.set(null);
+        lastReloadedRef.set(null);
+        reloadAfterRef.set(null);
         LOGGER.trace("Forcing reload on {}.", this);
     }
 }
