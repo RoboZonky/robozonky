@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.internal.remote;
+package com.github.robozonky.app.daemon;
 
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public final class FailureTypeUtil {
+final class FailureTypeUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(FailureTypeUtil.class);
 
@@ -38,20 +37,6 @@ public final class FailureTypeUtil {
         final String contents = response.readEntity(String.class);
         LOGGER.debug("Response body is: {}", contents);
         return contents;
-    }
-
-    public static boolean matches(final Class<? extends ClientErrorException> expectedException,
-            final ClientErrorException actualException,
-            final String reason) {
-        if (!actualException.getClass()
-            .isAssignableFrom(expectedException)) {
-            return false;
-        } else if (reason == null) {
-            return true;
-        } else {
-            return FailureTypeUtil.getResponseEntity(actualException.getResponse())
-                .contains(reason);
-        }
     }
 
 }

@@ -35,8 +35,6 @@ import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.PurchaseFailureType;
-import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -102,11 +100,11 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Response response = Response.status(400)
-            .entity(PurchaseFailureType.INSUFFICIENT_BALANCE.getReason()
-                .get())
+            .entity("INSUFFICIENT_BALANCE")
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
-        when(z.purchase(any())).thenReturn(PurchaseResult.failure(thrown));
+        doThrow(thrown).when(z)
+            .purchase(any());
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.of(pd), s);
@@ -132,11 +130,11 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
         final Response response = Response.status(400)
-            .entity(PurchaseFailureType.TOO_MANY_REQUESTS.getReason()
-                .get())
+            .entity("TOO_MANY_REQUESTS")
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
-        when(z.purchase(any())).thenReturn(PurchaseResult.failure(thrown));
+        doThrow(thrown).when(z)
+            .purchase(any());
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
         assertThatThrownBy(() -> PurchasingSession.purchase(auth, Stream.of(pd), s))

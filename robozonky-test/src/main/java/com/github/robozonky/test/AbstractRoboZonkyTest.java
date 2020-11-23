@@ -37,9 +37,7 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.remote.ApiProvider;
-import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.OAuth;
-import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.ConsentsImpl;
 import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
@@ -72,8 +70,6 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
 
     protected static Zonky harmlessZonky() {
         final Zonky zonky = mock(Zonky.class);
-        when(zonky.invest(notNull(), anyInt())).thenReturn(InvestmentResult.success());
-        when(zonky.purchase(any())).thenReturn(PurchaseResult.success());
         when(zonky.getRestrictions()).thenReturn(new RestrictionsImpl(true));
         when(zonky.getConsents()).thenReturn(new ConsentsImpl());
         when(zonky.getStatistics()).thenReturn(StatisticsImpl.empty());

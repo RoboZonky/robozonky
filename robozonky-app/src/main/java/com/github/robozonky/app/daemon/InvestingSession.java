@@ -25,13 +25,14 @@ import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLa
 
 import java.util.stream.Stream;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.InvestmentFailureType;
-import com.github.robozonky.internal.util.functional.Either;
 
 /**
  * Represents a single investment session over a certain marketplace, consisting of several attempts to invest into
@@ -89,25 +90,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         return true;
     }
 
-    private boolean unsuccessfulInvestment(final RecommendedLoan recommendation,
-            final InvestmentFailureType failureType) {
-        if (failureType == InvestmentFailureType.TOO_MANY_REQUESTS) {
-            // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
-            throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.");
-        } else if (failureType == InvestmentFailureType.INSUFFICIENT_BALANCE) {
-            tenant.setKnownBalanceUpperBound(recommendation.amount()
-                .subtract(1));
-        } else if (failureType != InvestmentFailureType.UNKNOWN) { // we don't want to see this loan ever again
-            discard(recommendation.descriptor());
-        }
-        logger.debug("Failed investing {} into loan #{}, reason: {}.",
-                recommendation.amount(), recommendation.descriptor()
-                    .item()
-                    .getId(),
-                failureType);
-        return false;
-    }
-
     @Override
     protected boolean accept(final RecommendedLoan recommendation) {
         if (!isBalanceAcceptable(recommendation)) {
@@ -116,8 +98,35 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             return false;
         }
         logger.debug("Will attempt to invest in {}.", recommendation);
-        final Either<InvestmentFailureType, Money> response = investor.invest(recommendation);
-        return response.fold(failure -> unsuccessfulInvestment(recommendation, failure),
-                amount -> successfulInvestment(recommendation, amount));
+        try {
+            investor.invest(recommendation);
+            return successfulInvestment(recommendation, recommendation.amount());
+        } catch (BadRequestException ex) {
+            var response = FailureTypeUtil.getResponseEntity(ex.getResponse());
+            switch (response) {
+                case "TOO_MANY_REQUESTS":
+                    // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
+                    throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.", ex);
+                case "INSUFFICIENT_BALANCE":
+                    logger.debug("Failed investing {}. We don't have sufficient balance.", recommendation.amount());
+                    tenant.setKnownBalanceUpperBound(recommendation.amount()
+                        .subtract(1));
+                    return false;
+                default:
+                    logger.debug("Failed investing {} into loan #{}. Reason given: {}.", recommendation.amount(),
+                            recommendation.descriptor()
+                                .item()
+                                .getId(),
+                            response);
+                    return false;
+            }
+        } catch (NotFoundException ex) {
+            logger.debug("Failed investing into loan #{}, not found.", recommendation.descriptor()
+                .item()
+                .getId());
+            return false;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Unknown exception caught during investing.", ex);
+        }
     }
 }

@@ -18,11 +18,7 @@ package com.github.robozonky.app.daemon;
 
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.Money;
-import com.github.robozonky.internal.remote.InvestmentFailureType;
-import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.util.functional.Either;
 
 abstract class Investor {
 
@@ -37,38 +33,29 @@ abstract class Investor {
             .isDryRun()) {
             return new Investor() {
                 @Override
-                public Either<InvestmentFailureType, Money> invest(final RecommendedLoan r) {
+                public void invest(final RecommendedLoan r) {
                     LOGGER.debug("Dry run. Otherwise would attempt investing: {}.", r);
-                    return Either.right(r.amount());
                 }
             };
         } else {
             return new Investor() {
-
                 @Override
-                public Either<InvestmentFailureType, Money> invest(final RecommendedLoan r) {
-                    return Investor.invest(auth, r);
+                public void invest(final RecommendedLoan r) {
+                    Investor.invest(auth, r);
                 }
             };
         }
     }
 
-    private static Either<InvestmentFailureType, Money> invest(final Tenant auth,
-            final RecommendedLoan recommendedLoan) {
+    private static void invest(final Tenant auth, final RecommendedLoan recommendedLoan) {
         LOGGER.debug("Executing investment: {}.", recommendedLoan);
         var loan = recommendedLoan.descriptor()
             .item();
         var amount = recommendedLoan.amount()
             .getValue()
             .intValue();
-        final InvestmentResult r = auth.call(zonky -> zonky.invest(loan, amount));
-        if (r.isSuccess()) {
-            return Either.right(recommendedLoan.amount());
-        } else {
-            return Either.left(r.getFailureType()
-                .get()); // get() while !isSuccess() guaranteed by Result contract
-        }
+        auth.run(zonky -> zonky.invest(loan, amount));
     }
 
-    public abstract Either<InvestmentFailureType, Money> invest(final RecommendedLoan r);
+    public abstract void invest(final RecommendedLoan r);
 }

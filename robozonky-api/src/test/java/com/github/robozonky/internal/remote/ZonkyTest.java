@@ -181,22 +181,6 @@ class ZonkyTest {
     }
 
     @Test
-    void invest() {
-        final ControlApi control = mock(ControlApi.class);
-        final Api<ControlApi> ca = mockApi(control);
-        final PaginatedApi<LoanImpl, LoanApi> la = mockApi();
-        final int loanId = 1;
-        final Loan loan = mock(LoanImpl.class);
-        when(loan.getId()).thenReturn(loanId);
-        when(loan.getAmount()).thenReturn(Money.from(200.0));
-        when(loan.getRemainingInvestment()).thenReturn(Money.from(200.0));
-        when(la.execute(any())).thenReturn(loan);
-        final Zonky z = mockZonky(ca, la);
-        final Loan l = z.getLoan(loanId);
-        assertThat(z.invest(l, 200)).isEqualTo(InvestmentResult.success());
-    }
-
-    @Test
     void investFailure() {
         final ControlApi control = mock(ControlApi.class);
         doThrow(new ClientErrorException(Response.Status.FORBIDDEN)).when(control)
@@ -210,22 +194,8 @@ class ZonkyTest {
         when(la.execute(any())).thenReturn(loan);
         final Zonky z = mockZonky(ca, la);
         final Loan l = z.getLoan(loan.getId());
-        final Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200));
-        assertThat(z.invest(l, 200)
-            .getFailureType())
-                .contains(InvestmentFailureType.UNKNOWN);
-    }
-
-    @Test
-    void purchase() {
-        final ControlApi control = mock(ControlApi.class);
-        final Api<ControlApi> ca = mockApi(control);
-        final Zonky z = mockZonkyControl(ca);
-        final Participation p = mock(ParticipationImpl.class);
-        when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
-        when(p.getDiscount()).thenReturn(Money.ZERO);
-        when(p.getId()).thenReturn(1L);
-        assertThat(z.purchase(p)).isEqualTo(PurchaseResult.success());
+        assertThatThrownBy(() -> z.invest(l, 200))
+            .isInstanceOf(ClientErrorException.class);
     }
 
     @Test
@@ -239,8 +209,8 @@ class ZonkyTest {
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
         when(p.getDiscount()).thenReturn(Money.ZERO);
         when(p.getId()).thenReturn(1L);
-        assertThat(z.purchase(p)
-            .getFailureType()).contains(PurchaseFailureType.UNKNOWN);
+        assertThatThrownBy(() -> z.purchase(p))
+            .isInstanceOf(ClientErrorException.class);
     }
 
     @Test

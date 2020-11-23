@@ -32,7 +32,6 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.FailureTypeUtil;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
