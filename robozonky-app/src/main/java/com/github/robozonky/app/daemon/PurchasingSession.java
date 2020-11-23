@@ -25,12 +25,14 @@ import static com.github.robozonky.app.events.impl.EventFactory.purchasingStarte
 
 import java.util.stream.Stream;
 
-import com.github.robozonky.api.Money;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
+
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.PurchaseResult;
+import com.github.robozonky.internal.remote.FailureTypeUtil;
 
 /**
  * Represents a single session over secondary marketplace, consisting of several attempts to purchase participations.
@@ -67,28 +69,36 @@ final class PurchasingSession extends
     }
 
     private boolean actualPurchase(final Participation participation) {
-        final PurchaseResult result = tenant.call(zonky -> zonky.purchase(participation));
-        if (result.isSuccess()) {
+        try {
+            tenant.run(zonky -> zonky.purchase(participation));
             logger.info("Purchased a participation worth {}.", participation.getRemainingPrincipal());
             return true;
+        } catch (BadRequestException ex) {
+            var response = FailureTypeUtil.getResponseEntity(ex.getResponse());
+            switch (response) {
+                case "TOO_MANY_REQUESTS":
+                    // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
+                    throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.", ex);
+                case "INSUFFICIENT_BALANCE":
+                    logger.debug("Failed purchasing participation worth {}. We don't have sufficient balance.",
+                            participation.getRemainingPrincipal());
+                    tenant.setKnownBalanceUpperBound(participation.getRemainingPrincipal()
+                        .subtract(1));
+                    return false;
+                case "ALREADY_HAVE_INVESTMENT":
+                    logger.debug("Failed purchasing participation #{}, already have investment.",
+                            participation.getId());
+                    return false;
+                default:
+                    throw new IllegalStateException("Unknown exception caught during purchasing. Reason given: '"
+                            + response + "'.", ex);
+            }
+        } catch (NotFoundException ex) {
+            logger.debug("Failed purchasing participation #{}, not found.", participation.getId());
+            return false;
+        } catch (Exception ex) {
+            throw new IllegalStateException("Unknown exception caught during purchasing.", ex);
         }
-        final Money amount = participation.getRemainingPrincipal();
-        switch (result.getFailureType()
-            .get()) {
-            case TOO_MANY_REQUESTS:
-                // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
-                throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.");
-            case INSUFFICIENT_BALANCE:
-                logger.debug("Failed purchasing participation worth {}. We don't have sufficient balance.", amount);
-                tenant.setKnownBalanceUpperBound(amount.subtract(1));
-                break;
-            case ALREADY_HAVE_INVESTMENT:
-                logger.debug("Failed purchasing participation worth {}. Someone's beaten us to it.", amount);
-                break;
-            default:
-                throw new IllegalStateException("Unknown problem when purchasing participation worth " + amount + ".");
-        }
-        return false;
     }
 
     @Override

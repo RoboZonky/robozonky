@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-final class FailureTypeUtil {
+public final class FailureTypeUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(FailureTypeUtil.class);
 

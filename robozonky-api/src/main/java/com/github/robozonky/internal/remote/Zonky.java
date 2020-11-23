@@ -125,15 +125,9 @@ public class Zonky {
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
-    public PurchaseResult purchase(final Participation participation) {
+    public void purchase(final Participation participation) {
         LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        try {
-            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
-            return PurchaseResult.success();
-        } catch (final ClientErrorException ex) {
-            LOGGER.debug("Caught API exception during purchasing.", ex);
-            return PurchaseResult.failure(ex);
-        }
+        controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
     }
 
     public void sell(final Investment investment) {
