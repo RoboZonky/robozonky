@@ -22,6 +22,11 @@ import java.util.function.BiConsumer;
 
 import com.github.robozonky.internal.test.DateUtil;
 
+/**
+ * Has to be thread-safe, as {@link #put(String, String)} and {@link #run()} may happen in parallel.
+ * 
+ * @param <T>
+ */
 final class StateModifierImpl<T> implements StateModifier<T>,
         Runnable {
 
@@ -37,14 +42,17 @@ final class StateModifierImpl<T> implements StateModifier<T>,
 
     @Override
     public StateModifier<T> put(final String key, final String value) {
-        actions.add((state, section) -> state.setValue(section, key, value));
+        synchronized (actions) {
+            actions.add((state, section) -> state.setValue(section, key, value));
+        }
         return this;
     }
 
     @Override
     public StateModifier<T> remove(final String key) {
-        final BiConsumer<StateStorage, String> action = (state, section) -> state.unsetValue(section, key);
-        actions.add(action);
+        synchronized (actions) {
+            actions.add((state, section) -> state.unsetValue(section, key));
+        }
         return this;
     }
 
@@ -52,7 +60,9 @@ final class StateModifierImpl<T> implements StateModifier<T>,
     public void run() {
         final String sectionName = instanceState.getSectionName();
         final StateStorage backend = instanceState.getStorage();
-        actions.forEach(a -> a.accept(backend, sectionName));
+        synchronized (actions) {
+            actions.forEach(a -> a.accept(backend, sectionName));
+        }
         backend.setValue(sectionName, Constants.LAST_UPDATED_KEY.getValue(), DateUtil.zonedNow()
             .toOffsetDateTime()
             .toString());
