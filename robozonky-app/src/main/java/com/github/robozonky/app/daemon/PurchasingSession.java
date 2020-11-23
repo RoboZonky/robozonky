@@ -74,29 +74,26 @@ final class PurchasingSession extends
             return true;
         } catch (BadRequestException ex) {
             var response = getResponseEntity(ex.getResponse());
-            switch (response) {
-                case "TOO_MANY_REQUESTS":
-                    // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
-                    throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.", ex);
-                case "INSUFFICIENT_BALANCE":
-                    logger.debug("Failed purchasing participation worth {}. We don't have sufficient balance.",
-                            participation.getRemainingPrincipal());
-                    tenant.setKnownBalanceUpperBound(participation.getRemainingPrincipal()
-                        .subtract(1));
-                    return false;
-                case "ALREADY_HAVE_INVESTMENT":
-                    logger.debug("Failed purchasing participation #{}, already have investment.",
-                            participation.getId());
-                    return false;
-                default:
-                    throw new IllegalStateException("Unknown exception caught during purchasing. Reason given: '"
-                            + response + "'.", ex);
+            if (response.contains("TOO_MANY_REQUESTS")) {
+                // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
+                throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.", ex);
+            } else if (response.contains("INSUFFICIENT_BALANCE")) {
+                logger.debug("Failed purchasing participation worth {}. We don't have sufficient balance.",
+                        participation.getRemainingPrincipal());
+                tenant.setKnownBalanceUpperBound(participation.getRemainingPrincipal()
+                    .subtract(1));
+                return false;
+            } else if (response.contains("ALREADY_HAVE_INVESTMENT")) {
+                logger.debug("Failed purchasing participation #{}, already have investment.",
+                        participation.getId());
+                return false;
             }
+            throw new IllegalStateException("Unknown problem during purchasing. Reason given: '" + response + "'.", ex);
         } catch (NotFoundException ex) {
             logger.debug("Failed purchasing participation #{}, not found.", participation.getId());
             return false;
         } catch (Exception ex) {
-            throw new IllegalStateException("Unknown exception caught during purchasing.", ex);
+            throw new IllegalStateException("Unknown problem during purchasing.", ex);
         }
     }
 

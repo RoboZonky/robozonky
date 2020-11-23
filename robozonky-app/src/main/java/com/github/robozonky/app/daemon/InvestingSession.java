@@ -108,33 +108,30 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             return true;
         } catch (BadRequestException ex) {
             var response = getResponseEntity(ex.getResponse());
-            switch (response) {
-                case "TOO_MANY_REQUESTS":
-                    // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
-                    throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.", ex);
-                case "INSUFFICIENT_BALANCE":
-                    var amount = recommendation.amount();
-                    logger.debug("Failed investing {}. We don't have sufficient balance.", amount);
-                    tenant.setKnownBalanceUpperBound(amount.subtract(1));
-                    return false;
-                case "cancelled":
-                case "withdrawn":
-                case "reservedInvestmentOnly":
-                case "overInvestment":
-                case "multipleInvestment":
-                case "alreadyCovered":
-                    logger.debug("Failed investing {} into loan #{}. Reason given: '{}'.", recommendation.amount(),
-                            recommendation.descriptor()
-                                .item()
-                                .getId(),
-                            response);
-                    return false;
-                default:
-                    throw new IllegalStateException("Unknown exception caught during investing. Reason given: '"
-                            + response + "'.", ex);
+            if (response.contains("TOO_MANY_REQUESTS")) {
+                // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
+                throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.", ex);
+            } else if (response.contains("INSUFFICIENT_BALANCE")) {
+                var amount = recommendation.amount();
+                logger.debug("Failed investing {}. We don't have sufficient balance.", amount);
+                tenant.setKnownBalanceUpperBound(amount.subtract(1));
+                return false;
             }
+            var acceptable = Stream
+                .of("cancelled", "withdrawn", "reservedInvestmentOnly", "overInvestment", "multipleInvestment",
+                        "alreadyCovered")
+                .anyMatch(response::contains);
+            if (acceptable) {
+                logger.debug("Failed investing {} into loan #{}. Reason given: '{}'.", recommendation.amount(),
+                        recommendation.descriptor()
+                            .item()
+                            .getId(),
+                        response);
+                return false;
+            }
+            throw new IllegalStateException("Unknown problem during investing. Reason given: '" + response + "'.", ex);
         } catch (Exception ex) {
-            throw new IllegalStateException("Unknown exception caught during investing.", ex);
+            throw new IllegalStateException("Unknown problem during investing.", ex);
         }
     }
 }
