@@ -50,7 +50,6 @@ import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.PurchaseResult;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -184,7 +183,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final Rating rating = loan.getRating();
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
-        doReturn(PurchaseResult.failure(new ClientErrorException(410))).when(zonky)
+        doThrow(new ClientErrorException(410)).when(zonky)
             .purchase(any());
         final Participation mock = mock(ParticipationImpl.class);
         when(mock.getId()).thenReturn(1L);

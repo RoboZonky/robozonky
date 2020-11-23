@@ -23,8 +23,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.ws.rs.ClientErrorException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -102,21 +100,10 @@ public class Zonky {
             .map(x -> x);
     }
 
-    /**
-     * @param loan   Loan to invest in.
-     * @param amount How much CZK to invest.
-     * @return Success or one of known investment failures.
-     */
-    public InvestmentResult invest(final Loan loan, final int amount) {
+    public void invest(final Loan loan, final int amount) {
         LOGGER.debug("Investing into loan #{}.", loan.getId());
-        try {
-            var request = new InvestmentRequest(loan.getId(), amount);
-            controlApi.run(api -> api.invest(request));
-            return InvestmentResult.success();
-        } catch (final ClientErrorException ex) {
-            LOGGER.debug("Caught API exception during investment.", ex);
-            return InvestmentResult.failure(ex);
-        }
+        var request = new InvestmentRequest(loan.getId(), amount);
+        controlApi.run(api -> api.invest(request));
     }
 
     public void cancel(final Investment investment) {
@@ -125,15 +112,9 @@ public class Zonky {
         controlApi.run(api -> api.cancel(investment.getId()));
     }
 
-    public PurchaseResult purchase(final Participation participation) {
+    public void purchase(final Participation participation) {
         LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        try {
-            controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
-            return PurchaseResult.success();
-        } catch (final ClientErrorException ex) {
-            LOGGER.debug("Caught API exception during purchasing.", ex);
-            return PurchaseResult.failure(ex);
-        }
+        controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
     }
 
     public void sell(final Investment investment) {

@@ -42,8 +42,6 @@ import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
 import com.github.robozonky.app.tenant.PowerTenant;
-import com.github.robozonky.internal.remote.InvestmentFailureType;
-import com.github.robozonky.internal.remote.InvestmentResult;
 import com.github.robozonky.internal.remote.Zonky;
 
 class InvestingSessionTest extends AbstractZonkyLeveragingTest {
@@ -103,7 +101,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         doThrow(thrown).when(z)
             .invest(notNull(), anyInt());
         final InvestingSession t = new InvestingSession(Stream.empty(), auth);
-        assertThatThrownBy(() -> t.accept(r)).isSameAs(thrown);
+        assertThatThrownBy(() -> t.accept(r)).isInstanceOf(IllegalStateException.class);
         verify(auth, never()).setKnownBalanceUpperBound(any());
     }
 
@@ -113,11 +111,11 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final PowerTenant auth = mockTenant(z, false);
         final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(200));
         final Response response = Response.status(400)
-            .entity(InvestmentFailureType.TOO_MANY_REQUESTS.getReason()
-                .get())
+            .entity("TOO_MANY_REQUESTS")
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
-        when(z.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(thrown));
+        doThrow(thrown).when(z)
+            .invest(any(), anyInt());
         final InvestingSession t = new InvestingSession(Stream.empty(), auth);
         assertThatThrownBy(() -> t.accept(r)).isInstanceOf(IllegalStateException.class);
         verify(auth, never()).setKnownBalanceUpperBound(any());
@@ -129,11 +127,11 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final PowerTenant auth = mockTenant(z, false);
         final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(200));
         final Response response = Response.status(400)
-            .entity(InvestmentFailureType.INSUFFICIENT_BALANCE.getReason()
-                .get())
+            .entity("INSUFFICIENT_BALANCE")
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
-        when(z.invest(notNull(), anyInt())).thenReturn(InvestmentResult.failure(thrown));
+        doThrow(thrown).when(z)
+            .invest(any(), anyInt());
         final InvestingSession t = new InvestingSession(Stream.empty(), auth);
         assertThat(t.accept(r)).isFalse();
         assertThat(auth.getKnownBalanceUpperBound()).isEqualTo(Money.from(199));
