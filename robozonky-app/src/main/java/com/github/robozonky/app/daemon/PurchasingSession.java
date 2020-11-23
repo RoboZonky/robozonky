@@ -73,7 +73,7 @@ final class PurchasingSession extends
             logger.info("Purchased a participation worth {}.", participation.getRemainingPrincipal());
             return true;
         } catch (BadRequestException ex) {
-            var response = FailureTypeUtil.getResponseEntity(ex.getResponse());
+            var response = getResponseEntity(ex.getResponse());
             switch (response) {
                 case "TOO_MANY_REQUESTS":
                     // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.

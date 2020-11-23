@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
+import javax.ws.rs.core.Response;
+
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.strategies.Descriptor;
@@ -82,4 +84,15 @@ abstract class AbstractSession<T extends Recommended<S, X>, S extends Descriptor
     Stream<X> getResult() {
         return result.stream();
     }
+
+    protected String getResponseEntity(final Response response) {
+        if (!response.hasEntity()) {
+            return "";
+        }
+        response.bufferEntity(); // allow for repeated queries over the same Response instance
+        var contents = response.readEntity(String.class);
+        logger.debug("Response body is: {}", contents);
+        return contents;
+    }
+
 }

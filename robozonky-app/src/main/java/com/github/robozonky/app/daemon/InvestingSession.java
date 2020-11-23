@@ -26,9 +26,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.investmentMadeLa
 import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -43,12 +41,9 @@ import com.github.robozonky.app.tenant.PowerTenant;
  */
 final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescriptor, Loan> {
 
-    private final Investor investor;
-
     InvestingSession(final Stream<LoanDescriptor> marketplace, final PowerTenant tenant) {
         super(marketplace, tenant, d -> d.item()
             .getId(), "discardedLoans", Audit.investing());
-        this.investor = Investor.build(tenant);
     }
 
     public static Stream<Loan> invest(final PowerTenant tenant, final Stream<LoanDescriptor> loans,
@@ -75,9 +70,10 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             .forEach(this::accept); // keep trying until investment opportunities are exhausted
     }
 
-    private boolean successfulInvestment(final RecommendedLoan recommendation, final Money amount) {
-        final Loan l = recommendation.descriptor()
+    private void processSuccessfulInvestment(final RecommendedLoan recommendation) {
+        var l = recommendation.descriptor()
             .item();
+        var amount = recommendation.amount();
         result.add(l);
         tenant.getPortfolio()
             .simulateCharge(l.getId(), l.getRating(), amount);
@@ -87,7 +83,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         tenant.fire(investmentMadeLazy(() -> investmentMade(l, amount, tenant.getPortfolio()
             .getOverview())));
         logger.info("Invested {} into loan #{}.", amount, l.getId());
-        return true;
     }
 
     @Override
@@ -97,34 +92,47 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
                     tenant.getKnownBalanceUpperBound());
             return false;
         }
-        logger.debug("Will attempt to invest in {}.", recommendation);
         try {
-            investor.invest(recommendation);
-            return successfulInvestment(recommendation, recommendation.amount());
+            if (tenant.getSessionInfo()
+                .isDryRun()) {
+                logger.debug("Dry run. Otherwise would attempt investing: {}.", recommendation);
+            } else {
+                logger.debug("Will attempt to invest in {}.", recommendation);
+                tenant.run(z -> z.invest(recommendation.descriptor()
+                    .item(),
+                        recommendation.amount()
+                            .getValue()
+                            .intValue()));
+            }
+            processSuccessfulInvestment(recommendation);
+            return true;
         } catch (BadRequestException ex) {
-            var response = FailureTypeUtil.getResponseEntity(ex.getResponse());
+            var response = getResponseEntity(ex.getResponse());
             switch (response) {
                 case "TOO_MANY_REQUESTS":
                     // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
-                    throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.", ex);
+                    throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.", ex);
                 case "INSUFFICIENT_BALANCE":
-                    logger.debug("Failed investing {}. We don't have sufficient balance.", recommendation.amount());
-                    tenant.setKnownBalanceUpperBound(recommendation.amount()
-                        .subtract(1));
+                    var amount = recommendation.amount();
+                    logger.debug("Failed investing {}. We don't have sufficient balance.", amount);
+                    tenant.setKnownBalanceUpperBound(amount.subtract(1));
                     return false;
-                default:
-                    logger.debug("Failed investing {} into loan #{}. Reason given: {}.", recommendation.amount(),
+                case "cancelled":
+                case "withdrawn":
+                case "reservedInvestmentOnly":
+                case "overInvestment":
+                case "multipleInvestment":
+                case "alreadyCovered":
+                    logger.debug("Failed investing {} into loan #{}. Reason given: '{}'.", recommendation.amount(),
                             recommendation.descriptor()
                                 .item()
                                 .getId(),
                             response);
                     return false;
+                default:
+                    throw new IllegalStateException("Unknown exception caught during investing. Reason given: '"
+                            + response + "'.", ex);
             }
-        } catch (NotFoundException ex) {
-            logger.debug("Failed investing into loan #{}, not found.", recommendation.descriptor()
-                .item()
-                .getId());
-            return false;
         } catch (Exception ex) {
             throw new IllegalStateException("Unknown exception caught during investing.", ex);
         }
