@@ -90,8 +90,6 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
                 .isEmpty();
             softly.assertThat(w.getOriginalPurchasePrice())
                 .isEmpty();
-            softly.assertThat(w.getDiscount())
-                .isEmpty();
             softly.assertThat(w.getPrice())
                 .isEmpty();
             softly.assertThat(w.getSellFee())
@@ -177,8 +175,6 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getRevenueRate())
                 .isGreaterThan(Ratio.ZERO);
             softly.assertThat(w.getOriginalPurchasePrice())
-                .isEmpty();
-            softly.assertThat(w.getDiscount())
                 .isEmpty();
             softly.assertThat(w.getPrice())
                 .isEmpty();

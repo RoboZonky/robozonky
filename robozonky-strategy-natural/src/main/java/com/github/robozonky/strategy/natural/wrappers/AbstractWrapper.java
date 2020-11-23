@@ -75,11 +75,6 @@ abstract class AbstractWrapper<T extends Descriptor<?>> implements Wrapper<T> {
         return Optional.empty();
     }
 
-    @Override
-    public Optional<BigDecimal> getDiscount() {
-        return Optional.empty();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(final Object o) {

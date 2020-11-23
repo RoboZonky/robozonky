@@ -33,10 +33,12 @@ class RelativeDiscountConditionTest {
     void lessThan() {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.lessThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN));
         assertThat(condition).rejects(w);
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(11));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.add(BigDecimal.ONE)));
+        assertThat(condition).rejects(w);
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.subtract(BigDecimal.ONE)));
         assertThat(condition).accepts(w);
     }
 
@@ -44,11 +46,13 @@ class RelativeDiscountConditionTest {
     void moreThan() {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.moreThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN));
         assertThat(condition).rejects(w);
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(9));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.add(BigDecimal.ONE)));
         assertThat(condition).accepts(w);
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.subtract(BigDecimal.ONE)));
+        assertThat(condition).rejects(w);
     }
 
     @Test
@@ -56,12 +60,16 @@ class RelativeDiscountConditionTest {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.exact(Ratio.fromPercentage(8),
                 Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
-        when(w.getDiscount()).thenReturn(Optional.of(BigDecimal.ONE));
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.TEN);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN));
         assertThat(condition).accepts(w);
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(9));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(9)));
+        assertThat(condition).accepts(w);
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(8)));
+        assertThat(condition).accepts(w);
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(7)));
         assertThat(condition).rejects(w);
-        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(7));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(11)));
         assertThat(condition).rejects(w);
     }
 

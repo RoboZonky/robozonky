@@ -46,7 +46,7 @@ public class ParticipationImpl implements Participation {
     protected boolean insuranceActive;
 
     protected Money remainingPrincipal;
-    protected Money discount;
+    protected Ratio discount;
     protected Money price;
 
     public ParticipationImpl() {
@@ -198,11 +198,11 @@ public class ParticipationImpl implements Participation {
     }
 
     @Override
-    public Money getDiscount() {
+    public Ratio getDiscount() {
         return discount;
     }
 
-    public void setDiscount(final Money discount) {
+    public void setDiscount(final Ratio discount) {
         this.discount = discount;
     }
 

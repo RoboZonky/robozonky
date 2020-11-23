@@ -108,9 +108,7 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<Ratio> relativeExact(final Function<Wrapper<?>, X> part,
-            final Function<Wrapper<?>, X> sum,
-            final Ratio minimum,
-            final Ratio maximum) {
+            final Function<Wrapper<?>, X> sum, final Ratio minimum, final Ratio maximum) {
         final Domain<Ratio> allowedValues = AbstractRelativeRangeCondition.RELATIVE_DOMAIN;
         if (!allowedValues.test(minimum)) {
             throw new IllegalArgumentException("Minimum " + minimum + " does not fit " + allowedValues);

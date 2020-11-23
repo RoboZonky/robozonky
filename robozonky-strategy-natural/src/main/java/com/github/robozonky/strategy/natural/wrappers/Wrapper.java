@@ -101,8 +101,6 @@ public interface Wrapper<T> {
 
     Optional<BigDecimal> getSellFee();
 
-    Optional<BigDecimal> getDiscount();
-
     T getOriginal();
 
 }

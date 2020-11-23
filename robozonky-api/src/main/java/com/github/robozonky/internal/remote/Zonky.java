@@ -113,8 +113,11 @@ public class Zonky {
     }
 
     public void purchase(final Participation participation) {
-        LOGGER.debug("Purchasing participation #{} in loan #{}.", participation.getId(), participation.getLoanId());
-        controlApi.run(api -> api.purchase(participation.getId(), new PurchaseRequest(participation)));
+        var request = new PurchaseRequest(participation.getPrice(), participation.getDiscount(),
+                participation.getRemainingPrincipal());
+        LOGGER.debug("Purchasing participation #{} in loan #{} ({}).", participation.getId(), participation.getLoanId(),
+                request);
+        controlApi.run(api -> api.purchase(participation.getId(), request));
     }
 
     public void sell(final Investment investment) {

@@ -61,7 +61,7 @@ public interface Participation {
 
     Money getRemainingPrincipal();
 
-    Money getDiscount();
+    Ratio getDiscount();
 
     Money getPrice();
 }

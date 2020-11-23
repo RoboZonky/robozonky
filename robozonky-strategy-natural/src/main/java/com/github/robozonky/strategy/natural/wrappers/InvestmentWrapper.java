@@ -23,7 +23,6 @@ import java.util.OptionalInt;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
@@ -176,15 +175,6 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
             .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment))
             .getSellPrice();
         return Optional.of(price.getValue());
-    }
-
-    @Override
-    public Optional<BigDecimal> getDiscount() {
-        var discount = investment.getSmpSellInfo()
-            .map(SellInfo::getDiscount)
-            .orElse(Ratio.ZERO);
-        var result = discount.apply(Money.from(getRemainingPrincipal()));
-        return Optional.of(result.getValue());
     }
 
     @Override

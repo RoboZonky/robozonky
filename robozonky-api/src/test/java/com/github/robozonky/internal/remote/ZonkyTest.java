@@ -30,6 +30,7 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.LastPublishedItem;
 import com.github.robozonky.api.remote.entities.Loan;
@@ -207,7 +208,8 @@ class ZonkyTest {
         final Zonky z = mockZonkyControl(ca);
         final Participation p = mock(ParticipationImpl.class);
         when(p.getRemainingPrincipal()).thenReturn(Money.from(10));
-        when(p.getDiscount()).thenReturn(Money.ZERO);
+        when(p.getDiscount()).thenReturn(Ratio.ZERO);
+        when(p.getPrice()).thenReturn(Money.from(10));
         when(p.getId()).thenReturn(1L);
         assertThatThrownBy(() -> z.purchase(p))
             .isInstanceOf(ClientErrorException.class);

@@ -137,12 +137,6 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     }
 
     @Override
-    public Optional<BigDecimal> getDiscount() {
-        return Optional.of(participation.getDiscount()
-            .getValue());
-    }
-
-    @Override
     public BigDecimal getRemainingPrincipal() {
         return participation.getRemainingPrincipal()
             .getValue();

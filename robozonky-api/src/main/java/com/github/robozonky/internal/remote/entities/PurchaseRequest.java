@@ -19,18 +19,19 @@ package com.github.robozonky.internal.remote.entities;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 
-import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 
 public class PurchaseRequest {
 
     private BigDecimal amount;
     private BigDecimal discount;
+    private BigDecimal remainingPrincipal;
 
-    public PurchaseRequest(final Participation participation) {
-        this.amount = participation.getRemainingPrincipal()
-            .getValue();
-        this.discount = participation.getDiscount()
-            .getValue();
+    public PurchaseRequest(final Money purchasePrice, final Ratio discount, final Money remainingPrincipal) {
+        this.amount = purchasePrice.getValue();
+        this.discount = discount.bigDecimalValue();
+        this.remainingPrincipal = remainingPrincipal.getValue();
     }
 
     public BigDecimal getAmount() {
@@ -49,11 +50,20 @@ public class PurchaseRequest {
         this.discount = discount;
     }
 
+    public BigDecimal getRemainingPrincipal() {
+        return remainingPrincipal;
+    }
+
+    public void setRemainingPrincipal(final BigDecimal remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", PurchaseRequest.class.getSimpleName() + "[", "]")
             .add("amount=" + amount)
             .add("discount=" + discount)
+            .add("remainingPrincipal=" + remainingPrincipal)
             .toString();
     }
 }

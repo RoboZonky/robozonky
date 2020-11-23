@@ -64,8 +64,6 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
         doReturn(Money.ZERO).when(p)
             .getRemainingPrincipal();
         doReturn(Money.ZERO).when(p)
-            .getDiscount();
-        doReturn(Money.ZERO).when(p)
             .getPrice();
         doReturn(loan.getPurpose()).when(p)
             .getPurpose();
@@ -99,8 +97,6 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
         when(participation.getInterestRate()).thenReturn(Ratio.ONE);
         doReturn(Money.ZERO).when(participation)
             .getRemainingPrincipal();
-        doReturn(Money.ZERO).when(participation)
-            .getDiscount();
         doReturn(Money.ZERO).when(participation)
             .getPrice();
         doReturn(20).when(participation)
@@ -149,8 +145,6 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
                 .isEmpty();
             softly.assertThat(w.getOriginalPurchasePrice())
                 .isEmpty();
-            softly.assertThat(w.getDiscount())
-                .contains(BigDecimal.ZERO);
             softly.assertThat(w.getPrice())
                 .contains(BigDecimal.ZERO);
             softly.assertThat(w.getSellFee())
@@ -227,8 +221,6 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
                 .isEmpty();
             softly.assertThat(w.getOriginalPurchasePrice())
                 .isEmpty();
-            softly.assertThat(w.getDiscount())
-                .contains(BigDecimal.ZERO);
             softly.assertThat(w.getPrice())
                 .contains(BigDecimal.ZERO);
             softly.assertThat(w.getSellFee())

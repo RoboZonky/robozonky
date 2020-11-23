@@ -402,6 +402,12 @@
         "old": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===java.time.Instant===, com.github.robozonky.api.Money)",
         "new": "parameter com.github.robozonky.api.Ratio com.github.robozonky.api.remote.enums.Rating::getMinimalRevenueRate(===java.time.ZonedDateTime===, com.github.robozonky.api.Money)",
         "justification": "Switched internal representation of date and time to ZonedDateTime."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method com.github.robozonky.api.Money com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "new": "method com.github.robozonky.api.Ratio com.github.robozonky.api.remote.entities.Participation::getDiscount()",
+        "justification": "The API was implemented incorrectly."
       }
     ]
   }
