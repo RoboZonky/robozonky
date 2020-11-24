@@ -59,17 +59,17 @@ final class Preferences {
     private static boolean isDesirable(Rating rating, ParsedStrategy strategy, PortfolioOverview portfolioOverview) {
         var permittedShare = strategy.getPermittedShare(rating);
         if (permittedShare.compareTo(Ratio.ZERO) <= 0) {
-            Audit.LOGGER.debug("Rating {} is not permitted, skipping.", rating);
+            Audit.LOGGER.debug("Rating {} is not permitted.", rating);
             return false;
         }
         var currentRatingShare = portfolioOverview.getShareOnInvestment(rating);
         var overinvested = currentRatingShare.compareTo(permittedShare) >= 0;
         if (overinvested) { // we over-invested into this rating; do not include
-            Audit.LOGGER.debug("Rating {} over-invested, skipping. (Expected {}, got {}.)", rating, permittedShare,
+            Audit.LOGGER.debug("Rating {} over-invested. (Expected {}, got {}.)", rating, permittedShare,
                     currentRatingShare);
             return false;
         }
-        Audit.LOGGER.debug("Rating {} under-invested, skipping. (Expected {}, got {}.)", rating, permittedShare,
+        Audit.LOGGER.debug("Rating {} under-invested. (Expected {}, got {}.)", rating, permittedShare,
                 currentRatingShare);
         return true;
     }
