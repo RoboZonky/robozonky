@@ -86,8 +86,7 @@ final class Util {
                 var isPossiblyDiscounted = loan.getDpd() > 0 || loan.hasCollectionHistory();
                 var sellPrice = isPossiblyDiscounted ? investment.getSmpSellInfo()
                     .orElseThrow()
-                    .getFee()
-                    .getValue()
+                    .getSellPrice()
                         : investment.getPrincipal()
                             .getUnpaid();
                 return Tuple.of(rating, sellPrice, fee);
