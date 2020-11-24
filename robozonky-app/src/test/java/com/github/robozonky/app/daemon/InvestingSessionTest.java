@@ -127,7 +127,7 @@ class InvestingSessionTest extends AbstractZonkyLeveragingTest {
         final PowerTenant auth = mockTenant(z, false);
         final RecommendedLoan r = new RecommendedLoan(mockLoanDescriptor(), Money.from(200));
         final Response response = Response.status(400)
-            .entity("INSUFFICIENT_BALANCE")
+            .entity("insufficientBalance")
             .build();
         final ClientErrorException thrown = new BadRequestException(response);
         doThrow(thrown).when(z)

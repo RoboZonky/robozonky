@@ -111,7 +111,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
             if (response.contains("TOO_MANY_REQUESTS")) {
                 // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
                 throw new IllegalStateException("HTTP 429 Too Many Requests caught during investing.", ex);
-            } else if (response.contains("INSUFFICIENT_BALANCE")) {
+            } else if (response.contains("insufficientBalance")) {
                 var amount = recommendation.amount();
                 logger.debug("Failed investing {}. We don't have sufficient balance.", amount);
                 tenant.setKnownBalanceUpperBound(amount.subtract(1));
