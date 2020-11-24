@@ -51,8 +51,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
         var reservation = reservationDescriptor.item();
         LOGGER.trace("Evaluating {}.", reservation);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.getDesirableRatings()
-            .contains(reservation.getRating());
+        var isAcceptable = preferences.isDesirable(reservation.getRating());
         if (!isAcceptable) {
             LOGGER.debug("Reservation #{} skipped due to an undesirable rating.", reservation.getId());
             return false;

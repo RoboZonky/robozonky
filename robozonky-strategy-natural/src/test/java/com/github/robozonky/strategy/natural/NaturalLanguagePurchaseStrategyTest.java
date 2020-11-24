@@ -52,7 +52,9 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
     }
 
     private static Participation mockParticipation() {
-        return mock(ParticipationImpl.class);
+        Participation participation = mock(ParticipationImpl.class);
+        when(participation.getRating()).thenReturn(Rating.D);
+        return participation;
     }
 
     @Test

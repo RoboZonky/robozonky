@@ -74,8 +74,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         var participation = participationDescriptor.item();
         LOGGER.trace("Evaluating {}.", participation);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.getDesirableRatings()
-            .contains(participation.getRating());
+        var isAcceptable = preferences.isDesirable(participation.getRating());
         if (!isAcceptable) {
             LOGGER.debug("Participation #{} skipped due to an undesirable rating.", participation.getId());
             return false;
