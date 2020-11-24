@@ -49,11 +49,10 @@ public class Daemon implements InvestmentMode {
 
     private void scheduleDaemons(final Scheduler executor) { // run investing and purchasing daemons
         LOGGER.debug("Scheduling daemon threads.");
-        // never check marketplaces more than once per second, or else Zonky quotas will come knocking
-        final Duration oneSecond = Duration.ofSeconds(1);
-        submitWithTenant(executor, StrategyExecutor.forInvesting(tenant)::get, InvestingSession.class, oneSecond);
-        submitWithTenant(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class, oneSecond,
-                Duration.ofMillis(250)); // delay so that primary and secondary don't happen at the same time
+        var halfSecond = Duration.ofMillis(500);
+        submitWithTenant(executor, StrategyExecutor.forInvesting(tenant)::get, InvestingSession.class, halfSecond);
+        submitWithTenant(executor, StrategyExecutor.forPurchasing(tenant)::get, PurchasingSession.class, halfSecond,
+                halfSecond.dividedBy(2)); // delay so that primary and secondary don't happen at the same time
     }
 
     private void submitWithTenant(final Scheduler executor, final Runnable r, final Class<?> type,
