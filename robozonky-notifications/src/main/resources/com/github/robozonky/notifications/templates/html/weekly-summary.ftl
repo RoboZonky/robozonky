@@ -1,5 +1,5 @@
 <table style="width: 60%">
-  <caption><h2>Výkonnost portfolia</h2></caption>
+  <caption><h2>Výkonnost portfolia k <@datetime data.portfolio.timestamp /></h2></caption>
   <thead>
     <tr>
         <th></th>
@@ -28,7 +28,7 @@
 hodnotou.</small></p>
 
 <table style="width: 60%">
-  <caption><h2>Struktura portfolia k ${data.portfolio.timestamp?time?iso_local_ms_nz}</h2></caption>
+  <caption><h2>Struktura portfolia k <@datetime data.portfolio.timestamp /></h2></caption>
   <thead>
     <tr>
         <th style="padding: 5px; text-align: right;">&nbsp;</th>
