@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote.entities;
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.SellInfo;
 
@@ -45,20 +44,8 @@ public class SellRequest {
     }
 
     public SellRequest(final Investment investment) {
-        this.investmentId = investment.getId();
-        this.remainingPrincipal = investment.getPrincipal()
-            .getUnpaid()
-            .getValue();
-        this.feeAmount = investment.getSmpSellInfo()
-            .map(s -> s.getFee()
-                .getValue())
-            .orElse(Money.ZERO)
-            .getValue();
-        this.discount = BigDecimal.ZERO;
-        this.price = investment.getSmpSellInfo()
-            .map(s -> s.getSellPrice()
-                .getValue())
-            .orElse(remainingPrincipal);
+        this(investment.getId(), investment.getSmpSellInfo()
+            .orElseGet(() -> SellInfoImpl.getBasicSale(investment)));
     }
 
     public long getInvestmentId() {

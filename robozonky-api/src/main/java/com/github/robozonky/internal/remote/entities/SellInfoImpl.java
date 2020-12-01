@@ -21,19 +21,16 @@ import java.util.StringJoiner;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.SellFee;
 import com.github.robozonky.api.remote.entities.SellInfo;
 
 public class SellInfoImpl implements SellInfo {
 
     private Money sellPrice;
-
     private SellFeeImpl fee;
-
     private Money boughtFor;
-
     private Money remainingPrincipal;
-
     private Ratio discount;
 
     public SellInfoImpl() {
@@ -47,7 +44,26 @@ public class SellInfoImpl implements SellInfo {
     public SellInfoImpl(Money sellPrice, Money sellFee) {
         this.sellPrice = Objects.requireNonNull(sellPrice);
         this.boughtFor = sellPrice;
+        this.remainingPrincipal = sellPrice;
+        this.discount = Ratio.ZERO;
         this.fee = new SellFeeImpl(sellFee);
+    }
+
+    /**
+     *
+     * @param investment to copy data from
+     * @return no fee, no discount, remaining principal = sell price = unpaid principal
+     */
+    public static SellInfoImpl getBasicSale(Investment investment) {
+        var result = new SellInfoImpl(investment.getPrincipal()
+            .getUnpaid());
+        result.boughtFor = investment.getPrincipal()
+            .getTotal();
+        result.discount = Ratio.ZERO;
+        result.fee = new SellFeeImpl(Money.ZERO);
+        result.remainingPrincipal = investment.getPrincipal()
+            .getUnpaid();
+        return result;
     }
 
     @Override
@@ -55,9 +71,17 @@ public class SellInfoImpl implements SellInfo {
         return fee;
     }
 
+    public void setFee(final SellFeeImpl fee) {
+        this.fee = fee;
+    }
+
     @Override
     public Money getSellPrice() {
         return sellPrice;
+    }
+
+    public void setSellPrice(final Money sellPrice) {
+        this.sellPrice = sellPrice;
     }
 
     @Override
@@ -65,30 +89,22 @@ public class SellInfoImpl implements SellInfo {
         return boughtFor;
     }
 
+    public void setBoughtFor(final Money boughtFor) {
+        this.boughtFor = boughtFor;
+    }
+
     @Override
     public Money getRemainingPrincipal() {
         return remainingPrincipal;
     }
 
+    public void setRemainingPrincipal(final Money remainingPrincipal) {
+        this.remainingPrincipal = remainingPrincipal;
+    }
+
     @Override
     public Ratio getDiscount() {
         return discount;
-    }
-
-    public void setSellPrice(final Money sellPrice) {
-        this.sellPrice = sellPrice;
-    }
-
-    public void setFee(final SellFeeImpl fee) {
-        this.fee = fee;
-    }
-
-    public void setBoughtFor(final Money boughtFor) {
-        this.boughtFor = boughtFor;
-    }
-
-    public void setRemainingPrincipal(final Money remainingPrincipal) {
-        this.remainingPrincipal = remainingPrincipal;
     }
 
     public void setDiscount(final Ratio discount) {
