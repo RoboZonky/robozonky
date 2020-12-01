@@ -40,6 +40,7 @@ import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.remote.entities.AmountsImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.remote.entities.InvestmentLoanDataImpl;
@@ -119,7 +120,7 @@ final class Util {
         loan.setDatePublished(OffsetDateTime.now()
             .minusDays(3));
         // set textual properties
-        loan.setUrl("https://app.zonky.cz/#/marketplace/detail/" + loan.getId() + "/");
+        loan.setUrl(ApiConstants.ZONKY_API_HOSTNAME + "/loan/" + loan.getId());
         loan.setStory(LOREM_IPSUM);
         loan.setName(generateShortText());
         return loan;
