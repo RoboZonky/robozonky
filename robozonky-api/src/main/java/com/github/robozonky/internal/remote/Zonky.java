@@ -121,7 +121,7 @@ public class Zonky {
     }
 
     public void sell(final Investment investment) {
-        SellRequest request = new SellRequest(investment);
+        var request = new SellRequest(investment);
         LOGGER.debug("Offering to sell investment in loan #{} ({}).", investment.getLoan()
             .getId(), request);
         controlApi.run(api -> api.offer(request));

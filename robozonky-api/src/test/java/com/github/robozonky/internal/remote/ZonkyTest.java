@@ -226,6 +226,7 @@ class ZonkyTest {
         investment.setId(1);
         investment.setPrincipal(new AmountsImpl(Money.from(10)));
         final SellInfoImpl sellInfo = new SellInfoImpl(Money.from(10), Money.from(1));
+
         investment.setSmpSellInfo(sellInfo);
         z.sell(investment);
         verify(control).offer(any());
