@@ -28,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
+import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
 import com.github.robozonky.internal.remote.endpoints.LoanApi;
@@ -43,7 +44,6 @@ import com.github.robozonky.internal.util.functional.Memoizer;
 
 public class ApiProvider implements AutoCloseable {
 
-    private static final String ZONKY_URL = "https://api.zonky.cz";
     private static final Logger LOGGER = LogManager.getLogger(ApiProvider.class);
     /**
      * Instances of the Zonky API are kept for as long as the token supplier is kept by the GC. This guarantees that,
@@ -97,17 +97,18 @@ public class ApiProvider implements AutoCloseable {
     <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
             final Supplier<ZonkyApiToken> token,
             final RequestCounter counter) {
-        return new PaginatedApi<>(api, ZONKY_URL, token, client.get(), counter);
+        return new PaginatedApi<>(api, ApiConstants.ZONKY_API_HOSTNAME, token, client.get(), counter);
     }
 
     <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
-        final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api, ZONKY_URL);
+        final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api,
+                ApiConstants.ZONKY_API_HOSTNAME);
         return actuallyObtainNormal(proxy, counter);
     }
 
     private OAuth oauth() {
-        final ZonkyOAuthApi proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
-                ZONKY_URL);
+        var proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
+                ApiConstants.ZONKY_API_HOSTNAME);
         return new OAuth(actuallyObtainNormal(proxy, counter));
     }
 

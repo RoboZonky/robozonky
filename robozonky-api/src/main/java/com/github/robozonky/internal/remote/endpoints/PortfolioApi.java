@@ -38,7 +38,7 @@ public interface PortfolioApi extends EntityCollectionApi<InvestmentImpl> {
     @Override
     List<InvestmentImpl> items();
 
-    @Path("/statistics/me/public-overview")
+    @Path(ApiConstants.ROOT + "/statistics/me/public-overview")
     @GET
     StatisticsImpl getStatistics();
 

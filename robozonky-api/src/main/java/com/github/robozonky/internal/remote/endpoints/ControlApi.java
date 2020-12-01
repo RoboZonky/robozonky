@@ -39,7 +39,7 @@ import com.github.robozonky.internal.remote.entities.SellRequest;
 public interface ControlApi {
 
     @GET
-    @Path("/investors/me/restrictions")
+    @Path(ApiConstants.ROOT + "/investors/me/restrictions")
     RestrictionsImpl restrictions();
 
     @GET
@@ -47,7 +47,7 @@ public interface ControlApi {
     ConsentsImpl consents();
 
     @POST
-    @Path("/marketplace/investment")
+    @Path(ApiConstants.ROOT + "/marketplace/investment")
     void invest(InvestmentRequest investmentRequest);
 
     @POST
@@ -59,7 +59,7 @@ public interface ControlApi {
     void purchase(@PathParam("id") long id, PurchaseRequest purchaseRequest);
 
     @DELETE
-    @Path("/traded-investments/{id}")
+    @Path(ApiConstants.ROOT + "/traded-investments/{id}")
     void cancel(@PathParam("id") long id);
 
     @PATCH

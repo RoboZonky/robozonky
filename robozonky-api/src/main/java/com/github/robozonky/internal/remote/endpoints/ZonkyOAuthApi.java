@@ -21,19 +21,19 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
-@Path("/oauth/token")
+@Path(ApiConstants.OAUTH + "/token")
 public interface ZonkyOAuthApi {
 
     @POST
-    ZonkyApiTokenImpl login(
-            @FormParam("code") String password,
-            @FormParam("redirect_uri") @DefaultValue("https://app.zonky.cz/api/oauth/code") String redirectUri,
+    ZonkyApiTokenImpl login(@FormParam("code") String password,
+            @FormParam("redirect_uri") @DefaultValue(ApiConstants.ZONKY_API_HOSTNAME + ApiConstants.OAUTH
+                    + "/code") String redirectUri,
             @FormParam("grant_type") @DefaultValue("authorization_code") String grantType);
 
     @POST
-    ZonkyApiTokenImpl refresh(
-            @FormParam("refresh_token") String refreshToken,
+    ZonkyApiTokenImpl refresh(@FormParam("refresh_token") String refreshToken,
             @FormParam("grant_type") @DefaultValue("refresh_token") String grantType);
 }

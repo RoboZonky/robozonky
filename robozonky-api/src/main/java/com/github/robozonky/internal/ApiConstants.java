@@ -18,13 +18,16 @@ package com.github.robozonky.internal;
 
 public final class ApiConstants {
 
-    public static final String ME = "/users/me";
-    public static final String INVESTMENTS = "/api/me/investments";
-    public static final String LOANS = "/loans";
+    public static final String ZONKY_API_HOSTNAME = "https://app.zonky.cz";
+    public static final String ROOT = "/api";
+    public static final String OAUTH = ROOT + "/oauth";
+    public static final String ME = ROOT + "/users/me";
+    public static final String INVESTMENTS = ROOT + "/me/investments";
+    public static final String LOANS = ROOT + "/loans";
     public static final String MARKETPLACE = LOANS + "/marketplace";
-    public static final String RESERVATIONS = "/reservations";
-    public static final String RESERVATION_PREFERENCES = "/reservations/settings";
-    public static final String SMP_INVESTMENTS = "/smp/investments";
+    public static final String RESERVATIONS = ROOT + "/reservations";
+    public static final String RESERVATION_PREFERENCES = RESERVATIONS + "/settings";
+    public static final String SMP_INVESTMENTS = ROOT + "/smp/investments";
 
     private ApiConstants() {
         // no instances
