@@ -41,7 +41,7 @@ class LoanImplTest {
             "\"topped\":false,\"amount\":360000.00,\"currency\":\"CZK\",\"countryOfOrigin\":\"CZ\"," +
             "\"remainingInvestment\":318900.00,\"investmentRate\":0.11416666666666667,\"covered\":false," +
             "\"reservedAmount\":72000.00,\"zonkyPlusAmount\":4100.00,\"datePublished\":\"2020-04-21T19:23:46.278Z\"," +
-            "\"published\":true,\"deadline\":\"2020-04-23T19:21:57.838Z\",\"investmentsCount\":6,\"region\":\"13\"," +
+            "\"published\":true,\"deadline\":\"2020-04-23T19:21:57.838Z\",\"investmentsCount\":6,\"region\":\"15\"," +
             "\"mainIncomeType\":\"EMPLOYMENT\",\"mainIncomeIndustry\":\"CONSTRUCTION\",\"activeLoansCount\":1," +
             "\"insuranceActive\":true,\"additionallyInsured\":false,\"flags\":[]," +
             "\"insuranceHistory\":[{\"policyPeriodFrom\":\"2020-04-22\",\"policyPeriodTo\":\"2025-04-13\"}]," +
@@ -81,7 +81,7 @@ class LoanImplTest {
                 softly.assertThat(loan.getZonkyPlusAmount())
                     .isEqualTo(Money.from(4_100));
                 softly.assertThat(loan.getRegion())
-                    .isEqualTo(Region.MORAVSKOSLEZSKY);
+                    .isEqualTo(Region.SLOVENSKO);
                 softly.assertThat(loan.getMainIncomeType())
                     .isEqualTo(MainIncomeType.EMPLOYMENT);
                 softly.assertThat(loan.isInsuranceActive())

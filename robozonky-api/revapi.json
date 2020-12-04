@@ -11,6 +11,12 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.field.enumConstantOrderChanged",
+        "old": "field com.github.robozonky.api.remote.enums.Region.UNKNOWN",
+        "new": "field com.github.robozonky.api.remote.enums.Region.UNKNOWN",
+        "justification": "Zonky added the Slovensko region."
+      }
     ]
   }
 }

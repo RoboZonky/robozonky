@@ -144,21 +144,22 @@ longExpr returns [long result] :
 
 // regions
 REGION   : (REGION_A | REGION_B | REGION_C | REGION_E | REGION_H | REGION_J | REGION_K | REGION_L | REGION_M | REGION_P
-            | REGION_S | REGION_T | REGION_U | REGION_Z);
-REGION_A : 'Praha';
-REGION_B : 'Jihomoravský';
-REGION_C : 'Jihočeský';
-REGION_E : 'Pardubický';
-REGION_H : 'Královéhradecký';
-REGION_J : 'Vysočina';
-REGION_K : 'Karlovarský';
-REGION_L : 'Liberecký';
-REGION_M : 'Olomoucký';
-REGION_P : 'Plzeňský';
-REGION_S : 'Středočeský';
-REGION_T : 'Moravskoslezský';
-REGION_U : 'Ústecký';
-REGION_Z : 'Zlínský';
+            | REGION_S | REGION_T | REGION_U | REGION_Z | REGION_SK);
+REGION_A  : 'Praha';
+REGION_B  : 'Jihomoravský';
+REGION_C  : 'Jihočeský';
+REGION_E  : 'Pardubický';
+REGION_H  : 'Královéhradecký';
+REGION_J  : 'Vysočina';
+REGION_K  : 'Karlovarský';
+REGION_L  : 'Liberecký';
+REGION_M  : 'Olomoucký';
+REGION_P  : 'Plzeňský';
+REGION_S  : 'Středočeský';
+REGION_T  : 'Moravskoslezský';
+REGION_U  : 'Ústecký';
+REGION_Z  : 'Zlínský';
+REGION_SK : 'Slovensko';
 
 // main income types
 INCOME                      : (INCOME_EMPLOYMENT | INCOME_ENTREPRENEUR | INCOME_SELF_EMPLOYMENT | INCOME_PENSION
