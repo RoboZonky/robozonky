@@ -45,6 +45,7 @@ public enum Region implements BaseEnum {
     OLOMOUCKY("Olomoucký"),
     MORAVSKOSLEZSKY("Moravskoslezský"),
     ZLINSKY("Zlínský"),
+    SLOVENSKO("Slovensko", "Slovensko"),
     UNKNOWN("N/A");
 
     private final String code;
