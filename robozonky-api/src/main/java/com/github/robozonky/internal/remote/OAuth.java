@@ -19,7 +19,6 @@ package com.github.robozonky.internal.remote;
 import static com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl.REFRESH_TOKEN_STRING;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
-import com.github.robozonky.internal.ApiConstants;
 import com.github.robozonky.internal.remote.endpoints.ZonkyOAuthApi;
 
 public class OAuth {
@@ -35,8 +34,7 @@ public class OAuth {
     }
 
     public ZonkyApiToken login(final char[] code) {
-        return api.call(a -> a.login(toString(code), ApiConstants.ZONKY_API_HOSTNAME + ApiConstants.OAUTH + "/code",
-                "authorization_code"));
+        return api.call(a -> a.login(toString(code), "https://app.zonky.cz/api/oauth/code", "authorization_code"));
     }
 
     public ZonkyApiToken refresh(final ZonkyApiToken token) {

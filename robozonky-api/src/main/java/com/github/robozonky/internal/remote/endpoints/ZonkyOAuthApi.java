@@ -28,12 +28,10 @@ import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 public interface ZonkyOAuthApi {
 
     @POST
-    ZonkyApiTokenImpl login(@FormParam("code") String password,
-            @FormParam("redirect_uri") @DefaultValue(ApiConstants.ZONKY_API_HOSTNAME + ApiConstants.OAUTH
-                    + "/code") String redirectUri,
+    ZonkyApiTokenImpl login(@FormParam("code") String password, @FormParam("redirect_uri") String redirectUri,
             @FormParam("grant_type") @DefaultValue("authorization_code") String grantType);
 
     @POST
     ZonkyApiTokenImpl refresh(@FormParam("refresh_token") String refreshToken,
-            @FormParam("grant_type") @DefaultValue("refresh_token") String grantType);
+            @FormParam("grant_type") String grantType);
 }
