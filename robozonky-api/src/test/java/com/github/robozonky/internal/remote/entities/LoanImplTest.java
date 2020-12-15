@@ -28,7 +28,6 @@ import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
-import com.github.robozonky.internal.ApiConstants;
 
 class LoanImplTest {
 
@@ -55,7 +54,7 @@ class LoanImplTest {
                 softly.assertThat(loan.getId())
                     .isEqualTo(710354);
                 softly.assertThat(loan.getUrl())
-                    .isEqualTo(ApiConstants.ZONKY_API_HOSTNAME + "/loan/710354");
+                    .endsWith("/loan/710354");
                 softly.assertThat(loan.getName())
                     .isNotBlank();
                 softly.assertThat(loan.getStory())
