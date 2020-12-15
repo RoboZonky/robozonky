@@ -18,8 +18,8 @@ package com.github.robozonky.internal;
 
 public final class ApiConstants {
 
-    public static final String ZONKY_API_HOSTNAME = "https://app.zonky.cz";
-    public static final String ROOT = "/api";
+    public static final String ZONKY_API_HOSTNAME = "https://api.zonky.cz";
+    public static final String ROOT = "";
     public static final String OAUTH = ROOT + "/oauth";
     public static final String ME = ROOT + "/users/me";
     public static final String INVESTMENTS = ROOT + "/me/investments";
