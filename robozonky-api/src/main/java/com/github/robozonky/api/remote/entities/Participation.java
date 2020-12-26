@@ -46,6 +46,7 @@ public interface Participation {
 
     Purpose getPurpose();
 
+    @Deprecated
     Rating getRating();
 
     boolean isWillExceedLoanInvestmentLimit();

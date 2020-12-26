@@ -150,7 +150,7 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
             return Optional.of(LoanHealth.HEALTHY);
         }
         var longestDpd = getLongestDpd().orElse(0);
-        if (longestDpd == 0) {
+        if (longestDpd > 0) {
             return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
         }
         return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
