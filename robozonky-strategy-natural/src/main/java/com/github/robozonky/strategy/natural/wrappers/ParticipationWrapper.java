@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.entities.ParticipationDetail;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -140,6 +141,19 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     public BigDecimal getRemainingPrincipal() {
         return participation.getRemainingPrincipal()
             .getValue();
+    }
+
+    @Override
+    public Optional<LoanHealth> getHealth() {
+        var currentDpd = getCurrentDpd().orElse(0);
+        if (currentDpd == 0) {
+            return Optional.of(LoanHealth.HEALTHY);
+        }
+        var longestDpd = getLongestDpd().orElse(0);
+        if (longestDpd == 0) {
+            return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
+        }
+        return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
     }
 
     @Override

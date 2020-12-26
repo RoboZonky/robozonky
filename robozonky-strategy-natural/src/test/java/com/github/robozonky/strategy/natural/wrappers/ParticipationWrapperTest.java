@@ -29,6 +29,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -142,7 +143,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getRemainingTermInMonths())
                 .isEqualTo(participation.getRemainingInstalmentCount());
             softly.assertThat(w.getHealth())
-                .isEmpty();
+                .contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getOriginalPurchasePrice())
                 .isEmpty();
             softly.assertThat(w.getPrice())
@@ -218,7 +219,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getRemainingTermInMonths())
                 .isEqualTo(PARTICIPATION.getRemainingInstalmentCount());
             softly.assertThat(w.getHealth())
-                .isEmpty();
+                .contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getOriginalPurchasePrice())
                 .isEmpty();
             softly.assertThat(w.getPrice())
