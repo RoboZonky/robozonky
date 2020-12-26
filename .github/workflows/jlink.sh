@@ -35,14 +35,14 @@ echo "Calling jdeps like so: "
 echo "  $JDEPS_CMD"
 DEPENDENCIES=$($JDEPS_CMD)
 echo "jdeps returned:"
-echo "$DEPENDENCIES"
+echo "  $DEPENDENCIES"
 
-# Call JLink with these dependencies; add locales and crypto, also JMX and JFR on top, as those are runtime monitoring dependencies.
+# Call JLink with these dependencies; add locales, crypto and JMX.
 # We could use --bind-services instead, but that makes the runtime huge and includes stuff like javac etc.
 JLINK_CMD="$JAVA_HOME/bin/jlink --compress=2 --no-header-files --no-man-pages
    --dedup-legal-notices=error-if-not-same-content
    --include-locales=en,cs
-   --add-modules $DEPENDENCIES,jdk.management.jfr,jdk.management.agent,jdk.crypto.ec,jdk.localedata
+   --add-modules $DEPENDENCIES,jdk.management.agent,jdk.crypto.ec,jdk.localedata
    --output $TARGET_DIR"
 echo "Calling jlink like so: "
 echo "  $JLINK_CMD"
