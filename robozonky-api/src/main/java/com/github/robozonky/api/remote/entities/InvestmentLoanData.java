@@ -36,6 +36,7 @@ public interface InvestmentLoanData {
 
     boolean hasCollectionHistory();
 
+    @Deprecated
     Rating getRating();
 
     String getTitle();

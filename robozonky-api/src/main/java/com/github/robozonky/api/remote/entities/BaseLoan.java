@@ -47,6 +47,7 @@ public interface BaseLoan {
 
     Ratio getInterestRate();
 
+    @Deprecated
     Rating getRating();
 
     /**

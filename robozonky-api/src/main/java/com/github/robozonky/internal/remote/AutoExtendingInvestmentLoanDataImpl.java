@@ -87,17 +87,22 @@ final class AutoExtendingInvestmentLoanDataImpl implements InvestmentLoanData {
 
     @Override
     public Optional<Label> getLabel() {
-        return delegate.getLabel();
+        return delegate.getLabel()
+            .or(() -> fullInvestmentLoanData.get()
+                .getLabel());
     }
 
     @Override
     public Set<DetailLabel> getDetailLabels() {
-        return delegate.getDetailLabels();
+        return fullInvestmentLoanData.get()
+            .getDetailLabels();
     }
 
     @Override
     public Borrower getBorrower() {
-        return delegate.getBorrower();
+        // primaryIncomeType is missing in the original
+        return fullInvestmentLoanData.get()
+            .getBorrower();
     }
 
     @Override

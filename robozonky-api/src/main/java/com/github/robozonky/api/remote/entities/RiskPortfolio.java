@@ -32,5 +32,6 @@ public interface RiskPortfolio {
 
     Money getTotalAmount();
 
+    @Deprecated
     Rating getRating();
 }
