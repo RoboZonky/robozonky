@@ -22,7 +22,7 @@ public class HealthCondition extends AbstractEnumeratedCondition<LoanHealth> {
 
     public HealthCondition() {
         super(w -> w.getHealth()
-            .orElse(LoanHealth.UNKNOWN), true);
+            .orElseThrow(), true);
     }
 
 }
