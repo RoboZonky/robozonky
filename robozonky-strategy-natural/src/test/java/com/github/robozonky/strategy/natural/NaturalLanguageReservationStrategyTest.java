@@ -49,7 +49,7 @@ class NaturalLanguageReservationStrategyTest extends AbstractMinimalRoboZonkyTes
             .set(ReservationImpl::setReservedAmount, Money.from(0))
             .set(ReservationImpl::setDatePublished, OffsetDateTime.now())
             .set(ReservationImpl::setMyReservation, r)
-            .set(ReservationImpl::setRating, Rating.A)
+            .set(ReservationImpl::setInterestRate, Rating.A.getInterestRate())
             .build();
     }
 

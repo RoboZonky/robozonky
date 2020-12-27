@@ -46,7 +46,7 @@ class ReservationWrapperTest {
         final Reservation l = new MockReservationBuilder()
             .set(ReservationImpl::setInsuranceActive, true)
             .set(ReservationImpl::setAmount, Money.from(100_000))
-            .set(ReservationImpl::setRating, Rating.D)
+            .set(ReservationImpl::setInterestRate, Rating.D.getInterestRate())
             .set(ReservationImpl::setInterestRate, Ratio.ONE)
             .set(ReservationImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(ReservationImpl::setPurpose, Purpose.AUTO_MOTO)
@@ -64,8 +64,6 @@ class ReservationWrapperTest {
                 .isEqualTo(l.getInterestRate());
             softly.assertThat(w.getRegion())
                 .isEqualTo(l.getRegion());
-            softly.assertThat(w.getRating())
-                .isEqualTo(l.getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(l.getMainIncomeType());
             softly.assertThat(w.getPurpose())
@@ -94,8 +92,7 @@ class ReservationWrapperTest {
         final Reservation l = new MockReservationBuilder()
             .set(ReservationImpl::setInsuranceActive, true)
             .set(ReservationImpl::setAmount, Money.from(100_000))
-            .set(ReservationImpl::setRating, Rating.D)
-            .set(ReservationImpl::setInterestRate, Ratio.ONE)
+            .set(ReservationImpl::setInterestRate, Rating.D.getInterestRate())
             .set(ReservationImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(ReservationImpl::setPurpose, Purpose.AUTO_MOTO)
             .set(ReservationImpl::setRegion, Region.JIHOCESKY)

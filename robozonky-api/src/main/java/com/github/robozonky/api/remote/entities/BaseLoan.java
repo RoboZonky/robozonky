@@ -24,7 +24,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 
 public interface BaseLoan {
@@ -46,9 +45,6 @@ public interface BaseLoan {
     int getTermInMonths();
 
     Ratio getInterestRate();
-
-    @Deprecated
-    Rating getRating();
 
     /**
      * @return True if the loan is insured at this very moment. Uninsured loans will have it return false.

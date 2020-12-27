@@ -21,7 +21,6 @@ import java.util.StringJoiner;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;
-import com.github.robozonky.api.remote.enums.Rating;
 
 public class RiskPortfolioImpl implements RiskPortfolio {
 
@@ -30,18 +29,16 @@ public class RiskPortfolioImpl implements RiskPortfolio {
     private Money paid;
     private Money due;
     private Money totalAmount;
-    private Rating rating;
 
     public RiskPortfolioImpl() {
         // For JSON-B.
     }
 
-    public RiskPortfolioImpl(final Rating rating, final Money paid, final Money unpaid, final Money due) {
-        this.interestRate = rating.getInterestRate();
+    public RiskPortfolioImpl(final Ratio interestRate, final Money paid, final Money unpaid, final Money due) {
+        this.interestRate = interestRate;
         this.paid = paid;
         this.unpaid = unpaid;
         this.due = due;
-        this.rating = rating;
         this.totalAmount = paid.add(unpaid)
             .add(due);
     }
@@ -71,11 +68,6 @@ public class RiskPortfolioImpl implements RiskPortfolio {
         return totalAmount;
     }
 
-    @Override
-    public Rating getRating() {
-        return rating;
-    }
-
     public void setInterestRate(final Ratio interestRate) {
         this.interestRate = interestRate;
     }
@@ -96,17 +88,12 @@ public class RiskPortfolioImpl implements RiskPortfolio {
         this.totalAmount = totalAmount;
     }
 
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(", ", RiskPortfolioImpl.class.getSimpleName() + "[", "]")
             .add("due='" + due + "'")
             .add("interestRate=" + interestRate)
             .add("paid='" + paid + "'")
-            .add("rating=" + rating)
             .add("totalAmount='" + totalAmount + "'")
             .add("unpaid='" + unpaid + "'")
             .toString();

@@ -42,9 +42,9 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
         assertSoftly(softly -> {
             softly.assertThat(tested.getInvested())
                 .isEqualTo(Money.ZERO);
-            softly.assertThat(tested.getInvested(Rating.A))
+            softly.assertThat(tested.getInvested(Rating.A.getInterestRate()))
                 .isEqualTo(Money.ZERO);
-            softly.assertThat(tested.getShareOnInvestment(Rating.A))
+            softly.assertThat(tested.getShareOnInvestment(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
             softly.assertThat(tested.getMinimalMonthlyProfit())
                 .isEqualTo(Money.ZERO);
@@ -66,24 +66,24 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void risk() {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getInvested(eq(Rating.A))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested(eq(Rating.A.getInterestRate()))).thenReturn(Money.from(10));
         when(portfolioOverview.getInvested()).thenReturn(Money.from(10));
         final ExtendedPortfolioOverview tested = ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
-                Collections.singletonMap(Rating.A, Money.from(1)),
+                Collections.singletonMap(Rating.A.getInterestRate(), Money.from(1)),
                 Collections.emptyMap(),
                 Collections.emptyMap());
         assertSoftly(softly -> {
             softly.assertThat(tested.getAtRisk())
                 .isEqualTo(Money.from(1));
-            softly.assertThat(tested.getAtRisk(Rating.A))
+            softly.assertThat(tested.getAtRisk(Rating.A.getInterestRate()))
                 .isEqualTo(Money.from(1));
-            softly.assertThat(tested.getAtRisk(Rating.B))
+            softly.assertThat(tested.getAtRisk(Rating.B.getInterestRate()))
                 .isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareAtRisk())
                 .isEqualTo(Ratio.fromPercentage(10));
-            softly.assertThat(tested.getAtRiskShareOnInvestment(Rating.A))
+            softly.assertThat(tested.getAtRiskShareOnInvestment(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromPercentage(10));
-            softly.assertThat(tested.getAtRiskShareOnInvestment(Rating.B))
+            softly.assertThat(tested.getAtRiskShareOnInvestment(Rating.B.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
         });
     }
@@ -91,24 +91,24 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void sellable() {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getInvested(eq(Rating.A))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested(eq(Rating.A.getInterestRate()))).thenReturn(Money.from(10));
         when(portfolioOverview.getInvested()).thenReturn(Money.from(10));
         final ExtendedPortfolioOverview tested = ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
                 Collections.emptyMap(),
-                Collections.singletonMap(Rating.A, Money.from(1)),
+                Collections.singletonMap(Rating.A.getInterestRate(), Money.from(1)),
                 Collections.emptyMap());
         assertSoftly(softly -> {
             softly.assertThat(tested.getSellable())
                 .isEqualTo(Money.from(1));
-            softly.assertThat(tested.getSellable(Rating.A))
+            softly.assertThat(tested.getSellable(Rating.A.getInterestRate()))
                 .isEqualTo(Money.from(1));
-            softly.assertThat(tested.getSellable(Rating.B))
+            softly.assertThat(tested.getSellable(Rating.B.getInterestRate()))
                 .isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareSellable())
                 .isEqualTo(Ratio.fromPercentage(10));
-            softly.assertThat(tested.getShareSellable(Rating.A))
+            softly.assertThat(tested.getShareSellable(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromPercentage(10));
-            softly.assertThat(tested.getShareSellable(Rating.B))
+            softly.assertThat(tested.getShareSellable(Rating.B.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
         });
     }
@@ -116,24 +116,24 @@ class ExtendedPortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void sellableFeeless() {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getInvested(eq(Rating.A))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested(eq(Rating.A.getInterestRate()))).thenReturn(Money.from(10));
         when(portfolioOverview.getInvested()).thenReturn(Money.from(10));
         final ExtendedPortfolioOverview tested = ExtendedPortfolioOverviewImpl.extend(portfolioOverview,
                 Collections.emptyMap(),
                 Collections.emptyMap(),
-                Collections.singletonMap(Rating.A, Money.from(1)));
+                Collections.singletonMap(Rating.A.getInterestRate(), Money.from(1)));
         assertSoftly(softly -> {
             softly.assertThat(tested.getSellableFeeless())
                 .isEqualTo(Money.from(1));
-            softly.assertThat(tested.getSellableFeeless(Rating.A))
+            softly.assertThat(tested.getSellableFeeless(Rating.A.getInterestRate()))
                 .isEqualTo(Money.from(1));
-            softly.assertThat(tested.getSellableFeeless(Rating.B))
+            softly.assertThat(tested.getSellableFeeless(Rating.B.getInterestRate()))
                 .isEqualTo(Money.ZERO);
             softly.assertThat(tested.getShareSellableFeeless())
                 .isEqualTo(Ratio.fromPercentage(10));
-            softly.assertThat(tested.getShareSellableFeeless(Rating.A))
+            softly.assertThat(tested.getShareSellableFeeless(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromPercentage(10));
-            softly.assertThat(tested.getShareSellableFeeless(Rating.B))
+            softly.assertThat(tested.getShareSellableFeeless(Rating.B.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
         });
     }

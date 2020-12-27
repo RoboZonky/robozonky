@@ -19,21 +19,20 @@ package com.github.robozonky.strategy.natural;
 import java.util.StringJoiner;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 
 class PortfolioShare {
 
     private final Ratio permitted;
-    private final Rating rating;
+    private final Ratio interestRate;
 
-    public PortfolioShare(final Rating rating, final Ratio ratio) {
-        this.rating = rating;
+    public PortfolioShare(final Ratio interestRate, final Ratio ratio) {
+        this.interestRate = interestRate;
         PortfolioShare.assertIsInRange(ratio);
         this.permitted = ratio;
     }
 
     private static void assertIsInRange(final Ratio ratio) {
-        final double actual = ratio.asPercentage()
+        var actual = ratio.asPercentage()
             .doubleValue();
         if (actual < 0 || actual > 100) {
             throw new IllegalArgumentException("Portfolio share must be in range of <0; 100>.");
@@ -44,15 +43,15 @@ class PortfolioShare {
         return permitted;
     }
 
-    public Rating getRating() {
-        return rating;
+    public Ratio getInterestRate() {
+        return interestRate;
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", PortfolioShare.class.getSimpleName() + "[", "]")
+            .add("interestRate=" + interestRate)
             .add("permitted=" + permitted)
-            .add("rating=" + rating)
             .toString();
     }
 }

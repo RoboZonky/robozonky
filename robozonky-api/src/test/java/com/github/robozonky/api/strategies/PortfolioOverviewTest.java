@@ -38,7 +38,7 @@ class PortfolioOverviewTest {
         }
 
         @Override
-        public Money getInvested(Rating r) {
+        public Money getInvested(Ratio r) {
             return getInvested().divideBy(Rating.values().length);
         }
 
@@ -68,7 +68,7 @@ class PortfolioOverviewTest {
                 .isEqualTo(Money.from("416.67"));
             softly.assertThat(portfolioOverview.getOptimalMonthlyProfit())
                 .isEqualTo(Money.from("600.68"));
-            softly.assertThat(portfolioOverview.getShareOnInvestment(Rating.A))
+            softly.assertThat(portfolioOverview.getShareOnInvestment(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromRaw("0.09090910"));
         });
     }
@@ -79,7 +79,7 @@ class PortfolioOverviewTest {
         when(portfolioOverview.getInvested()).thenReturn(Money.ZERO);
         when(portfolioOverview.getShareOnInvestment(any())).thenCallRealMethod();
         when(portfolioOverview.getInvested(any())).thenReturn(Money.from(10));
-        assertThat(portfolioOverview.getShareOnInvestment(Rating.A)).isEqualTo(Ratio.ZERO);
+        assertThat(portfolioOverview.getShareOnInvestment(Rating.A.getInterestRate())).isEqualTo(Ratio.ZERO);
     }
 
 }

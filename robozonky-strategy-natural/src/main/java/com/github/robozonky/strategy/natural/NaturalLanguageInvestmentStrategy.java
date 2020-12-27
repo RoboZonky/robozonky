@@ -47,9 +47,9 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         var loan = loanDescriptor.item();
         LOGGER.trace("Evaluating {}.", loan);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.isDesirable(loan.getRating());
+        var isAcceptable = preferences.isDesirable(loan.getInterestRate());
         if (!isAcceptable) {
-            LOGGER.debug("Loan #{} skipped due to an undesirable rating.", loan.getId());
+            LOGGER.debug("Loan #{} skipped due to an undesirable interest rate.", loan.getId());
             return Optional.empty();
         } else if (!strategy.isApplicable(loanDescriptor, portfolio)) {
             return Optional.empty();

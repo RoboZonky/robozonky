@@ -76,7 +76,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         var amount = recommendation.amount();
         result.add(l);
         tenant.getPortfolio()
-            .simulateCharge(l.getId(), l.getRating(), amount);
+            .simulateCharge(l.getId(), l.getInterestRate(), amount);
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
             .subtract(amount));
         discard(recommendation.descriptor()); // never show again

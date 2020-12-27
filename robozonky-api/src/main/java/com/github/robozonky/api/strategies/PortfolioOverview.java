@@ -22,7 +22,7 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.times;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
@@ -48,7 +48,7 @@ public interface PortfolioOverview {
      * @param r Rating in question.
      * @return Amount.
      */
-    Money getInvested(final Rating r);
+    Money getInvested(final Ratio r);
 
     /**
      * Retrieve the amounts due in a given rating, divided by {@link #getInvested()}.
@@ -56,7 +56,7 @@ public interface PortfolioOverview {
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
-    default Ratio getShareOnInvestment(final Rating r) {
+    default Ratio getShareOnInvestment(final Ratio r) {
         Money total = getInvested();
         if (total.isZero()) {
             return Ratio.ZERO;
@@ -73,15 +73,15 @@ public interface PortfolioOverview {
      */
     Ratio getAnnualProfitability();
 
-    private BigDecimal calculateProfitability(final Rating r, final Function<Rating, Ratio> metric) {
-        final Ratio ratingShare = getShareOnInvestment(r);
-        final Ratio ratingProfitability = metric.apply(r);
+    private BigDecimal calculateProfitability(final Ratio r, final UnaryOperator<Ratio> metric) {
+        var ratingShare = getShareOnInvestment(r);
+        var ratingProfitability = metric.apply(r);
         return times(ratingShare.bigDecimalValue(), ratingProfitability.bigDecimalValue());
     }
 
-    private Ratio getProfitability(final Function<Rating, Ratio> metric) {
-        final BigDecimal result = Arrays.stream(Rating.values())
-            .map(r -> calculateProfitability(r, metric))
+    private Ratio getProfitability(final UnaryOperator<Ratio> metric) {
+        var result = Arrays.stream(Rating.values())
+            .map(r -> calculateProfitability(r.getInterestRate(), metric))
             .reduce(BigDecimalCalculator::plus)
             .orElse(BigDecimal.ZERO);
         return Ratio.fromRaw(result);
@@ -94,7 +94,8 @@ public interface PortfolioOverview {
      * @return never null
      */
     default Ratio getMinimalAnnualProfitability() {
-        return getProfitability(r -> r.getMinimalRevenueRate(getInvested()));
+        return getProfitability(r -> Rating.forInterestRate(r)
+            .getMinimalRevenueRate(getInvested()));
     }
 
     /**
@@ -104,7 +105,8 @@ public interface PortfolioOverview {
      * @return never null
      */
     default Ratio getOptimalAnnualProfitability() {
-        return getProfitability(r -> r.getMaximalRevenueRate(getInvested()));
+        return getProfitability(r -> Rating.forInterestRate(r)
+            .getMaximalRevenueRate(getInvested()));
     }
 
     private Money calculateProfit(Ratio rate) {

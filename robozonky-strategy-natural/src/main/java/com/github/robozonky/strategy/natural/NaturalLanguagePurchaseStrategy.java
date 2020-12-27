@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
@@ -37,9 +36,8 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     }
 
     private Money[] getRecommendationBoundaries(final Participation participation) {
-        final Rating rating = participation.getRating();
-        final Money minimumInvestment = strategy.getMinimumPurchaseSize(rating);
-        final Money maximumInvestment = strategy.getMaximumPurchaseSize(rating);
+        var minimumInvestment = strategy.getMinimumPurchaseSize(participation.getInterestRate());
+        var maximumInvestment = strategy.getMaximumPurchaseSize(participation.getInterestRate());
         return new Money[] { minimumInvestment, maximumInvestment };
     }
 
@@ -74,9 +72,9 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         var participation = participationDescriptor.item();
         LOGGER.trace("Evaluating {}.", participation);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.isDesirable(participation.getRating());
+        var isAcceptable = preferences.isDesirable(participation.getInterestRate());
         if (!isAcceptable) {
-            LOGGER.debug("Participation #{} skipped due to an undesirable rating.", participation.getId());
+            LOGGER.debug("Participation #{} skipped due to an undesirable  interest rate.", participation.getId());
             return false;
         } else if (!strategy.isApplicable(participationDescriptor, portfolio)) {
             return false;

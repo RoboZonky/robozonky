@@ -28,31 +28,31 @@ class PortfolioShareTest {
 
     @Test
     void rightBoundWrong() {
-        assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(101)))
+        assertThatThrownBy(() -> new PortfolioShare(Rating.B.getInterestRate(), Ratio.fromPercentage(101)))
             .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new PortfolioShare(Rating.B, Ratio.fromPercentage(-1)))
+        assertThatThrownBy(() -> new PortfolioShare(Rating.B.getInterestRate(), Ratio.fromPercentage(-1)))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void correct1() {
-        final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ONE);
+        final PortfolioShare p = new PortfolioShare(Rating.C.getInterestRate(), Ratio.ONE);
         assertSoftly(softly -> {
             softly.assertThat(p.getPermitted())
                 .isEqualTo(Ratio.ONE);
-            softly.assertThat(p.getRating())
-                .isEqualTo(Rating.C);
+            softly.assertThat(p.getInterestRate())
+                .isEqualTo(Rating.C.getInterestRate());
         });
     }
 
     @Test
     void correct2() {
-        final PortfolioShare p = new PortfolioShare(Rating.C, Ratio.ZERO);
+        final PortfolioShare p = new PortfolioShare(Rating.C.getInterestRate(), Ratio.ZERO);
         assertSoftly(softly -> {
             softly.assertThat(p.getPermitted())
                 .isEqualTo(Ratio.ZERO);
-            softly.assertThat(p.getRating())
-                .isEqualTo(Rating.C);
+            softly.assertThat(p.getInterestRate())
+                .isEqualTo(Rating.C.getInterestRate());
         });
     }
 

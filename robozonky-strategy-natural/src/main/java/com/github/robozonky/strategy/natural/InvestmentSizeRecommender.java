@@ -25,7 +25,6 @@ import java.util.function.BiFunction;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.Rating;
 
 class InvestmentSizeRecommender implements BiFunction<Loan, SessionInfo, Money> {
 
@@ -51,30 +50,27 @@ class InvestmentSizeRecommender implements BiFunction<Loan, SessionInfo, Money> 
         return Money.from(result);
     }
 
-    private Money[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan,
+    private static Money[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan,
             final SessionInfo sessionInfo) {
-        final Rating rating = loan.getRating();
-        final Money absoluteMinimum = strategy.getMinimumInvestmentSize(rating)
+        var rating = loan.getInterestRate();
+        var absoluteMinimum = strategy.getMinimumInvestmentSize(rating)
             .max(sessionInfo.getMinimumInvestmentAmount());
-        final Money minimumRecommendation = roundToNearestIncrement(absoluteMinimum, sessionInfo.getInvestmentStep());
-        final Money maximumUserRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSize(rating),
+        var minimumRecommendation = roundToNearestIncrement(absoluteMinimum, sessionInfo.getInvestmentStep());
+        var maximumUserRecommendation = roundToNearestIncrement(strategy.getMaximumInvestmentSize(rating),
                 sessionInfo.getInvestmentStep());
-        final Money maximumInvestmentAmount = sessionInfo.getMaximumInvestmentAmount();
+        var maximumInvestmentAmount = sessionInfo.getMaximumInvestmentAmount();
         if (maximumUserRecommendation.compareTo(maximumInvestmentAmount) > 0) {
             LOGGER.info("Maximum investment amount reduced to {} by Zonky.", maximumInvestmentAmount);
         }
-        final Money maximumRecommendation = maximumUserRecommendation.min(maximumInvestmentAmount);
-        final int loanId = loan.getId();
+        var maximumRecommendation = maximumUserRecommendation.min(maximumInvestmentAmount);
+        var loanId = loan.getId();
         LOGGER.trace("Strategy gives investment range for loan #{} of <{}; {}>.", loanId, minimumRecommendation,
                 maximumRecommendation);
-        final Money minimumInvestmentByShare = getPercentage(loan.getAmount(),
-                strategy.getMinimumInvestmentShareInPercent());
-        final Money minimumInvestment = minimumInvestmentByShare
-            .max(strategy.getMinimumInvestmentSize(loan.getRating()));
-        final Money maximumInvestmentByShare = getPercentage(loan.getAmount(),
+        var minimumInvestmentByShare = getPercentage(loan.getAmount(), strategy.getMinimumInvestmentShareInPercent());
+        var minimumInvestment = minimumInvestmentByShare.max(strategy.getMinimumInvestmentSize(rating));
+        var maximumInvestmentByShare = getPercentage(loan.getAmount(),
                 strategy.getMaximumInvestmentShareInPercent());
-        final Money maximumInvestment = maximumInvestmentByShare
-            .min(strategy.getMaximumInvestmentSize(loan.getRating()));
+        var maximumInvestment = maximumInvestmentByShare.min(strategy.getMaximumInvestmentSize(rating));
         // minimums are guaranteed to be <= maximums due to the contract of strategy implementation
         return new Money[] { minimumInvestment, maximumInvestment };
     }

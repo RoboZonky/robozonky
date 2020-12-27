@@ -23,18 +23,7 @@ import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanInvestmentData;
-import com.github.robozonky.api.remote.enums.MainIncomeType;
-import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.api.remote.enums.Region;
 
-/**
- * This class carries several enumeration-based fields. Some of the enums are extremely important to the core function
- * (such as {@link Rating}), while others ({@link Region}, {@link MainIncomeType}, {@link Purpose}) are only providing
- * additional metadata. If the important enums change, we need RoboZonky to fail. However, in case of the others, we
- * provide non-failing deserializers which handle the missing values gracefully and provide a message warning users that
- * something needs an upgrade.
- */
 public class LoanImpl extends BaseLoanImpl implements Loan {
 
     protected String url;

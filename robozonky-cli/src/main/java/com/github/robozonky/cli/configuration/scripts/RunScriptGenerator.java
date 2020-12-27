@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -61,7 +62,7 @@ public abstract class RunScriptGenerator implements Function<List<String>, File>
     public abstract File getChildRunScript();
 
     protected File process(final List<String> javaOpts, final String templateName,
-            final Function<String, String> finisher) {
+            final UnaryOperator<String> finisher) {
         try {
             final String result = TemplateProcessor.INSTANCE.process(templateName, Map.ofEntries(
                     entry("root", distributionDirectory.getAbsolutePath()),
@@ -79,6 +80,6 @@ public abstract class RunScriptGenerator implements Function<List<String>, File>
     }
 
     protected File process(final List<String> javaOpts, final String templateName) {
-        return process(javaOpts, templateName, Function.identity());
+        return process(javaOpts, templateName, a -> a);
     }
 }

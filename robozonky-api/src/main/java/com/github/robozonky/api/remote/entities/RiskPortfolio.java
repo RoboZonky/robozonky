@@ -18,7 +18,6 @@ package com.github.robozonky.api.remote.entities;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 
 public interface RiskPortfolio {
 
@@ -32,6 +31,4 @@ public interface RiskPortfolio {
 
     Money getTotalAmount();
 
-    @Deprecated
-    Rating getRating();
 }

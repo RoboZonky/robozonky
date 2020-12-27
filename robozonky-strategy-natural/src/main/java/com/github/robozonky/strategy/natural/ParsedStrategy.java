@@ -18,7 +18,7 @@ package com.github.robozonky.strategy.natural;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
@@ -39,9 +38,9 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 class ParsedStrategy {
 
     private final DefaultValues defaults;
-    private final Map<Rating, PortfolioShare> portfolio;
-    private final Map<Rating, MoneyRange> investmentSizes;
-    private final Map<Rating, MoneyRange> purchaseSizes;
+    private final Map<Ratio, PortfolioShare> portfolio;
+    private final Map<Ratio, MoneyRange> investmentSizes;
+    private final Map<Ratio, MoneyRange> purchaseSizes;
     private final FilterSupplier filters;
     private RoboZonkyVersion minimumVersion;
 
@@ -67,19 +66,19 @@ class ParsedStrategy {
     }
 
     ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-            final Map<Rating, MoneyRange> investmentSizes, final Map<Rating, MoneyRange> purchaseSizes) {
+            final Map<Ratio, MoneyRange> investmentSizes, final Map<Ratio, MoneyRange> purchaseSizes) {
         this(defaults, portfolio, investmentSizes, purchaseSizes, new FilterSupplier(defaults));
     }
 
     public ParsedStrategy(final DefaultValues defaults, final Collection<PortfolioShare> portfolio,
-            final Map<Rating, MoneyRange> investmentSizes,
-            final Map<Rating, MoneyRange> purchaseSizes, final FilterSupplier filters) {
+            final Map<Ratio, MoneyRange> investmentSizes, final Map<Ratio, MoneyRange> purchaseSizes,
+            final FilterSupplier filters) {
         this.defaults = defaults;
         this.portfolio = portfolio.isEmpty() ? Collections.emptyMap()
-                : new EnumMap<>(portfolio.stream()
-                    .collect(Collectors.toMap(PortfolioShare::getRating, Function.identity())));
-        this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(investmentSizes);
-        this.purchaseSizes = purchaseSizes.isEmpty() ? Collections.emptyMap() : new EnumMap<>(purchaseSizes);
+                : new HashMap<>(portfolio.stream()
+                    .collect(Collectors.toMap(PortfolioShare::getInterestRate, Function.identity())));
+        this.investmentSizes = investmentSizes.isEmpty() ? Collections.emptyMap() : investmentSizes;
+        this.purchaseSizes = purchaseSizes.isEmpty() ? Collections.emptyMap() : purchaseSizes;
         this.filters = filters;
     }
 
@@ -114,7 +113,7 @@ class ParsedStrategy {
         this.minimumVersion = minimumVersion;
     }
 
-    public Ratio getPermittedShare(final Rating rating) {
+    public Ratio getPermittedShare(final Ratio rating) {
         if (portfolio.containsKey(rating)) {
             return portfolio.get(rating)
                 .getPermitted();
@@ -124,27 +123,27 @@ class ParsedStrategy {
         }
     }
 
-    private MoneyRange getInvestmentSize(final Rating rating) {
+    private MoneyRange getInvestmentSize(final Ratio rating) {
         return investmentSizes.getOrDefault(rating, defaults.getInvestmentSize());
     }
 
-    public Money getMinimumInvestmentSize(final Rating rating) {
+    public Money getMinimumInvestmentSize(final Ratio rating) {
         return getInvestmentSize(rating).getMinimumInvestment();
     }
 
-    public Money getMaximumInvestmentSize(final Rating rating) {
+    public Money getMaximumInvestmentSize(final Ratio rating) {
         return getInvestmentSize(rating).getMaximumInvestment();
     }
 
-    private MoneyRange getPurchaseSize(final Rating rating) {
+    private MoneyRange getPurchaseSize(final Ratio rating) {
         return purchaseSizes.getOrDefault(rating, defaults.getPurchaseSize());
     }
 
-    public Money getMinimumPurchaseSize(final Rating rating) {
+    public Money getMinimumPurchaseSize(final Ratio rating) {
         return getPurchaseSize(rating).getMinimumInvestment();
     }
 
-    public Money getMaximumPurchaseSize(final Rating rating) {
+    public Money getMaximumPurchaseSize(final Ratio rating) {
         return getPurchaseSize(rating).getMaximumInvestment();
     }
 

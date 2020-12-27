@@ -18,10 +18,8 @@ package com.github.robozonky.internal.remote.entities;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -46,7 +44,6 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     private int activeLoanOrdinal;
     private int dpd;
     private boolean hasCollectionHistory;
-    private Rating rating;
     private String title;
     private String story;
     private Money annuity;
@@ -80,10 +77,10 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
         this.healthStats = (LoanHealthStatsImpl) loanHealthStats;
         this.purpose = loan.getPurpose();
         this.payments = new InstalmentsImpl(loan.getTermInMonths());
-        this.revenueRate = loan.getRevenueRate()
-            .orElse(loan.getRating()
-                .getMaximalRevenueRate());
         this.interestRate = loan.getInterestRate();
+        this.revenueRate = loan.getRevenueRate()
+            .orElseGet(() -> Rating.forInterestRate(interestRate)
+                .getMaximalRevenueRate());
     }
 
     @Override
@@ -120,21 +117,6 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
 
     public void setHasCollectionHistory(final boolean hasCollectionHistory) {
         this.hasCollectionHistory = hasCollectionHistory;
-    }
-
-    @Override
-    public Rating getRating() { // TODO try to convince Zonky to make this available on the API.
-        if (rating != null) {
-            return rating;
-        }
-        return Arrays.stream(Rating.values())
-            .filter(r -> Objects.equals(r.getInterestRate(), getInterestRate()))
-            .findAny()
-            .orElseThrow(() -> new IllegalStateException("Unknown interest rate: " + getInterestRate()));
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
     }
 
     @Override
@@ -242,7 +224,6 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
     public String toString() {
         return new StringJoiner(", ", InvestmentLoanDataImpl.class.getSimpleName() + "[", "]")
             .add("id=" + id)
-            .add("rating=" + rating)
             .add("annuity=" + annuity)
             .add("interestRate=" + interestRate)
             .add("revenueRate=" + revenueRate)

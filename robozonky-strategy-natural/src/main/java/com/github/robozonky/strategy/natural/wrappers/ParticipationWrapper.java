@@ -27,7 +27,6 @@ import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
@@ -68,18 +67,8 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     }
 
     @Override
-    public Ratio getRevenueRate() {
-        return estimateRevenueRate();
-    }
-
-    @Override
     public Purpose getPurpose() {
         return participation.getPurpose();
-    }
-
-    @Override
-    public Rating getRating() {
-        return participation.getRating();
     }
 
     @Override

@@ -27,7 +27,6 @@ import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -47,7 +46,6 @@ public class ParticipationDetailImpl implements ParticipationDetail {
     protected Money annuity;
     protected String name;
     protected Purpose purpose;
-    protected Rating rating;
     protected int activeLoansCount;
     protected int dueInstalmentsCount;
     protected boolean insuranceActive;
@@ -198,10 +196,6 @@ public class ParticipationDetailImpl implements ParticipationDetail {
         this.purpose = purpose;
     }
 
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
     public void setActiveLoansCount(final int activeLoansCount) {
         this.activeLoansCount = activeLoansCount;
     }
@@ -235,7 +229,6 @@ public class ParticipationDetailImpl implements ParticipationDetail {
             .add("name='" + name + "'")
             .add("nextPaymentDate='" + DateUtil.toString(getNextPaymentDate()) + "'")
             .add("purpose=" + purpose)
-            .add("rating=" + rating)
             .add("region=" + region)
             .add("revenueRate=" + revenueRate)
             .add("url=" + url)

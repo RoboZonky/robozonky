@@ -112,7 +112,7 @@ final class PurchasingSession extends
         if (succeeded) {
             result.add(participation);
             tenant.getPortfolio()
-                .simulateCharge(participation.getLoanId(), participation.getRating(), recommendation.amount());
+                .simulateCharge(participation.getLoanId(), participation.getInterestRate(), recommendation.amount());
             tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
                 .subtract(recommendation.amount()));
             tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation,

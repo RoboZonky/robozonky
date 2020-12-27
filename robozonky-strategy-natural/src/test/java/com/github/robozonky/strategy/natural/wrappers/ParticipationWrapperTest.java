@@ -48,8 +48,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
     private static final Loan LOAN = new MockLoanBuilder()
         .set(LoanImpl::setInsuranceActive, true)
         .set(LoanImpl::setAmount, Money.from(100_000))
-        .set(LoanImpl::setRating, Rating.D)
-        .set(LoanImpl::setInterestRate, Ratio.ONE)
+        .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
         .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
         .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
         .set(LoanImpl::setRegion, Region.JIHOCESKY)
@@ -68,8 +67,8 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             .getPrice();
         doReturn(loan.getPurpose()).when(p)
             .getPurpose();
-        doReturn(loan.getRating()).when(p)
-            .getRating();
+        doReturn(loan.getInterestRate()).when(p)
+            .getInterestRate();
         doReturn(loan.getMainIncomeType()).when(p)
             .getIncomeType();
         doReturn(loan.isInsuranceActive()).when(p)
@@ -82,8 +81,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
         final Loan loan = new MockLoanBuilder()
             .set(LoanImpl::setInsuranceActive, true)
             .set(LoanImpl::setAmount, Money.from(100_000))
-            .set(LoanImpl::setRating, Rating.D)
-            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
             .set(LoanImpl::setRegion, Region.JIHOCESKY)
@@ -104,8 +102,8 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             .getOriginalInstalmentCount();
         doReturn(loan.getPurpose()).when(participation)
             .getPurpose();
-        doReturn(loan.getRating()).when(participation)
-            .getRating();
+        doReturn(loan.getInterestRate()).when(participation)
+            .getInterestRate();
         doReturn(loan.getMainIncomeType()).when(participation)
             .getIncomeType();
         doReturn(true).when(participation)
@@ -118,11 +116,9 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.isInsuranceActive())
                 .isEqualTo(participation.isInsuranceActive());
             softly.assertThat(w.getInterestRate())
-                .isEqualTo(Ratio.ONE);
+                .isEqualTo(Rating.D.getInterestRate());
             softly.assertThat(w.getRegion())
                 .isEqualTo(loan.getRegion());
-            softly.assertThat(w.getRating())
-                .isEqualTo(participation.getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(loan.getMainIncomeType());
             softly.assertThat(w.getPurpose())
@@ -172,13 +168,13 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
     @Test
     void fromParticipationWithoutRevenueRate() {
         final Loan loan = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.C)
+            .set(LoanImpl::setInterestRate, Rating.C.getInterestRate())
             .set(LoanImpl::setInsuranceActive, false)
             .build();
         final int invested = 200;
         final Participation p = mock(ParticipationImpl.class);
-        doReturn(loan.getRating()).when(p)
-            .getRating();
+        doReturn(loan.getInterestRate()).when(p)
+            .getInterestRate();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(invested));
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(new ParticipationDescriptor(p, () -> loan), FOLIO);
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
@@ -194,11 +190,9 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.isInsuranceActive())
                 .isEqualTo(PARTICIPATION.isInsuranceActive());
             softly.assertThat(w.getInterestRate())
-                .isEqualTo(Ratio.ONE);
+                .isEqualTo(PARTICIPATION.getInterestRate());
             softly.assertThat(w.getRegion())
                 .isEqualTo(LOAN.getRegion());
-            softly.assertThat(w.getRating())
-                .isEqualTo(PARTICIPATION.getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(LOAN.getMainIncomeType());
             softly.assertThat(w.getPurpose())

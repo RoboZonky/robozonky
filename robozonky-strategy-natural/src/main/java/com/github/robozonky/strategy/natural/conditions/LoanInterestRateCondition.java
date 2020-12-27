@@ -35,6 +35,10 @@ public final class LoanInterestRateCondition extends AbstractRangeCondition<Rati
         return new LoanInterestRateCondition(c);
     }
 
+    public static LoanInterestRateCondition exact(final Ratio rate) {
+        return exact(rate, rate);
+    }
+
     public static LoanInterestRateCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
         final RangeCondition<Ratio> c = RangeCondition.exact(Wrapper::getInterestRate, RATE_DOMAIN,
                 minimumThreshold, maximumThreshold);

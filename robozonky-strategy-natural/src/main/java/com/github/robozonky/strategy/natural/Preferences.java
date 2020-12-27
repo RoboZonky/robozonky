@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
@@ -36,9 +35,9 @@ final class Preferences {
 
     private final ParsedStrategy referenceStrategy;
     private final PortfolioOverview referencePortfolio;
-    private final Function<Rating, Boolean> ratingDemand;
+    private final Function<Ratio, Boolean> ratingDemand;
 
-    private Preferences(ParsedStrategy strategy, PortfolioOverview portfolio, Predicate<Rating> ratingDemandPredicate) {
+    private Preferences(ParsedStrategy strategy, PortfolioOverview portfolio, Predicate<Ratio> ratingDemandPredicate) {
         this.referenceStrategy = strategy;
         this.referencePortfolio = portfolio;
         this.ratingDemand = Memoizer.memoize(ratingDemandPredicate::test);
@@ -56,7 +55,7 @@ final class Preferences {
         });
     }
 
-    private static boolean isDesirable(Rating rating, ParsedStrategy strategy, PortfolioOverview portfolioOverview) {
+    private static boolean isDesirable(Ratio rating, ParsedStrategy strategy, PortfolioOverview portfolioOverview) {
         var permittedShare = strategy.getPermittedShare(rating);
         if (permittedShare.compareTo(Ratio.ZERO) <= 0) {
             Audit.LOGGER.debug("Rating {} is not permitted.", rating);
@@ -74,7 +73,7 @@ final class Preferences {
         return true;
     }
 
-    public boolean isDesirable(Rating rating) {
+    public boolean isDesirable(Ratio rating) {
         return ratingDemand.apply(rating);
     }
 

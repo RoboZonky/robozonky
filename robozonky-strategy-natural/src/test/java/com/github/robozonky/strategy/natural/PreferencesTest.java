@@ -36,11 +36,11 @@ class PreferencesTest extends AbstractRoboZonkyTest {
             final Number ratingC) {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         doReturn(fromPercentage(ratingA)).when(portfolioOverview)
-            .getShareOnInvestment(eq(Rating.A));
+            .getShareOnInvestment(eq(Rating.A.getInterestRate()));
         doReturn(fromPercentage(ratingB)).when(portfolioOverview)
-            .getShareOnInvestment(eq(Rating.B));
+            .getShareOnInvestment(eq(Rating.B.getInterestRate()));
         doReturn(fromPercentage(ratingC)).when(portfolioOverview)
-            .getShareOnInvestment(eq(Rating.C));
+            .getShareOnInvestment(eq(Rating.C.getInterestRate()));
         return portfolioOverview;
     }
 
@@ -51,33 +51,33 @@ class PreferencesTest extends AbstractRoboZonkyTest {
         final int targetShareC = targetShareB * 5;
         final ParsedStrategy parsed = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
                 asList(
-                        new PortfolioShare(Rating.A, fromPercentage(targetShareA)),
-                        new PortfolioShare(Rating.B, fromPercentage(targetShareB)),
-                        new PortfolioShare(Rating.C, fromPercentage(targetShareC))),
+                        new PortfolioShare(Rating.A.getInterestRate(), fromPercentage(targetShareA)),
+                        new PortfolioShare(Rating.B.getInterestRate(), fromPercentage(targetShareB)),
+                        new PortfolioShare(Rating.C.getInterestRate(), fromPercentage(targetShareC))),
                 Collections.emptyMap(), Collections.emptyMap());
         // all ratings have zero share; C > B > A
         final PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
         final Preferences preferences = Preferences.get(parsed, portfolio);
         assertSoftly(softly -> {
-            softly.assertThat(preferences.isDesirable(Rating.D))
+            softly.assertThat(preferences.isDesirable(Rating.D.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.C))
+            softly.assertThat(preferences.isDesirable(Rating.C.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.B))
+            softly.assertThat(preferences.isDesirable(Rating.B.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.A))
+            softly.assertThat(preferences.isDesirable(Rating.A.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.AE))
+            softly.assertThat(preferences.isDesirable(Rating.AE.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AA))
+            softly.assertThat(preferences.isDesirable(Rating.AA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAAAA.getInterestRate()))
                 .isFalse();
         });
     }
@@ -89,34 +89,34 @@ class PreferencesTest extends AbstractRoboZonkyTest {
         final int targetShareC = targetShareB * 5;
         final ParsedStrategy parsed = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
                 asList(
-                        new PortfolioShare(Rating.A, fromPercentage(targetShareA)),
-                        new PortfolioShare(Rating.B, fromPercentage(targetShareB)),
-                        new PortfolioShare(Rating.C, fromPercentage(targetShareC))),
+                        new PortfolioShare(Rating.A.getInterestRate(), fromPercentage(targetShareA)),
+                        new PortfolioShare(Rating.B.getInterestRate(), fromPercentage(targetShareB)),
+                        new PortfolioShare(Rating.C.getInterestRate(), fromPercentage(targetShareC))),
                 Collections.emptyMap(), Collections.emptyMap());
         // A only; B, C overinvested
         final PortfolioOverview portfolio = preparePortfolio(BigDecimal.ZERO, BigDecimal.valueOf(10),
                 BigDecimal.valueOf(30));
         final Preferences preferences = Preferences.get(parsed, portfolio);
         assertSoftly(softly -> {
-            softly.assertThat(preferences.isDesirable(Rating.D))
+            softly.assertThat(preferences.isDesirable(Rating.D.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.C))
+            softly.assertThat(preferences.isDesirable(Rating.C.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.B))
+            softly.assertThat(preferences.isDesirable(Rating.B.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.A))
+            softly.assertThat(preferences.isDesirable(Rating.A.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.AE))
+            softly.assertThat(preferences.isDesirable(Rating.AE.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AA))
+            softly.assertThat(preferences.isDesirable(Rating.AA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAAAA.getInterestRate()))
                 .isFalse();
         });
 
@@ -129,34 +129,34 @@ class PreferencesTest extends AbstractRoboZonkyTest {
         final int targetShareC = targetShareB * 5;
         final ParsedStrategy parsed = new ParsedStrategy(new DefaultValues(DefaultPortfolio.EMPTY),
                 asList(
-                        new PortfolioShare(Rating.A, fromPercentage(targetShareA)),
-                        new PortfolioShare(Rating.B, fromPercentage(targetShareB)),
-                        new PortfolioShare(Rating.C, fromPercentage(targetShareC))),
+                        new PortfolioShare(Rating.A.getInterestRate(), fromPercentage(targetShareA)),
+                        new PortfolioShare(Rating.B.getInterestRate(), fromPercentage(targetShareB)),
+                        new PortfolioShare(Rating.C.getInterestRate(), fromPercentage(targetShareC))),
                 Collections.emptyMap(), Collections.emptyMap());
         // B > A > C
         final PortfolioOverview portfolio = preparePortfolio(BigDecimal.valueOf(0.99), BigDecimal.ZERO,
                 BigDecimal.valueOf(24.9));
         final Preferences preferences = Preferences.get(parsed, portfolio);
         assertSoftly(softly -> {
-            softly.assertThat(preferences.isDesirable(Rating.D))
+            softly.assertThat(preferences.isDesirable(Rating.D.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.C))
+            softly.assertThat(preferences.isDesirable(Rating.C.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.B))
+            softly.assertThat(preferences.isDesirable(Rating.B.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.A))
+            softly.assertThat(preferences.isDesirable(Rating.A.getInterestRate()))
                 .isTrue();
-            softly.assertThat(preferences.isDesirable(Rating.AE))
+            softly.assertThat(preferences.isDesirable(Rating.AE.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AA))
+            softly.assertThat(preferences.isDesirable(Rating.AA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAAA.getInterestRate()))
                 .isFalse();
-            softly.assertThat(preferences.isDesirable(Rating.AAAAAA))
+            softly.assertThat(preferences.isDesirable(Rating.AAAAAA.getInterestRate()))
                 .isFalse();
         });
 

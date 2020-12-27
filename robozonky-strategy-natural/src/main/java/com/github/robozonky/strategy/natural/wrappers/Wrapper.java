@@ -24,7 +24,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.LoanDescriptor;
@@ -72,8 +71,6 @@ public interface Wrapper<T> {
     Ratio getRevenueRate();
 
     Purpose getPurpose();
-
-    Rating getRating();
 
     int getOriginalTermInMonths();
 

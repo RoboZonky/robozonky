@@ -24,7 +24,6 @@ import java.time.ZonedDateTime;
 
 import org.junit.jupiter.api.Test;
 
-import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.LoanBased;
 import com.github.robozonky.api.notifications.LoanDefaultedEvent;
 import com.github.robozonky.api.remote.entities.Investment;
@@ -84,8 +83,7 @@ class UtilTest {
             @Override
             public Loan getLoan() {
                 return new MockLoanBuilder()
-                    .set(LoanImpl::setRating, Rating.D)
-                    .set(LoanImpl::setInterestRate, Ratio.ONE)
+                    .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
                     .build();
             }
 

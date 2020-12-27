@@ -71,8 +71,6 @@ class LoanImplTest {
                     .isEqualTo(Money.from(7_536));
                 softly.assertThat(loan.getPremium())
                     .isEqualTo(Money.from(615));
-                softly.assertThat(loan.getRating())
-                    .isEqualTo(Rating.AAAA);
                 softly.assertThat(loan.getRemainingInvestment())
                     .isEqualTo(Money.from(318_900));
                 softly.assertThat(loan.getReservedAmount())

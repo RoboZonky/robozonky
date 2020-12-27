@@ -54,9 +54,8 @@ class BaseEnumTest {
     Stream<DynamicTest> code() {
         var purpose = code(Purpose.class, Purpose.values(), Purpose::findByCode);
         var mainIncomeType = code(MainIncomeType.class, MainIncomeType.values(), MainIncomeType::findByCode);
-        var rating = code(Rating.class, Rating.values(), Rating::findByCode);
         var region = code(Region.class, Region.values(), Region::findByCode);
-        return Stream.of(purpose, mainIncomeType, rating, region)
+        return Stream.of(purpose, mainIncomeType, region)
             .flatMap(s -> s);
     }
 }

@@ -23,7 +23,6 @@ import java.util.Objects;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -32,7 +31,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     private final ZonedDateTime timestamp = DateUtil.zonedNow();
     private final Ratio profitability;
     private final Money invested;
-    private final Map<Rating, Money> investedPerRating;
+    private final Map<Ratio, Money> investedPerRating;
 
     PortfolioOverviewImpl(final RemotePortfolioImpl impl) {
         this(impl.getTotal(), impl.getRemoteData()
@@ -41,7 +40,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
             .orElse(Ratio.ZERO));
     }
 
-    PortfolioOverviewImpl(final Map<Rating, Money> investedPerRating, final Ratio profitability) {
+    PortfolioOverviewImpl(final Map<Ratio, Money> investedPerRating, final Ratio profitability) {
         this.profitability = profitability;
         this.invested = Money.sum(investedPerRating.values());
         if (invested.isZero()) {
@@ -57,7 +56,7 @@ final class PortfolioOverviewImpl implements PortfolioOverview {
     }
 
     @Override
-    public Money getInvested(final Rating r) {
+    public Money getInvested(final Ratio r) {
         return this.investedPerRating.getOrDefault(r, invested.getZero());
     }
 

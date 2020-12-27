@@ -47,13 +47,13 @@ class PrimaryMarketplaceAccessorTest extends AbstractZonkyLeveragingTest {
     @Test
     void eliminatesUselessLoans() {
         final Loan alreadyInvested = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.B)
+            .set(LoanImpl::setInterestRate, Rating.B.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(1))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
             .build();
         final Loan normal = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(1))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .build();

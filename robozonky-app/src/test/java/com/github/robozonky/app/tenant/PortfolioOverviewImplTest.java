@@ -21,7 +21,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,8 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
         assertThat(po).isEqualTo(po2);
         assertThat(po2).isEqualTo(po);
         resetClock();
-        PortfolioOverview po3 = new PortfolioOverviewImpl(Map.of(Rating.A, Money.from(100)), Ratio.ZERO);
+        PortfolioOverview po3 = new PortfolioOverviewImpl(Map.of(Rating.A.getInterestRate(), Money.from(100)),
+                Ratio.ZERO);
         assertThat(po3)
             .isNotEqualTo(po)
             .isNotEqualTo(po2);
@@ -64,10 +65,10 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             softly.assertThat(po.getInvested())
                 .isEqualTo(Money.ZERO);
             for (final Rating r : Rating.values()) {
-                softly.assertThat(po.getInvested(r))
+                softly.assertThat(po.getInvested(r.getInterestRate()))
                     .as(r + " invested")
                     .isEqualTo(Money.ZERO);
-                softly.assertThat(po.getShareOnInvestment(r))
+                softly.assertThat(po.getShareOnInvestment(r.getInterestRate()))
                     .as(r + " as a share")
                     .isEqualTo(Ratio.ZERO);
             }
@@ -76,9 +77,9 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void profitability() {
-        final Map<Rating, Money> investments = new EnumMap<>(Rating.class);
-        investments.put(Rating.AAAAA, Money.from(200_000));
-        investments.put(Rating.D, Money.from(20_000));
+        final Map<Ratio, Money> investments = new HashMap<>(2);
+        investments.put(Rating.AAAAA.getInterestRate(), Money.from(200_000));
+        investments.put(Rating.D.getInterestRate(), Money.from(20_000));
         final PortfolioOverview po = new PortfolioOverviewImpl(investments, Ratio.fromPercentage(4));
         assertSoftly(softly -> {
             // the values tested against have been calculated manually and are guaranteed correct
@@ -110,7 +111,7 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
     @Test
     void emptyPortfolioWithAdjustmentsAndRisks() {
         final Money adj = Money.from(10);
-        final Map<Rating, Money> in = Collections.singletonMap(Rating.D, adj);
+        final Map<Ratio, Money> in = Collections.singletonMap(Rating.D.getInterestRate(), adj);
         final PortfolioOverview po = new PortfolioOverviewImpl(in, Ratio.ZERO);
         assertSoftly(softly -> {
             softly.assertThat(po.getInvested())
@@ -118,10 +119,10 @@ class PortfolioOverviewImplTest extends AbstractRoboZonkyTest {
             for (final Rating r : Rating.values()) {
                 final Money expectedAbsolute = r == Rating.D ? adj : Money.ZERO;
                 final Money expectedRelative = r == Rating.D ? Money.from(1) : Money.ZERO;
-                softly.assertThat(po.getInvested(r))
+                softly.assertThat(po.getInvested(r.getInterestRate()))
                     .as(r + " invested")
                     .isEqualTo(expectedAbsolute);
-                softly.assertThat(po.getShareOnInvestment(r))
+                softly.assertThat(po.getShareOnInvestment(r.getInterestRate()))
                     .as(r + " as a share")
                     .isEqualTo(Ratio.fromRaw(expectedRelative.getValue()));
             }

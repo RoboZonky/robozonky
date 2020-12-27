@@ -37,7 +37,7 @@ class LoanDescriptorTest {
     static LoanImpl mockLoan(final Rating r) {
         final LoanImpl loan = mock(LoanImpl.class);
         when(loan.getId()).thenReturn(1);
-        when(loan.getRating()).thenReturn(r);
+        when(loan.getInterestRate()).thenReturn(r.getInterestRate());
         when(loan.getAmount()).thenReturn(Money.from(2_000));
         when(loan.getNonReservedRemainingInvestment()).thenReturn(Money.from(1_000));
         when(loan.getDatePublished()).thenReturn(OffsetDateTime.now());

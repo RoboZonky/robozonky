@@ -38,7 +38,7 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
 
     private static Loan mockLoan(final int amount) {
         return new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
             .set(LoanImpl::setAmount, Money.from(amount))
             .set(LoanImpl::setRemainingInvestment, Money.from(amount))
             .set(LoanImpl::setReservedAmount, Money.from(0))
@@ -51,7 +51,7 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
         final MoneyRange target = new MoneyRange(MAXIMUM_INVESTMENT);
         return new ParsedStrategy(defaults, Collections.emptyList(),
-                Collections.singletonMap(mockLoan(0).getRating(), target),
+                Collections.singletonMap(mockLoan(0).getInterestRate(), target),
                 Collections.emptyMap());
     }
 
@@ -96,8 +96,9 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        when(s.getMinimumInvestmentSize(eq(l.getRating()))).thenReturn(minimumInvestment);
-        when(s.getMaximumInvestmentSize(eq(l.getRating()))).thenReturn(minimumInvestment.add(minimumInvestment));
+        var rating = l.getInterestRate();
+        when(s.getMinimumInvestmentSize(eq(rating))).thenReturn(minimumInvestment);
+        when(s.getMaximumInvestmentSize(eq(rating))).thenReturn(minimumInvestment.add(minimumInvestment));
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);
         assertThat(r.apply(l, sessionInfo)).isEqualTo(Money.ZERO);
@@ -110,10 +111,11 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
+        var rating = l.getInterestRate();
         // next line will cause the recommendation to be rounded to 800, which will be below the minimum investment
-        when(s.getMinimumInvestmentSize(eq(l.getRating()))).thenReturn(
-                minimumInvestment.subtract(1));
-        when(s.getMaximumInvestmentSize(eq(l.getRating())))
+        when(s.getMinimumInvestmentSize(eq(rating)))
+            .thenReturn(minimumInvestment.subtract(1));
+        when(s.getMaximumInvestmentSize(eq(rating)))
             .thenReturn(minimumInvestment);
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
         final InvestmentSizeRecommender r = new InvestmentSizeRecommender(s);

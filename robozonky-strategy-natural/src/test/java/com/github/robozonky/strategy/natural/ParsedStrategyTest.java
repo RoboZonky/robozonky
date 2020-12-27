@@ -51,7 +51,7 @@ class ParsedStrategyTest {
 
     private static LoanImpl mockLoan(final int amount) {
         return new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
             .set(LoanImpl::setAmount, Money.from(amount))
             .build();
     }
@@ -78,11 +78,11 @@ class ParsedStrategyTest {
                 .isNotEmpty();
             softly.assertThat(strategy.getMaximumInvestmentSize())
                 .isEqualTo(Money.from(Long.MAX_VALUE));
-            softly.assertThat(strategy.getPermittedShare(Rating.B))
-                .isEqualTo(portfolio.getDefaultShare(Rating.B));
-            softly.assertThat(strategy.getMinimumInvestmentSize(Rating.C))
+            softly.assertThat(strategy.getPermittedShare(Rating.B.getInterestRate()))
+                .isEqualTo(portfolio.getDefaultShare(Rating.B.getInterestRate()));
+            softly.assertThat(strategy.getMinimumInvestmentSize(Rating.C.getInterestRate()))
                 .isEqualTo(Money.from(0));
-            softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D))
+            softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D.getInterestRate()))
                 .isEqualTo(Money.from(20_000));
         });
     }
@@ -130,7 +130,7 @@ class ParsedStrategyTest {
         // no loan or participation should be bought; every investment should be sold
         final LoanImpl loanUnder = ParsedStrategyTest.mockLoan(1000);
         final LoanImpl loanOver = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
             .set(LoanImpl::setAmount, Money.from(2_000))
             .set(LoanImpl::setTermInMonths, 84)
             .build();
@@ -183,10 +183,10 @@ class ParsedStrategyTest {
     void shares() {
         final DefaultPortfolio portfolio = DefaultPortfolio.EMPTY;
         final DefaultValues values = new DefaultValues(portfolio);
-        final PortfolioShare share = new PortfolioShare(Rating.D, Ratio.fromPercentage(100));
+        final PortfolioShare share = new PortfolioShare(Rating.D.getInterestRate(), Ratio.fromPercentage(100));
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.singleton(share),
                 Collections.emptyMap(), Collections.emptyMap());
-        assertThat(strategy.getPermittedShare(Rating.D)).isEqualTo(Ratio.ONE);
+        assertThat(strategy.getPermittedShare(Rating.D.getInterestRate())).isEqualTo(Ratio.ONE);
     }
 
     @Test
@@ -195,12 +195,12 @@ class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final MoneyRange size = new MoneyRange(600, 1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(),
-                Collections.singletonMap(Rating.D, size),
+                Collections.singletonMap(Rating.D.getInterestRate(), size),
                 Collections.emptyMap());
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getMinimumInvestmentSize(Rating.D))
+            softly.assertThat(strategy.getMinimumInvestmentSize(Rating.D.getInterestRate()))
                 .isEqualTo(Money.from(600));
-            softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D))
+            softly.assertThat(strategy.getMaximumInvestmentSize(Rating.D.getInterestRate()))
                 .isEqualTo(Money.from(1_000));
         });
     }
@@ -211,11 +211,11 @@ class ParsedStrategyTest {
         final DefaultValues values = new DefaultValues(portfolio);
         final MoneyRange size = new MoneyRange(1000);
         final ParsedStrategy strategy = new ParsedStrategy(values, Collections.emptyList(), Collections.emptyMap(),
-                Collections.singletonMap(Rating.D, size));
+                Collections.singletonMap(Rating.D.getInterestRate(), size));
         assertSoftly(softly -> {
-            softly.assertThat(strategy.getMinimumPurchaseSize(Rating.D))
+            softly.assertThat(strategy.getMinimumPurchaseSize(Rating.D.getInterestRate()))
                 .isEqualTo(Money.from(0));
-            softly.assertThat(strategy.getMaximumPurchaseSize(Rating.D))
+            softly.assertThat(strategy.getMaximumPurchaseSize(Rating.D.getInterestRate()))
                 .isEqualTo(Money.from(1_000));
         });
     }

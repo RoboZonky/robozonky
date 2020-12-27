@@ -36,12 +36,12 @@ class BlockedTest extends AbstractRoboZonkyTest {
 
     @Test
     void fromBigDecimal() {
-        final Blocked b = new Blocked(1, Money.from(10), Rating.D);
+        final Blocked b = new Blocked(1, Money.from(10), Rating.D.getInterestRate());
         assertSoftly(softly -> {
             softly.assertThat(b.getAmount())
                 .isEqualTo(Money.from(10));
-            softly.assertThat(b.getRating())
-                .isEqualTo(Rating.D);
+            softly.assertThat(b.getInterestRate())
+                .isEqualTo(Rating.D.getInterestRate());
             softly.assertThat(b.getId())
                 .isEqualTo(1);
         });
@@ -55,20 +55,20 @@ class BlockedTest extends AbstractRoboZonkyTest {
             .getTimestamp()
             .minusSeconds(1);
         DateUtil.setSystemClock(Clock.fixed(loadOn.toInstant(), Defaults.ZONKYCZ_ZONE_ID));
-        final Blocked b = new Blocked(0, Money.ZERO, Rating.D, false);
+        final Blocked b = new Blocked(0, Money.ZERO, Rating.D.getInterestRate(), false);
         RemoteData r = RemoteData.load(tenant);
         assertThat(b.isValid(r)).isFalse();
     }
 
     @Test
     void equals() {
-        final Blocked b = new Blocked(2, Money.from(10), Rating.D);
+        final Blocked b = new Blocked(2, Money.from(10), Rating.D.getInterestRate());
         assertThat(b).isEqualTo(b);
         assertThat(b).isNotEqualTo(null);
         assertThat(b).isNotEqualTo("");
-        final Blocked sameB = new Blocked(2, Money.from(10), Rating.D);
+        final Blocked sameB = new Blocked(2, Money.from(10), Rating.D.getInterestRate());
         assertThat(sameB).isEqualTo(b);
-        final Blocked differentB = new Blocked(2, Money.from(1), Rating.D);
+        final Blocked differentB = new Blocked(2, Money.from(1), Rating.D.getInterestRate());
         assertThat(differentB).isNotEqualTo(b);
     }
 }

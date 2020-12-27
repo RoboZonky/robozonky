@@ -32,7 +32,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 class DefaultPortfolioTest {
 
     private static void hasValue(final DefaultPortfolio p, final Rating r) {
-        assertThat(p.getDefaultShare(r)).isEqualTo(Ratio.ZERO);
+        assertThat(p.getDefaultShare(r.getInterestRate())).isEqualTo(Ratio.ZERO);
     }
 
     private static void unknownValue(final DefaultPortfolio p) {

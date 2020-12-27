@@ -95,6 +95,7 @@ class ReservationsProcessingTest extends AbstractZonkyLeveragingTest {
     void enabled() {
         final Zonky z = harmlessZonky();
         final Reservation simple = new MockReservationBuilder()
+            .set(ReservationImpl::setInterestRate, Rating.D.getInterestRate())
             .set(ReservationImpl::setMyReservation, mockMyReservation())
             .build();
         final Loan fresh = MockLoanBuilder.fresh();

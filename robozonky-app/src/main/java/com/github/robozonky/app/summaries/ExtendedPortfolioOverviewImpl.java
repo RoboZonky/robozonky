@@ -23,7 +23,6 @@ import java.util.Map;
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
@@ -32,14 +31,12 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     private final Money atRisk;
     private final Money sellable;
     private final Money sellableFeeless;
-    private final Map<Rating, Money> atRiskPerRating;
-    private final Map<Rating, Money> sellablePerRating;
-    private final Map<Rating, Money> sellableFeelessPerRating;
+    private final Map<Ratio, Money> atRiskPerRating;
+    private final Map<Ratio, Money> sellablePerRating;
+    private final Map<Ratio, Money> sellableFeelessPerRating;
 
-    ExtendedPortfolioOverviewImpl(final PortfolioOverview parent,
-            final Map<Rating, Money> atRiskPerRating,
-            final Map<Rating, Money> sellablePerRating,
-            final Map<Rating, Money> sellableFeelessPerRating) {
+    ExtendedPortfolioOverviewImpl(final PortfolioOverview parent, final Map<Ratio, Money> atRiskPerRating,
+            final Map<Ratio, Money> sellablePerRating, final Map<Ratio, Money> sellableFeelessPerRating) {
         this.parent = parent;
         this.sellable = Money.sum(sellablePerRating.values());
         this.sellableFeeless = Money.sum(sellableFeelessPerRating.values());
@@ -60,9 +57,8 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     public static ExtendedPortfolioOverview extend(final PortfolioOverview parent,
-            final Map<Rating, Money> atRiskPerRating,
-            final Map<Rating, Money> sellablePerRating,
-            final Map<Rating, Money> sellableFeelessPerRating) {
+            final Map<Ratio, Money> atRiskPerRating, final Map<Ratio, Money> sellablePerRating,
+            final Map<Ratio, Money> sellableFeelessPerRating) {
         return new ExtendedPortfolioOverviewImpl(parent, atRiskPerRating, sellablePerRating,
                 sellableFeelessPerRating);
     }
@@ -73,7 +69,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Money getInvested(final Rating r) {
+    public Money getInvested(final Ratio r) {
         return parent.getInvested(r);
     }
 
@@ -83,12 +79,12 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Money getAtRisk(final Rating r) {
+    public Money getAtRisk(final Ratio r) {
         return this.atRiskPerRating.getOrDefault(r, atRisk.getZero());
     }
 
     @Override
-    public Ratio getShareOnInvestment(final Rating r) {
+    public Ratio getShareOnInvestment(final Ratio r) {
         return parent.getShareOnInvestment(r);
     }
 
@@ -98,7 +94,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Money getSellable(final Rating r) {
+    public Money getSellable(final Ratio r) {
         return sellablePerRating.getOrDefault(r, sellable.getZero());
     }
 
@@ -108,7 +104,7 @@ final class ExtendedPortfolioOverviewImpl implements ExtendedPortfolioOverview {
     }
 
     @Override
-    public Money getSellableFeeless(final Rating r) {
+    public Money getSellableFeeless(final Ratio r) {
         return sellableFeelessPerRating.getOrDefault(r, sellable.getZero());
     }
 

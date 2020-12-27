@@ -90,7 +90,7 @@ final class Util {
     public static Loan randomizeLoan() {
         final LoanImpl loan = new LoanImpl();
         loan.setId(100_000 + RANDOM.nextInt(900_000)); // six-digit number
-        loan.setRating(Rating.values()[RANDOM.nextInt(Rating.values().length)]);
+        loan.setInterestRate(Rating.values()[RANDOM.nextInt(Rating.values().length)].getInterestRate());
         loan.setMainIncomeType(randomize(MainIncomeType.values()));
         loan.setPurpose(randomize(Purpose.values()));
         loan.setRegion(randomize(Region.values()));
@@ -111,11 +111,9 @@ final class Util {
             loan.setAnnuityWithInsurance(Money.from(annuity));
         }
         // set rating and infer other dependent properties
-        loan.setRating(randomize(Rating.values()));
-        loan.setInterestRate(loan.getRating()
-            .getInterestRate());
-        loan.setRevenueRate(loan.getRating()
-            .getMaximalRevenueRate());
+        Rating rating = randomize(Rating.values());
+        loan.setInterestRate(rating.getInterestRate());
+        loan.setRevenueRate(rating.getMaximalRevenueRate());
         // set various dates
         loan.setDatePublished(OffsetDateTime.now()
             .minusDays(3));
@@ -143,7 +141,8 @@ final class Util {
 
     public static PortfolioOverview randomizePortfolioOverview() {
         final ZonedDateTime now = DateUtil.zonedNow();
-        final Map<Rating, Integer> invested = Stream.of(Rating.values())
+        final Map<Ratio, Integer> invested = Stream.of(Rating.values())
+            .map(Rating::getInterestRate)
             .collect(Collectors.toMap(r -> r, r -> RANDOM.nextInt(10_000_000)));
         return new PortfolioOverview() {
             @Override
@@ -154,7 +153,7 @@ final class Util {
             }
 
             @Override
-            public Money getInvested(Rating r) {
+            public Money getInvested(Ratio r) {
                 return Money.from(invested.get(r));
             }
 
@@ -178,12 +177,13 @@ final class Util {
             @Override
             public Money getAtRisk() {
                 return Stream.of(Rating.values())
+                    .map(Rating::getInterestRate)
                     .map(this::getAtRisk)
                     .reduce(Money.ZERO, Money::add);
             }
 
             @Override
-            public Money getAtRisk(Rating r) {
+            public Money getAtRisk(Ratio r) {
                 int nextRandom = RANDOM.nextInt(100);
                 if (nextRandom == 0) {
                     return Money.ZERO;
@@ -195,24 +195,26 @@ final class Util {
             @Override
             public Money getSellable() {
                 return Stream.of(Rating.values())
+                    .map(Rating::getInterestRate)
                     .map(this::getSellable)
                     .reduce(Money.ZERO, Money::add);
             }
 
             @Override
-            public Money getSellable(Rating r) {
+            public Money getSellable(Ratio r) {
                 return getAtRisk(r);
             }
 
             @Override
             public Money getSellableFeeless() {
                 return Stream.of(Rating.values())
+                    .map(Rating::getInterestRate)
                     .map(this::getSellableFeeless)
                     .reduce(Money.ZERO, Money::add);
             }
 
             @Override
-            public Money getSellableFeeless(Rating r) {
+            public Money getSellableFeeless(Ratio r) {
                 int nextRandom = RANDOM.nextInt(100);
                 if (nextRandom == 0) {
                     return Money.ZERO;
@@ -227,7 +229,7 @@ final class Util {
             }
 
             @Override
-            public Money getInvested(Rating r) {
+            public Money getInvested(Ratio r) {
                 return portfolioOverview.getInvested(r);
             }
 

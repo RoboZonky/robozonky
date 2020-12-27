@@ -64,7 +64,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void thresholds() {
         final Loan loan = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setAmount, Money.from(100_000))
             .build();
         final Investment investment = MockInvestmentBuilder.fresh(loan, BigDecimal.TEN)
@@ -173,7 +173,7 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
     @Test
     void loanNowDelinquent() {
         Loan loan = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.AAAAA)
+            .set(LoanImpl::setInterestRate, Rating.AAAAA.getInterestRate())
             .build();
         final LoanNowDelinquentEvent e = EventFactory.loanNowDelinquent(MockInvestmentBuilder
             .fresh(loan, new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE), 200)

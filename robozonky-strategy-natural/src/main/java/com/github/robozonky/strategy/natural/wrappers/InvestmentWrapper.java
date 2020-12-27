@@ -27,7 +27,6 @@ import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -71,19 +70,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
-    public Ratio getRevenueRate() {
-        return estimateRevenueRate();
-    }
-
-    @Override
     public Purpose getPurpose() {
         return getLoan().getPurpose();
-    }
-
-    @Override
-    public Rating getRating() {
-        return investment.getLoan()
-            .getRating();
     }
 
     @Override
