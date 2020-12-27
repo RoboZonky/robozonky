@@ -16,7 +16,7 @@
 
 package com.github.robozonky.strategy.natural;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.Rating;
@@ -28,28 +28,28 @@ enum DefaultPortfolio {
     PROGRESSIVE(1, 2, 7, 10, 14, 15, 17, 15, 10, 6, 3),
     EMPTY(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-    private final EnumMap<Rating, Ratio> shares = new EnumMap<>(Rating.class);
+    private final HashMap<Ratio, Ratio> shares = new HashMap<>();
 
     DefaultPortfolio(double aaaaaa, final double aaaaa, final double aaaa, final double aaa, final double aae,
             final double aa, final double ae, final double a, final double b, final double c, final double d) {
-        shares.put(Rating.AAAAAA, Ratio.fromPercentage(aaaaaa));
-        shares.put(Rating.AAAAA, Ratio.fromPercentage(aaaaa));
-        shares.put(Rating.AAAA, Ratio.fromPercentage(aaaa));
-        shares.put(Rating.AAA, Ratio.fromPercentage(aaa));
-        shares.put(Rating.AAE, Ratio.fromPercentage(aae));
-        shares.put(Rating.AA, Ratio.fromPercentage(aa));
-        shares.put(Rating.AE, Ratio.fromPercentage(ae));
-        shares.put(Rating.A, Ratio.fromPercentage(a));
-        shares.put(Rating.B, Ratio.fromPercentage(b));
-        shares.put(Rating.C, Ratio.fromPercentage(c));
-        shares.put(Rating.D, Ratio.fromPercentage(d));
+        shares.put(Rating.AAAAAA.getInterestRate(), Ratio.fromPercentage(aaaaaa));
+        shares.put(Rating.AAAAA.getInterestRate(), Ratio.fromPercentage(aaaaa));
+        shares.put(Rating.AAAA.getInterestRate(), Ratio.fromPercentage(aaaa));
+        shares.put(Rating.AAA.getInterestRate(), Ratio.fromPercentage(aaa));
+        shares.put(Rating.AAE.getInterestRate(), Ratio.fromPercentage(aae));
+        shares.put(Rating.AA.getInterestRate(), Ratio.fromPercentage(aa));
+        shares.put(Rating.AE.getInterestRate(), Ratio.fromPercentage(ae));
+        shares.put(Rating.A.getInterestRate(), Ratio.fromPercentage(a));
+        shares.put(Rating.B.getInterestRate(), Ratio.fromPercentage(b));
+        shares.put(Rating.C.getInterestRate(), Ratio.fromPercentage(c));
+        shares.put(Rating.D.getInterestRate(), Ratio.fromPercentage(d));
     }
 
-    public Ratio getDefaultShare(final Rating r) {
+    public Ratio getDefaultShare(final Ratio r) {
         if (shares.containsKey(r)) {
             return shares.get(r);
         } else {
-            throw new IllegalStateException("Rating " + r + " is missing. This is a bug in RoboZonky.");
+            throw new IllegalStateException("Interest rate " + r + " is missing. This is a bug in RoboZonky.");
         }
     }
 

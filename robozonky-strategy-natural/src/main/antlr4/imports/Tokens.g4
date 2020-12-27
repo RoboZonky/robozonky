@@ -40,10 +40,7 @@ interestConditionRangeOpen returns [MarketplaceFilterCondition result]:
                                                       Ratio.fromPercentage($max.result));
         } else {
             // by default, just pick the one rating
-            final Rating r = Rating.findByCode($min.result.toString());
-            LoanRatingEnumeratedCondition c = new LoanRatingEnumeratedCondition();
-            c.add(r);
-            $result = c;
+            $result = LoanInterestRateCondition.exact(Ratio.fromPercentage($min.result));
         }
     }
 ;
@@ -62,19 +59,8 @@ interestConditionRangeClosedRight returns [MarketplaceFilterCondition result]:
     }
 ;
 
-interestEnumeratedExpression returns [Collection<Rating> result]:
-    { $result = new LinkedHashSet<Rating>(); }
-    (
-        (
-            r1=interestRateBasedRatingExpression OR_COMMA { $result.add($r1.result); }
-        )*
-        r2=interestRateBasedRatingExpression OR { $result.add($r2.result); }
-    )?
-    r3=interestRateBasedRatingExpression { $result.add($r3.result); }
-;
-
-interestRateBasedRatingExpression returns [Rating result] :
-    r=floatExpr ' % p.a' DOT? { $result = Rating.findByCode($r.result.toString()); }
+interestRateBasedRatingExpression returns [Ratio result] :
+    r=floatExpr ' % p.a' DOT? { $result = Ratio.fromPercentage($r.result.toString()); }
 ;
 
 regionExpression returns [Region result] :

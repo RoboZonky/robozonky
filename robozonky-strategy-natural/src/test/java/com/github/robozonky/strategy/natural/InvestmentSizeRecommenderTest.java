@@ -51,7 +51,7 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
         defaults.setInvestmentShare(new DefaultInvestmentShare(MAXIMUM_SHARE));
         final MoneyRange target = new MoneyRange(MAXIMUM_INVESTMENT);
         return new ParsedStrategy(defaults, Collections.emptyList(),
-                Collections.singletonMap(Rating.findByInterestRate(mockLoan(0).getInterestRate()), target),
+                Collections.singletonMap(mockLoan(0).getInterestRate(), target),
                 Collections.emptyMap());
     }
 
@@ -96,7 +96,7 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
+        var rating = l.getInterestRate();
         when(s.getMinimumInvestmentSize(eq(rating))).thenReturn(minimumInvestment);
         when(s.getMaximumInvestmentSize(eq(rating))).thenReturn(minimumInvestment.add(minimumInvestment));
         when(s.getMaximumInvestmentShareInPercent()).thenReturn(100);
@@ -111,7 +111,7 @@ class InvestmentSizeRecommenderTest extends AbstractMinimalRoboZonkyTest {
         final Loan l = mockLoan(minimumInvestment.getValue()
             .intValue() - 1);
         final ParsedStrategy s = mock(ParsedStrategy.class);
-        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
+        var rating = l.getInterestRate();
         // next line will cause the recommendation to be rounded to 800, which will be below the minimum investment
         when(s.getMinimumInvestmentSize(eq(rating)))
             .thenReturn(minimumInvestment.subtract(1));

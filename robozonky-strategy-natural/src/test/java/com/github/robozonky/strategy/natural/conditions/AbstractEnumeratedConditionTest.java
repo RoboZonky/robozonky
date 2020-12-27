@@ -65,8 +65,7 @@ class AbstractEnumeratedConditionTest {
     @TestFactory
     Stream<DynamicNode> conditions() {
         return Stream.of(new BorrowerIncomeConditionSpec(), new BorrowerRegionConditionSpec(),
-                new LoanPurposeConditionSpec(), new LoanRatingEnumeratedConditionSpec(),
-                new HealthConditionSpec())
+                new LoanPurposeConditionSpec(), new HealthConditionSpec())
             .map(spec -> dynamicContainer(spec.getImplementation()
                 .getClass()
                 .getSimpleName(), forSpec(spec)));

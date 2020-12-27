@@ -19,7 +19,6 @@ package com.github.robozonky.app.daemon;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -29,7 +28,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 /**
@@ -102,17 +100,16 @@ final class SellingThrottle
     @Override
     public Stream<RecommendedInvestment> apply(final Stream<RecommendedInvestment> investmentDescriptors,
             final PortfolioOverview portfolioOverview) {
-        final Map<Rating, Set<RecommendedInvestment>> eligible = investmentDescriptors
-            .collect(Collectors.groupingBy(t -> Rating.findByInterestRate(t.descriptor()
+        var eligible = investmentDescriptors
+            .collect(Collectors.groupingBy(t -> t.descriptor()
                 .item()
                 .getLoan()
-                .getInterestRate()), Collectors.toSet()));
-        final Money maxSeloffValue = getMaxSelloffValue(portfolioOverview);
+                .getInterestRate(), Collectors.toSet()));
+        var maxSeloffValue = getMaxSelloffValue(portfolioOverview);
         return eligible.entrySet()
             .stream()
             .flatMap(e -> {
-                final Rating r = e.getKey();
-                LOGGER.debug("Processing {} investments.", r);
+                LOGGER.debug("Processing investments with interest rate {}.", e.getKey());
                 return determineSelloffByRating(e.getValue(), maxSeloffValue);
             });
     }
