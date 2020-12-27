@@ -23,7 +23,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -70,17 +69,12 @@ final class LoanWrapper extends AbstractWrapper<LoanDescriptor> {
     @Override
     public Ratio getRevenueRate() {
         return loan.getRevenueRate()
-            .orElseGet(this::estimateRevenueRate);
+            .orElseGet(super::getRevenueRate);
     }
 
     @Override
     public Purpose getPurpose() {
         return loan.getPurpose();
-    }
-
-    @Override
-    public Rating getRating() {
-        return loan.getRating();
     }
 
     @Override

@@ -45,7 +45,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
             .set(LoanImpl::setRemainingInvestment, Money.from(amount))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setDatePublished, OffsetDateTime.now())
-            .set(LoanImpl::setRating, Rating.A)
+            .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
             .build();
     }
 
@@ -84,7 +84,7 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
         final LoanImpl l = mockLoan(1000);
-        final Rating r = l.getRating();
+        final Rating r = Rating.findByInterestRate(l.getInterestRate());
         when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
         final Optional<Money> result = s.recommend(new LoanDescriptor(l), () -> portfolio, mockSessionInfo());
         assertThat(result).isEmpty();

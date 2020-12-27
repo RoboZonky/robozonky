@@ -52,7 +52,7 @@ class CategoryTest extends AbstractZonkyLeveragingTest {
 
     private final Zonky zonky = harmlessZonky();
     private final Loan loan = new MockLoanBuilder()
-        .set(LoanImpl::setRating, Rating.D)
+        .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
         .build();
     private final Investment investment = MockInvestmentBuilder
         .fresh(loan, new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE), 200)

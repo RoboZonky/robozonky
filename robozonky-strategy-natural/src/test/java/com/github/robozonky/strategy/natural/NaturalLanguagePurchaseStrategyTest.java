@@ -53,7 +53,7 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static Participation mockParticipation() {
         Participation participation = mock(ParticipationImpl.class);
-        when(participation.getRating()).thenReturn(Rating.D);
+        when(participation.getInterestRate()).thenReturn(Rating.D.getInterestRate());
         return participation;
     }
 
@@ -94,8 +94,8 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
             .subtract(1));
         when(portfolio.getShareOnInvestment(any())).thenReturn(Ratio.ZERO);
         final Participation l = mockParticipation();
-        doReturn(Rating.A).when(l)
-            .getRating();
+        doReturn(Rating.A.getInterestRate()).when(l)
+            .getInterestRate();
         final boolean result = s.recommend(mockDescriptor(l), () -> portfolio, mockSessionInfo());
         assertThat(result).isFalse();
     }
@@ -114,14 +114,14 @@ class NaturalLanguagePurchaseStrategyTest extends AbstractMinimalRoboZonkyTest {
         final Participation participation = mockParticipation();
         doReturn(Money.from(100_000)).when(participation)
             .getRemainingPrincipal(); // not recommended for balance
-        doReturn(Rating.A).when(participation)
-            .getRating();
+        doReturn(Rating.A.getInterestRate()).when(participation)
+            .getInterestRate();
         final Participation p2 = mockParticipation();
         final int amount = 199; // check amounts under Zonky investment minimum
         doReturn(Money.from(amount)).when(p2)
             .getRemainingPrincipal();
-        doReturn(Rating.A).when(p2)
-            .getRating();
+        doReturn(Rating.A.getInterestRate()).when(p2)
+            .getInterestRate();
         final ParticipationDescriptor pd = mockDescriptor(p2);
         final boolean result = s.recommend(mockDescriptor(participation), () -> portfolio, mockSessionInfo());
         assertThat(result).isFalse();

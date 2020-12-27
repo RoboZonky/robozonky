@@ -42,7 +42,7 @@ class NaturalLanguageSellStrategyTest extends AbstractMinimalRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
         .set(LoanImpl::setAmount, Money.from(100_000))
-        .set(LoanImpl::setRating, Rating.A)
+        .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
         .build();
 
     private static Investment mockInvestment() {

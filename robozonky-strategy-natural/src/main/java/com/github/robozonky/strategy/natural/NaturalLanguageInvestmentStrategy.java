@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
@@ -47,7 +48,7 @@ class NaturalLanguageInvestmentStrategy implements InvestmentStrategy {
         var loan = loanDescriptor.item();
         LOGGER.trace("Evaluating {}.", loan);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.isDesirable(loan.getRating());
+        var isAcceptable = preferences.isDesirable(Rating.findByInterestRate(loan.getInterestRate()));
         if (!isAcceptable) {
             LOGGER.debug("Loan #{} skipped due to an undesirable rating.", loan.getId());
             return Optional.empty();

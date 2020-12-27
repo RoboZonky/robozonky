@@ -72,16 +72,16 @@ final class Util {
     }
 
     public static Map<String, Object> getLoanData(final LoanBased loanBased) {
-        Loan loan = loanBased.getLoan();
+        var loan = loanBased.getLoan();
+        var rating = Rating.findByInterestRate(loan.getInterestRate());
         return Map.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()
                     .getValue()),
                 entry("loanAnnuity", loan.getAnnuity()
                     .getValue()),
-                entry("loanInterestRate", loan.getRating()
-                    .getCode()),
-                entry("loanRating", loan.getRating()),
+                entry("loanInterestRate", rating.getCode()),
+                entry("loanRating", rating),
                 entry("loanTerm", loan.getTermInMonths()),
                 entry("loanUrl", loan.getUrl()),
                 entry("loanRegion", loan.getRegion()),

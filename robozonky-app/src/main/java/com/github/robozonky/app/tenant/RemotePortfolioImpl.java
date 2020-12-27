@@ -31,7 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.async.Reloadable;
@@ -106,7 +105,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
         final Map<Rating, Money> amounts = data.getStatistics()
             .getRiskPortfolio()
             .stream()
-            .collect(toMap(RiskPortfolio::getRating, portfolio -> portfolio.getDue()
+            .collect(toMap(p -> Rating.findByInterestRate(p.getInterestRate()), portfolio -> portfolio.getDue()
                 .add(portfolio.getUnpaid()),
                     Money::add, () -> new EnumMap<>(Rating.class)));
         LOGGER.debug("Remote portfolio: {}.", amounts);

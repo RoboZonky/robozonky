@@ -56,8 +56,8 @@ public class MockInvestmentBuilder extends BaseMockBuilder<InvestmentImpl, MockI
     public static MockInvestmentBuilder fresh(final Loan loan, final LoanHealthStats loanHealthStats,
             final BigDecimal invested) {
         LoanImpl loanImpl = (LoanImpl) loan;
-        if (loanImpl.getRating() == null) {
-            loanImpl.setRating(Rating.AAAAA);
+        if (loanImpl.getInterestRate() == null) {
+            loanImpl.setInterestRate(Rating.AAAAA.getInterestRate());
         }
         InvestmentLoanDataImpl ild = loanHealthStats == null ? new InvestmentLoanDataImpl(loanImpl)
                 : new InvestmentLoanDataImpl(loanImpl, loanHealthStats);

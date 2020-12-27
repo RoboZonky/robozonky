@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.LoanHealth;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.Descriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.Defaults;
@@ -36,13 +37,6 @@ abstract class AbstractWrapper<T extends Descriptor<?>> implements Wrapper<T> {
     protected AbstractWrapper(final T original, final PortfolioOverview portfolioOverview) {
         this.original = original;
         this.portfolioOverview = portfolioOverview;
-    }
-
-    protected Ratio estimateRevenueRate() { // Loans with ID < 400k are assumed to have the old pre-2019 fees.
-        var feeDate = getLoanId() < 400_000 ? LocalDate.of(2019, 2, 28)
-            .atStartOfDay()
-            .atZone(Defaults.ZONKYCZ_ZONE_ID) : DateUtil.zonedNow();
-        return getRating().getMaximalRevenueRate(feeDate, portfolioOverview.getInvested());
     }
 
     @Override
@@ -68,6 +62,15 @@ abstract class AbstractWrapper<T extends Descriptor<?>> implements Wrapper<T> {
     @Override
     public Optional<BigDecimal> getOriginalPurchasePrice() {
         return Optional.empty();
+    }
+
+    @Override
+    public Ratio getRevenueRate() { // Estimate; loans with ID < 400k are assumed to have the old pre-2019 fees.
+        var feeDate = getLoanId() < 400_000 ? LocalDate.of(2019, 2, 28)
+            .atStartOfDay()
+            .atZone(Defaults.ZONKYCZ_ZONE_ID) : DateUtil.zonedNow();
+        return Rating.findByInterestRate(getInterestRate())
+            .getMaximalRevenueRate(feeDate, portfolioOverview.getInvested());
     }
 
     @Override

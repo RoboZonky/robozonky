@@ -17,11 +17,10 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import com.github.robozonky.api.remote.enums.Rating;
-import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class LoanRatingEnumeratedCondition extends AbstractEnumeratedCondition<Rating> {
 
     public LoanRatingEnumeratedCondition() {
-        super(Wrapper::getRating, false);
+        super(w -> Rating.findByInterestRate(w.getInterestRate()), false);
     }
 }

@@ -47,7 +47,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         return new MockReservationBuilder()
             .set(ReservationImpl::setMyReservation, mr)
             .set(ReservationImpl::setId, loan.getId())
-            .set(ReservationImpl::setRating, loan.getRating())
+            .set(ReservationImpl::setInterestRate, loan.getInterestRate())
             .build();
     }
 
@@ -63,7 +63,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     void properReal() {
         final Loan l = new MockLoanBuilder()
             .set(LoanImpl::setAmount, Money.from(200))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(200))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
@@ -81,7 +81,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = l.getRating();
+        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
     }
 
@@ -89,7 +89,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     void properDry() {
         final Loan l = new MockLoanBuilder()
             .set(LoanImpl::setAmount, Money.from(200))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(200))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
@@ -107,7 +107,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
         verify(z, never()).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        Rating rating = l.getRating();
+        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
@@ -116,7 +116,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
     void properFail() {
         final Loan l = new MockLoanBuilder()
             .set(LoanImpl::setAmount, Money.from(200))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(200))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
@@ -136,7 +136,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(2);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = l.getRating();
+        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
         verify(rp, never()).simulateCharge(eq(loanId), eq(rating), any());
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(199)));
     }

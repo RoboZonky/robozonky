@@ -189,7 +189,7 @@ class ZonkyTest {
         final Api<ControlApi> ca = mockApi(control);
         final PaginatedApi<LoanImpl, LoanApi> la = mockApi();
         final LoanImpl loan = new LoanImpl();
-        loan.setRating(Rating.A);
+        loan.setInterestRate(Rating.A.getInterestRate());
         loan.setAmount(Money.from(200));
         loan.setRemainingInvestment(Money.from(200));
         when(la.execute(any())).thenReturn(loan);
@@ -221,7 +221,7 @@ class ZonkyTest {
         final Api<ControlApi> ca = mockApi(control);
         final Zonky z = mockZonkyControl(ca);
         final LoanImpl loan = new LoanImpl();
-        loan.setRating(Rating.D);
+        loan.setInterestRate(Rating.D.getInterestRate());
         final InvestmentImpl investment = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(200));
         investment.setId(1);
         investment.setPrincipal(new AmountsImpl(Money.from(10)));

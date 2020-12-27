@@ -62,7 +62,6 @@ class RemoteDataTest extends AbstractZonkyLeveragingTest {
         final Zonky zonky = harmlessZonky();
         final Tenant tenant = mockTenant(zonky);
         final Loan loan = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.D)
             .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .build();
         Investment i = new InvestmentImpl(new InvestmentLoanDataImpl(loan), Money.from(10));

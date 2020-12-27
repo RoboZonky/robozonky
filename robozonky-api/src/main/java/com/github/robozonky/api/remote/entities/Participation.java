@@ -22,7 +22,6 @@ import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 
 public interface Participation {
 
@@ -45,9 +44,6 @@ public interface Participation {
     String getLoanName();
 
     Purpose getPurpose();
-
-    @Deprecated
-    Rating getRating();
 
     boolean isWillExceedLoanInvestmentLimit();
 

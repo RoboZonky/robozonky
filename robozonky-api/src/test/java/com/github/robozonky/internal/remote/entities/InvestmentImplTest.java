@@ -43,7 +43,6 @@ import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.remote.enums.SellStatus;
 
@@ -163,7 +162,6 @@ class InvestmentImplTest {
                     .returns(Optional.of(Money.from(8419)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(84, 83), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
-                    .returns(Rating.B, InvestmentLoanData::getRating)
                     .returns(Optional.of(MainIncomeType.EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.STREDOCESKY, l -> l.getBorrower()
@@ -253,7 +251,6 @@ class InvestmentImplTest {
                     .returns(Optional.of(Money.from(4404)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(66, 62), InvestmentLoanData::getPayments)
                     .returns(Purpose.AUTO_MOTO, InvestmentLoanData::getPurpose)
-                    .returns(Rating.B, InvestmentLoanData::getRating)
                     .returns(Optional.of(MainIncomeType.SELF_EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.ZLINSKY, l -> l.getBorrower()
@@ -343,7 +340,6 @@ class InvestmentImplTest {
                     .returns(Optional.of(Money.from(5263)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(84, 81), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
-                    .returns(Rating.A, InvestmentLoanData::getRating)
                     .returns(Optional.of(MainIncomeType.EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.PARDUBICKY, l -> l.getBorrower()
@@ -419,7 +415,6 @@ class InvestmentImplTest {
                     .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(20, 5), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
-                    .returns(Rating.B, InvestmentLoanData::getRating)
                     .returns(Optional.empty(), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.HLAVNI_MESTO_PRAHA, l -> l.getBorrower()
@@ -470,7 +465,6 @@ class InvestmentImplTest {
                     .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(60, 17), InvestmentLoanData::getPayments)
                     .returns(Purpose.HEALTH, InvestmentLoanData::getPurpose)
-                    .returns(Rating.C, InvestmentLoanData::getRating)
                     .returns(Optional.empty(), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.USTECKY, l -> l.getBorrower()
@@ -521,7 +515,6 @@ class InvestmentImplTest {
                     .returns(Optional.empty(), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(19, 0), InvestmentLoanData::getPayments)
                     .returns(Purpose.REFINANCING, InvestmentLoanData::getPurpose)
-                    .returns(Rating.AAAA, InvestmentLoanData::getRating)
                     .returns(Optional.empty(), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.JIHOMORAVSKY, l -> l.getBorrower()
@@ -572,7 +565,6 @@ class InvestmentImplTest {
                     .returns(Optional.of(Money.from(1925)), InvestmentLoanData::getAnnuity)
                     .returns(new InstalmentsImpl(60), InvestmentLoanData::getPayments)
                     .returns(Purpose.HOUSEHOLD, InvestmentLoanData::getPurpose)
-                    .returns(Rating.AAAA, InvestmentLoanData::getRating)
                     .returns(Optional.of(MainIncomeType.EMPLOYMENT), l -> l.getBorrower()
                         .getPrimaryIncomeType())
                     .returns(Region.JIHOMORAVSKY, l -> l.getBorrower()

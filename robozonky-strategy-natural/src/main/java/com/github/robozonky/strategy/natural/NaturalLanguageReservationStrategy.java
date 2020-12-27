@@ -21,6 +21,7 @@ import static com.github.robozonky.strategy.natural.Audit.LOGGER;
 import java.util.function.Supplier;
 
 import com.github.robozonky.api.SessionInfo;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationMode;
@@ -51,7 +52,7 @@ class NaturalLanguageReservationStrategy implements ReservationStrategy {
         var reservation = reservationDescriptor.item();
         LOGGER.trace("Evaluating {}.", reservation);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.isDesirable(reservation.getRating());
+        var isAcceptable = preferences.isDesirable(Rating.findByInterestRate(reservation.getInterestRate()));
         if (!isAcceptable) {
             LOGGER.debug("Reservation #{} skipped due to an undesirable rating.", reservation.getId());
             return false;

@@ -48,8 +48,8 @@ final class Util {
     static Map<Rating, Money> getAmountsAtRisk(final Tenant tenant) {
         return tenant.call(Zonky::getDelinquentInvestments)
             .parallel() // possibly many pages' worth of results; fetch in parallel
-            .collect(groupingBy(investment -> investment.getLoan()
-                .getRating(),
+            .collect(groupingBy(investment -> Rating.findByInterestRate(investment.getLoan()
+                .getInterestRate()),
                     () -> new EnumMap<>(Rating.class),
                     mapping(i -> {
                         final Money remaining = i.getPrincipal()
@@ -75,8 +75,8 @@ final class Util {
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
             .map(investment -> {
                 // Do everything we can to avoid retrieving the optional remote smpSellInfo.
-                var rating = investment.getLoan()
-                    .getRating();
+                var rating = Rating.findByInterestRate(investment.getLoan()
+                    .getInterestRate());
                 var fee = investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE ? Money.ZERO
                         : investment.getSmpSellInfo()
                             .orElseThrow()

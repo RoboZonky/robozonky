@@ -103,10 +103,10 @@ final class SellingThrottle
     public Stream<RecommendedInvestment> apply(final Stream<RecommendedInvestment> investmentDescriptors,
             final PortfolioOverview portfolioOverview) {
         final Map<Rating, Set<RecommendedInvestment>> eligible = investmentDescriptors
-            .collect(Collectors.groupingBy(t -> t.descriptor()
+            .collect(Collectors.groupingBy(t -> Rating.findByInterestRate(t.descriptor()
                 .item()
                 .getLoan()
-                .getRating(), Collectors.toSet()));
+                .getInterestRate()), Collectors.toSet()));
         final Money maxSeloffValue = getMaxSelloffValue(portfolioOverview);
         return eligible.entrySet()
             .stream()

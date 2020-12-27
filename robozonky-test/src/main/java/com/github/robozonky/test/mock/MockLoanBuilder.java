@@ -27,7 +27,6 @@ public class MockLoanBuilder extends BaseLoanMockBuilder<LoanImpl, MockLoanBuild
         set(LoanImpl::setId, RANDOM.nextInt());
         set(LoanImpl::setDatePublished, DateUtil.zonedNow()
             .toOffsetDateTime());
-        set(LoanImpl::setRating, Rating.A);
         set(LoanImpl::setInterestRate, Rating.A.getInterestRate());
         set(LoanImpl::setRevenueRate, Rating.A.getMaximalRevenueRate());
     }

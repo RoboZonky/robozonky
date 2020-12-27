@@ -58,10 +58,9 @@ final class RemoteData {
             .peek(investment -> LOGGER.debug("Found: {}.", investment))
             .collect(Collectors.toMap(i -> i.getLoan()
                 .getId(),
-                    i -> Tuple.of(i.getLoan()
-                        .getRating(),
-                            i.getPrincipal()
-                                .getUnpaid())));
+                    i -> Tuple.of(Rating.findByInterestRate(i.getLoan()
+                        .getInterestRate()), i.getPrincipal()
+                            .getUnpaid())));
     }
 
     public ZonedDateTime getRetrievedOn() {

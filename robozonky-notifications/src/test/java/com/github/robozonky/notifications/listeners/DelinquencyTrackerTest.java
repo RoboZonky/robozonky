@@ -25,7 +25,6 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.notifications.EventListener;
 import com.github.robozonky.api.notifications.LoanDelinquent10DaysOrMoreEvent;
@@ -57,8 +56,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
             .toOffsetDateTime())
         .set(LoanImpl::setAmount, Money.from(200))
         .set(LoanImpl::setAnnuity, Money.from(BigDecimal.TEN))
-        .set(LoanImpl::setRating, Rating.D)
-        .set(LoanImpl::setInterestRate, Ratio.fromPercentage(Rating.D.getCode()))
+        .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
         .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
         .set(LoanImpl::setRegion, Region.JIHOCESKY)
         .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
@@ -72,8 +70,7 @@ class DelinquencyTrackerTest extends AbstractRoboZonkyTest {
     private static final Loan LOAN2 = new MockLoanBuilder()
         .set(LoanImpl::setAmount, Money.from(200))
         .set(LoanImpl::setAnnuity, Money.from(BigDecimal.TEN))
-        .set(LoanImpl::setRating, Rating.A)
-        .set(LoanImpl::setInterestRate, Ratio.fromPercentage(Rating.A.getCode()))
+        .set(LoanImpl::setInterestRate, Rating.A.getInterestRate())
         .set(LoanImpl::setPurpose, Purpose.TRAVEL)
         .set(LoanImpl::setRegion, Region.JIHOMORAVSKY)
         .set(LoanImpl::setMainIncomeType, MainIncomeType.OTHER)

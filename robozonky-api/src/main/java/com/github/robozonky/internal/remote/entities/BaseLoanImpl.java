@@ -26,7 +26,6 @@ import com.github.robozonky.api.remote.entities.BaseLoan;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.internal.test.DateUtil;
 
@@ -37,7 +36,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
     protected int termInMonths;
     protected String name;
     protected String story;
-    protected Rating rating;
     protected MainIncomeType mainIncomeType;
     protected MainIncomeIndustry mainIncomeIndustry;
     protected Region region;
@@ -137,15 +135,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
 
     public void setInterestRate(final Ratio interestRate) {
         this.interestRate = interestRate;
-    }
-
-    @Override
-    public Rating getRating() {
-        return rating;
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
     }
 
     @Override
@@ -258,7 +247,6 @@ public abstract class BaseLoanImpl implements BaseLoan {
             .add("name='" + name + "'")
             .add("premium='" + premium + "'")
             .add("purpose=" + purpose)
-            .add("rating=" + rating)
             .add("region=" + region)
             .add("remainingInvestment='" + remainingInvestment + "'")
             .add("reservedAmount='" + reservedAmount + "'")

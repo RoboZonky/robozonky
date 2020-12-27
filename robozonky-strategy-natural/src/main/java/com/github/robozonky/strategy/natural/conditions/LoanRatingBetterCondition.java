@@ -39,7 +39,7 @@ public class LoanRatingBetterCondition extends MarketplaceFilterConditionImpl {
 
     @Override
     public boolean test(final Wrapper<?> item) {
-        return item.getRating()
+        return Rating.findByInterestRate(item.getInterestRate())
             .compareTo(worstPossibleRating) < 0;
     }
 }

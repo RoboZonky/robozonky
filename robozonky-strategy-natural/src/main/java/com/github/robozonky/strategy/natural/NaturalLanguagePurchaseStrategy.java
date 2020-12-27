@@ -37,7 +37,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
     }
 
     private Money[] getRecommendationBoundaries(final Participation participation) {
-        final Rating rating = participation.getRating();
+        final Rating rating = Rating.findByInterestRate(participation.getInterestRate());
         final Money minimumInvestment = strategy.getMinimumPurchaseSize(rating);
         final Money maximumInvestment = strategy.getMaximumPurchaseSize(rating);
         return new Money[] { minimumInvestment, maximumInvestment };
@@ -74,7 +74,7 @@ class NaturalLanguagePurchaseStrategy implements PurchaseStrategy {
         var participation = participationDescriptor.item();
         LOGGER.trace("Evaluating {}.", participation);
         var preferences = Preferences.get(strategy, portfolio);
-        var isAcceptable = preferences.isDesirable(participation.getRating());
+        var isAcceptable = preferences.isDesirable(Rating.findByInterestRate(participation.getInterestRate()));
         if (!isAcceptable) {
             LOGGER.debug("Participation #{} skipped due to an undesirable rating.", participation.getId());
             return false;

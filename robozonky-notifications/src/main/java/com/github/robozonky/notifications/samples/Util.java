@@ -90,7 +90,7 @@ final class Util {
     public static Loan randomizeLoan() {
         final LoanImpl loan = new LoanImpl();
         loan.setId(100_000 + RANDOM.nextInt(900_000)); // six-digit number
-        loan.setRating(Rating.values()[RANDOM.nextInt(Rating.values().length)]);
+        loan.setInterestRate(Rating.values()[RANDOM.nextInt(Rating.values().length)].getInterestRate());
         loan.setMainIncomeType(randomize(MainIncomeType.values()));
         loan.setPurpose(randomize(Purpose.values()));
         loan.setRegion(randomize(Region.values()));
@@ -111,11 +111,9 @@ final class Util {
             loan.setAnnuityWithInsurance(Money.from(annuity));
         }
         // set rating and infer other dependent properties
-        loan.setRating(randomize(Rating.values()));
-        loan.setInterestRate(loan.getRating()
-            .getInterestRate());
-        loan.setRevenueRate(loan.getRating()
-            .getMaximalRevenueRate());
+        Rating rating = randomize(Rating.values());
+        loan.setInterestRate(rating.getInterestRate());
+        loan.setRevenueRate(rating.getMaximalRevenueRate());
         // set various dates
         loan.setDatePublished(OffsetDateTime.now()
             .minusDays(3));

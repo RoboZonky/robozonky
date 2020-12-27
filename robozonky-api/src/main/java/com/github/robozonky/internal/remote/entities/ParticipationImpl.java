@@ -26,7 +26,6 @@ import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeIndustry;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 
 public class ParticipationImpl implements Participation {
 
@@ -41,7 +40,6 @@ public class ParticipationImpl implements Participation {
     protected LoanHealth loanHealthInfo;
     protected String loanName;
     protected Purpose purpose;
-    protected Rating rating;
     protected boolean willExceedLoanInvestmentLimit;
     protected boolean insuranceActive;
 
@@ -60,7 +58,6 @@ public class ParticipationImpl implements Participation {
         this.loanName = loan.getName();
         this.originalInstalmentCount = loan.getTermInMonths();
         this.purpose = loan.getPurpose();
-        this.rating = loan.getRating();
         this.insuranceActive = loan.isInsuranceActive();
         this.remainingPrincipal = remainingPrincipal;
         this.remainingInstalmentCount = remainingInstalmentCount;
@@ -153,15 +150,6 @@ public class ParticipationImpl implements Participation {
     }
 
     @Override
-    public Rating getRating() {
-        return rating;
-    }
-
-    public void setRating(final Rating rating) {
-        this.rating = rating;
-    }
-
-    @Override
     public boolean isWillExceedLoanInvestmentLimit() {
         return willExceedLoanInvestmentLimit;
     }
@@ -231,7 +219,6 @@ public class ParticipationImpl implements Participation {
             .add("originalInstalmentCount=" + originalInstalmentCount)
             .add("price='" + price + "'")
             .add("purpose=" + purpose)
-            .add("rating=" + rating)
             .add("remainingInstalmentCount=" + remainingInstalmentCount)
             .add("remainingPrincipal='" + remainingPrincipal + "'")
             .add("willExceedLoanInvestmentLimit=" + willExceedLoanInvestmentLimit)

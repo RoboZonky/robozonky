@@ -43,7 +43,7 @@ class ReservationDescriptorTest {
         when(mr.getReservedAmount()).thenReturn(Money.from(1_000));
         final Reservation rs = mock(ReservationImpl.class);
         when(rs.getId()).thenReturn(1);
-        when(rs.getRating()).thenReturn(r);
+        when(rs.getInterestRate()).thenReturn(r.getInterestRate());
         when(rs.getAmount()).thenReturn(Money.from(2_000));
         when(rs.getNonReservedRemainingInvestment()).thenReturn(Money.from(1_000));
         when(rs.getDatePublished()).thenReturn(OffsetDateTime.now());

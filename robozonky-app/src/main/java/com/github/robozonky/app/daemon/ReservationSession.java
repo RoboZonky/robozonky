@@ -24,6 +24,7 @@ import static com.github.robozonky.app.events.impl.EventFactory.reservationCheck
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.remote.entities.Reservation;
+import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ReservationDescriptor;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -99,7 +100,8 @@ final class ReservationSession extends AbstractSession<RecommendedReservation, R
         result.add(recommendation.descriptor()
             .item());
         tenant.getPortfolio()
-            .simulateCharge(reservation.getId(), reservation.getRating(), recommendation.amount());
+            .simulateCharge(reservation.getId(), Rating.findByInterestRate(reservation.getInterestRate()),
+                    recommendation.amount());
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
             .subtract(recommendation.amount()));
         tenant.fire(reservationAcceptedLazy(() -> reservationAccepted(recommendation.descriptor()

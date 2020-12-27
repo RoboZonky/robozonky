@@ -46,7 +46,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
         final LoanImpl loan = new MockLoanBuilder()
             .set(LoanImpl::setInsuranceActive, false)
             .set(LoanImpl::setAmount, Money.from(100_000))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
             .set(LoanImpl::setRegion, Region.JIHOCESKY)
@@ -66,8 +66,6 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
                 .isEqualTo(loan.getInterestRate());
             softly.assertThat(w.getRegion())
                 .isEqualTo(loan.getRegion());
-            softly.assertThat(w.getRating())
-                .isEqualTo(loan.getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(loan.getMainIncomeType());
             softly.assertThat(w.getPurpose())
@@ -116,7 +114,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
     @Test
     void fromLoanWithoutRevenueRate() {
         final LoanImpl loan = new MockLoanBuilder()
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRevenueRate, null)
             .build();
         final Wrapper<LoanDescriptor> w = Wrapper.wrap(new LoanDescriptor(loan), FOLIO);
@@ -129,8 +127,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
         final LoanImpl l = new MockLoanBuilder()
             .set(LoanImpl::setInsuranceActive, true)
             .set(LoanImpl::setAmount, Money.from(100_000))
-            .set(LoanImpl::setRating, Rating.D)
-            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRevenueRate, null)
             .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
@@ -147,11 +144,9 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.isInsuranceActive())
                 .isEqualTo(l.isInsuranceActive());
             softly.assertThat(w.getInterestRate())
-                .isEqualTo(Ratio.ONE);
+                .isEqualTo(l.getInterestRate());
             softly.assertThat(w.getRegion())
                 .isEqualTo(l.getRegion());
-            softly.assertThat(w.getRating())
-                .isEqualTo(l.getRating());
             softly.assertThat(w.getMainIncomeType())
                 .isEqualTo(l.getMainIncomeType());
             softly.assertThat(w.getPurpose())
@@ -192,8 +187,7 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
         final LoanImpl l = new MockLoanBuilder()
             .set(LoanImpl::setInsuranceActive, true)
             .set(LoanImpl::setAmount, Money.from(100_000))
-            .set(LoanImpl::setRating, Rating.D)
-            .set(LoanImpl::setInterestRate, Ratio.ONE)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
             .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
             .set(LoanImpl::setRegion, Region.JIHOCESKY)

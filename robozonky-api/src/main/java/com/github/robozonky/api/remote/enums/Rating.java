@@ -106,6 +106,13 @@ public enum Rating implements BaseEnum {
             .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
     }
 
+    public static Rating findByInterestRate(final Ratio interestRate) {
+        return Stream.of(Rating.values())
+            .filter(r -> Objects.equals(r.interestRate, interestRate))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Unknown interest rate: " + interestRate));
+    }
+
     private static boolean isBeforeLatestFeeChange(final ZonedDateTime dateForFees) {
         return dateForFees.isBefore(MIDNIGHT_2019_03_18);
     }

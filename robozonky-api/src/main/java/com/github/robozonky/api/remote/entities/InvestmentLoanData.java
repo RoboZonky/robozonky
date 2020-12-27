@@ -24,7 +24,6 @@ import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Label;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 
 public interface InvestmentLoanData {
 
@@ -35,9 +34,6 @@ public interface InvestmentLoanData {
     int getDpd();
 
     boolean hasCollectionHistory();
-
-    @Deprecated
-    Rating getRating();
 
     String getTitle();
 

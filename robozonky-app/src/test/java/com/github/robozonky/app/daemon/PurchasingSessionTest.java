@@ -55,7 +55,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     void properReal() {
         final Loan l = new MockLoanBuilder()
             .set(LoanImpl::setAmount, Money.from(200))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(200))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
@@ -64,7 +64,8 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         final Participation p = mock(ParticipationImpl.class);
         doReturn(l.getId()).when(p)
             .getLoanId();
-        when(p.getRating()).thenReturn(Rating.D);
+        doReturn(l.getInterestRate()).when(p)
+            .getInterestRate();
         when(p.getRemainingPrincipal()).thenReturn(Money.from(200));
         final PurchaseStrategy s = mock(PurchaseStrategy.class);
         when(s.recommend(any(), any(), any())).thenReturn(true);
@@ -77,7 +78,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
         verify(z).purchase(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = l.getRating();
+        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
@@ -86,7 +87,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     void failure() {
         final Loan l = new MockLoanBuilder()
             .set(LoanImpl::setAmount, Money.from(200))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(200))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())
@@ -116,7 +117,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
     void failureDueToTooManyRequests() {
         final Loan l = new MockLoanBuilder()
             .set(LoanImpl::setAmount, Money.from(200))
-            .set(LoanImpl::setRating, Rating.D)
+            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
             .set(LoanImpl::setRemainingInvestment, Money.from(200))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setMyInvestment, mockMyInvestment())

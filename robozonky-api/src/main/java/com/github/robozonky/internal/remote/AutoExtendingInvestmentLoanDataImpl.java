@@ -31,7 +31,6 @@ import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.Label;
 import com.github.robozonky.api.remote.enums.Purpose;
-import com.github.robozonky.api.remote.enums.Rating;
 
 final class AutoExtendingInvestmentLoanDataImpl implements InvestmentLoanData {
 
@@ -63,11 +62,6 @@ final class AutoExtendingInvestmentLoanDataImpl implements InvestmentLoanData {
     @Override
     public boolean hasCollectionHistory() {
         return delegate.hasCollectionHistory();
-    }
-
-    @Override
-    public Rating getRating() {
-        return delegate.getRating();
     }
 
     @Override

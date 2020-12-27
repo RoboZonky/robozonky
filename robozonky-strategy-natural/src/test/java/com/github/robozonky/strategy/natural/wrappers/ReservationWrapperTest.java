@@ -43,11 +43,10 @@ class ReservationWrapperTest {
         final Reservation reservation = new MockReservationBuilder()
             .set(ReservationImpl::setInsuranceActive, true)
             .set(ReservationImpl::setAnnuity, Money.from(BigDecimal.ONE))
-            .set(ReservationImpl::setRating, Rating.D)
             .set(ReservationImpl::setAmount, Money.from(100_000))
             .set(ReservationImpl::setRegion, Region.JIHOCESKY)
             .set(ReservationImpl::setRevenueRate, Ratio.ZERO)
-            .set(ReservationImpl::setInterestRate, Ratio.ONE)
+            .set(ReservationImpl::setInterestRate, Rating.D.getInterestRate())
             .build();
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),
                 FOLIO);
@@ -58,14 +57,12 @@ class ReservationWrapperTest {
                 .isEqualTo(reservation.getStory());
             softly.assertThat(w.getRegion())
                 .isEqualTo(reservation.getRegion());
-            softly.assertThat(w.getRating())
-                .isEqualTo(reservation.getRating());
             softly.assertThat(w.getOriginalAmount())
                 .isEqualTo(reservation.getAmount()
                     .getValue()
                     .intValue());
             softly.assertThat(w.getInterestRate())
-                .isEqualTo(Ratio.ONE);
+                .isEqualTo(Rating.D.getInterestRate());
             softly.assertThat(w.getRevenueRate())
                 .isEqualTo(Ratio.ZERO);
             softly.assertThat(w.getOriginalAnnuity())
@@ -94,7 +91,7 @@ class ReservationWrapperTest {
     @Test
     void fromReservationWithoutRevenueRate() {
         final Reservation reservation = new MockReservationBuilder()
-            .set(ReservationImpl::setRating, Rating.B)
+            .set(ReservationImpl::setInterestRate, Rating.B.getInterestRate())
             .set(ReservationImpl::setInsuranceActive, false)
             .build();
         final Wrapper<ReservationDescriptor> w = Wrapper.wrap(new ReservationDescriptor(reservation, () -> null),

@@ -50,7 +50,7 @@ public abstract class AbstractZonkyLeveragingTest extends AbstractEventLeveragin
             .set(LoanImpl::setRemainingInvestment, Money.from(Integer.MAX_VALUE))
             .set(LoanImpl::setReservedAmount, Money.from(0))
             .set(LoanImpl::setDatePublished, OffsetDateTime.now())
-            .set(LoanImpl::setRating, Rating.AAAAA);
+            .set(LoanImpl::setInterestRate, Rating.AAAAA.getInterestRate());
         return new LoanDescriptor(b.build());
     }
 

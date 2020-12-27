@@ -53,7 +53,7 @@ class InvestmentSizeRecommender implements BiFunction<Loan, SessionInfo, Money> 
 
     private Money[] getInvestmentBounds(final ParsedStrategy strategy, final Loan loan,
             final SessionInfo sessionInfo) {
-        final Rating rating = loan.getRating();
+        final Rating rating = Rating.findByInterestRate(loan.getInterestRate());
         final Money absoluteMinimum = strategy.getMinimumInvestmentSize(rating)
             .max(sessionInfo.getMinimumInvestmentAmount());
         final Money minimumRecommendation = roundToNearestIncrement(absoluteMinimum, sessionInfo.getInvestmentStep());
@@ -70,11 +70,10 @@ class InvestmentSizeRecommender implements BiFunction<Loan, SessionInfo, Money> 
         final Money minimumInvestmentByShare = getPercentage(loan.getAmount(),
                 strategy.getMinimumInvestmentShareInPercent());
         final Money minimumInvestment = minimumInvestmentByShare
-            .max(strategy.getMinimumInvestmentSize(loan.getRating()));
+            .max(strategy.getMinimumInvestmentSize(rating));
         final Money maximumInvestmentByShare = getPercentage(loan.getAmount(),
                 strategy.getMaximumInvestmentShareInPercent());
-        final Money maximumInvestment = maximumInvestmentByShare
-            .min(strategy.getMaximumInvestmentSize(loan.getRating()));
+        final Money maximumInvestment = maximumInvestmentByShare.min(strategy.getMaximumInvestmentSize(rating));
         // minimums are guaranteed to be <= maximums due to the contract of strategy implementation
         return new Money[] { minimumInvestment, maximumInvestment };
     }
