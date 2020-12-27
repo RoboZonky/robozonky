@@ -113,7 +113,7 @@ public final class ConfigurationModel {
             Properties robozonkyProperties = new Properties();
             Stream.of(applicationConfiguration, strategyConfiguration, notificationConfiguration, jmxConfiguration)
                 .filter(c -> c instanceof PropertyConfiguration)
-                .map(c -> (PropertyConfiguration) c)
+                .map(PropertyConfiguration.class::cast)
                 .forEach(c -> c.getProperties()
                     .forEach((k, v) -> {
                         if (k.startsWith("robozonky.")) {
