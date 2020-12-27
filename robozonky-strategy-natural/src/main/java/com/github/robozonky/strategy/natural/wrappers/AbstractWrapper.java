@@ -69,7 +69,7 @@ abstract class AbstractWrapper<T extends Descriptor<?>> implements Wrapper<T> {
         var feeDate = getLoanId() < 400_000 ? LocalDate.of(2019, 2, 28)
             .atStartOfDay()
             .atZone(Defaults.ZONKYCZ_ZONE_ID) : DateUtil.zonedNow();
-        return Rating.findByInterestRate(getInterestRate())
+        return Rating.forInterestRate(getInterestRate())
             .getMaximalRevenueRate(feeDate, portfolioOverview.getInvested());
     }
 

@@ -27,12 +27,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.test.DateUtil;
+import com.github.robozonky.internal.util.functional.Memoizer;
 
 public enum Rating implements BaseEnum {
 
@@ -59,6 +61,7 @@ public enum Rating implements BaseEnum {
             entry(200_000, Ratio.fromPercentage(10)),
             entry(500_000, Ratio.fromPercentage(15)),
             entry(1_000_000, Ratio.fromPercentage(20))));
+    private static final Function<Ratio, Rating> PER_INTEREST_RATE = Memoizer.memoize(Rating::findInterestRate);
 
     private final String code;
     private final Ratio interestRate;
@@ -99,11 +102,15 @@ public enum Rating implements BaseEnum {
         }
     }
 
-    public static Rating findByInterestRate(final Ratio interestRate) {
+    private static Rating findInterestRate(final Ratio interestRate) {
         return Stream.of(Rating.values())
             .filter(r -> Objects.equals(r.interestRate, interestRate))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Unknown interest rate: " + interestRate));
+    }
+
+    public static Rating forInterestRate(final Ratio interestRate) {
+        return PER_INTEREST_RATE.apply(interestRate);
     }
 
     private static boolean isBeforeLatestFeeChange(final ZonedDateTime dateForFees) {

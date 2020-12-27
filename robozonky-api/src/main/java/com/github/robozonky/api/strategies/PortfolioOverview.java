@@ -94,7 +94,7 @@ public interface PortfolioOverview {
      * @return never null
      */
     default Ratio getMinimalAnnualProfitability() {
-        return getProfitability(r -> Rating.findByInterestRate(r)
+        return getProfitability(r -> Rating.forInterestRate(r)
             .getMinimalRevenueRate(getInvested()));
     }
 
@@ -105,7 +105,7 @@ public interface PortfolioOverview {
      * @return never null
      */
     default Ratio getOptimalAnnualProfitability() {
-        return getProfitability(r -> Rating.findByInterestRate(r)
+        return getProfitability(r -> Rating.forInterestRate(r)
             .getMaximalRevenueRate(getInvested()));
     }
 

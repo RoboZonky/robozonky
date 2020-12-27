@@ -79,7 +79,7 @@ public class InvestmentLoanDataImpl implements InvestmentLoanData {
         this.payments = new InstalmentsImpl(loan.getTermInMonths());
         this.interestRate = loan.getInterestRate();
         this.revenueRate = loan.getRevenueRate()
-            .orElseGet(() -> Rating.findByInterestRate(interestRate)
+            .orElseGet(() -> Rating.forInterestRate(interestRate)
                 .getMaximalRevenueRate());
     }
 

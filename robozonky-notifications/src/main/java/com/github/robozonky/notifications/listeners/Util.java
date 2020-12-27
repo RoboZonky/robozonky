@@ -74,7 +74,7 @@ final class Util {
 
     public static Map<String, Object> getLoanData(final LoanBased loanBased) {
         var loan = loanBased.getLoan();
-        var rating = Rating.findByInterestRate(loan.getInterestRate());
+        var rating = Rating.forInterestRate(loan.getInterestRate());
         return Map.ofEntries(
                 entry("loanId", loan.getId()),
                 entry("loanAmount", loan.getAmount()
