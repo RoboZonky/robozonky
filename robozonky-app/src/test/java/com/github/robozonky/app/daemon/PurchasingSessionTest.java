@@ -78,7 +78,7 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
         verify(z).purchase(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
+        var rating = l.getInterestRate();
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }

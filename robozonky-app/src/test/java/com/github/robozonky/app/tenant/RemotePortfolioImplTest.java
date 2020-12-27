@@ -73,33 +73,37 @@ class RemotePortfolioImplTest extends AbstractZonkyLeveragingTest {
         final RemotePortfolio p = new RemotePortfolioImpl(tenant);
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal())
-                .containsOnly(Map.entry(Rating.C, Money.from(10)), Map.entry(Rating.D, Money.from(5)));
+                .containsOnly(Map.entry(Rating.C.getInterestRate(), Money.from(10)),
+                        Map.entry(Rating.D.getInterestRate(), Money.from(5)));
             softly.assertThat(p.getOverview()
                 .getInvested())
                 .isEqualTo(Money.from(15));
         });
-        p.simulateCharge(1, Rating.D, Money.from(15));
+        p.simulateCharge(1, Rating.D.getInterestRate(), Money.from(15));
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal())
-                .containsOnly(Map.entry(Rating.C, Money.from(10)), Map.entry(Rating.D, Money.from(20)));
+                .containsOnly(Map.entry(Rating.C.getInterestRate(), Money.from(10)),
+                        Map.entry(Rating.D.getInterestRate(), Money.from(20)));
             softly.assertThat(p.getOverview()
                 .getInvested())
                 .isEqualTo(Money.from(30));
         });
-        p.simulateCharge(2, Rating.A, Money.from(1));
+        p.simulateCharge(2, Rating.A.getInterestRate(), Money.from(1));
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal())
-                .containsOnly(Map.entry(Rating.C, Money.from(10)), Map.entry(Rating.D, Money.from(20)),
-                        Map.entry(Rating.A, Money.from(1)));
+                .containsOnly(Map.entry(Rating.C.getInterestRate(), Money.from(10)),
+                        Map.entry(Rating.D.getInterestRate(), Money.from(20)),
+                        Map.entry(Rating.A.getInterestRate(), Money.from(1)));
             softly.assertThat(p.getOverview()
                 .getInvested())
                 .isEqualTo(Money.from(31));
         });
-        p.simulateCharge(3, Rating.A, Money.from(1));
+        p.simulateCharge(3, Rating.A.getInterestRate(), Money.from(1));
         assertSoftly(softly -> {
             softly.assertThat(p.getTotal())
-                .containsOnly(Map.entry(Rating.C, Money.from(10)), Map.entry(Rating.D, Money.from(20)),
-                        Map.entry(Rating.A, Money.from(2)));
+                .containsOnly(Map.entry(Rating.C.getInterestRate(), Money.from(10)),
+                        Map.entry(Rating.D.getInterestRate(), Money.from(20)),
+                        Map.entry(Rating.A.getInterestRate(), Money.from(2)));
             softly.assertThat(p.getOverview()
                 .getInvested())
                 .isEqualTo(Money.from(32));

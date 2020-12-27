@@ -38,7 +38,7 @@ class ExtendedPortfolioOverviewTest {
         }
 
         @Override
-        public Money getInvested(Rating r) {
+        public Money getInvested(Ratio r) {
             return Money.from(10_000);
         }
 
@@ -58,7 +58,7 @@ class ExtendedPortfolioOverviewTest {
         }
 
         @Override
-        public Money getAtRisk(Rating r) {
+        public Money getAtRisk(Ratio r) {
             return Money.from(1_000);
         }
 
@@ -68,7 +68,7 @@ class ExtendedPortfolioOverviewTest {
         }
 
         @Override
-        public Money getSellable(Rating r) {
+        public Money getSellable(Ratio r) {
             return Money.from(5_000);
         }
 
@@ -78,7 +78,7 @@ class ExtendedPortfolioOverviewTest {
         }
 
         @Override
-        public Money getSellableFeeless(Rating r) {
+        public Money getSellableFeeless(Ratio r) {
             return Money.from(3_000);
         }
 
@@ -89,15 +89,15 @@ class ExtendedPortfolioOverviewTest {
         assertSoftly(softly -> {
             softly.assertThat(OVERVIEW.getShareAtRisk())
                 .isEqualTo(Ratio.fromRaw("0.10"));
-            softly.assertThat(OVERVIEW.getAtRiskShareOnInvestment(Rating.A))
+            softly.assertThat(OVERVIEW.getAtRiskShareOnInvestment(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromRaw("0.1"));
             softly.assertThat(OVERVIEW.getShareSellable())
                 .isEqualTo(Ratio.fromRaw("0.5"));
-            softly.assertThat(OVERVIEW.getShareSellable(Rating.A))
+            softly.assertThat(OVERVIEW.getShareSellable(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromRaw("0.5"));
             softly.assertThat(OVERVIEW.getShareSellableFeeless())
                 .isEqualTo(Ratio.fromRaw("0.3"));
-            softly.assertThat(OVERVIEW.getShareSellableFeeless(Rating.A))
+            softly.assertThat(OVERVIEW.getShareSellableFeeless(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.fromRaw("0.3"));
         });
     }
@@ -116,15 +116,15 @@ class ExtendedPortfolioOverviewTest {
         assertSoftly(softly -> {
             softly.assertThat(portfolioOverview.getShareAtRisk())
                 .isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getAtRiskShareOnInvestment(Rating.A))
+            softly.assertThat(portfolioOverview.getAtRiskShareOnInvestment(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
             softly.assertThat(portfolioOverview.getShareSellable())
                 .isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getShareSellable(Rating.A))
+            softly.assertThat(portfolioOverview.getShareSellable(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
             softly.assertThat(portfolioOverview.getShareSellableFeeless())
                 .isEqualTo(Ratio.ZERO);
-            softly.assertThat(portfolioOverview.getShareSellableFeeless(Rating.A))
+            softly.assertThat(portfolioOverview.getShareSellableFeeless(Rating.A.getInterestRate()))
                 .isEqualTo(Ratio.ZERO);
         });
     }

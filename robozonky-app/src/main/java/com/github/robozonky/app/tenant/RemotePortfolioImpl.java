@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toMap;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,7 +30,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.entities.RiskPortfolio;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
@@ -59,7 +59,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
             .build();
     }
 
-    private static void includeAmount(Map<Rating, Money> amounts, Rating rating, Money amount) {
+    private static void includeAmount(Map<Ratio, Money> amounts, Ratio rating, Money amount) {
         amounts.compute(rating, (__, currentAmount) -> currentAmount == null ? amount : currentAmount.add(amount));
     }
 
@@ -72,7 +72,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     @Override
-    public void simulateCharge(final int loanId, final Rating rating, final Money amount) {
+    public void simulateCharge(final int loanId, final Ratio rating, final Money amount) {
         refreshSynthetics(old -> {
             final Map<Integer, Blocked> result = new LinkedHashMap<>(old);
             /*
@@ -99,15 +99,14 @@ class RemotePortfolioImpl implements RemotePortfolio {
     }
 
     @Override
-    public Map<Rating, Money> getTotal() {
+    public Map<Ratio, Money> getTotal() {
         var data = getRemoteData(); // use the same data for the entirety of this method
         LOGGER.debug("Remote data used: {}.", data);
-        final Map<Rating, Money> amounts = data.getStatistics()
+        var amounts = data.getStatistics()
             .getRiskPortfolio()
             .stream()
-            .collect(toMap(p -> Rating.findByInterestRate(p.getInterestRate()), portfolio -> portfolio.getDue()
-                .add(portfolio.getUnpaid()),
-                    Money::add, () -> new EnumMap<>(Rating.class)));
+            .collect(toMap(RiskPortfolio::getInterestRate, portfolio -> portfolio.getDue()
+                .add(portfolio.getUnpaid()), Money::add, HashMap::new));
         LOGGER.debug("Remote portfolio: {}.", amounts);
         data.getBlocked()
             .forEach((id, blocked) -> includeAmount(amounts, blocked._1, blocked._2));
@@ -116,7 +115,7 @@ class RemotePortfolioImpl implements RemotePortfolio {
             .values()
             .stream()
             .filter(blocked -> blocked.isValid(data))
-            .forEach(blocked -> includeAmount(amounts, blocked.getRating(), blocked.getAmount()));
+            .forEach(blocked -> includeAmount(amounts, blocked.getInterestRate(), blocked.getAmount()));
         LOGGER.debug("Grand total incl. synthetics: {}.", amounts);
         return Collections.unmodifiableMap(amounts);
     }

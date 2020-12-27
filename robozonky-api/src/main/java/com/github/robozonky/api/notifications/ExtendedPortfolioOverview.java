@@ -20,7 +20,6 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.divide;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
@@ -56,7 +55,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Amount.
      */
-    Money getAtRisk(final Rating r);
+    Money getAtRisk(final Ratio r);
 
     /**
      * Retrieve the amounts due in a given rating, divided by {@link #getInvested()}.
@@ -64,7 +63,7 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Share of the given rating on overall investments.
      */
-    default Ratio getAtRiskShareOnInvestment(final Rating r) {
+    default Ratio getAtRiskShareOnInvestment(final Ratio r) {
         final Money investedPerRating = this.getInvested(r);
         if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
@@ -98,15 +97,15 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Amount.
      */
-    Money getSellable(final Rating r);
+    Money getSellable(final Ratio r);
 
     /**
-     * Retrieve the sellable in a given rating, divided by {@link #getInvested(Rating)}.
+     * Retrieve the sellable in a given rating, divided by {@link #getInvested(Ratio)}.
      * 
      * @param r Rating in question.
      * @return Share of sellable on overall investments in a given rating.
      */
-    default Ratio getShareSellable(final Rating r) {
+    default Ratio getShareSellable(final Ratio r) {
         final Money investedPerRating = this.getInvested(r);
         if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;
@@ -140,15 +139,15 @@ public interface ExtendedPortfolioOverview extends PortfolioOverview {
      * @param r Rating in question.
      * @return Amount.
      */
-    Money getSellableFeeless(final Rating r);
+    Money getSellableFeeless(final Ratio r);
 
     /**
-     * Retrieve the sellable without fees in a given rating, divided by {@link #getInvested(Rating)}.
+     * Retrieve the sellable without fees in a given rating, divided by {@link #getInvested(Ratio)}.
      * 
      * @param r Rating in question.
      * @return Share of sellable on overall investments in a given rating.
      */
-    default Ratio getShareSellableFeeless(final Rating r) {
+    default Ratio getShareSellableFeeless(final Ratio r) {
         final Money investedPerRating = this.getInvested(r);
         if (investedPerRating.isZero()) { // protected against division by zero
             return Ratio.ZERO;

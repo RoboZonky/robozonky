@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.robozonky.api.Money;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.notifications.DelinquencyBased;
 import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.InvestmentBased;
@@ -144,16 +145,24 @@ final class Util {
         return loanData;
     }
 
-    private static Map<String, Object> moneyPerRating(final Function<Rating, Money> provider) {
-        final Function<Rating, Number> converter = m -> provider.apply(m)
-            .getValue();
-        return Stream.of(Rating.values())
-            .collect(Collectors.toMap(Rating::getCode, converter));
+    private static String asPlainRate(Ratio ratio) {
+        return ratio.asPercentage()
+            .stripTrailingZeros()
+            .toPlainString();
     }
 
-    private static Map<String, Object> numberPerRating(final Function<Rating, Number> provider) {
+    private static Map<String, Object> moneyPerRating(final Function<Ratio, Money> provider) {
+        final Function<Ratio, Number> converter = m -> provider.apply(m)
+            .getValue();
         return Stream.of(Rating.values())
-            .collect(Collectors.toMap(Rating::getCode, provider));
+            .map(Rating::getInterestRate)
+            .collect(Collectors.toMap(Util::asPlainRate, converter));
+    }
+
+    private static Map<String, Object> numberPerRating(final Function<Ratio, Number> provider) {
+        return Stream.of(Rating.values())
+            .map(Rating::getInterestRate)
+            .collect(Collectors.toMap(Util::asPlainRate, provider));
     }
 
     public static Map<String, Object> summarizePortfolioStructure(final PortfolioOverview portfolioOverview) {

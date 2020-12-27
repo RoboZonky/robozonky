@@ -84,8 +84,8 @@ class NaturalLanguageInvestmentStrategyTest extends AbstractMinimalRoboZonkyTest
         when(portfolio.getInvested()).thenReturn(p.getMaximumInvestmentSize()
             .subtract(1));
         final LoanImpl l = mockLoan(1000);
-        final Rating r = Rating.findByInterestRate(l.getInterestRate());
-        when(portfolio.getShareOnInvestment(eq(r))).thenReturn(Ratio.fromPercentage("100"));
+        var rate = l.getInterestRate();
+        when(portfolio.getShareOnInvestment(eq(rate))).thenReturn(Ratio.fromPercentage("100"));
         final Optional<Money> result = s.recommend(new LoanDescriptor(l), () -> portfolio, mockSessionInfo());
         assertThat(result).isEmpty();
     }

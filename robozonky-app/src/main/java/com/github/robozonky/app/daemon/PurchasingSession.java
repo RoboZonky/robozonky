@@ -29,7 +29,6 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -113,8 +112,7 @@ final class PurchasingSession extends
         if (succeeded) {
             result.add(participation);
             tenant.getPortfolio()
-                .simulateCharge(participation.getLoanId(), Rating.findByInterestRate(participation.getInterestRate()),
-                        recommendation.amount());
+                .simulateCharge(participation.getLoanId(), participation.getInterestRate(), recommendation.amount());
             tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
                 .subtract(recommendation.amount()));
             tenant.fire(investmentPurchasedLazy(() -> investmentPurchased(participation,

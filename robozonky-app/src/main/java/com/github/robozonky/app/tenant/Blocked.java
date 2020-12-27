@@ -20,22 +20,22 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.internal.test.DateUtil;
 
 final class Blocked {
 
     private final int id;
     private final Money amount;
-    private final Rating rating;
+    private final Ratio rating;
     private final boolean persistent;
     private final ZonedDateTime storedOn = DateUtil.zonedNow();
 
-    Blocked(final int id, final Money amount, final Rating rating) {
+    Blocked(final int id, final Money amount, final Ratio rating) {
         this(id, amount, rating, false);
     }
 
-    public Blocked(final int id, final Money amount, final Rating rating, final boolean persistent) {
+    public Blocked(final int id, final Money amount, final Ratio rating, final boolean persistent) {
         this.id = id;
         this.amount = Money.from(amount.getValue()
             .abs());
@@ -51,7 +51,7 @@ final class Blocked {
         return amount;
     }
 
-    public Rating getRating() {
+    public Ratio getInterestRate() {
         return rating;
     }
 
@@ -72,7 +72,7 @@ final class Blocked {
         final Blocked blocked = (Blocked) o;
         return id == blocked.id &&
                 Objects.equals(amount, blocked.amount) &&
-                rating == blocked.rating;
+                Objects.equals(rating, blocked.rating);
     }
 
     @Override

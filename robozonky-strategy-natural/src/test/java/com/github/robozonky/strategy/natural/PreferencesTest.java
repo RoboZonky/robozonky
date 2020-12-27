@@ -36,11 +36,11 @@ class PreferencesTest extends AbstractRoboZonkyTest {
             final Number ratingC) {
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
         doReturn(fromPercentage(ratingA)).when(portfolioOverview)
-            .getShareOnInvestment(eq(Rating.A));
+            .getShareOnInvestment(eq(Rating.A.getInterestRate()));
         doReturn(fromPercentage(ratingB)).when(portfolioOverview)
-            .getShareOnInvestment(eq(Rating.B));
+            .getShareOnInvestment(eq(Rating.B.getInterestRate()));
         doReturn(fromPercentage(ratingC)).when(portfolioOverview)
-            .getShareOnInvestment(eq(Rating.C));
+            .getShareOnInvestment(eq(Rating.C.getInterestRate()));
         return portfolioOverview;
     }
 

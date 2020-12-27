@@ -25,7 +25,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
@@ -62,7 +61,7 @@ final class Preferences {
             Audit.LOGGER.debug("Rating {} is not permitted.", rating);
             return false;
         }
-        var currentRatingShare = portfolioOverview.getShareOnInvestment(Rating.findByInterestRate(rating));
+        var currentRatingShare = portfolioOverview.getShareOnInvestment(rating);
         var overinvested = currentRatingShare.compareTo(permittedShare) >= 0;
         if (overinvested) { // we over-invested into this rating; do not include
             Audit.LOGGER.debug("Rating {} over-invested. (Expected {}, got {}.)", rating, permittedShare,

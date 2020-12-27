@@ -19,7 +19,7 @@ package com.github.robozonky.internal.tenant;
 import java.util.Map;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
 public interface RemotePortfolio {
@@ -32,9 +32,9 @@ public interface RemotePortfolio {
      * @param rating Rating of the loan.
      * @param amount Amount of the charge.
      */
-    void simulateCharge(final int loanId, final Rating rating, final Money amount);
+    void simulateCharge(final int loanId, final Ratio rating, final Money amount);
 
-    Map<Rating, Money> getTotal();
+    Map<Ratio, Money> getTotal();
 
     /**
      * Takes {@link #getTotal()} and summarizes it.

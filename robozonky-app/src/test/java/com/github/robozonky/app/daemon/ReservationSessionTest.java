@@ -81,7 +81,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
+        var rating = l.getInterestRate();
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
     }
 
@@ -107,7 +107,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(3);
         verify(z, never()).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
+        var rating = l.getInterestRate();
         verify(rp).simulateCharge(eq(loanId), eq(rating), any());
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(Integer.MAX_VALUE - 200)));
     }
@@ -136,7 +136,7 @@ class ReservationSessionTest extends AbstractZonkyLeveragingTest {
         assertThat(getEventsRequested()).hasSize(2);
         verify(z).accept(eq(p));
         final RemotePortfolio rp = auth.getPortfolio();
-        final Rating rating = Rating.findByInterestRate(l.getInterestRate());
+        var rating = l.getInterestRate();
         verify(rp, never()).simulateCharge(eq(loanId), eq(rating), any());
         verify(auth).setKnownBalanceUpperBound(eq(Money.from(199)));
     }

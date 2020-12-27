@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.reducing;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
-import com.github.robozonky.api.remote.enums.Rating;
+import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.tenant.Tenant;
@@ -45,38 +45,36 @@ final class Util {
         // no instances
     }
 
-    static Map<Rating, Money> getAmountsAtRisk(final Tenant tenant) {
+    static Map<Ratio, Money> getAmountsAtRisk(final Tenant tenant) {
         return tenant.call(Zonky::getDelinquentInvestments)
             .parallel() // possibly many pages' worth of results; fetch in parallel
-            .collect(groupingBy(investment -> Rating.findByInterestRate(investment.getLoan()
-                .getInterestRate()),
-                    () -> new EnumMap<>(Rating.class),
-                    mapping(i -> {
-                        final Money remaining = i.getPrincipal()
-                            .getUnpaid();
-                        // TODO Convince Zonky to add penalties back to the API.
-                        final Money principalNotYetReturned = remaining.subtract(i.getInterest()
-                            .getPaid())
-                            .max(remaining.getZero());
-                        LOGGER.debug("Delinquent: {} in loan #{}, investment #{}.",
-                                principalNotYetReturned, i.getLoan()
-                                    .getId(),
-                                i.getId());
-                        return principalNotYetReturned;
-                    }, ADDING_REDUCTION)));
+            .collect(groupingBy(investment -> investment.getLoan()
+                .getInterestRate(), HashMap::new, mapping(i -> {
+                    final Money remaining = i.getPrincipal()
+                        .getUnpaid();
+                    // TODO Convince Zonky to add penalties back to the API.
+                    final Money principalNotYetReturned = remaining.subtract(i.getInterest()
+                        .getPaid())
+                        .max(remaining.getZero());
+                    LOGGER.debug("Delinquent: {} in loan #{}, investment #{}.",
+                            principalNotYetReturned, i.getLoan()
+                                .getId(),
+                            i.getId());
+                    return principalNotYetReturned;
+                }, ADDING_REDUCTION)));
     }
 
     /**
      * @param tenant
      * @return First is sellable with or without fee, second just without.
      */
-    static Tuple2<Map<Rating, Money>, Map<Rating, Money>> getAmountsSellable(final Tenant tenant) {
+    static Tuple2<Map<Ratio, Money>, Map<Ratio, Money>> getAmountsSellable(final Tenant tenant) {
         var allSellableInvestments = tenant.call(Zonky::getSellableInvestments)
             .parallel() // Possibly many pages of HTTP requests, plus possibly subsequent sellInfo HTTP requests.
             .map(investment -> {
                 // Do everything we can to avoid retrieving the optional remote smpSellInfo.
-                var rating = Rating.findByInterestRate(investment.getLoan()
-                    .getInterestRate());
+                var rating = investment.getLoan()
+                    .getInterestRate();
                 var fee = investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE ? Money.ZERO
                         : investment.getSmpSellInfo()
                             .orElseThrow()
@@ -95,12 +93,10 @@ final class Util {
             .collect(Collectors.toList());
         var sellableWithoutFees = allSellableInvestments.stream()
             .filter(data -> data._3.isZero())
-            .collect(groupingBy(t -> t._1, () -> new EnumMap<>(Rating.class),
-                    mapping(t -> t._2, ADDING_REDUCTION)));
+            .collect(groupingBy(t -> t._1, HashMap::new, mapping(t -> t._2, ADDING_REDUCTION)));
         var sellable = allSellableInvestments.stream()
             .map(t -> Tuple.of(t._1, t._2.subtract(t._3))) // Account for the sale fee.
-            .collect(groupingBy(t -> t._1, () -> new EnumMap<>(Rating.class),
-                    mapping(t -> t._2, ADDING_REDUCTION)));
+            .collect(groupingBy(t -> t._1, HashMap::new, mapping(t -> t._2, ADDING_REDUCTION)));
         return Tuple.of(sellable, sellableWithoutFees);
     }
 }

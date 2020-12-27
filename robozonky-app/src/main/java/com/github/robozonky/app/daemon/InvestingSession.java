@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import javax.ws.rs.BadRequestException;
 
 import com.github.robozonky.api.remote.entities.Loan;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
 import com.github.robozonky.api.strategies.LoanDescriptor;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -77,7 +76,7 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
         var amount = recommendation.amount();
         result.add(l);
         tenant.getPortfolio()
-            .simulateCharge(l.getId(), Rating.findByInterestRate(l.getInterestRate()), amount);
+            .simulateCharge(l.getId(), l.getInterestRate(), amount);
         tenant.setKnownBalanceUpperBound(tenant.getKnownBalanceUpperBound()
             .subtract(amount));
         discard(recommendation.descriptor()); // never show again

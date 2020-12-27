@@ -40,7 +40,6 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void picksSmallestOneIfAllOverThreshold() {
-        final Rating rating = Rating.A;
         final Investment i1 = MockInvestmentBuilder.fresh()
             .set(InvestmentImpl::setLoan, new InvestmentLoanDataImpl(MockLoanBuilder.fresh()))
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.TEN)))
@@ -54,7 +53,7 @@ class SelingThrottleTest extends AbstractZonkyLeveragingTest {
             .set(InvestmentImpl::setPrincipal, new AmountsImpl(Money.from(BigDecimal.ONE)))
             .build();
         final PortfolioOverview portfolioOverview = mockPortfolioOverview();
-        when(portfolioOverview.getInvested(eq(rating))).thenReturn(Money.from(10));
+        when(portfolioOverview.getInvested(eq(Rating.A.getInterestRate()))).thenReturn(Money.from(10));
         final Stream<RecommendedInvestment> recommendations = Stream.of(i1, i2, i3)
             .map(i -> new InvestmentDescriptor(i, () -> null))
             .map(RecommendedInvestment::new);

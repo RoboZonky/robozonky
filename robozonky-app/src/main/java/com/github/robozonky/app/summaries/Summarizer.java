@@ -18,22 +18,17 @@ package com.github.robozonky.app.summaries;
 
 import static com.github.robozonky.app.summaries.Util.getAmountsSellable;
 
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.robozonky.api.Money;
 import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.WeeklySummaryEvent;
-import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.app.events.SessionEvents;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
 import com.github.robozonky.internal.jobs.TenantPayload;
 import com.github.robozonky.internal.tenant.Tenant;
-import com.github.robozonky.internal.util.functional.Tuple2;
 
 final class Summarizer implements TenantPayload {
 
@@ -50,10 +45,9 @@ final class Summarizer implements TenantPayload {
     }
 
     private static ExtendedPortfolioOverview extend(final Tenant tenant) {
-        final Tuple2<Map<Rating, Money>, Map<Rating, Money>> amountsSellable = getAmountsSellable(tenant);
+        var amountsSellable = getAmountsSellable(tenant);
         return ExtendedPortfolioOverviewImpl.extend(tenant.getPortfolio()
-            .getOverview(),
-                Util.getAmountsAtRisk(tenant), amountsSellable._1(), amountsSellable._2());
+            .getOverview(), Util.getAmountsAtRisk(tenant), amountsSellable._1(), amountsSellable._2());
     }
 
     private static void run(final PowerTenant tenant) {
