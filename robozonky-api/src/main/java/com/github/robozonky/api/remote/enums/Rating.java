@@ -99,13 +99,6 @@ public enum Rating implements BaseEnum {
         }
     }
 
-    public static Rating findByCode(final String code) {
-        return Stream.of(Rating.values())
-            .filter(r -> Objects.equals(r.code, code))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Unknown rating: " + code));
-    }
-
     public static Rating findByInterestRate(final Ratio interestRate) {
         return Stream.of(Rating.values())
             .filter(r -> Objects.equals(r.interestRate, interestRate))
