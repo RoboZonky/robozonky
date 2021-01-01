@@ -672,7 +672,7 @@
         </plugin>
         <plugin> <!-- Shade plugin configuration shared by all distribution modules. -->
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.2.3</version>
+          <version>3.2.4</version>
           <executions>
             <execution>
               <id>shade</id>
