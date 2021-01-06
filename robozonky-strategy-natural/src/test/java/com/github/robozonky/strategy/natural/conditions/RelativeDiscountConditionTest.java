@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.github.robozonky.strategy.natural.conditions;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
@@ -30,16 +31,33 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 class RelativeDiscountConditionTest {
 
     @Test
+    void noDiscount() {
+        final Wrapper<?> w = mock(Wrapper.class);
+        when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(100)));
+        final MarketplaceFilterCondition moreThanZeroDiscount = RelativeDiscountCondition
+            .moreThan(Ratio.fromPercentage(0));
+        final MarketplaceFilterCondition lessThanOneDiscount = RelativeDiscountCondition
+            .lessThan(Ratio.fromPercentage(1));
+        assertSoftly(softly -> {
+            softly.assertThat(moreThanZeroDiscount)
+                .rejects(w);
+            softly.assertThat(lessThanOneDiscount)
+                .accepts(w);
+        });
+    }
+
+    @Test
     void lessThan() {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.lessThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(90)));
         assertThat(condition).rejects(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.add(BigDecimal.ONE)));
-        assertThat(condition).rejects(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.subtract(BigDecimal.ONE)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(91)));
         assertThat(condition).accepts(w);
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(89)));
+        assertThat(condition).rejects(w);
     }
 
     @Test
@@ -47,11 +65,11 @@ class RelativeDiscountConditionTest {
         final MarketplaceFilterCondition condition = RelativeDiscountCondition.moreThan(Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(90)));
         assertThat(condition).rejects(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.add(BigDecimal.ONE)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(89)));
         assertThat(condition).accepts(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN.subtract(BigDecimal.ONE)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(91)));
         assertThat(condition).rejects(w);
     }
 
@@ -61,15 +79,15 @@ class RelativeDiscountConditionTest {
                 Ratio.fromPercentage(10));
         final Wrapper<?> w = mock(Wrapper.class);
         when(w.getRemainingPrincipal()).thenReturn(BigDecimal.valueOf(100));
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.TEN));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(90)));
         assertThat(condition).accepts(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(9)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(91)));
         assertThat(condition).accepts(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(8)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(92)));
         assertThat(condition).accepts(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(7)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(93)));
         assertThat(condition).rejects(w);
-        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(11)));
+        when(w.getPrice()).thenReturn(Optional.of(BigDecimal.valueOf(89)));
         assertThat(condition).rejects(w);
     }
 
