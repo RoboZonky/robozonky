@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             .fresh(loan, new LoanHealthStatsImpl(LoanHealth.HEALTHY), invested)
             .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .set(InvestmentImpl::setSmpSellInfo, new SellInfoImpl(Money.from(1), Money.from(1)))
-            .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(1)))
+            .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(10), Money.from(1)))
             .build();
         InvestmentLoanDataImpl ild = (InvestmentLoanDataImpl) investment.getLoan();
         ild.setPayments(new InstalmentsImpl(20, 10));
@@ -136,7 +136,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getSellFee())
                 .contains(new BigDecimal("1.00"));
             softly.assertThat(w.getReturns())
-                .contains(BigDecimal.ZERO);
+                .contains(new BigDecimal("9.00"));
             softly.assertThat(w.getRevenueRate())
                 .isEqualTo(Ratio.fromRaw("0.1499"));
             softly.assertThat(w.getOriginalAnnuity())
@@ -149,6 +149,10 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
                 .hasValue(0);
             softly.assertThat(w.getDaysSinceDpd())
                 .hasValue(0);
+            softly.assertThat(w.getOriginalInterest())
+                .contains(new BigDecimal("10.00"));
+            softly.assertThat(w.getRemainingInterest())
+                .contains(new BigDecimal("1.00"));
             softly.assertThat(w.toString())
                 .isNotNull();
         });

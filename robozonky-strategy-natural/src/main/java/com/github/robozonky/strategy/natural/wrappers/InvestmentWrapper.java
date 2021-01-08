@@ -119,7 +119,6 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
         var principal = investment.getPrincipal()
             .getPaid();
         return Optional.of(interest.add(principal)
-            .add(interest)
             .getValue());
     }
 
