@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,9 +81,9 @@ class StrategyProvider implements ReloadListener<String> {
         final T value = ref.updateAndGet(old -> provider.get()
             .orElse(null));
         if (Objects.isNull(value)) {
-            LOGGER.info("{} strategy inactive or missing, disabling all such operations.", desc);
+            LOGGER.info("{} strategy inactive or missing, functionality disabled.", desc);
         } else {
-            LOGGER.debug("{} strategy correctly loaded.", desc);
+            LOGGER.info("{} strategy correctly loaded.", desc);
         }
         return value;
     }
@@ -96,11 +96,13 @@ class StrategyProvider implements ReloadListener<String> {
             return;
         }
         LOGGER.trace("Loading strategies.");
-        var investStrategy = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Investing");
-        var purchaseStrategy = set(toPurchase, () -> StrategyLoader.toPurchase(newValue), "Purchasing");
-        var sellingStrategy = set(toSell, () -> StrategyLoader.toSell(newValue), "Selling");
-        var reserveStrategy = set(forReservations, () -> StrategyLoader.forReservations(newValue), "Reservations");
-        var allStrategiesMissing = Stream.of(investStrategy, purchaseStrategy, sellingStrategy, reserveStrategy)
+        var investStrategy = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Primary marketplace investment");
+        var purchaseStrategy = set(toPurchase, () -> StrategyLoader.toPurchase(newValue),
+                "Secondary marketplace purchase");
+        var sellingStrategy = set(toSell, () -> StrategyLoader.toSell(newValue), "Portfolio selling");
+        var reservationStrategy = set(forReservations, () -> StrategyLoader.forReservations(newValue),
+                "Loan reservation confirmation");
+        var allStrategiesMissing = Stream.of(investStrategy, purchaseStrategy, sellingStrategy, reservationStrategy)
             .allMatch(Objects::isNull);
         if (allStrategiesMissing) {
             LOGGER.warn("No strategies are available, all operations are disabled. Check log for parser errors.");
