@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,16 @@ abstract class AbstractWrapper<T extends Descriptor<?>> implements Wrapper<T> {
 
     @Override
     public Optional<BigDecimal> getPrice() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<BigDecimal> getOriginalInterest() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<BigDecimal> getRemainingInterest() {
         return Optional.empty();
     }
 

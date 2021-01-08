@@ -245,4 +245,6 @@ sellMarketplaceFilterCondition returns [MarketplaceFilterCondition result]:
     | c21=currentDaysPastDueCondition { $result = $c21.result; }
     | c22=longestDaysPastDueCondition { $result = $c22.result; }
     | c23=daysSinceLastPastDueCondition { $result = $c23.result; }
+    | c24=remainingInterestCondition { $result = $c24.result; }
+    | c25=relativeRemainingInterestCondition { $result = $c25.result; }
 ;

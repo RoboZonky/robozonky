@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,6 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
         var principal = investment.getPrincipal()
             .getPaid();
         return Optional.of(interest.add(principal)
-            .add(interest)
             .getValue());
     }
 
@@ -134,6 +133,20 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
             .orElse(Money.ZERO)
             .getValue();
         return Optional.of(fee);
+    }
+
+    @Override
+    public Optional<BigDecimal> getOriginalInterest() {
+        return Optional.of(investment.getInterest()
+            .getTotal()
+            .getValue());
+    }
+
+    @Override
+    public Optional<BigDecimal> getRemainingInterest() {
+        return Optional.of(investment.getInterest()
+            .getUnpaid()
+            .getValue());
     }
 
     @Override
