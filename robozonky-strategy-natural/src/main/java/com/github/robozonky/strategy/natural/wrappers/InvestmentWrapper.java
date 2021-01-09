@@ -119,6 +119,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
         var principal = investment.getPrincipal()
             .getPaid();
         return Optional.of(interest.add(principal)
+            .subtract(getSellFee().orElse(BigDecimal.ZERO))
             .getValue());
     }
 
@@ -133,20 +134,6 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
             .orElse(Money.ZERO)
             .getValue();
         return Optional.of(fee);
-    }
-
-    @Override
-    public Optional<BigDecimal> getOriginalInterest() {
-        return Optional.of(investment.getInterest()
-            .getTotal()
-            .getValue());
-    }
-
-    @Override
-    public Optional<BigDecimal> getRemainingInterest() {
-        return Optional.of(investment.getInterest()
-            .getUnpaid()
-            .getValue());
     }
 
     @Override

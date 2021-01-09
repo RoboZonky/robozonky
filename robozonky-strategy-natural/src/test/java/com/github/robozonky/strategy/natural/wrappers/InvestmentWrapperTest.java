@@ -136,7 +136,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
             softly.assertThat(w.getSellFee())
                 .contains(new BigDecimal("1.00"));
             softly.assertThat(w.getReturns())
-                .contains(new BigDecimal("9.00"));
+                .contains(new BigDecimal("8.00"));
             softly.assertThat(w.getRevenueRate())
                 .isEqualTo(Ratio.fromRaw("0.1499"));
             softly.assertThat(w.getOriginalAnnuity())
@@ -149,10 +149,6 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
                 .hasValue(0);
             softly.assertThat(w.getDaysSinceDpd())
                 .hasValue(0);
-            softly.assertThat(w.getOriginalInterest())
-                .contains(new BigDecimal("10.00"));
-            softly.assertThat(w.getRemainingInterest())
-                .contains(new BigDecimal("1.00"));
             softly.assertThat(w.toString())
                 .isNotNull();
         });
