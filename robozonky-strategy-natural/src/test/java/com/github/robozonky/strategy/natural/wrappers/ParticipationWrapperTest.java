@@ -162,10 +162,6 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
                 .hasValue(0);
             softly.assertThat(w.getDaysSinceDpd())
                 .hasValue(0);
-            softly.assertThat(w.getOriginalInterest())
-                .isEmpty();
-            softly.assertThat(w.getRemainingInterest())
-                .isEmpty();
         });
     }
 

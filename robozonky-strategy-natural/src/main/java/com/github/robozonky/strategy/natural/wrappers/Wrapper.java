@@ -98,10 +98,6 @@ public interface Wrapper<T> {
 
     Optional<BigDecimal> getSellFee();
 
-    Optional<BigDecimal> getOriginalInterest();
-
-    Optional<BigDecimal> getRemainingInterest();
-
     T getOriginal();
 
 }

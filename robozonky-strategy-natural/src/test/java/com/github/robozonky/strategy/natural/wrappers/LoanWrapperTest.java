@@ -106,10 +106,6 @@ class LoanWrapperTest extends AbstractRoboZonkyTest {
                 .isEmpty();
             softly.assertThat(w.getDaysSinceDpd())
                 .isEmpty();
-            softly.assertThat(w.getOriginalInterest())
-                .isEmpty();
-            softly.assertThat(w.getRemainingInterest())
-                .isEmpty();
             softly.assertThat(w.toString())
                 .isNotNull();
         });

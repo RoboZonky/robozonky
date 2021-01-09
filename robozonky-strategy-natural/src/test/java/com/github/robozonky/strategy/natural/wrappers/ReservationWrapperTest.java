@@ -83,10 +83,6 @@ class ReservationWrapperTest {
                 .isEmpty();
             softly.assertThat(w.isInsuranceActive())
                 .isTrue();
-            softly.assertThat(w.getOriginalInterest())
-                .isEmpty();
-            softly.assertThat(w.getRemainingInterest())
-                .isEmpty();
             softly.assertThat(w.toString())
                 .isNotNull();
         });
