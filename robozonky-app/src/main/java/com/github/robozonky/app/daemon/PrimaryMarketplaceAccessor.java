@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
          * The code is designed to invest, rebuild the portfolio structure, and then invest again.
          */
         var loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
+            .peek(l -> ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerLoan(nanotime, l.getId())))
             .filter(l -> l.getMyInvestment()
                 .isEmpty()); // re-investing would fail
         if (getMaximumItemsToRead().isPresent()) {
@@ -84,6 +85,7 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     public boolean hasUpdates() {
         try {
             final LastPublishedItem current = tenant.call(Zonky::getLastPublishedLoanInfo);
+            ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerLoan(nanotime, current.getId()));
             final LastPublishedItem previous = stateAccessor.apply(current);
             LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);

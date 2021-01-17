@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,12 +97,16 @@ class StrategyExecutor<T, S, R> implements Supplier<Stream<R>> {
             return Stream.empty();
         }
         var marketplaceCheckTimestamp = DateUtil.zonedNow();
-        var marketplace = marketplaceAccessor.getMarketplace();
-        var result = operationDescriptor.getOperation()
-            .apply(tenant, marketplace, strategy);
-        lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
-        logger.trace("Marketplace processing complete.");
-        return result;
+        try {
+            var marketplace = marketplaceAccessor.getMarketplace();
+            var result = operationDescriptor.getOperation()
+                .apply(tenant, marketplace, strategy);
+            lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
+            logger.trace("Marketplace processing complete.");
+            return result;
+        } finally {
+            ResponseTimeTracker.executeAsync((r, nanotime) -> r.clear());
+        }
     }
 
     @Override

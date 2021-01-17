@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,8 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     @Override
     protected boolean accept(final RecommendedLoan recommendation) {
+        ResponseTimeTracker.executeAsync((r, nanotime) -> r.dispatch(nanotime, recommendation.descriptor()
+            .item()));
         if (!isBalanceAcceptable(recommendation)) {
             logger.debug("Will not invest in {} due to balance ({}) likely too low.", recommendation,
                     tenant.getKnownBalanceUpperBound());
