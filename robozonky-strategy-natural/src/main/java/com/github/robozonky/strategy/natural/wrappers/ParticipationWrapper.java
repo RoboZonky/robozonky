@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,14 @@ import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescriptor> {
+final class ParticipationWrapper extends AbstractWrapper<ParticipationDescriptor> {
 
     private final Participation participation;
-    private final Supplier<Optional<ParticipationDetail>> detail;
+    private final Supplier<ParticipationDetail> detail;
 
     public ParticipationWrapper(final ParticipationDescriptor descriptor, final PortfolioOverview portfolioOverview) {
         super(descriptor, portfolioOverview);
@@ -44,6 +45,18 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
     @Override
     public long getId() {
         return participation.getId();
+    }
+
+    @Override
+    public Region getRegion() {
+        return detail.get()
+            .getRegion();
+    }
+
+    @Override
+    public String getStory() {
+        return detail.get()
+            .getStory();
     }
 
     @Override
@@ -83,41 +96,42 @@ final class ParticipationWrapper extends AbstractLoanWrapper<ParticipationDescri
 
     @Override
     public int getOriginalAmount() {
-        return getLoan().getAmount()
+        return detail.get()
+            .getAmount()
             .getValue()
             .intValue();
     }
 
     @Override
     public int getOriginalAnnuity() {
-        return getLoan().getAnnuity()
+        return detail.get()
+            .getAnnuity()
             .getValue()
             .intValue();
     }
 
     @Override
     public OptionalInt getCurrentDpd() {
-        return OptionalInt.of(detail.get()
-            .map(d -> d.getLoanHealthStats()
-                .getCurrentDaysDue())
-            .orElse(0));
+        int currentDpd = detail.get()
+            .getLoanHealthStats()
+            .getCurrentDaysDue();
+        return OptionalInt.of(currentDpd);
     }
 
     @Override
     public OptionalInt getLongestDpd() {
         int maxDpd = detail.get()
-            .map(d -> d.getLoanHealthStats()
-                .getLongestDaysDue())
-            .orElseGet(() -> getCurrentDpd().orElse(0));
+            .getLoanHealthStats()
+            .getLongestDaysDue();
         return OptionalInt.of(maxDpd);
     }
 
     @Override
     public OptionalInt getDaysSinceDpd() {
-        return OptionalInt.of(detail.get()
-            .map(d -> d.getLoanHealthStats()
-                .getDaysSinceLastInDue())
-            .orElse(0));
+        int daysSinceDpd = detail.get()
+            .getLoanHealthStats()
+            .getDaysSinceLastInDue();
+        return OptionalInt.of(daysSinceDpd);
     }
 
     @Override
