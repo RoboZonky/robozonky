@@ -11,6 +11,12 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.util.Optional<com.github.robozonky.api.remote.entities.ParticipationDetail> com.github.robozonky.api.strategies.ParticipationDescriptor::detail()",
+        "new": "method com.github.robozonky.api.remote.entities.ParticipationDetail com.github.robozonky.api.strategies.ParticipationDescriptor::detail()",
+        "justification": "Needn't be Optional."
+      }
     ]
   }
 }

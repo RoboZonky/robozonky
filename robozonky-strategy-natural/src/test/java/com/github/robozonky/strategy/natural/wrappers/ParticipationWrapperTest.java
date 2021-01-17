@@ -29,6 +29,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.api.remote.entities.ParticipationDetail;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
@@ -36,6 +37,7 @@ import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.strategies.ParticipationDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
@@ -60,11 +62,41 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
 
     private static Participation mockParticipation(final Loan loan) {
         final Participation p = mock(ParticipationImpl.class);
-        when(p.getInterestRate()).thenReturn(Ratio.ONE);
+        when(p.getId()).thenReturn((long) (Math.random() * 1000));
+        doReturn(loan.getInterestRate()).when(p)
+            .getInterestRate();
         doReturn(Money.ZERO).when(p)
             .getRemainingPrincipal();
         doReturn(Money.ZERO).when(p)
             .getPrice();
+        doReturn(loan.getPurpose()).when(p)
+            .getPurpose();
+        doReturn(loan.getInterestRate()).when(p)
+            .getInterestRate();
+        doReturn(loan.getMainIncomeType()).when(p)
+            .getIncomeType();
+        doReturn(loan.isInsuranceActive()).when(p)
+            .isInsuranceActive();
+        doReturn(20).when(p)
+            .getOriginalInstalmentCount();
+        return p;
+    }
+
+    private static ParticipationDetail mockParticipationDetail(final Loan loan) {
+        final ParticipationDetail p = mock(ParticipationDetail.class);
+        when(p.getId()).thenReturn((long) (Math.random() * 1000));
+        doReturn(loan.getInterestRate()).when(p)
+            .getInterestRate();
+        doReturn(loan.getAmount()).when(p)
+            .getAmount();
+        doReturn(loan.getAnnuity()).when(p)
+            .getAnnuity();
+        doReturn(loan.getRegion()).when(p)
+            .getRegion();
+        doReturn(loan.getStory()).when(p)
+            .getStory();
+        doReturn(new LoanHealthStatsImpl(LoanHealth.HEALTHY)).when(p)
+            .getLoanHealthStats();
         doReturn(loan.getPurpose()).when(p)
             .getPurpose();
         doReturn(loan.getInterestRate()).when(p)
@@ -91,24 +123,10 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
             .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
             .build();
         final int invested = 200;
-        final Participation participation = mock(ParticipationImpl.class);
-        when(participation.getId()).thenReturn((long) (Math.random() * 1000));
-        when(participation.getInterestRate()).thenReturn(Ratio.ONE);
-        doReturn(Money.ZERO).when(participation)
-            .getRemainingPrincipal();
-        doReturn(Money.ZERO).when(participation)
-            .getPrice();
-        doReturn(20).when(participation)
-            .getOriginalInstalmentCount();
-        doReturn(loan.getPurpose()).when(participation)
-            .getPurpose();
-        doReturn(loan.getInterestRate()).when(participation)
-            .getInterestRate();
-        doReturn(loan.getMainIncomeType()).when(participation)
-            .getIncomeType();
-        doReturn(true).when(participation)
-            .isInsuranceActive();
-        final ParticipationDescriptor pd = new ParticipationDescriptor(participation, () -> loan);
+        final Participation participation = mockParticipation(loan);
+        final ParticipationDetail participationDetail = mockParticipationDetail(loan);
+        final ParticipationDescriptor pd = new ParticipationDescriptor(participation, () -> loan,
+                () -> participationDetail);
         final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(pd, FOLIO);
         assertSoftly(softly -> {
             softly.assertThat(w.getId())
@@ -180,51 +198,6 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
         when(FOLIO.getInvested()).thenReturn(Money.ZERO);
         assertThat(w.getRevenueRate()).isEqualTo(Ratio.fromPercentage("11.49"));
         assertThat(w.isInsuranceActive()).isFalse();
-    }
-
-    @Test
-    void values() {
-        final ParticipationDescriptor original = new ParticipationDescriptor(PARTICIPATION, () -> LOAN);
-        final Wrapper<ParticipationDescriptor> w = Wrapper.wrap(original, FOLIO);
-        assertSoftly(softly -> {
-            softly.assertThat(w.isInsuranceActive())
-                .isEqualTo(PARTICIPATION.isInsuranceActive());
-            softly.assertThat(w.getInterestRate())
-                .isEqualTo(PARTICIPATION.getInterestRate());
-            softly.assertThat(w.getRegion())
-                .isEqualTo(LOAN.getRegion());
-            softly.assertThat(w.getMainIncomeType())
-                .isEqualTo(LOAN.getMainIncomeType());
-            softly.assertThat(w.getPurpose())
-                .isEqualTo(LOAN.getPurpose());
-            softly.assertThat(w.getOriginalAmount())
-                .isEqualTo(LOAN.getAmount()
-                    .getValue()
-                    .intValue());
-            softly.assertThat(w.getRemainingPrincipal())
-                .isEqualTo(PARTICIPATION.getRemainingPrincipal()
-                    .getValue());
-            softly.assertThat(w.getOriginal())
-                .isSameAs(original);
-            softly.assertThat(w.getStory())
-                .isEqualTo(LOAN.getStory());
-            softly.assertThat(w.getOriginalTermInMonths())
-                .isEqualTo(PARTICIPATION.getOriginalInstalmentCount());
-            softly.assertThat(w.getRemainingTermInMonths())
-                .isEqualTo(PARTICIPATION.getRemainingInstalmentCount());
-            softly.assertThat(w.getHealth())
-                .contains(LoanHealth.HEALTHY);
-            softly.assertThat(w.getOriginalPurchasePrice())
-                .isEmpty();
-            softly.assertThat(w.getPrice())
-                .contains(BigDecimal.ZERO);
-            softly.assertThat(w.getSellFee())
-                .isEmpty();
-            softly.assertThat(w.getReturns())
-                .isEmpty();
-            softly.assertThat(w.toString())
-                .isNotNull();
-        });
     }
 
     @Test

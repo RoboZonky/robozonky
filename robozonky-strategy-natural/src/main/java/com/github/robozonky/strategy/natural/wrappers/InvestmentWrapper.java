@@ -27,11 +27,12 @@ import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.MainIncomeType;
 import com.github.robozonky.api.remote.enums.Purpose;
+import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 
-final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> {
+final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     private final Investment investment;
 
@@ -59,8 +60,27 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
     }
 
     @Override
+    public Region getRegion() {
+        return investment.getLoan()
+            .getBorrower()
+            .getRegion();
+    }
+
+    @Override
+    public String getStory() {
+        return investment.getLoan()
+            .getStory()
+            .orElseGet(() -> getOriginal().related()
+                .getStory());
+    }
+
+    @Override
     public MainIncomeType getMainIncomeType() {
-        return getLoan().getMainIncomeType();
+        return investment.getLoan()
+            .getBorrower()
+            .getPrimaryIncomeType()
+            .orElseGet(() -> getOriginal().related()
+                .getMainIncomeType());
     }
 
     @Override
@@ -71,7 +91,8 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public Purpose getPurpose() {
-        return getLoan().getPurpose();
+        return investment.getLoan()
+            .getPurpose();
     }
 
     @Override
@@ -90,7 +111,7 @@ final class InvestmentWrapper extends AbstractLoanWrapper<InvestmentDescriptor> 
 
     @Override
     public int getOriginalAmount() {
-        return getLoan()
+        return getOriginal().related()
             .getAmount()
             .getValue()
             .intValue();
