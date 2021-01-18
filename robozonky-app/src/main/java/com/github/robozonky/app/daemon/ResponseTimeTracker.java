@@ -17,12 +17,13 @@
 package com.github.robozonky.app.daemon;
 
 import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static java.util.stream.Collectors.joining;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -45,29 +46,29 @@ final class ResponseTimeTracker {
 
     private static final Logger LOGGER = LogManager.getLogger(ResponseTimeTracker.class);
     private static final ResponseTimeTracker INSTANCE = new ResponseTimeTracker();
+    static final Path LOAN_OUTPUT_PATH = Path.of("robozonky-debug-loans.txt");
+    static final Path PARTICIPATION_OUTPUT_PATH = Path.of("robozonky-debug-participations.txt");
 
     private final Map<Long, Long> loanRegistrations = new ConcurrentHashMap<>(0);
     private final Map<Long, Long> participationRegistrations = new ConcurrentHashMap<>(0);
-    private final File loanOutputFile = new File("debug-loans.txt");
-    private final File participationOutputFile = new File("debug-participations.txt");
-    private final Map<File, List<String>> toWrite = new ConcurrentHashMap<>(2);
+    private final Map<Path, List<String>> toWrite = new ConcurrentHashMap<>(2);
 
     private ResponseTimeTracker() {
         // No external instances.
     }
 
-    private static void write(File file, String contents) {
-        try (var writer = Files.newBufferedWriter(file.toPath(), WRITE, APPEND)) {
+    private static void write(final Path output, final String contents) {
+        try (var writer = Files.newBufferedWriter(output, CREATE, WRITE, APPEND)) {
             writer.write(contents);
             writer.newLine();
         } catch (IOException ex) {
-            LOGGER.trace("Failed writing '{}' to {}.", contents, file);
+            LOGGER.trace("Failed writing '{}' to {}.", contents, output);
         }
     }
 
-    public static void executeAsync(BiConsumer<ResponseTimeTracker, Long> operation) {
+    public static CompletableFuture<Void> executeAsync(final BiConsumer<ResponseTimeTracker, Long> operation) {
         var nanotime = System.nanoTime(); // Store current nanotime, as we can't control when the operation will run.
-        CompletableFuture.runAsync(() -> operation.accept(INSTANCE, nanotime));
+        return CompletableFuture.runAsync(() -> operation.accept(INSTANCE, nanotime));
     }
 
     /**
@@ -76,7 +77,7 @@ final class ResponseTimeTracker {
      * @param nanotime
      * @param id
      */
-    public void registerLoan(long nanotime, long id) {
+    public void registerLoan(final long nanotime, final long id) {
         loanRegistrations.putIfAbsent(id, nanotime);
     }
 
@@ -86,7 +87,7 @@ final class ResponseTimeTracker {
      * @param nanotime
      * @param id
      */
-    public void registerParticipation(long nanotime, long id) {
+    public void registerParticipation(final long nanotime, final long id) {
         participationRegistrations.putIfAbsent(id, nanotime);
     }
 
@@ -96,8 +97,8 @@ final class ResponseTimeTracker {
      * @param nanotime
      * @param loan
      */
-    public void dispatch(long nanotime, Loan loan) {
-        dispatch(nanotime, (long) loan.getId(), loanRegistrations, loanOutputFile);
+    public void dispatch(final long nanotime, final Loan loan) {
+        dispatch(nanotime, (long) loan.getId(), loanRegistrations, LOAN_OUTPUT_PATH);
     }
 
     /**
@@ -106,11 +107,12 @@ final class ResponseTimeTracker {
      * @param nanotime
      * @param participation
      */
-    public void dispatch(long nanotime, Participation participation) {
-        dispatch(nanotime, participation.getId(), participationRegistrations, participationOutputFile);
+    public void dispatch(final long nanotime, final Participation participation) {
+        dispatch(nanotime, participation.getId(), participationRegistrations, PARTICIPATION_OUTPUT_PATH);
     }
 
-    private <Id extends Number> void dispatch(long nanotime, Id id, Map<Id, Long> registrations, File output) {
+    private <Id extends Number> void dispatch(final long nanotime, final Id id, final Map<Id, Long> registrations,
+            final Path output) {
         var registeredOn = registrations.remove(id);
         if (registeredOn == null) {
             LOGGER.trace("No registration found for #{}.", id);
@@ -125,16 +127,16 @@ final class ResponseTimeTracker {
         });
     }
 
-    private void clear(File file, Map<Long, Long> registrations) {
+    private void clear(final Path output, final Map<Long, Long> registrations) {
         try {
-            var contents = toWrite.remove(file);
+            var contents = toWrite.remove(output);
             if (contents == null) {
                 return;
             }
-            write(file, contents.stream()
+            write(output, contents.stream()
                 .collect(joining(System.lineSeparator())));
         } catch (Exception ex) {
-            LOGGER.trace("Failed writing into {}.", file, ex);
+            LOGGER.trace("Failed writing into {}.", output, ex);
         } finally {
             registrations.clear();
         }
@@ -144,11 +146,11 @@ final class ResponseTimeTracker {
      * To be called at the end of operations to write the results and clear any undispatched items.
      */
     public void clear() {
-        synchronized (loanOutputFile) {
-            clear(loanOutputFile, loanRegistrations);
+        synchronized (LOAN_OUTPUT_PATH) {
+            clear(LOAN_OUTPUT_PATH, loanRegistrations);
         }
-        synchronized (participationOutputFile) {
-            clear(participationOutputFile, participationRegistrations);
+        synchronized (PARTICIPATION_OUTPUT_PATH) {
+            clear(PARTICIPATION_OUTPUT_PATH, participationRegistrations);
         }
     }
 
