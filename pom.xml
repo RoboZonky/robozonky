@@ -135,12 +135,6 @@
         <groupId>org.jboss.resteasy</groupId>
         <artifactId>resteasy-client</artifactId>
         <version>${version.org.jboss.resteasy}</version>
-        <exclusions>
-          <exclusion> <!-- We use an async client. -->
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
@@ -173,11 +167,6 @@
         <groupId>org.eclipse</groupId>
         <artifactId>yasson</artifactId>
         <version>1.0.8</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpasyncclient</artifactId>
-        <version>4.1.4</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -607,8 +596,6 @@
                 <ignoredUnusedDeclaredDependency>com.github.robozonky</ignoredUnusedDeclaredDependency>
                 <!-- Service-loaded stuff such as the JSON-B provider. -->
                 <ignoredUnusedDeclaredDependency>org.jboss.resteasy</ignoredUnusedDeclaredDependency>
-                <!-- httpasyncclient replaces the regular client in runtime. -->
-                <ignoredUnusedDeclaredDependency>org.apache.httpcomponents</ignoredUnusedDeclaredDependency>
                 <!-- log4j-core is a base dependency of Log4J. -->
                 <ignoredUnusedDeclaredDependency>org.apache.logging.log4j</ignoredUnusedDeclaredDependency>
                 <!-- For async logging, configured at runtime. -->

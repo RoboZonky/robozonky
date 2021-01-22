@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.ws.rs.client.ClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
 import com.github.robozonky.internal.Settings;
 
@@ -37,15 +36,14 @@ final class ProxyFactory {
 
     public static ResteasyClient newResteasyClient() {
         LOGGER.debug("Creating RESTEasy client.");
-        final Settings settings = Settings.INSTANCE;
-        final long socketTimeout = settings.getSocketTimeout()
+        var settings = Settings.INSTANCE;
+        var socketTimeout = settings.getSocketTimeout()
             .toMillis();
         LOGGER.debug("Set socket timeout to {} ms.", socketTimeout);
-        final long connectionTimeout = settings.getConnectionTimeout()
+        var connectionTimeout = settings.getConnectionTimeout()
             .toMillis();
         LOGGER.debug("Set connection timeout to {} ms.", connectionTimeout);
-        final ResteasyClientBuilder builder = ((ResteasyClientBuilder) ClientBuilder.newBuilder())
-            .useAsyncHttpEngine()
+        var builder = ClientBuilder.newBuilder()
             .readTimeout(socketTimeout, TimeUnit.MILLISECONDS)
             .connectTimeout(connectionTimeout, TimeUnit.MILLISECONDS);
         /*
@@ -54,12 +52,12 @@ final class ProxyFactory {
          */
         settings.getHttpsProxyHostname()
             .ifPresent(host -> {
-                final int port = settings.getHttpsProxyPort();
+                var port = settings.getHttpsProxyPort();
                 builder.property("org.jboss.resteasy.jaxrs.client.proxy.host", host)
                     .property("org.jboss.resteasy.jaxrs.client.proxy.port", port);
                 LOGGER.debug("Set HTTP proxy to {}:{}.", host, port);
             });
-        return builder.build();
+        return (ResteasyClient) builder.build();
     }
 
     public static <T> T newProxy(final ResteasyClient client, final RoboZonkyFilter filter, final Class<T> api,
