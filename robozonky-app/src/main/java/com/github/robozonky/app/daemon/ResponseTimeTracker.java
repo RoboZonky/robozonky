@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
+import com.github.robozonky.internal.Settings;
 
 /**
  * Used to debug how long it takes for a loan to be invested into, or a participation to be purchased.
@@ -67,6 +68,9 @@ final class ResponseTimeTracker {
     }
 
     public static CompletableFuture<Void> executeAsync(final BiConsumer<ResponseTimeTracker, Long> operation) {
+        if (!Settings.INSTANCE.isDebugDaemonTimingEnabled()) {
+            return CompletableFuture.completedFuture(null);
+        }
         var nanotime = System.nanoTime(); // Store current nanotime, as we can't control when the operation will run.
         return CompletableFuture.runAsync(() -> operation.accept(INSTANCE, nanotime));
     }
@@ -146,6 +150,9 @@ final class ResponseTimeTracker {
      * To be called at the end of operations to write the results and clear any undispatched items.
      */
     public void clear() {
+        if (!Settings.INSTANCE.isDebugDaemonTimingEnabled()) {
+            return;
+        }
         synchronized (LOAN_OUTPUT_PATH) {
             clear(LOAN_OUTPUT_PATH, loanRegistrations);
         }

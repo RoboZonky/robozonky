@@ -26,10 +26,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.robozonky.internal.Settings;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
+import com.github.robozonky.test.AbstractRoboZonkyTest;
 import com.github.robozonky.test.mock.MockLoanBuilder;
 
-class ResponseTimeTrackerTest {
+class ResponseTimeTrackerTest extends AbstractRoboZonkyTest {
+
+    @BeforeEach
+    void enableDebug() {
+        System.setProperty(Settings.Key.DEBUG_ENABLE_DAEMON_TIMING.getName(), "true");
+    }
 
     @BeforeEach
     @AfterEach
