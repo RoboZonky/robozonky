@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package com.github.robozonky.app.daemon;
 import static com.github.robozonky.app.events.impl.EventFactory.sellingCompletedLazy;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
@@ -72,10 +71,21 @@ final class Selling implements TenantPayload {
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
-        final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
+        final PortfolioOverview overview = tenant.getPortfolio()
+            .getOverview();
+        tenant.fire(EventFactory.sellingStarted(overview));
         LOGGER.debug("Starting to query for sellable investments.");
-        final Set<InvestmentDescriptor> eligible = tenant.call(Zonky::getSellableInvestments)
+        final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
+        var recommended = tenant.call(Zonky::getSellableInvestments)
             .parallel()
+            .filter(investment -> { // Only sell if the remaining amount is more than 1. Be nice to people.
+                var remainingInterest = investment.getInterest()
+                    .getUnpaid();
+                var remainingPrincipal = investment.getPrincipal()
+                    .getUnpaid();
+                var remaining = remainingInterest.add(remainingPrincipal);
+                return (remaining.compareTo(Money.from(1)) > 0);
+            })
             .filter(investment -> sold.getOffered()
                 .noneMatch(investmentId -> investmentId == investment.getId())) // To enable dry run.
             .filter(i -> !sold.wasOnceSold(i.getId()))
@@ -84,11 +94,7 @@ final class Selling implements TenantPayload {
                     .getId());
                 return new InvestmentDescriptor(i, loanSupplier);
             })
-            .collect(Collectors.toSet());
-        final PortfolioOverview overview = tenant.getPortfolio()
-            .getOverview();
-        tenant.fire(EventFactory.sellingStarted(overview));
-        var recommended = eligible.stream()
+
             .filter(i -> strategy.recommend(i, () -> tenant.getPortfolio()
                 .getOverview(), tenant.getSessionInfo()))
             .map(RecommendedInvestment::new);
