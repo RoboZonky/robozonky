@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ final class Util {
         p.setProperty("email.roboZonkyDaemonResumed.hourlyMaxEmails", "20");
         p.setProperty("email.weeklySummary.enabled", toBoolean(Variables.EMAIL_IS_WEEKLY.getValue(data)));
         p.setProperty("email.roboZonkyUpdateDetected.enabled", "true");
-        p.setProperty("email.roboZonkyUpdateDetected.maxHourlyEmails", "1");
+        p.setProperty("email.roboZonkyUpdateDetected.hourlyMaxEmails", "1");
         return p;
     }
 
