@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ final class ApplicationConfiguration implements PropertyConfiguration {
 
     public Map<String, String> getJvmArguments() {
         if (dryRunEnabled) {
-            return Map.ofEntries(
-                    Map.entry("Xmx128m", ""),
-                    Map.entry("XX:StartFlightRecording", "disk=true,dumponexit=true,maxage=1d,path-to-gc-roots=true"));
+            return Map.ofEntries(Map.entry("Xmx128m", ""));
         } else {
             return Collections.singletonMap("Xmx64m", "");
         }
