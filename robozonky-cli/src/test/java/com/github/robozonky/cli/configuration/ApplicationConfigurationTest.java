@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,7 @@ class ApplicationConfigurationTest {
             .containsEntry("p", SECRET)
             .containsEntry("d", "");
         assertThat(configuration.getJvmArguments())
-            .containsEntry("Xmx128m", "")
-            .containsKey("XX:StartFlightRecording");
+            .containsEntry("Xmx128m", "");
     }
 
     @Test
@@ -49,8 +48,7 @@ class ApplicationConfigurationTest {
             .containsEntry("p", SECRET)
             .doesNotContainKey("d");
         assertThat(configuration.getJvmArguments())
-            .containsEntry("Xmx64m", "")
-            .doesNotContainKey("XX:StartFlightRecording");
+            .containsEntry("Xmx64m", "");
     }
 
 }
