@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2020 The RoboZonky Project
+  ~ Copyright 2021 The RoboZonky Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
       <Filters>
-        <ThresholdFilter level="warn" onMatch="DENY" onMismatch="NEUTRAL"/>
-        <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
+        <ThresholdFilter level="WARN" onMatch="DENY" onMismatch="NEUTRAL"/>
+        <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
       </Filters>
       <PatternLayout pattern="${consoleAppenderPatternLayout}"/>
     </Console>
     <Console name="STDERR" target="SYSTEM_ERR">
       <!-- Only send error and fatal messages. -->
-      <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
+      <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
       <PatternLayout pattern="${consoleAppenderPatternLayout}"/>
     </Console>
     <!-- Log everything to robozonky-installer.log file. -->
@@ -39,15 +39,15 @@
     </File>
   </Appenders>
   <Loggers>
-    <Root level="info">
+    <Root level="INFO">
       <AppenderRef ref="STDOUT"/> <!-- Infos go to the standard output. -->
       <AppenderRef ref="STDERR"/> <!-- Errors and warnings go to the standard error output. -->
       <AppenderRef ref="FILE"/>  <!-- All RoboZonky logging goes into a single file. -->
     </Root>
-    <Logger name="com.github.robozonky" level="trace"/>
+    <Logger name="com.github.robozonky" level="DEBUG"/> <!-- change "debug" to "trace" for more detailed logging -->
     <!-- kill various unavoidable messages -->
-    <Logger name="javax.mail" level="error"/>
-    <Logger name="org.apache.http" level="warn"/>
-    <Logger name="org.jboss.resteasy" level="warn"/>
+    <Logger name="javax.mail" level="ERROR"/>
+    <Logger name="org.apache.http" level="WARN"/>
+    <Logger name="org.jboss.resteasy" level="WARN"/>
   </Loggers>
 </Configuration>
