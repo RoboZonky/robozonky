@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -70,13 +71,13 @@ final class AvailabilityImpl implements Availability {
         return isQuotaLimitHit(throwable.getCause());
     }
 
-    static boolean isSocketTimeout(Throwable throwable) {
+    static boolean canBeIgnored(Throwable throwable) {
         if (throwable == null) {
             return false;
-        } else if (throwable instanceof SocketTimeoutException) {
+        } else if (throwable instanceof SocketTimeoutException || throwable instanceof InternalServerErrorException) {
             return true;
         }
-        return isSocketTimeout(throwable.getCause());
+        return canBeIgnored(throwable.getCause());
     }
 
     @Override
@@ -122,8 +123,11 @@ final class AvailabilityImpl implements Availability {
 
     @Override
     public boolean registerException(final Exception ex) {
-        if (isSocketTimeout(ex)) {
-            LOGGER.debug("Ignoring socket timeout.");
+        if (canBeIgnored(ex)) {
+            // Zonky throws some errors relatively frequently.
+            // The user can do absolutely nothing about them.
+            // So we just ignore them.
+            LOGGER.debug("Ignoring Zonky API exception.", ex);
             return false;
         }
         if (isAvailable()) {
