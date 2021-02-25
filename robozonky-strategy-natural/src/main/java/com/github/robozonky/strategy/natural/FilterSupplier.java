@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ class FilterSupplier {
     private static Collection<MarketplaceFilter> supplyFilters(final Collection<MarketplaceFilter> filters,
             final long monthsBeforeExit) {
         if (monthsBeforeExit > -1) { // ignore marketplace items that go over the exit date
-            final int filteredTerms = (int) Math.min(monthsBeforeExit + 1, 84); // fix extreme exit dates
+            final int filteredTerms = (int) Math.min(monthsBeforeExit + 1, 120); // fix extreme exit dates
             final MarketplaceFilterCondition c = LoanTermCondition.moreThan(filteredTerms);
             final MarketplaceFilter f = MarketplaceFilter.of(c);
             final Collection<MarketplaceFilter> result = new ArrayList<>(filters.size() + 1);
