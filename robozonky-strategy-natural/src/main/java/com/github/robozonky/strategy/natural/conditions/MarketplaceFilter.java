@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
                 return c.test(item);
             } catch (final Exception ex) {
                 // This is here for debugging. The stack trace gives no useful information on its own.
-                throw new IllegalStateException("Failed processing " + item + " with " + c + ".");
+                throw new IllegalStateException("Failed processing " + item + " with " + c + ".", ex);
             }
         }
     }
