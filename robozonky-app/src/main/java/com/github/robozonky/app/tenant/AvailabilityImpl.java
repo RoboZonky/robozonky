@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -69,6 +70,15 @@ final class AvailabilityImpl implements Availability {
         return isQuotaLimitHit(throwable.getCause());
     }
 
+    static boolean isSocketTimeout(Throwable throwable) {
+        if (throwable == null) {
+            return false;
+        } else if (throwable instanceof SocketTimeoutException) {
+            return true;
+        }
+        return isSocketTimeout(throwable.getCause());
+    }
+
     @Override
     public ZonedDateTime nextAvailabilityCheck() {
         if (zonkyApiTokenSupplier.isClosed()) {
@@ -112,6 +122,10 @@ final class AvailabilityImpl implements Availability {
 
     @Override
     public boolean registerException(final Exception ex) {
+        if (isSocketTimeout(ex)) {
+            LOGGER.debug("Ignoring socket timeout.");
+            return false;
+        }
         if (isAvailable()) {
             pause.set(new Status(isQuotaLimitHit(ex)));
             LOGGER.debug("Fault identified, forcing pause.", ex);

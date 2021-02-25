@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javax.ws.rs.ProcessingException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,29 +41,10 @@ class Api<T> {
         this.counter = counter;
     }
 
-    private static boolean isConnectionIssue(final Throwable throwable) {
-        if (throwable == null) {
-            return false;
-        } else if (throwable instanceof IOException) {
-            return true;
-        } else {
-            return isConnectionIssue(throwable.getCause());
-        }
-    }
-
-    private static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter,
-            final int attemptNo) {
+    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {
         LOGGER.trace("Executing...");
         try {
             return function.apply(proxy);
-        } catch (final ProcessingException ex) {
-            if (!isConnectionIssue(ex)) { // nothing to retry
-                throw new ProcessingException("Operation failed and can not be retried.", ex);
-            } else if (attemptNo > 2) { // no longer retry
-                throw new ProcessingException("Operation failed even after " + attemptNo + " retries.", ex);
-            }
-            LOGGER.debug("Caught socket timeout. Retry #{} starting.", attemptNo, ex);
-            return call(function, proxy, counter, attemptNo + 1);
         } finally {
             if (counter != null) {
                 counter.mark();
@@ -76,10 +54,6 @@ class Api<T> {
                 LOGGER.trace("... done. (Not counting towards the API quota.)");
             }
         }
-    }
-
-    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {
-        return call(function, proxy, counter, 1);
     }
 
     <S> S call(final Function<T, S> function) {
