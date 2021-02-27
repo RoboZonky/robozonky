@@ -19,6 +19,7 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
@@ -28,8 +29,9 @@ public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
     }
 
     private static BigDecimal getSellPrice(final Wrapper<?> w) {
-        return w.getSellPrice()
-            .orElse(w.getRemainingPrincipal());
+        return BigDecimalCalculator.minus(w.getRemainingPrincipal(),
+                w.getSellPrice()
+                    .orElse(w.getRemainingPrincipal()));
     }
 
     public static RelativeDiscountCondition lessThan(final Ratio threshold) {

@@ -67,6 +67,20 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
     }
 
     @Override
+    public Optional<LoanHealth> getHealth() {
+        var isPastDue = getCurrentDpd().orElse(0) > 0;
+        if (isPastDue) {
+            return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
+        }
+        var wasPastDue = investment.getLoan()
+            .hasCollectionHistory();
+        if (wasPastDue) {
+            return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
+        }
+        return Optional.of(LoanHealth.HEALTHY);
+    }
+
+    @Override
     public String getStory() {
         return investment.getLoan()
             .getStory()
