@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,7 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<X> lessThan(final Function<Wrapper<?>, X> value,
-            final Domain<X> allowedValues,
-            final X threshold) {
+            final Domain<X> allowedValues, final X threshold) {
         if (!allowedValues.test(threshold)) {
             throw new IllegalArgumentException("Threshold " + threshold + " does not fit " + allowedValues);
         }
@@ -48,8 +47,7 @@ final class RangeCondition<T extends Number & Comparable<T>> implements Predicat
     }
 
     static <X extends Number & Comparable<X>> RangeCondition<X> moreThan(final Function<Wrapper<?>, X> value,
-            final Domain<X> allowedValues,
-            final X threshold) {
+            final Domain<X> allowedValues, final X threshold) {
         if (!allowedValues.test(threshold)) {
             throw new IllegalArgumentException("Threshold " + threshold + " does not fit " + allowedValues);
         }

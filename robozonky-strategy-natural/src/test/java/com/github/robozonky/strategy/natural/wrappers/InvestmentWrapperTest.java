@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.enums.DetailLabel;
 import com.github.robozonky.api.remote.enums.LoanHealth;
@@ -51,7 +50,7 @@ import com.github.robozonky.test.mock.MockLoanBuilder;
 class InvestmentWrapperTest extends AbstractRoboZonkyTest {
 
     private static final Loan LOAN = new MockLoanBuilder()
-        .set(LoanImpl::setInsuranceActive, true)
+        .set(LoanImpl::setInsuranceActive, false)
         .set(LoanImpl::setAmount, Money.from(100_000))
         .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
         .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
@@ -60,6 +59,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
         .set(LoanImpl::setStory, UUID.randomUUID()
             .toString())
         .set(LoanImpl::setTermInMonths, 20)
+        .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
         .build();
     private static final InvestmentImpl INVESTMENT = MockInvestmentBuilder
         .fresh(LOAN, new LoanHealthStatsImpl(LoanHealth.HEALTHY), 2_000)
@@ -69,125 +69,118 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
 
     @Test
     void fromInvestment() {
-        final Loan loan = new MockLoanBuilder()
-            .set(LoanImpl::setInsuranceActive, false)
-            .set(LoanImpl::setAmount, Money.from(100_000))
-            .set(LoanImpl::setInterestRate, Rating.D.getInterestRate())
-            .set(LoanImpl::setMainIncomeType, MainIncomeType.EMPLOYMENT)
-            .set(LoanImpl::setPurpose, Purpose.AUTO_MOTO)
-            .set(LoanImpl::setRegion, Region.JIHOCESKY)
-            .set(LoanImpl::setStory, UUID.randomUUID()
-                .toString())
-            .set(LoanImpl::setTermInMonths, 20)
-            .set(LoanImpl::setAnnuity, Money.from(BigDecimal.ONE))
-            .build();
-        final int invested = 200;
-        final InvestmentImpl investment = MockInvestmentBuilder
-            .fresh(loan, new LoanHealthStatsImpl(LoanHealth.HEALTHY), invested)
-            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
-            .set(InvestmentImpl::setSmpSellInfo, new SellInfoImpl(Money.from(1), Money.from(1)))
+        var invested = new BigDecimal("200.00");
+        var investment = MockInvestmentBuilder
+            .fresh(LOAN, new LoanHealthStatsImpl(LoanHealth.HEALTHY), invested)
+            .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITHOUT_FEE)
             .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(10), Money.from(1)))
             .build();
-        InvestmentLoanDataImpl ild = (InvestmentLoanDataImpl) investment.getLoan();
-        ild.setPayments(new InstalmentsImpl(20, 10));
-        final InvestmentDescriptor id = new InvestmentDescriptor(investment, () -> loan);
-        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(id, FOLIO);
+        var investmentLoanData = (InvestmentLoanDataImpl) investment.getLoan();
+        investmentLoanData.setPayments(new InstalmentsImpl(20, 10));
+        var investmentDescriptor = new InvestmentDescriptor(investment, () -> LOAN);
+        var wrapper = Wrapper.wrap(investmentDescriptor, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.getId())
+            softly.assertThat(wrapper.getId())
                 .isEqualTo(investment.getId());
-            softly.assertThat(w.isInsuranceActive())
+            softly.assertThat(wrapper.isInsuranceActive())
                 .isEqualTo(investment.getLoan()
                     .getDetailLabels()
                     .contains(DetailLabel.CURRENTLY_INSURED));
-            softly.assertThat(w.getInterestRate())
+            softly.assertThat(wrapper.getInterestRate())
                 .isEqualTo(Ratio.fromPercentage(19.99));
-            softly.assertThat(w.getRegion())
-                .isEqualTo(loan.getRegion());
-            softly.assertThat(w.getMainIncomeType())
-                .isEqualTo(loan.getMainIncomeType());
-            softly.assertThat(w.getPurpose())
-                .isEqualTo(loan.getPurpose());
-            softly.assertThat(w.getOriginalAmount())
-                .isEqualTo(loan.getAmount()
+            softly.assertThat(wrapper.getRegion())
+                .isEqualTo(LOAN.getRegion());
+            softly.assertThat(wrapper.getMainIncomeType())
+                .isEqualTo(LOAN.getMainIncomeType());
+            softly.assertThat(wrapper.getPurpose())
+                .isEqualTo(LOAN.getPurpose());
+            softly.assertThat(wrapper.getOriginalAmount())
+                .isEqualTo(LOAN.getAmount()
                     .getValue()
                     .intValue());
-            softly.assertThat(w.getRemainingPrincipal())
+            softly.assertThat(wrapper.getRemainingPrincipal())
                 .isEqualTo(investment.getPrincipal()
                     .getUnpaid()
                     .getValue());
-            softly.assertThat(w.getOriginal())
-                .isSameAs(id);
-            softly.assertThat(w.getStory())
-                .isEqualTo(loan.getStory());
-            softly.assertThat(w.getOriginalTermInMonths())
+            softly.assertThat(wrapper.getOriginal())
+                .isSameAs(investmentDescriptor);
+            softly.assertThat(wrapper.getStory())
+                .isEqualTo(LOAN.getStory());
+            softly.assertThat(wrapper.getOriginalTermInMonths())
                 .isEqualTo(investment.getLoan()
                     .getPayments()
                     .getTotal());
-            softly.assertThat(w.getRemainingTermInMonths())
+            softly.assertThat(wrapper.getRemainingTermInMonths())
                 .isEqualTo(investment.getLoan()
                     .getPayments()
                     .getUnpaid());
-            softly.assertThat(w.getHealth())
+            softly.assertThat(wrapper.getHealth())
                 .contains(LoanHealth.HEALTHY);
-            softly.assertThat(w.getOriginalPurchasePrice())
-                .contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getPrice())
-                .contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getSellFee())
-                .contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getReturns())
-                .contains(new BigDecimal("8.00"));
-            softly.assertThat(w.getRevenueRate())
+            softly.assertThat(wrapper.getOriginalPurchasePrice())
+                .contains(invested);
+            softly.assertThat(wrapper.getSellPrice())
+                .contains(invested);
+            softly.assertThat(wrapper.getSellFee())
+                .contains(BigDecimal.ZERO);
+            softly.assertThat(wrapper.getReturns())
+                .contains(new BigDecimal("9.00"));
+            softly.assertThat(wrapper.getRevenueRate())
                 .isEqualTo(Ratio.fromRaw("0.1499"));
-            softly.assertThat(w.getOriginalAnnuity())
-                .isEqualTo(loan.getAnnuity()
+            softly.assertThat(wrapper.getOriginalAnnuity())
+                .isEqualTo(LOAN.getAnnuity()
                     .getValue()
                     .intValue());
-            softly.assertThat(w.getCurrentDpd())
+            softly.assertThat(wrapper.getCurrentDpd())
                 .hasValue(0);
-            softly.assertThat(w.getLongestDpd())
+            softly.assertThat(wrapper.getLongestDpd())
                 .hasValue(0);
-            softly.assertThat(w.getDaysSinceDpd())
+            softly.assertThat(wrapper.getDaysSinceDpd())
                 .hasValue(0);
-            softly.assertThat(w.toString())
+            softly.assertThat(wrapper.toString())
                 .isNotNull();
         });
     }
 
     @Test
     void sellInfoValues() {
-        final SellFeeImpl feeInfo = new SellFeeImpl(Money.from(2));
-        final SellInfoImpl sellInfo = new SellInfoImpl(Money.from(10));
+        var feeInfo = new SellFeeImpl(Money.from(2));
+        var sellInfo = new SellInfoImpl(Money.from(10));
         sellInfo.setFee(feeInfo);
         sellInfo.setDiscount(Ratio.fromPercentage(10));
-        final Investment investment = MockInvestmentBuilder.fresh(LOAN, BigDecimal.valueOf(200))
+        var investment = MockInvestmentBuilder
+            .fresh(LOAN, new LoanHealthStatsImpl(LoanHealth.CURRENTLY_IN_DUE), BigDecimal.valueOf(200))
             .set(InvestmentImpl::setSellStatus, SellStatus.SELLABLE_WITH_FEE)
             .set(InvestmentImpl::setSmpSellInfo, sellInfo)
+            .set(InvestmentImpl::setInterest, new AmountsImpl(Money.from(10), Money.from(1)))
             .build();
-        final InvestmentDescriptor original = new InvestmentDescriptor(investment, () -> LOAN);
-        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
+        var investmentLoanData = (InvestmentLoanDataImpl) investment.getLoan();
+        investmentLoanData.setDpd(1);
+        var investmentDescriptor = new InvestmentDescriptor(investment, () -> LOAN);
+        var wrapper = Wrapper.wrap(investmentDescriptor, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w.getHealth())
-                .contains(LoanHealth.HEALTHY);
-            softly.assertThat(w.getPrice())
+            softly.assertThat(wrapper.getHealth())
+                .contains(LoanHealth.CURRENTLY_IN_DUE);
+            softly.assertThat(wrapper.getSellPrice())
                 .contains(new BigDecimal("10.00"));
-            softly.assertThat(w.getSellFee())
+            softly.assertThat(wrapper.getSellFee())
                 .contains(new BigDecimal("2.00"));
+            softly.assertThat(wrapper.getReturns())
+                .contains(new BigDecimal("7.00"));
         });
     }
 
     @Test
     void equality() {
-        final InvestmentDescriptor original = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
-        final Wrapper<InvestmentDescriptor> w = Wrapper.wrap(original, FOLIO);
+        var investmentDescriptor = new InvestmentDescriptor(INVESTMENT, () -> LOAN);
+        var wrapper = Wrapper.wrap(investmentDescriptor, FOLIO);
         assertSoftly(softly -> {
-            softly.assertThat(w)
-                .isEqualTo(w);
-            softly.assertThat(w)
-                .isEqualTo(Wrapper.wrap(original, FOLIO));
-            softly.assertThat(w)
+            softly.assertThat(wrapper)
+                .isEqualTo(wrapper);
+            softly.assertThat(wrapper)
+                .isEqualTo(Wrapper.wrap(investmentDescriptor, FOLIO));
+            softly.assertThat(wrapper)
                 .isEqualTo(Wrapper.wrap(new InvestmentDescriptor(INVESTMENT, () -> LOAN), FOLIO));
-            softly.assertThat(w)
+            softly.assertThat(wrapper)
                 .isNotEqualTo(null);
         });
     }

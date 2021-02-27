@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,21 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 public final class SmpFeePresenceCondition extends AbstractBooleanCondition {
 
-    public static final MarketplaceFilterCondition PRESENT = new SmpFeePresenceCondition(true);
-    public static final MarketplaceFilterCondition NOT_PRESENT = new SmpFeePresenceCondition(false);
+    public static final MarketplaceFilterCondition PRESENT = new SmpFeePresenceCondition();
+    public static final MarketplaceFilterCondition NOT_PRESENT = PRESENT.negate();
 
-    private SmpFeePresenceCondition(final boolean expectPresent) {
+    private SmpFeePresenceCondition() {
         super(w -> w.getSellFee()
-            .orElse(BigDecimal.ZERO)
-            .signum() > 0, expectPresent, true);
+            .map(fee -> fee.signum() > 0)
+            .orElse(false), true, true);
     }
 
     @Override
     public Optional<String> getDescription() {
-        return Optional.of("Sale fee present: " + expected + ".");
+        return Optional.of("Sale fee present.");
     }
 }
