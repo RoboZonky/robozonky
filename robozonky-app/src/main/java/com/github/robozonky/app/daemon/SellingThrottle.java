@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package com.github.robozonky.app.daemon;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,66 +48,63 @@ final class SellingThrottle
     private static final Logger LOGGER = Audit.selling();
     private static final Ratio MAX_SELLOFF_SHARE_PER_RATING = Ratio.fromPercentage(0.5);
 
-    private static Stream<RecommendedInvestment> determineSelloffByRating(final Set<RecommendedInvestment> eligible,
+    private static Stream<RecommendedInvestment> determineSelloffByRating(final List<RecommendedInvestment> eligible,
             final Money maxSelloffSize) {
-        if (eligible.isEmpty()) {
-            LOGGER.debug("No investments eligible.");
-            return Stream.empty();
-        }
-        Money czkIncluded = maxSelloffSize.getZero();
-        final List<RecommendedInvestment> byAmountIncreasing = eligible.stream()
-            .sorted(Comparator.comparing(d -> d.descriptor()
-                .item()
-                .getPrincipal()
-                .getUnpaid()))
-            .collect(Collectors.toList());
-        LOGGER.trace("Eligible investments: {}.", byAmountIncreasing);
-        final Set<RecommendedInvestment> included = new HashSet<>();
-        // find all the investments that can be sold without reaching over the limit, start with the smallest first
-        for (final RecommendedInvestment evaluating : byAmountIncreasing) {
-            final Money value = evaluating.descriptor()
+        var czkIncluded = maxSelloffSize.getZero();
+        eligible.sort(Comparator.comparing(d -> d.descriptor()
+            .item()
+            .getPrincipal()
+            .getUnpaid()));
+        LOGGER.trace("Eligible investments: {}.", eligible);
+        // Find all the investments that can be sold without reaching over the limit, start with the smallest first.
+        var firstUnacceptableInvestmentIndex = -1;
+        for (var i = 0; i < eligible.size(); i++) {
+            var investment = eligible.get(i);
+            var value = investment.descriptor()
                 .item()
                 .getPrincipal()
                 .getUnpaid();
-            final Money ifIncluded = czkIncluded.add(value);
+            var ifIncluded = czkIncluded.add(value);
             if (ifIncluded.compareTo(maxSelloffSize) > 0) {
-                continue;
+                firstUnacceptableInvestmentIndex = i;
+                break;
             }
             czkIncluded = czkIncluded.add(value);
-            included.add(evaluating);
         }
-        /*
-         * if no investments can be sold without reaching over the limit, then the portfolio is very small; still, the
-         * user expects us to sell something, so pick the smallest thing we could possibly sell.
-         */
-        if (included.isEmpty()) {
-            final RecommendedInvestment descriptor = byAmountIncreasing.get(0);
+        if (firstUnacceptableInvestmentIndex == 0) {
+            /*
+             * If no investments can be sold without reaching over the limit, then the portfolio is very small.
+             * Still, the user expects us to sell something, so pick the smallest thing we could possibly sell.
+             */
+            var descriptor = eligible.get(0);
             LOGGER.debug("Will sell one investment: {}.", descriptor);
             return Stream.of(descriptor);
         } else {
-            LOGGER.debug("Investments with total value of {} to be sold: {}.", czkIncluded, byAmountIncreasing);
-            return included.stream();
+            var toBeSold = eligible.subList(0, firstUnacceptableInvestmentIndex);
+            LOGGER.debug("Investments with total value of {} to be sold: {}.", czkIncluded, toBeSold);
+            return toBeSold.stream();
         }
-    }
-
-    private static Money getMaxSelloffValue(final PortfolioOverview portfolioOverview) {
-        final Money invested = portfolioOverview.getInvested();
-        return MAX_SELLOFF_SHARE_PER_RATING.apply(invested);
     }
 
     @Override
     public Stream<RecommendedInvestment> apply(final Stream<RecommendedInvestment> investmentDescriptors,
             final PortfolioOverview portfolioOverview) {
+        LOGGER.debug("Starting to query for sellable investments.");
         var eligible = investmentDescriptors
             .collect(Collectors.groupingBy(t -> t.descriptor()
                 .item()
                 .getLoan()
-                .getInterestRate(), Collectors.toSet()));
-        var maxSeloffValue = getMaxSelloffValue(portfolioOverview);
+                .getInterestRate(), Collectors.toList()));
+        if (eligible.isEmpty()) {
+            LOGGER.debug("No investments eligible for sale.");
+            return Stream.empty();
+        }
+        LOGGER.debug("Throttling the selling algorithm.");
+        var maxSeloffValue = MAX_SELLOFF_SHARE_PER_RATING.apply(portfolioOverview.getInvested());
         return eligible.entrySet()
             .stream()
             .flatMap(e -> {
-                LOGGER.debug("Processing investments with interest rate {}.", e.getKey());
+                LOGGER.debug("Processing investments with interest rate {} of up to {}.", e.getKey(), maxSeloffValue);
                 return determineSelloffByRating(e.getValue(), maxSeloffValue);
             });
     }

@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.ws.rs.InternalServerErrorException;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.verification.VerificationMode;
 
@@ -110,34 +108,6 @@ class SellingTest extends AbstractZonkyLeveragingTest {
                 .isInstanceOf(SellingCompletedEvent.class);
         });
         verify(zonky, never()).sell(eq(i));
-    }
-
-    @Test
-    void noSaleDueToHttp500Error() {
-        final Loan loan = MockLoanBuilder.fresh();
-        final Investment i = mockInvestment(loan);
-        final Zonky zonky = harmlessZonky();
-        doThrow(InternalServerErrorException.class).when(zonky)
-            .sell(any());
-        when(zonky.getLoan(eq(loan.getId()))).thenReturn(loan);
-        when(zonky.getSellableInvestments()).thenAnswer(inv -> Stream.of(i));
-        when(zonky.getInvestment(anyLong())).thenAnswer(inv -> i);
-        when(zonky.getSoldInvestments()).thenAnswer(inv -> Stream.empty());
-        final PowerTenant tenant = mockTenant(zonky, false);
-        when(tenant.getSellStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_STRATEGY));
-        final Selling s = new Selling();
-        s.accept(tenant);
-        final List<Event> e = getEventsRequested();
-        assertThat(e).hasSize(2);
-        assertSoftly(softly -> {
-            softly.assertThat(e.get(0))
-                .isInstanceOf(SellingStartedEvent.class);
-            softly.assertThat(e.get(1))
-                .isInstanceOf(SellingCompletedEvent.class);
-        });
-        verify(zonky, times(1)).sell(argThat(inv -> i.getLoan()
-            .getId() == inv.getLoan()
-                .getId()));
     }
 
     private void saleMade(final boolean isDryRun) {
