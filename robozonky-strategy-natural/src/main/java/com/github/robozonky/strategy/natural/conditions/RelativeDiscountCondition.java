@@ -19,7 +19,6 @@ package com.github.robozonky.strategy.natural.conditions;
 import java.math.BigDecimal;
 
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.internal.util.BigDecimalCalculator;
 import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 
 public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
@@ -28,27 +27,25 @@ public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
         super(condition, true);
     }
 
-    private static BigDecimal getDiscount(final Wrapper<?> w) {
-        BigDecimal price = w.getSellPrice()
+    private static BigDecimal getSellPrice(final Wrapper<?> w) {
+        return w.getSellPrice()
             .orElse(w.getRemainingPrincipal());
-        BigDecimal principal = w.getRemainingPrincipal();
-        return BigDecimalCalculator.minus(principal, price);
     }
 
     public static RelativeDiscountCondition lessThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeDiscountCondition::getDiscount,
+        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeDiscountCondition::getSellPrice,
                 Wrapper::getRemainingPrincipal, threshold);
         return new RelativeDiscountCondition(c);
     }
 
     public static RelativeDiscountCondition moreThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeDiscountCondition::getDiscount,
+        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeDiscountCondition::getSellPrice,
                 Wrapper::getRemainingPrincipal, threshold);
         return new RelativeDiscountCondition(c);
     }
 
     public static RelativeDiscountCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeDiscountCondition::getDiscount,
+        final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeDiscountCondition::getSellPrice,
                 Wrapper::getRemainingPrincipal, minimumThreshold, maximumThreshold);
         return new RelativeDiscountCondition(c);
     }
