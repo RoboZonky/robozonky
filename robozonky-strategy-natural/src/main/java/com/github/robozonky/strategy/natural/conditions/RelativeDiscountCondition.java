@@ -29,7 +29,7 @@ public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
     }
 
     private static BigDecimal getDiscount(final Wrapper<?> w) {
-        BigDecimal price = w.getPrice()
+        BigDecimal price = w.getSellPrice()
             .orElse(w.getRemainingPrincipal());
         BigDecimal principal = w.getRemainingPrincipal();
         return BigDecimalCalculator.minus(principal, price);

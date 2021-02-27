@@ -131,7 +131,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
                 .contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getOriginalPurchasePrice())
                 .contains(new BigDecimal("1.00"));
-            softly.assertThat(w.getPrice())
+            softly.assertThat(w.getSellPrice())
                 .contains(new BigDecimal("1.00"));
             softly.assertThat(w.getSellFee())
                 .contains(new BigDecimal("1.00"));
@@ -169,7 +169,7 @@ class InvestmentWrapperTest extends AbstractRoboZonkyTest {
         assertSoftly(softly -> {
             softly.assertThat(w.getHealth())
                 .contains(LoanHealth.HEALTHY);
-            softly.assertThat(w.getPrice())
+            softly.assertThat(w.getSellPrice())
                 .contains(new BigDecimal("10.00"));
             softly.assertThat(w.getSellFee())
                 .contains(new BigDecimal("2.00"));

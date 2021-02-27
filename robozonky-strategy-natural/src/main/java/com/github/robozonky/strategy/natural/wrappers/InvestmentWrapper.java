@@ -158,19 +158,6 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
     }
 
     @Override
-    public Optional<LoanHealth> getHealth() {
-        var currentDpd = getCurrentDpd().orElse(0);
-        if (currentDpd == 0) {
-            return Optional.of(LoanHealth.HEALTHY);
-        }
-        if (investment.getLoan()
-            .hasCollectionHistory()) {
-            return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
-        }
-        return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
-    }
-
-    @Override
     public Optional<BigDecimal> getOriginalPurchasePrice() {
         return Optional.of(investment.getSmpSellInfo()
             .map(sellInfo -> sellInfo.getBoughtFor()
@@ -179,7 +166,12 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
     }
 
     @Override
-    public Optional<BigDecimal> getPrice() {
+    public Optional<BigDecimal> getSellPrice() {
+        if (getHealth().orElseThrow() == LoanHealth.HEALTHY) { // Avoids HTTP request.
+            return Optional.of(investment.getPrincipal()
+                .getUnpaid()
+                .getValue());
+        }
         var price = investment.getSmpSellInfo()
             .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment))
             .getSellPrice();
@@ -194,6 +186,9 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public OptionalInt getLongestDpd() {
+        if (getHealth().orElseThrow() == LoanHealth.HEALTHY) { // Avoids HTTP request.
+            return OptionalInt.of(0);
+        }
         return investment.getLoan()
             .getHealthStats()
             .map(s -> OptionalInt.of(s.getLongestDaysDue()))
@@ -202,6 +197,9 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public OptionalInt getDaysSinceDpd() {
+        if (getHealth().orElseThrow() == LoanHealth.HEALTHY) { // Avoids HTTP request.
+            return OptionalInt.of(0);
+        }
         return investment.getLoan()
             .getHealthStats()
             .map(s -> OptionalInt.of(s.getDaysSinceLastInDue()))

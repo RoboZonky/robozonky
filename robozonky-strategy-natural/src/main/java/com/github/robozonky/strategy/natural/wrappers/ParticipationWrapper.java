@@ -135,7 +135,7 @@ final class ParticipationWrapper extends AbstractWrapper<ParticipationDescriptor
     }
 
     @Override
-    public Optional<BigDecimal> getPrice() {
+    public Optional<BigDecimal> getSellPrice() {
         return Optional.of(participation.getPrice()
             .getValue());
     }
@@ -148,15 +148,15 @@ final class ParticipationWrapper extends AbstractWrapper<ParticipationDescriptor
 
     @Override
     public Optional<LoanHealth> getHealth() {
-        var currentDpd = getCurrentDpd().orElse(0);
-        if (currentDpd == 0) {
-            return Optional.of(LoanHealth.HEALTHY);
+        var isPastDue = getCurrentDpd().orElse(0) > 0;
+        if (isPastDue) {
+            return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
         }
-        var longestDpd = getLongestDpd().orElse(0);
-        if (longestDpd > 0) {
+        var wasPastDue = getLongestDpd().orElse(0) > 0;
+        if (wasPastDue) {
             return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
         }
-        return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
+        return Optional.of(LoanHealth.HEALTHY);
     }
 
     @Override
