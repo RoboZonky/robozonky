@@ -28,26 +28,26 @@ public class RelativeDiscountCondition extends AbstractRelativeRangeCondition {
         super(condition, true);
     }
 
-    private static BigDecimal getSellPrice(final Wrapper<?> w) {
+    private static BigDecimal getDiscount(final Wrapper<?> w) {
         return BigDecimalCalculator.minus(w.getRemainingPrincipal(),
                 w.getSellPrice()
                     .orElse(w.getRemainingPrincipal()));
     }
 
     public static RelativeDiscountCondition lessThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeDiscountCondition::getSellPrice,
+        final RangeCondition<Ratio> c = RangeCondition.relativeLessThan(RelativeDiscountCondition::getDiscount,
                 Wrapper::getRemainingPrincipal, threshold);
         return new RelativeDiscountCondition(c);
     }
 
     public static RelativeDiscountCondition moreThan(final Ratio threshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeDiscountCondition::getSellPrice,
+        final RangeCondition<Ratio> c = RangeCondition.relativeMoreThan(RelativeDiscountCondition::getDiscount,
                 Wrapper::getRemainingPrincipal, threshold);
         return new RelativeDiscountCondition(c);
     }
 
     public static RelativeDiscountCondition exact(final Ratio minimumThreshold, final Ratio maximumThreshold) {
-        final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeDiscountCondition::getSellPrice,
+        final RangeCondition<Ratio> c = RangeCondition.relativeExact(RelativeDiscountCondition::getDiscount,
                 Wrapper::getRemainingPrincipal, minimumThreshold, maximumThreshold);
         return new RelativeDiscountCondition(c);
     }
