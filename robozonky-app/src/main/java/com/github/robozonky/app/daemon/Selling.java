@@ -21,15 +21,12 @@ import static com.github.robozonky.app.events.impl.EventFactory.sellingCompleted
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.ws.rs.InternalServerErrorException;
-
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
-import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.SellStrategy;
 import com.github.robozonky.app.events.impl.EventFactory;
 import com.github.robozonky.app.tenant.PowerTenant;
@@ -45,37 +42,30 @@ final class Selling implements TenantPayload {
 
     private static final Logger LOGGER = Audit.selling();
 
-    private static Optional<Investment> processSale(final PowerTenant tenant, final RecommendedInvestment r,
-            final SoldParticipationCache sold) {
-        final InvestmentDescriptor d = r.descriptor();
-        final Investment i = d.item();
-        final int loanId = i.getLoan()
+    private static Optional<Investment> processSale(final PowerTenant tenant,
+            final RecommendedInvestment recommendation, final SoldParticipationCache sold) {
+        var descriptor = recommendation.descriptor();
+        var investment = descriptor.item();
+        var loanId = investment.getLoan()
             .getId();
-        try {
-            final boolean isRealRun = !tenant.getSessionInfo()
-                .isDryRun();
-            if (isRealRun) {
-                LOGGER.debug("Will send sell request for loan #{}.", loanId);
-                tenant.run(zonky -> zonky.sell(i));
-            } else {
-                LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
-            }
-            sold.markAsOffered(i.getId());
-            tenant.fire(EventFactory.saleOffered(i, d.related()));
-            LOGGER.info("Offered to sell investment in loan #{}.", loanId);
-            return Optional.of(i);
-        } catch (final InternalServerErrorException ex) { // The sell endpoint has been seen to throw these.
-            LOGGER.warn("Failed offering to sell investment in loan #{}.", loanId, ex);
-            return Optional.empty();
+        if (tenant.getSessionInfo()
+            .isDryRun()) {
+            LOGGER.debug("Will not send a real sell request for loan #{}, dry run.", loanId);
+        } else {
+            LOGGER.debug("Will send sell request for loan #{}.", loanId);
+            tenant.run(zonky -> zonky.sell(investment));
         }
+        sold.markAsOffered(investment.getId());
+        tenant.fire(EventFactory.saleOffered(investment, descriptor.related()));
+        LOGGER.info("Offered to sell investment in loan #{}.", loanId);
+        return Optional.of(investment);
     }
 
     private static void sell(final PowerTenant tenant, final SellStrategy strategy) {
-        final PortfolioOverview overview = tenant.getPortfolio()
+        var overview = tenant.getPortfolio()
             .getOverview();
         tenant.fire(EventFactory.sellingStarted(overview));
-        LOGGER.debug("Starting to query for sellable investments.");
-        final SoldParticipationCache sold = SoldParticipationCache.forTenant(tenant);
+        var sold = SoldParticipationCache.forTenant(tenant);
         var recommended = tenant.call(Zonky::getSellableInvestments)
             .parallel()
             .filter(investment -> { // Only sell if the remaining amount is more than 1. Be nice to people.
@@ -94,7 +84,6 @@ final class Selling implements TenantPayload {
                     .getId());
                 return new InvestmentDescriptor(i, loanSupplier);
             })
-
             .filter(i -> strategy.recommend(i, () -> tenant.getPortfolio()
                 .getOverview(), tenant.getSessionInfo()))
             .map(RecommendedInvestment::new);
