@@ -16,12 +16,11 @@
 
 package com.github.robozonky.strategy.natural.conditions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -53,12 +52,12 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
     private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
     private final int id = COUNTER.incrementAndGet();
-    private Collection<MarketplaceFilterCondition> when = Collections.emptySet(),
-            butNotWhen = Collections.emptySet();
+    private Collection<MarketplaceFilterCondition> when = Collections.emptyList(),
+            butNotWhen = Collections.emptyList();
 
     public static MarketplaceFilter of(final MarketplaceFilterCondition c) {
         final MarketplaceFilter f = new MarketplaceFilter();
-        f.when(Collections.singleton(c));
+        f.when(Collections.singletonList(c));
         return f;
     }
 
@@ -73,11 +72,12 @@ public class MarketplaceFilter implements MarketplaceFilterCondition, Comparable
      * @return Collection of conditions with a stable iteration order, where the conditions that do not require HTTP
      *         requests come first.
      */
-    private static Set<MarketplaceFilterCondition> processConditions(
+    private static Collection<MarketplaceFilterCondition> processConditions(
             final Collection<? extends MarketplaceFilterCondition> conditions) {
         return conditions.stream()
+            .distinct()
             .sorted()
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**

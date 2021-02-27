@@ -6,7 +6,6 @@ grammar Tokens;
     import java.math.BigInteger;
     import java.time.LocalDate;
     import java.util.Collection;
-    import java.util.LinkedHashSet;
     import com.github.robozonky.api.Ratio;
     import com.github.robozonky.api.remote.enums.*;
     import com.github.robozonky.api.remote.entities.*;

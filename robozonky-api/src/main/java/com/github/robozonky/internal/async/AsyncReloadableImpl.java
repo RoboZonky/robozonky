@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package com.github.robozonky.internal.async;
 
 import java.time.Duration;
-import java.util.Set;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -33,12 +33,12 @@ final class AsyncReloadableImpl<T> extends AbstractReloadableImpl<T> {
     private final AtomicReference<CompletableFuture<Void>> future = new AtomicReference<>();
 
     public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners) {
+            final Consumer<T> runWhenReloaded, final Collection<ReloadListener<T>> listeners) {
         super(supplier, reloader, runWhenReloaded, listeners);
     }
 
     public AsyncReloadableImpl(final Supplier<T> supplier, final UnaryOperator<T> reloader,
-            final Consumer<T> runWhenReloaded, final Set<ReloadListener<T>> listeners,
+            final Consumer<T> runWhenReloaded, final Collection<ReloadListener<T>> listeners,
             final Function<T, Duration> reloadAfter) {
         super(supplier, reloader, runWhenReloaded, listeners, reloadAfter);
     }

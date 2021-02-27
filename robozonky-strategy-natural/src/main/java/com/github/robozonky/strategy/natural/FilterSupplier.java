@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package com.github.robozonky.strategy.natural;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -86,13 +84,14 @@ class FilterSupplier {
      * @return Collection of filters with a stable iteration order, where the filters that do not require HTTP requests
      *         come first.
      */
-    private static Set<MarketplaceFilter> reorderFilters(final Collection<MarketplaceFilter> marketplaceFilters) {
+    private static Collection<MarketplaceFilter> reorderFilters(
+            final Collection<MarketplaceFilter> marketplaceFilters) {
         if (marketplaceFilters == null) {
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
         return marketplaceFilters.stream()
             .sorted()
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private static Collection<MarketplaceFilter> getFilters(final Supplier<Collection<MarketplaceFilter>> unlessSelloff,

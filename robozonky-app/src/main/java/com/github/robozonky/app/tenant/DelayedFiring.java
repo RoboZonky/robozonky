@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.github.robozonky.app.tenant;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CyclicBarrier;
@@ -45,7 +45,7 @@ final class DelayedFiring implements Runnable {
                 throw new IllegalStateException("Interrupted while waiting for transaction commit.");
             }
         }));
-    private final Collection<CompletableFuture<Void>> all = new HashSet<>(0);
+    private final Collection<CompletableFuture<Void>> all = new ArrayList<>(0);
 
     private void ensureNotOver() {
         if (isOver.get()) {

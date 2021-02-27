@@ -8,7 +8,7 @@ import Tokens;
 }
 
 portfolioStructureExpression returns [Collection<PortfolioShare> result]:
- { Collection<PortfolioShare> result = new LinkedHashSet<>(); }
+ { Collection<PortfolioShare> result = new ArrayList<>(); }
  (i=portfolioStructureInterestRateExpression { result.add($i.result); })+
  { $result = result; }
 ;

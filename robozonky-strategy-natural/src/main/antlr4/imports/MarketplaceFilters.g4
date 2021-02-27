@@ -146,28 +146,28 @@ sellMarketplaceFilter returns [MarketplaceFilter result]:
 ;
 
 jointMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
-    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+    { Collection<MarketplaceFilterCondition> result = new ArrayList<>(); }
     (c1=jointMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=jointMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
 primaryMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
-    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+    { Collection<MarketplaceFilterCondition> result = new ArrayList<>(); }
     (c1=primaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=primaryMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
 secondaryMarketplaceFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
-    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+    { Collection<MarketplaceFilterCondition> result = new ArrayList<>(); }
     (c1=secondaryMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=secondaryMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
 ;
 
 sellFilterConditions returns [Collection<MarketplaceFilterCondition> result]:
-    { Collection<MarketplaceFilterCondition> result = new LinkedHashSet<>(); }
+    { Collection<MarketplaceFilterCondition> result = new ArrayList<>(); }
     (c1=sellMarketplaceFilterCondition { result.add($c1.result); } '; ')*
     c2=sellMarketplaceFilterCondition { result.add($c2.result); } DOT
     { $result = result; }
