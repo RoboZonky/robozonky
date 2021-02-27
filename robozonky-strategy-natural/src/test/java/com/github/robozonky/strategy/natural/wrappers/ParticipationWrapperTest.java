@@ -160,7 +160,7 @@ class ParticipationWrapperTest extends AbstractRoboZonkyTest {
                 .contains(LoanHealth.HEALTHY);
             softly.assertThat(w.getOriginalPurchasePrice())
                 .isEmpty();
-            softly.assertThat(w.getPrice())
+            softly.assertThat(w.getSellPrice())
                 .contains(BigDecimal.ZERO);
             softly.assertThat(w.getSellFee())
                 .isEmpty();
