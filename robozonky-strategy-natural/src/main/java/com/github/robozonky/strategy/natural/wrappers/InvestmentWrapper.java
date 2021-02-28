@@ -31,6 +31,7 @@ import com.github.robozonky.api.remote.enums.Region;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 
 final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
@@ -186,8 +187,7 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
                 .getUnpaid()
                 .getValue());
         }
-        var price = investment.getSmpSellInfo()
-            .orElseThrow(() -> new IllegalStateException("Investment has no sell info: " + investment))
+        var price = InvestmentImpl.getSellInfoOrThrow(investment)
             .getSellPrice();
         return Optional.of(price.getValue());
     }

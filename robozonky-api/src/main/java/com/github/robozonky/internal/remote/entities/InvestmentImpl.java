@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,11 @@ import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.remote.enums.SellStatus;
 
 public class InvestmentImpl implements Investment {
+
+    public static SellInfo getSellInfoOrThrow(Investment investment) {
+        return investment.getSmpSellInfo()
+            .orElseThrow(() -> new IllegalStateException("Sell info not present for " + investment));
+    }
 
     private long id;
     private InvestmentLoanDataImpl loan;
