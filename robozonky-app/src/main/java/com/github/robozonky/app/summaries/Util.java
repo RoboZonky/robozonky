@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.internal.remote.Zonky;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 import com.github.robozonky.internal.tenant.Tenant;
 import com.github.robozonky.internal.util.functional.Tuple;
 import com.github.robozonky.internal.util.functional.Tuple2;
@@ -76,14 +77,12 @@ final class Util {
                 var rating = investment.getLoan()
                     .getInterestRate();
                 var fee = investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE ? Money.ZERO
-                        : investment.getSmpSellInfo()
-                            .orElseThrow()
+                        : InvestmentImpl.getSellInfoOrThrow(investment)
                             .getFee()
                             .getValue();
                 var loan = investment.getLoan();
                 var isPossiblyDiscounted = loan.getDpd() > 0 || loan.hasCollectionHistory();
-                var sellPrice = isPossiblyDiscounted ? investment.getSmpSellInfo()
-                    .orElseThrow()
+                var sellPrice = isPossiblyDiscounted ? InvestmentImpl.getSellInfoOrThrow(investment)
                     .getSellPrice()
                         : investment.getPrincipal()
                             .getUnpaid();
