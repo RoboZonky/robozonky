@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,6 @@ class LoanTermIntervalTest {
             assertThat(currentEnd).isEqualTo(previousEnd + 1)
                 .as(current + " does not start where previous ends.");
         }
-        assertThat(LoanTermInterval.values()[LoanTermInterval.values().length - 1].getMaxInclusive()).isEqualTo(84);
+        assertThat(LoanTermInterval.values()[LoanTermInterval.values().length - 1].getMaxInclusive()).isEqualTo(120);
     }
 }

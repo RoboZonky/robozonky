@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ public enum LoanTermInterval {
     FROM_37_TO_48(37, 48),
     FROM_49_TO_60(49, 60),
     FROM_61_TO_72(61, 72),
-    FROM_73_TO_84(73, 84);
+    FROM_73_TO_84(73, 84),
+    FROM_85_TO_96(85, 96),
+    FROM_97_TO_108(97, 108),
+    FROM_109_TO_120(109, 120);
 
     private final int minInclusive;
     private final int maxInclusive;

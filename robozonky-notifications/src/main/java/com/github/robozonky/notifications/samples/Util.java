@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,9 @@ final class Util {
         loan.setPurpose(randomize(Purpose.values()));
         loan.setRegion(randomize(Region.values()));
         // set basic financial properties
-        final int amount = (2 + RANDOM.nextInt(68)) * 10_000; // from 20k to 700k
+        final int amount = (2 + RANDOM.nextInt(89)) * 10_000; // from 20K to 900K
         loan.setAmount(Money.from(amount));
-        final int term = 6 + RANDOM.nextInt(76); // from 6 to 84
+        final int term = 6 + RANDOM.nextInt(115); // from 6 to 120
         loan.setTermInMonths(term);
         final BigDecimal annuity = divide(amount, term);
         loan.setAnnuity(Money.from(annuity));
