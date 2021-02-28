@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public enum TemplateProcessor {
     private static final Configuration HTML_CLASSPATH_CONFIG = getFreemarkerConfiguration(HtmlTemplate.class);
 
     public static Configuration getFreemarkerConfiguration() {
-        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
+        final Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);
         final Map<String, TemplateNumberFormatFactory> customNumberFormats = Collections.singletonMap("interest",
                 InterestNumberFormatFactory.INSTANCE);
         cfg.setCustomNumberFormats(customNumberFormats);
