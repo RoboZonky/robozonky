@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,17 @@ import com.github.robozonky.strategy.natural.wrappers.Wrapper;
 abstract class AbstractRangeCondition<T extends Number & Comparable<T>> extends MarketplaceFilterConditionImpl
         implements MarketplaceFilterCondition {
 
-    /**
-     * 8 years. Maximum 7 years, plus an estimated 1 year of possible delinquency on top.
-     */
-    protected static final Domain<Integer> LOAN_LIFE_IN_DAYS_DOMAIN = new Domain<>(Integer.class, 0, 8 * 365);
-    /**
-     * All loans on Zonky are for a term of up to 7 years.
-     */
-    protected static final Domain<Integer> LOAN_TERM_IN_MONTHS_DOMAIN = new Domain<>(Integer.class, 0, 84);
     protected static final Domain<Integer> AMOUNT_DOMAIN = new Domain<>(Integer.class, 0, null);
     protected static final Domain<BigDecimal> PRINCIPAL_DOMAIN = new Domain<>(BigDecimal.class, BigDecimal.ZERO, null);
     protected static final Domain<Ratio> RATE_DOMAIN = new Domain<>(Ratio.class, Ratio.ZERO, null);
+    private static final int MAX_LOAN_TERM_IN_YEARS = 10;
+    /**
+     * Max loan term plus an estimated 1 year of possible delinquency on top.
+     */
+    protected static final Domain<Integer> LOAN_LIFE_IN_DAYS_DOMAIN = new Domain<>(Integer.class, 0,
+            (MAX_LOAN_TERM_IN_YEARS + 1) * 365);
+    protected static final Domain<Integer> LOAN_TERM_IN_MONTHS_DOMAIN = new Domain<>(Integer.class, 0,
+            MAX_LOAN_TERM_IN_YEARS * 12);
     private final RangeCondition<T> rangeCondition;
 
     protected AbstractRangeCondition(final RangeCondition<T> condition, final boolean mayRequireRemoteRequests) {
