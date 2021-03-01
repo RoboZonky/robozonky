@@ -80,7 +80,8 @@ final class SellingThrottle
             LOGGER.debug("Will sell one investment: {}.", descriptor);
             return Stream.of(descriptor);
         } else {
-            var toBeSold = eligible.subList(0, firstUnacceptableInvestmentIndex);
+            var toBeSold = firstUnacceptableInvestmentIndex == -1 ? eligible
+                    : eligible.subList(0, firstUnacceptableInvestmentIndex);
             LOGGER.debug("Investments with total value of {} to be sold: {}.", czkIncluded, toBeSold);
             return toBeSold.stream();
         }
