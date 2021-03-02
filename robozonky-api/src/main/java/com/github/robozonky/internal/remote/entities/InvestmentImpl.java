@@ -23,20 +23,22 @@ import java.util.StringJoiner;
 
 import javax.json.bind.annotation.JsonbProperty;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Amounts;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.InvestmentLoanData;
+import com.github.robozonky.api.remote.entities.LoanHealthStats;
 import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.Label;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.SellStatus;
 
 public class InvestmentImpl implements Investment {
 
-    public static SellInfo getSellInfoOrThrow(Investment investment) {
-        return investment.getSmpSellInfo()
-            .orElseThrow(() -> new IllegalStateException("Sell info not present for " + investment));
-    }
-
+    private static final Logger LOGGER = LogManager.getLogger(InvestmentImpl.class);
     private long id;
     private InvestmentLoanDataImpl loan;
     @JsonbProperty(nillable = true)
@@ -52,6 +54,58 @@ public class InvestmentImpl implements Investment {
     public InvestmentImpl(final InvestmentLoanDataImpl loan, final Money amount) {
         this.principal = new AmountsImpl(amount);
         this.loan = loan;
+    }
+
+    /**
+     * Loan health is notoriously difficult to retrieve properly.
+     * It can be retrieved with certainty from {@link InvestmentLoanData#getHealthStats()},
+     * but that requires an extra remote call.
+     * Therefore this method does as much as it could to detect loan health from other signs first
+     * and only does the remote call as a last resort.
+     *
+     * @param investment
+     * @return never null
+     */
+    public static LoanHealth determineHealth(Investment investment) {
+        var loanData = investment.getLoan();
+        if (loanData.getDpd() > 0) { // The investment is guaranteed due.
+            LOGGER.debug("Investment {} determined {} based on DPD.", investment, LoanHealth.CURRENTLY_IN_DUE);
+            return LoanHealth.CURRENTLY_IN_DUE;
+        }
+        var label = loanData.getLabel();
+        if (label.isPresent()) {
+            if (label.get() == Label.PAST_DUE_PREVIOUSLY) { // The investment is guaranteed previously due.
+                LOGGER.debug("Investment {} determined {} based on label.", investment, LoanHealth.HISTORICALLY_IN_DUE);
+                return LoanHealth.HISTORICALLY_IN_DUE;
+            } else { // The investment is guaranteed healthy.
+                LOGGER.debug("Investment {} determined {} based on label.", investment, LoanHealth.HEALTHY);
+                return LoanHealth.HEALTHY;
+            }
+        } else { // Incur a remote call to figure out the actual health of the investment.
+            var loanHealth = loanData.getHealthStats()
+                .map(LoanHealthStats::getLoanHealthInfo)
+                .orElse(LoanHealth.HEALTHY);
+            LOGGER.debug("Investment {} confirmed {}.", investment, loanHealth);
+            return loanHealth;
+        }
+    }
+
+    /**
+     * See {@link #determineHealth(Investment)} for why this is necessary.
+     */
+    public static Money determineSellPrice(Investment investment) {
+        var unpaidPrincipal = investment.getPrincipal()
+            .getUnpaid();
+        if (InvestmentImpl.determineHealth(investment) == LoanHealth.HEALTHY) { // Guaranteed without discount.
+            LOGGER.debug("Sell price for {} determined: {}.", investment, unpaidPrincipal);
+            return unpaidPrincipal;
+        }
+        // Incur a remote call to figure out the actual sell price.
+        var sellPrice = investment.getSmpSellInfo()
+            .map(SellInfo::getSellPrice)
+            .orElse(unpaidPrincipal);
+        LOGGER.debug("Sell price for {} confirmed: {}.", investment, sellPrice);
+        return sellPrice;
     }
 
     @Override

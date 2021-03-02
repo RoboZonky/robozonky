@@ -69,16 +69,7 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public Optional<LoanHealth> getHealth() {
-        var isPastDue = getCurrentDpd().orElse(0) > 0;
-        if (isPastDue) {
-            return Optional.of(LoanHealth.CURRENTLY_IN_DUE);
-        }
-        var wasPastDue = investment.getLoan()
-            .hasCollectionHistory();
-        if (wasPastDue) {
-            return Optional.of(LoanHealth.HISTORICALLY_IN_DUE);
-        }
-        return Optional.of(LoanHealth.HEALTHY);
+        return Optional.of(InvestmentImpl.determineHealth(investment));
     }
 
     @Override
@@ -182,14 +173,8 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public Optional<BigDecimal> getSellPrice() {
-        if (getHealth().orElseThrow() == LoanHealth.HEALTHY) { // Avoids HTTP request.
-            return Optional.of(investment.getPrincipal()
-                .getUnpaid()
-                .getValue());
-        }
-        var price = InvestmentImpl.getSellInfoOrThrow(investment)
-            .getSellPrice();
-        return Optional.of(price.getValue());
+        return Optional.of(InvestmentImpl.determineSellPrice(investment)
+            .getValue());
     }
 
     @Override
@@ -200,7 +185,7 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public OptionalInt getLongestDpd() {
-        if (getHealth().orElseThrow() == LoanHealth.HEALTHY) { // Avoids HTTP request.
+        if (InvestmentImpl.determineHealth(investment) == LoanHealth.HEALTHY) { // Avoids HTTP request.
             return OptionalInt.of(0);
         }
         return investment.getLoan()
@@ -211,7 +196,7 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public OptionalInt getDaysSinceDpd() {
-        if (getHealth().orElseThrow() == LoanHealth.HEALTHY) { // Avoids HTTP request.
+        if (InvestmentImpl.determineHealth(investment) == LoanHealth.HEALTHY) { // Avoids HTTP request.
             return OptionalInt.of(0);
         }
         return investment.getLoan()

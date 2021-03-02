@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.Objects;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.remote.entities.Investment;
-import com.github.robozonky.api.remote.entities.SellInfo;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 
 final class RecommendedInvestment implements Recommended<InvestmentDescriptor, Investment> {
 
@@ -30,18 +30,7 @@ final class RecommendedInvestment implements Recommended<InvestmentDescriptor, I
 
     RecommendedInvestment(final InvestmentDescriptor investmentDescriptor) {
         this.descriptor = investmentDescriptor;
-        Investment investment = investmentDescriptor.item();
-        if (!investment.getLoan()
-            .hasCollectionHistory()) {
-            this.amount = investment.getPrincipal()
-                .getUnpaid();
-        } else {
-            this.amount = investment.getSmpSellInfo()
-                .map(SellInfo::getSellPrice)
-                .orElseGet(() -> investment.getPrincipal()
-                    .getUnpaid());
-        }
-
+        this.amount = InvestmentImpl.determineSellPrice(investmentDescriptor.item());
     }
 
     @Override
@@ -62,7 +51,7 @@ final class RecommendedInvestment implements Recommended<InvestmentDescriptor, I
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final RecommendedInvestment that = (RecommendedInvestment) o;
+        var that = (RecommendedInvestment) o;
         return Objects.equals(descriptor, that.descriptor);
     }
 

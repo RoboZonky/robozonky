@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
@@ -77,15 +78,14 @@ final class Util {
                 var rating = investment.getLoan()
                     .getInterestRate();
                 var fee = investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE ? Money.ZERO
-                        : InvestmentImpl.getSellInfoOrThrow(investment)
-                            .getFee()
-                            .getValue();
-                var loan = investment.getLoan();
-                var isPossiblyDiscounted = loan.getDpd() > 0 || loan.hasCollectionHistory();
-                var sellPrice = isPossiblyDiscounted ? InvestmentImpl.getSellInfoOrThrow(investment)
-                    .getSellPrice()
-                        : investment.getPrincipal()
-                            .getUnpaid();
+                        : investment.getSmpSellInfo()
+                            .map(si -> si.getFee()
+                                .getValue())
+                            .orElse(Money.ZERO);
+                var isPossiblyDiscounted = InvestmentImpl.determineHealth(investment) != LoanHealth.HEALTHY;
+                var unpaidPrincipal = investment.getPrincipal()
+                    .getUnpaid();
+                var sellPrice = InvestmentImpl.determineSellPrice(investment);
                 return Tuple.of(rating, sellPrice, fee);
             })
             .filter(data -> !data._2.isZero()) // Filter out empty loans. Zonky shouldn't send those, but happened.

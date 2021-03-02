@@ -23,10 +23,12 @@ import java.util.function.Supplier;
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.remote.entities.SellInfo;
+import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.api.strategies.InvestmentDescriptor;
 import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.internal.remote.entities.InvestmentImpl;
 
 class NaturalLanguageSellStrategy implements SellStrategy {
 
@@ -43,8 +45,7 @@ class NaturalLanguageSellStrategy implements SellStrategy {
 
     private static boolean isUndiscounted(final InvestmentDescriptor descriptor) {
         var investment = descriptor.item();
-        var loan = investment.getLoan();
-        if (loan.getDpd() == 0 && !loan.hasCollectionHistory()) {
+        if (InvestmentImpl.determineHealth(investment) == LoanHealth.HEALTHY) {
             return true; // The loan was never late; we can safely assume there is no discount.
         }
         return investment.getSmpSellInfo()
