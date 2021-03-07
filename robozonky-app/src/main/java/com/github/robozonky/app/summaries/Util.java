@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
-import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.SellStatus;
 import com.github.robozonky.internal.remote.Zonky;
 import com.github.robozonky.internal.remote.entities.InvestmentImpl;
@@ -82,9 +81,6 @@ final class Util {
                             .map(si -> si.getFee()
                                 .getValue())
                             .orElse(Money.ZERO);
-                var isPossiblyDiscounted = InvestmentImpl.determineHealth(investment) != LoanHealth.HEALTHY;
-                var unpaidPrincipal = investment.getPrincipal()
-                    .getUnpaid();
                 var sellPrice = InvestmentImpl.determineSellPrice(investment);
                 return Tuple.of(rating, sellPrice, fee);
             })

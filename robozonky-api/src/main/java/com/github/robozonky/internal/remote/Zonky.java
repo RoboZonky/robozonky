@@ -170,10 +170,14 @@ public class Zonky {
     }
 
     public Stream<Investment> getSellableInvestments() {
-        final Select s = Select.unrestricted()
+        var select = Select.unrestricted()
             .equals("investmentStatus", "ACTIVE")
             .in("sellStatus", "SELLABLE_WITH_FEE", "SELLABLE_WITHOUT_FEE");
-        return getInvestments(s);
+        // And now actually filter out the non-sellable stuff.
+        // It makes no sense, but we have already seen Zonky return these here.
+        return getInvestments(select)
+            .filter(i -> i.getSellStatus()
+                .isSellable());
     }
 
     public Stream<Investment> getDelinquentInvestments() {

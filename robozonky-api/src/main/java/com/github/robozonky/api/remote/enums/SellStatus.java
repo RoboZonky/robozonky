@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,22 @@ package com.github.robozonky.api.remote.enums;
 public enum SellStatus {
 
     NOT_SELLABLE,
-    SELLABLE_WITH_FEE,
-    SELLABLE_WITHOUT_FEE,
+    SELLABLE_WITH_FEE(true),
+    SELLABLE_WITHOUT_FEE(true),
     OFFERED,
-    SOLD
+    SOLD;
 
+    private final boolean sellable;
+
+    SellStatus() {
+        this(false);
+    }
+
+    SellStatus(boolean isSellable) {
+        this.sellable = isSellable;
+    }
+
+    public boolean isSellable() {
+        return sellable;
+    }
 }

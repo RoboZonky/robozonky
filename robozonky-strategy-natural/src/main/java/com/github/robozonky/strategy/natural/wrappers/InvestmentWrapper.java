@@ -152,6 +152,10 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public Optional<BigDecimal> getSellFee() {
+        if (!investment.getSellStatus()
+            .isSellable()) {
+            return Optional.empty();
+        }
         if (investment.getSellStatus() == SellStatus.SELLABLE_WITHOUT_FEE) {
             return Optional.of(BigDecimal.ZERO);
         }
@@ -173,6 +177,10 @@ final class InvestmentWrapper extends AbstractWrapper<InvestmentDescriptor> {
 
     @Override
     public Optional<BigDecimal> getSellPrice() {
+        if (!investment.getSellStatus()
+            .isSellable()) {
+            return Optional.empty();
+        }
         return Optional.of(InvestmentImpl.determineSellPrice(investment)
             .getValue());
     }
