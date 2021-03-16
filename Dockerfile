@@ -18,7 +18,7 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
     && chmod +x $BINARY_DIRECTORY/robozonky.sh
 
 # ... then build a minimalistic Java runtime using jlink ...
-FROM azul/zulu-openjdk-alpine:15 AS jlink
+FROM azul/zulu-openjdk-alpine:16 AS jlink
 ENV WORKING_DIRECTORY=/tmp/robozonky
 COPY --from=scratch /tmp/robozonky $WORKING_DIRECTORY
 COPY . .
