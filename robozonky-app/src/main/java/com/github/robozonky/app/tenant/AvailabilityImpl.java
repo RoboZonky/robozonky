@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 
 import javax.ws.rs.ClientErrorException;
@@ -47,7 +46,6 @@ final class AvailabilityImpl implements Availability {
     public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final RequestCounter requestCounter) {
         this.zonkyApiTokenSupplier = zonkyTokenSupplier;
         if (requestCounter == null) { // for easier testing
-            final LongAdder adder = new LongAdder();
             this.hasNewerRequest = instant -> true;
         } else {
             this.hasNewerRequest = requestCounter::hasMoreRecent;
