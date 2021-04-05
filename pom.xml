@@ -19,7 +19,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.robozonky</groupId>
   <artifactId>robozonky</artifactId>
-  <version>6.4.0</version>
+  <version>6.4.1-SNAPSHOT</version>
   <modules>
     <module>robozonky-api</module>
     <module>robozonky-app</module>
