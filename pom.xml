@@ -43,7 +43,7 @@
     <version.org.antlr>4.9</version.org.antlr>
     <version.org.codehaus.izpack>5.1.3</version.org.codehaus.izpack>
     <version.info.picocli>4.6.1</version.info.picocli>
-    <version.com.fasterxml.jackson.core>2.12.0</version.com.fasterxml.jackson.core>
+    <version.com.fasterxml.jackson.core>2.12.3</version.com.fasterxml.jackson.core>
     <version.org.jboss.resteasy>4.6.0.Final</version.org.jboss.resteasy>
     <version.org.junit5>7.0</version.org.junit5>
     <version.org.junit>5.${version.org.junit5}</version.org.junit>
@@ -434,6 +434,16 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${version.com.fasterxml.jackson.core}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-yaml</artifactId>
         <version>${version.com.fasterxml.jackson.core}</version>
       </dependency>
       <dependency>
