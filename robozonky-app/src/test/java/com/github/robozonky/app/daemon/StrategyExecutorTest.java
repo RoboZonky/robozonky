@@ -223,7 +223,9 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_PURCHASE_STRATEGY));
         final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor(pd);
         var exec = new StrategyExecutor<>(tenant, d);
-        assertThatThrownBy(exec::get).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(exec::get)
+            .isInstanceOf(IllegalStateException.class)
+            .hasCauseInstanceOf(ClientErrorException.class);
     }
 
     @Test
