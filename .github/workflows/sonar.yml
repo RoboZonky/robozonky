@@ -1,0 +1,43 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  DEFAULT_JDK_VERSION: 11
+  STABILIZING_PROPERTIES: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false
+  STREAMLINING_PROPERTIES: -Dassembly.skipAssembly -Denforcer.skip
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  full:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout from Github
+        uses: actions/checkout@v2
+      - name: Set up the JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.DEFAULT_JDK_VERSION }}
+      # See https://docs.github.com/en/actions/guides/building-and-testing-java-with-maven#caching-dependencies
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Compile and test all modules, skipping mutation coverage
+        run: mvn --batch-mode org.jacoco:jacoco-maven-plugin:prepare-agent install org.jacoco:jacoco-maven-plugin:report -Dpit.skip=true ${{ env.STABILIZING_PROPERTIES }} ${{ env.STREAMLINING_PROPERTIES }}
+      - name: Trigger SonarCloud
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=robozonky -Dsonar.projectKey=com.github.robozonky:robozonky -Dsonar.java.source=${{ env.DEFAULT_JDK_VERSION }} ${{ env.STABILIZING_PROPERTIES }} ${{ env.STREAMLINING_PROPERTIES }}
