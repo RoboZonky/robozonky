@@ -40,6 +40,8 @@ import com.github.robozonky.api.notifications.DelinquencyBased;
 import com.github.robozonky.api.notifications.ExtendedPortfolioOverview;
 import com.github.robozonky.api.notifications.InvestmentBased;
 import com.github.robozonky.api.notifications.LoanBased;
+import com.github.robozonky.api.notifications.Release;
+import com.github.robozonky.api.notifications.ReleaseAsset;
 import com.github.robozonky.api.remote.entities.Investment;
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanHealthStats;
@@ -255,4 +257,24 @@ final class Util {
             throw new IllegalArgumentException("Not a valid e-mail address: " + username);
         }
     }
+
+    public static Map<String, Object> extractReleaseInfo(final Release release) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("name", release.getName());
+        result.put("url", release.getUrl());
+        result.put("datePublished", release.getDatePublished());
+        result.put("assets", release.getAssets()
+            .stream()
+            .map(Util::extractReleaseInfo)
+            .collect(Collectors.toList()));
+        return result;
+    }
+
+    public static Map<String, Object> extractReleaseInfo(final ReleaseAsset releaseAsset) {
+        return Map.of(
+                "name", releaseAsset.getName(),
+                "url", releaseAsset.getDownloadUrl(),
+                "megabytes", releaseAsset.getSizeInBytes() / 1_000 / 1_000);
+    }
+
 }

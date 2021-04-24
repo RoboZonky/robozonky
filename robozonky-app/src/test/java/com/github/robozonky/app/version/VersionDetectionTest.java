@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,9 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
 
         @BeforeEach
         void before() {
-            when(metadata.get()).thenReturn(Either.right(Response.moreRecent("5.0.1", "5.0.2-cr-1")));
+            when(metadata.get())
+                .thenReturn(
+                        Either.right(Response.moreRecent(new GithubRelease("5.0.1"), new GithubRelease("5.0.2-cr-1"))));
         }
 
         @Test
@@ -85,7 +87,8 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
 
             @BeforeEach
             void before() {
-                when(metadata.get()).thenReturn(Either.right(Response.moreRecentStable("5.0.1")));
+                when(metadata.get())
+                    .thenReturn(Either.right(Response.moreRecentStable(new GithubRelease("5.0.1"))));
             }
 
             @Test
@@ -104,7 +107,8 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
 
             @BeforeEach
             void before() {
-                when(metadata.get()).thenReturn(Either.right(Response.moreRecentExperimental("5.0.2-cr-1")));
+                when(metadata.get())
+                    .thenReturn(Either.right(Response.moreRecentExperimental(new GithubRelease("5.0.2-cr-1"))));
             }
 
             @Test

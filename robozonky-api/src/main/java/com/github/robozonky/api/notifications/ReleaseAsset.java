@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.api.notifications;
 
-public final class CentralResponseGav {
+import java.net.URL;
 
-    private String v;
+public interface ReleaseAsset {
 
-    public String getV() {
-        return v;
-    }
+    String getName();
 
-    public void setV(final String v) {
-        this.v = v;
-    }
+    URL getDownloadUrl();
+
+    long getSizeInBytes();
+
+    int getDownloadCount();
 }

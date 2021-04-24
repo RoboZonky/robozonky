@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class RoboZonkyExperimentalUpdateDetectedEventListener extends
 
     @Override
     public String getSubject(final RoboZonkyExperimentalUpdateDetectedEvent event) {
-        return "Experimentální RoboZonky " + event.getNewVersion() + " je k dispozici";
+        return "Experimentální " + event.getNewVersion() + " je k dispozici";
     }
 
     @Override
@@ -43,6 +43,6 @@ public class RoboZonkyExperimentalUpdateDetectedEventListener extends
 
     @Override
     protected Map<String, Object> getData(final RoboZonkyExperimentalUpdateDetectedEvent event) {
-        return Collections.singletonMap("newVersion", event.getNewVersion());
+        return Collections.singletonMap("newVersion", Util.extractReleaseInfo(event.getNewVersion()));
     }
 }

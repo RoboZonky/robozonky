@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,19 +37,19 @@ final class VersionDetection implements SimplePayload {
     private static final Logger LOGGER = LogManager.getLogger(VersionDetection.class);
 
     private final Supplier<Either<Throwable, Response>> metadata;
-    private final AtomicReference<String> lastKnownStableVersion = new AtomicReference<>();
-    private final AtomicReference<String> lastKnownExperimentalVersion = new AtomicReference<>();
+    private final AtomicReference<GithubRelease> lastKnownStableVersion = new AtomicReference<>();
+    private final AtomicReference<GithubRelease> lastKnownExperimentalVersion = new AtomicReference<>();
 
     public VersionDetection() {
-        this(() -> new MavenMetadataParser().apply(Defaults.ROBOZONKY_VERSION));
+        this(() -> new GithubMetadataParser().apply(Defaults.ROBOZONKY_VERSION));
     }
 
     VersionDetection(final Supplier<Either<Throwable, Response>> metadata) {
         this.metadata = metadata;
     }
 
-    private static void processVersion(Optional<String> version, AtomicReference<String> target, String unchanged,
-            String changed, Function<String, ? extends GlobalEvent> eventSupplier) {
+    private static void processVersion(Optional<GithubRelease> version, AtomicReference<GithubRelease> target,
+            String unchanged, String changed, Function<GithubRelease, ? extends GlobalEvent> eventSupplier) {
         version.ifPresentOrElse(newVersion -> {
             var oldVersion = target.getAndSet(newVersion);
             if (Objects.equals(newVersion, oldVersion)) {
@@ -64,7 +64,7 @@ final class VersionDetection implements SimplePayload {
 
     @Override
     public void run() {
-        final Either<Throwable, Response> result = metadata.get();
+        var result = metadata.get();
         if (result.isLeft()) {
             LOGGER.debug("Failed retrieving RoboZonky version information.", result.getLeft());
             return;
