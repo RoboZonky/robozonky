@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,16 +130,16 @@ class PurchasingSessionTest extends AbstractZonkyLeveragingTest {
         when(s.recommend(any(), any(), any())).thenReturn(true);
         final Zonky z = harmlessZonky();
         when(z.getLoan(eq(l.getId()))).thenReturn(l);
-        final Response response = Response.status(400)
-            .entity("TOO_MANY_REQUESTS")
+        final Response response = Response.status(429)
+            .entity("HTTP 429 Too Many Requests")
             .build();
-        final ClientErrorException thrown = new BadRequestException(response);
+        final ClientErrorException thrown = new ClientErrorException(response);
         doThrow(thrown).when(z)
             .purchase(any());
         final PowerTenant auth = mockTenant(z, false);
         final ParticipationDescriptor pd = new ParticipationDescriptor(p, () -> l);
-        assertThatThrownBy(() -> PurchasingSession.purchase(auth, Stream.of(pd), s))
-            .isInstanceOf(IllegalStateException.class);
+        final Stream<Participation> i = PurchasingSession.purchase(auth, Stream.of(pd), s);
+        assertThat(i).isEmpty();
     }
 
 }

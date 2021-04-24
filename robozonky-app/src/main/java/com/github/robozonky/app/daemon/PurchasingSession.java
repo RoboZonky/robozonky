@@ -75,10 +75,7 @@ final class PurchasingSession extends
             return true;
         } catch (BadRequestException ex) {
             var response = getResponseEntity(ex.getResponse());
-            if (response.contains("TOO_MANY_REQUESTS")) {
-                // HTTP 429 needs to terminate investing and throw failure up to the availability algorithm.
-                throw new IllegalStateException("HTTP 429 Too Many Requests caught during purchasing.", ex);
-            } else if (response.contains("INSUFFICIENT_BALANCE")) {
+            if (response.contains("INSUFFICIENT_BALANCE")) {
                 logger.debug("Failed purchasing participation worth {}. We don't have sufficient balance.",
                         participation.getRemainingPrincipal());
                 tenant.setKnownBalanceUpperBound(participation.getRemainingPrincipal()
@@ -94,7 +91,14 @@ final class PurchasingSession extends
             logger.debug("Failed purchasing participation #{}, not found.", participation.getId());
             return false;
         } catch (Exception ex) {
-            throw new IllegalStateException("Unknown problem during purchasing.", ex);
+            var message = ex.getMessage();
+            if (message != null && message.contains("HTTP 429")) {
+                // Zonky only allows one purchase per second; ignore.
+                logger.debug("Failed purchasing participation #{}, Zonky rejected request with HTTP 429.",
+                        participation.getId());
+                return false;
+            } else
+                throw new IllegalStateException("Unknown problem during purchasing.", ex);
         }
     }
 
