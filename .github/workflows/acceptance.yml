@@ -6,7 +6,6 @@ env:
   DEFAULT_JDK_VERSION: 11
   STABILIZING_PROPERTIES: -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false
   STREAMLINING_PROPERTIES: -Dassembly.skipAssembly -Denforcer.skip
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 defaults:

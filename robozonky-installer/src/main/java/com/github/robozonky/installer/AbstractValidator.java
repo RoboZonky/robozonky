@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,10 @@ abstract class AbstractValidator implements DataValidator {
                 .get(timeoutInSeconds, TimeUnit.SECONDS);
         } catch (final Exception ex) { // the installer must never ever throw an exception (= neverending spinner)
             logger.error("Uncaught exception.", ex);
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread()
+                    .interrupt();
+            }
             return DataValidator.Status.ERROR;
         } finally {
             logger.info("Finished validation.");
