@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import com.github.robozonky.api.notifications.LoanLostEvent;
 import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.Release;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
 import com.github.robozonky.api.notifications.RoboZonkyCrashedEvent;
@@ -52,6 +53,7 @@ import com.github.robozonky.api.remote.entities.Participation;
 import com.github.robozonky.api.remote.enums.LoanHealth;
 import com.github.robozonky.api.remote.enums.Rating;
 import com.github.robozonky.app.AbstractZonkyLeveragingTest;
+import com.github.robozonky.app.version.GithubRelease;
 import com.github.robozonky.internal.remote.entities.LoanHealthStatsImpl;
 import com.github.robozonky.internal.remote.entities.LoanImpl;
 import com.github.robozonky.internal.remote.entities.ParticipationImpl;
@@ -261,14 +263,18 @@ class EventFactoryTest extends AbstractZonkyLeveragingTest {
 
     @Test
     void robozonkyExperimentalUpdateDetected() {
-        var e = EventFactory.roboZonkyExperimentalUpdateDetected("5.0.0-cr-1");
-        assertThat(e.getNewVersion()).isEqualTo("5.0.0-cr-1");
+        var e = EventFactory.roboZonkyExperimentalUpdateDetected(new GithubRelease("5.0.0-cr-1"));
+        assertThat(e.getNewVersion())
+            .extracting(Release::getName)
+            .isEqualTo("5.0.0-cr-1");
     }
 
     @Test
     void robozonkyUpdateDetected() {
-        var e = EventFactory.roboZonkyUpdateDetected("5.0.0");
-        assertThat(e.getNewVersion()).isEqualTo("5.0.0");
+        var e = EventFactory.roboZonkyUpdateDetected(new GithubRelease("5.0.0"));
+        assertThat(e.getNewVersion())
+            .extracting(Release::getName)
+            .isEqualTo("5.0.0");
     }
 
     @Test

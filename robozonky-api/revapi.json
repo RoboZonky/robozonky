@@ -11,6 +11,18 @@
       }
     },
     "ignore": [
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.lang.String com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent::getNewVersion()",
+        "new": "method com.github.robozonky.api.notifications.Release com.github.robozonky.api.notifications.RoboZonkyExperimentalUpdateDetectedEvent::getNewVersion()",
+        "justification": "New version format."
+      },
+      {
+        "code": "java.method.returnTypeChanged",
+        "old": "method java.lang.String com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent::getNewVersion()",
+        "new": "method com.github.robozonky.api.notifications.Release com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent::getNewVersion()",
+        "justification": "New version format."
+      }
     ]
   }
 }

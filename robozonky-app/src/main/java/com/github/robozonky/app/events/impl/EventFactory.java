@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import com.github.robozonky.api.notifications.LoanNoLongerDelinquentEvent;
 import com.github.robozonky.api.notifications.LoanNowDelinquentEvent;
 import com.github.robozonky.api.notifications.PurchasingCompletedEvent;
 import com.github.robozonky.api.notifications.PurchasingStartedEvent;
+import com.github.robozonky.api.notifications.Release;
 import com.github.robozonky.api.notifications.ReservationAcceptedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckCompletedEvent;
 import com.github.robozonky.api.notifications.ReservationCheckStartedEvent;
@@ -152,7 +153,7 @@ public final class EventFactory {
         return new RoboZonkyEndingEventImpl();
     }
 
-    public static RoboZonkyExperimentalUpdateDetectedEvent roboZonkyExperimentalUpdateDetected(final String version) {
+    public static RoboZonkyExperimentalUpdateDetectedEvent roboZonkyExperimentalUpdateDetected(final Release version) {
         return new RoboZonkyExperimentalUpdateDetectedEventImpl(version);
     }
 
@@ -172,7 +173,7 @@ public final class EventFactory {
         return new WeeklySummaryEventImpl(portfolioOverview);
     }
 
-    public static RoboZonkyUpdateDetectedEvent roboZonkyUpdateDetected(final String version) {
+    public static RoboZonkyUpdateDetectedEvent roboZonkyUpdateDetected(final Release version) {
         return new RoboZonkyUpdateDetectedEventImpl(version);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ class ResponseTest {
             softly.assertThat(r)
                 .isEqualTo(Response.noMoreRecentVersion());
         });
-        final Response r2 = Response.moreRecentStable("5.7.0");
-        final Response r3 = Response.moreRecentStable("5.8.0");
+        final Response r2 = Response.moreRecentStable(new GithubRelease("5.7.0"));
+        final Response r3 = Response.moreRecentStable(new GithubRelease("5.8.0"));
         assertThat(r2).isNotEqualTo(r3);
     }
 
