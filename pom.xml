@@ -51,7 +51,7 @@
     <version.org.mockito>3.9.0</version.org.mockito>
     <version.org.mock-server>5.11.2</version.org.mock-server>
     <version.org.apache.logging.log4j>2.14.1</version.org.apache.logging.log4j>
-    <version.com.sun.mail>1.6.5</version.com.sun.mail>
+    <version.com.sun.mail>1.6.7</version.com.sun.mail>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
