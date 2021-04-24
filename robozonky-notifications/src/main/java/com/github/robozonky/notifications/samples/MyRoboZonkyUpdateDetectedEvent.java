@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@
 
 package com.github.robozonky.notifications.samples;
 
+import com.github.robozonky.api.notifications.Release;
 import com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent;
 
 public final class MyRoboZonkyUpdateDetectedEvent extends AbstractEvent
         implements RoboZonkyUpdateDetectedEvent {
     @Override
-    public String getNewVersion() {
-        return "5.4.0";
+    public Release getNewVersion() {
+        return new SampleRelease(false);
     }
 }

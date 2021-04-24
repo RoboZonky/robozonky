@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.github.robozonky.app.version;
+package com.github.robozonky.api.notifications;
 
-public final class CentralResponse {
+import java.net.URL;
+import java.time.ZonedDateTime;
+import java.util.List;
 
-    private CentralResponseBody response;
+public interface Release {
 
-    public CentralResponseBody getResponse() {
-        return response;
-    }
+    URL getUrl();
 
-    public void setResponse(final CentralResponseBody response) {
-        this.response = response;
-    }
+    String getName();
+
+    ZonedDateTime getDatePublished();
+
+    boolean isPrerelease();
+
+    List<? extends ReleaseAsset> getAssets();
 }

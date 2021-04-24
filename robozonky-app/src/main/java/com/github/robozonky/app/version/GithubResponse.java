@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package com.github.robozonky.app.version;
 
 import java.util.List;
 
-public final class CentralResponseBody {
+public final class GithubResponse {
 
-    private List<CentralResponseGav> docs;
+    private List<GithubRelease> releases;
 
-    public List<CentralResponseGav> getDocs() {
-        return docs;
+    public List<GithubRelease> getReleases() {
+        return releases;
     }
 
-    public void setDocs(final List<CentralResponseGav> docs) {
-        this.docs = docs;
+    public void setReleases(final List<GithubRelease> releases) {
+        this.releases = releases;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import java.util.Optional;
 
 final class Response {
 
-    private final String moreRecentStableVersion;
-    private final String moreRecentExperimentalVersion;
+    private final GithubRelease moreRecentStableVersion;
+    private final GithubRelease moreRecentExperimentalVersion;
 
     private Response() {
         this(null, null);
     }
 
-    private Response(final String moreRecentStableVersion, final String moreRecentExperimentalVersion) {
+    private Response(final GithubRelease moreRecentStableVersion, final GithubRelease moreRecentExperimentalVersion) {
         this.moreRecentStableVersion = moreRecentStableVersion;
         this.moreRecentExperimentalVersion = moreRecentExperimentalVersion;
     }
@@ -37,23 +37,24 @@ final class Response {
         return new Response();
     }
 
-    public static Response moreRecent(final String newStableVersion, final String newExperimentalVersion) {
+    public static Response moreRecent(final GithubRelease newStableVersion,
+            final GithubRelease newExperimentalVersion) {
         return new Response(newStableVersion, newExperimentalVersion);
     }
 
-    public static Response moreRecentExperimental(final String newVersion) {
+    public static Response moreRecentExperimental(final GithubRelease newVersion) {
         return new Response(null, newVersion);
     }
 
-    public static Response moreRecentStable(final String newVersion) {
+    public static Response moreRecentStable(final GithubRelease newVersion) {
         return new Response(newVersion, null);
     }
 
-    public Optional<String> getMoreRecentStableVersion() {
+    public Optional<GithubRelease> getMoreRecentStableVersion() {
         return Optional.ofNullable(moreRecentStableVersion);
     }
 
-    public Optional<String> getMoreRecentExperimentalVersion() {
+    public Optional<GithubRelease> getMoreRecentExperimentalVersion() {
         return Optional.ofNullable(moreRecentExperimentalVersion);
     }
 
@@ -65,7 +66,7 @@ final class Response {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
             return false;
         }
-        final Response response = (Response) o;
+        var response = (Response) o;
         return Objects.equals(moreRecentStableVersion, response.moreRecentStableVersion) &&
                 Objects.equals(moreRecentExperimentalVersion, response.moreRecentExperimentalVersion);
     }
