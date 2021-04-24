@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 
 import org.apache.logging.log4j.LogManager;
@@ -211,7 +210,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         final int loanId = loan.getId();
         final Zonky zonky = harmlessZonky();
         when(zonky.getLoan(eq(loanId))).thenReturn(loan);
-        doThrow(BadRequestException.class).when(zonky)
+        doThrow(ClientErrorException.class).when(zonky)
             .purchase(any());
         final Participation mock = mock(ParticipationImpl.class);
         when(mock.getId()).thenReturn(1L);
@@ -224,7 +223,7 @@ class StrategyExecutorTest extends AbstractZonkyLeveragingTest {
         when(tenant.getPurchaseStrategy()).thenReturn(Optional.of(ALL_ACCEPTING_PURCHASE_STRATEGY));
         final PurchasingOperationDescriptor d = mockPurchasingOperationDescriptor(pd);
         var exec = new StrategyExecutor<>(tenant, d);
-        assertThatThrownBy(exec::get).isNotNull();
+        assertThatThrownBy(exec::get).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
