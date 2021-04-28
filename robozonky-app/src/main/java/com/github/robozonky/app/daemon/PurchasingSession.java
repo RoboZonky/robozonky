@@ -85,6 +85,10 @@ final class PurchasingSession extends
                 logger.debug("Failed purchasing participation #{}, already have investment.",
                         participation.getId());
                 return false;
+            } else if (response.contains("INVESTMENT_LOCK_BY_OTHER_USER")) {
+                logger.debug("Failed purchasing participation #{}, locked by another user.",
+                        participation.getId());
+                return false;
             }
             throw new IllegalStateException("Unknown problem during purchasing. Reason given: '" + response + "'.", ex);
         } catch (NotFoundException ex) {
