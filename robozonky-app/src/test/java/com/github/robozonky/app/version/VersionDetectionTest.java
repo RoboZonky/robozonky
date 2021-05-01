@@ -39,13 +39,6 @@ class VersionDetectionTest extends AbstractEventLeveragingTest {
     private final SimplePayload payload = new VersionDetection(metadata);
 
     @Test
-    void live() {
-        final SimplePayload livePayload = new VersionDetection();
-        livePayload.run();
-        assertThat(getEventsRequested()).isEmpty();
-    }
-
-    @Test
     void noEventsOnFailure() {
         when(metadata.get()).thenReturn(Either.left(new IllegalStateException()));
         payload.run();
