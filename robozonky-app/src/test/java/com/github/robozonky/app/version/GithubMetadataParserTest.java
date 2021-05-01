@@ -64,7 +64,7 @@ class GithubMetadataParserTest extends AbstractRoboZonkyTest {
     @Test
     void checkUnknownVersion() {
         var parser = new GithubMetadataParser(serverUrl);
-        var result = parser.apply(Defaults.ROBOZONKY_VERSION); // Field set to a default value.
+        var result = parser.apply("unknown"); // Field set to a default value.
         assertThat(result.get()).isEqualTo(Response.noMoreRecentVersion());
     }
 
