@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import javax.ws.rs.core.MediaType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
+
 /**
  * Carries application constants (such as version) and desired environmental settings (such as charset or locale).
  */
@@ -48,6 +50,8 @@ public final class Defaults {
     public static final String ROBOZONKY_URL = "http://www.robozonky.cz";
     public static final String ROBOZONKY_USER_AGENT = "RoboZonky/" + Defaults.ROBOZONKY_VERSION + " ("
             + Defaults.ROBOZONKY_URL + ")";
+
+    public static final CompositeMeterRegistry METER_REGISTRY = new CompositeMeterRegistry();
 
     private Defaults() {
         // no instances

@@ -127,10 +127,6 @@ public enum Settings {
         return get(Settings.Key.DEBUG_ENABLE_HTTP_RESPONSE_LOGGING);
     }
 
-    public boolean isDebugDaemonTimingEnabled() {
-        return get(Settings.Key.DEBUG_ENABLE_DAEMON_TIMING);
-    }
-
     public Duration getRemoteResourceRefreshInterval() {
         return Duration.ofMinutes(get(Settings.Key.DEFAULTS_RESOURCE_REFRESH, 5));
     }
@@ -176,7 +172,6 @@ public enum Settings {
     public enum Key {
 
         DEBUG_ENABLE_HTTP_RESPONSE_LOGGING("robozonky.debug.enable_http_response_logging"),
-        DEBUG_ENABLE_DAEMON_TIMING("robozonky.debug.enable_daemon_timing"),
         DEFAULTS_RESOURCE_REFRESH("robozonky.default.resource_refresh_minutes"),
         DEFAULTS_SOCKET_TIMEOUT("robozonky.default.socket_timeout_seconds"),
         DEFAULTS_CONNECTION_TIMEOUT("robozonky.default.connection_timeout_seconds"),

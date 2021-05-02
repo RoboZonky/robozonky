@@ -29,38 +29,33 @@ import com.github.robozonky.internal.remote.endpoints.LoanApi;
 
 class ApiTest {
 
-    private final RequestCounter counter = new RequestCounterImpl();
-
     @Test
     void executeFunction() {
-        final LoanApi mock = mock(LoanApi.class);
-        final Api<LoanApi> api = new Api<>(mock, counter);
-        final String expected = UUID.randomUUID()
+        var mock = mock(LoanApi.class);
+        var api = new Api<>(mock);
+        var expected = UUID.randomUUID()
             .toString();
-        final Function<LoanApi, String> function = (a) -> expected;
-        final String result = api.call(function);
+        Function<LoanApi, String> function = (a) -> expected;
+        var result = api.call(function);
         assertThat(result).isSameAs(expected);
-        assertThat(counter.count()).isEqualTo(1);
     }
 
     @Test
     void failsImmediately() {
-        final LoanApi mock = mock(LoanApi.class);
-        final Api<LoanApi> api = new Api<>(mock, counter);
-        final Function<LoanApi, String> function = (a) -> {
+        var mock = mock(LoanApi.class);
+        var api = new Api<>(mock);
+        Function<LoanApi, String> function = (a) -> {
             throw new IllegalStateException();
         };
         assertThatThrownBy(() -> api.call(function)).isInstanceOf(IllegalStateException.class);
-        assertThat(counter.count()).isEqualTo(1);
     }
 
     @Test
     void executeProcedure() {
-        final LoanApi mock = mock(LoanApi.class);
-        final Api<LoanApi> api = new Api<>(mock, counter);
-        final Consumer<LoanApi> procedure = mock(Consumer.class);
+        var mock = mock(LoanApi.class);
+        var api = new Api<>(mock);
+        Consumer<LoanApi> procedure = mock(Consumer.class);
         api.run(procedure);
         verify(procedure, times(1)).accept(eq(mock));
-        assertThat(counter.count()).isEqualTo(1);
     }
 }

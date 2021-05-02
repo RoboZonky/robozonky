@@ -52,6 +52,7 @@
     <version.org.mock-server>5.11.2</version.org.mock-server>
     <version.org.apache.logging.log4j>2.14.1</version.org.apache.logging.log4j>
     <version.com.sun.mail>1.6.7</version.com.sun.mail>
+    <version.io.micrometer>1.6.6</version.io.micrometer>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
@@ -252,6 +253,17 @@
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>1.15</version>
+      </dependency>
+      <!-- Metrics. -->
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-core</artifactId>
+        <version>${version.io.micrometer}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-registry-jmx</artifactId>
+        <version>${version.io.micrometer}</version>
       </dependency>
       <!-- Testing. -->
       <dependency>
@@ -545,6 +557,7 @@
           </jvmArgs>
           <avoidCallsTo>
             <avoidCallsTo>org.apache.logging.log4j</avoidCallsTo> <!-- don't mutate logging calls -->
+            <avoidCallsTo>io.micrometer</avoidCallsTo> <!-- don't mutate metrics calls -->
           </avoidCallsTo>
           <!-- speed up PITest during development -->
           <maxDependencyDistance>2</maxDependencyDistance>

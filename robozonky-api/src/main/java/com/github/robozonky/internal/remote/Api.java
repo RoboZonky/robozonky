@@ -16,48 +16,33 @@
 
 package com.github.robozonky.internal.remote;
 
-import java.time.Duration;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 class Api<T> {
 
-    private static final Logger LOGGER = LogManager.getLogger(Api.class);
-    private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
-    private static final Duration FIVE_MINUTES = Duration.ofMinutes(5);
-
     private final T proxy;
-    private final RequestCounter counter;
+    private final Timer timer;
 
-    Api(final T proxy) {
-        this(proxy, null);
-    }
-
-    public Api(final T proxy, final RequestCounter counter) {
+    public Api(final T proxy) {
         this.proxy = proxy;
-        this.counter = counter;
+        this.timer = Timer.builder(UUID.randomUUID()
+            .toString()) // Testing purposes
+            .register(new SimpleMeterRegistry());
     }
 
-    static <Y, Z> Z call(final Function<Y, Z> function, final Y proxy, final RequestCounter counter) {
-        LOGGER.trace("Executing...");
-        try {
-            return function.apply(proxy);
-        } finally {
-            if (counter != null) {
-                counter.mark();
-                LOGGER.trace("... done. (Request counts: {} in last 60 sec., {} in last 5 min.)",
-                        () -> counter.count(ONE_MINUTE), () -> counter.count(FIVE_MINUTES));
-            } else {
-                LOGGER.trace("... done. (Not counting towards the API quota.)");
-            }
-        }
+    public Api(final T proxy, final Timer timer) {
+        this.proxy = proxy;
+        this.timer = Objects.requireNonNull(timer);
     }
 
     <S> S call(final Function<T, S> function) {
-        return call(function, proxy, counter);
+        return timer.record(() -> function.apply(proxy));
     }
 
     void run(final Consumer<T> consumer) {

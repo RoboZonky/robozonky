@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,9 @@ class EntityCollectionPageSource<T, S> implements PageSource<T> {
     @Override
     public List<T> fetch(final long offset, final long limit, final LongConsumer totalSizeSink) {
         LOGGER.trace("Requested with offset {}, limit {}.", offset, limit);
-        final int pageId = offset < 1 ? 0 : (int) (offset / pageSize);
+        var pageId = offset < 1 ? 0 : (int) (offset / pageSize);
         // limit is ignored, as the page size determines the page number; offset+limit is not supported by Zonky
-        final PaginatedResult<T> result = api.execute(function, this.select, pageId, pageSize);
+        var result = api.execute(function, this.select, pageId, pageSize);
         totalSizeSink.accept(result.getTotalResultCount());
         return result.getPage();
     }

@@ -21,8 +21,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
@@ -31,9 +31,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
+
+import io.micrometer.core.instrument.Timer;
 
 final class AvailabilityImpl implements Availability {
 
@@ -41,15 +42,15 @@ final class AvailabilityImpl implements Availability {
     private static final Logger LOGGER = LogManager.getLogger(AvailabilityImpl.class);
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
     private final AtomicReference<Status> pause = new AtomicReference<>();
-    private final Predicate<ZonedDateTime> hasNewerRequest;
+    private final Timer meteredRequestTimer;
+    private final Timer downtimeTimer;
+    private final AtomicLong requestCountAtTimeOfError = new AtomicLong(0);
 
-    public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final RequestCounter requestCounter) {
+    public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final Timer requestTimer) {
         this.zonkyApiTokenSupplier = zonkyTokenSupplier;
-        if (requestCounter == null) { // for easier testing
-            this.hasNewerRequest = instant -> true;
-        } else {
-            this.hasNewerRequest = requestCounter::hasMoreRecent;
-        }
+        this.meteredRequestTimer = requestTimer;
+        this.downtimeTimer = Timer.builder("robozonky.downtime") // TODO make tenant-specific one day.
+            .register(Defaults.METER_REGISTRY);
     }
 
     AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier) {
@@ -60,7 +61,7 @@ final class AvailabilityImpl implements Availability {
         if (throwable == null) {
             return false;
         } else if (throwable instanceof ClientErrorException) {
-            final int code = ((ClientErrorException) throwable).getResponse()
+            var code = ((ClientErrorException) throwable).getResponse()
                 .getStatus();
             if (code == 429) {
                 return true;
@@ -87,13 +88,13 @@ final class AvailabilityImpl implements Availability {
         } else if (isAvailable()) { // no waiting for anything
             return DateUtil.zonedNow();
         }
-        final Status paused = pause.get();
+        var status = pause.get();
         // add 5 seconds of initial delay to give time to recover from HTTP 429 or whatever other problem there was
-        final boolean unavailableDueToQuota = paused.isQuotaLimited();
-        final long initialMandatoryDelayInSeconds = unavailableDueToQuota ? 60 : MANDATORY_DELAY_IN_SECONDS;
-        final long secondsFromPauseToNextCheck = initialMandatoryDelayInSeconds
-                + (long) Math.pow(2, paused.getFailedRetries());
-        return paused.getExceptionRegisteredOn()
+        var unavailableDueToQuota = status.isQuotaLimited();
+        var initialMandatoryDelayInSeconds = unavailableDueToQuota ? 60 : MANDATORY_DELAY_IN_SECONDS;
+        var secondsFromPauseToNextCheck = initialMandatoryDelayInSeconds
+                + (long) Math.pow(2, status.getFailedRetries());
+        return status.getExceptionRegisteredOn()
             .plus(Duration.ofSeconds(secondsFromPauseToNextCheck));
     }
 
@@ -109,7 +110,13 @@ final class AvailabilityImpl implements Availability {
         }
         var paused = pause.get();
         var pausedOn = paused.getExceptionRegisteredOn();
-        if (hasNewerRequest.test(pausedOn)) {
+        var hasNewerRequest = requestCountAtTimeOfError.get() < 0 ||
+                meteredRequestTimer.count() > requestCountAtTimeOfError.get();
+        if (hasNewerRequest) {
+            var downtime = Duration.between(paused.getExceptionRegisteredOn(), DateUtil.zonedNow())
+                .abs();
+            downtimeTimer.record(downtime);
+            requestCountAtTimeOfError.set(-1);
             pause.set(null);
             LOGGER.info(() -> "Resumed after a forced pause on " + DateUtil.toString(pausedOn) + ".");
             return Optional.of(paused.getExceptionRegisteredOn());
@@ -128,6 +135,7 @@ final class AvailabilityImpl implements Availability {
             LOGGER.debug("Ignoring Zonky API exception.", ex);
             return false;
         }
+        requestCountAtTimeOfError.set(meteredRequestTimer == null ? -1 : meteredRequestTimer.count());
         if (isAvailable()) {
             pause.set(new Status(isQuotaLimitHit(ex)));
             LOGGER.debug("Fault identified, forcing pause.", ex);

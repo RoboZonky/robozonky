@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.github.robozonky.app.tenant;
 
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -48,10 +47,8 @@ class PowerTenantImpl implements PowerTenant {
 
     private static final Logger LOGGER = LogManager.getLogger(PowerTenantImpl.class);
 
-    private final Random random = new Random();
     private final SessionInfo sessionInfo;
     private final ApiProvider apis;
-    private final Runnable quotaMonitor;
     private final RemotePortfolio portfolio;
     private final ZonkyApiTokenSupplier token;
     private final StrategyProvider strategyProvider;
@@ -63,30 +60,17 @@ class PowerTenantImpl implements PowerTenant {
             final StrategyProvider strategyProvider, final ZonkyApiTokenSupplier tokenSupplier) {
         this.strategyProvider = strategyProvider;
         this.apis = apis;
-        this.quotaMonitor = apis.getRequestCounter()
-            .map(r -> (Runnable) new QuotaMonitor(r))
-            .orElse(() -> {
-                // do nothing
-            });
         this.sessionInfo = new SessionInfoImpl(() -> call(Zonky::getConsents), () -> call(Zonky::getRestrictions),
                 username, sessionName, isDryRun);
         this.token = tokenSupplier;
-        this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getRequestCounter()
-            .orElse(null)));
+        this.availability = Memoizer.memoize(() -> new AvailabilityImpl(token, apis.getMeteredRequestTimer()));
         this.portfolio = new RemotePortfolioImpl(this);
         this.balance = new StatefulBoundedBalance(this);
     }
 
     @Override
     public <T> T call(final Function<Zonky, T> operation) {
-        try {
-            return apis.call(operation, token);
-        } finally {
-            final int randomBetweenZeroAndHundred = random.nextInt(100);
-            if (randomBetweenZeroAndHundred == 0) { // check request situation in 1 % of cases
-                quotaMonitor.run();
-            }
-        }
+        return apis.call(operation, token);
     }
 
     @Override

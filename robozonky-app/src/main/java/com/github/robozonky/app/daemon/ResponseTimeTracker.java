@@ -16,19 +16,10 @@
 
 package com.github.robozonky.app.daemon;
 
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
-import static java.util.stream.Collectors.joining;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +27,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.Participation;
-import com.github.robozonky.internal.Settings;
+import com.github.robozonky.internal.Defaults;
+
+import io.micrometer.core.instrument.Timer;
 
 /**
  * Used to debug how long it takes for a loan to be invested into, or a participation to be purchased.
@@ -47,37 +40,40 @@ final class ResponseTimeTracker {
 
     private static final Logger LOGGER = LogManager.getLogger(ResponseTimeTracker.class);
     private static final ResponseTimeTracker INSTANCE = new ResponseTimeTracker();
-    static final Path LOAN_OUTPUT_PATH = Path.of("robozonky-debug-loans.txt");
-    static final Path PARTICIPATION_OUTPUT_PATH = Path.of("robozonky-debug-participations.txt");
 
+    private final Timer loanTimer;
+    private final Timer participationTimer;
     private final Map<Long, Long> loanRegistrations = new ConcurrentHashMap<>(0);
     private final Map<Long, Long> participationRegistrations = new ConcurrentHashMap<>(0);
-    private final Map<Path, List<String>> toWrite = new ConcurrentHashMap<>(2);
 
     private ResponseTimeTracker() {
-        // No external instances.
-    }
-
-    private static void write(final Path output, final String contents) {
-        try (var writer = Files.newBufferedWriter(output, CREATE, WRITE, APPEND)) {
-            writer.write(contents);
-            writer.newLine();
-        } catch (IOException ex) {
-            LOGGER.trace("Failed writing '{}' to {}.", contents, output);
-        }
+        this.loanTimer = Timer.builder("robozonky.strategy.response")
+            .tag("marketplace", "primary")
+            .register(Defaults.METER_REGISTRY);
+        this.participationTimer = Timer.builder("robozonky.strategy.response")
+            .tag("marketplace", "secondary")
+            .register(Defaults.METER_REGISTRY);
     }
 
     public static CompletableFuture<Void> executeAsync(final BiConsumer<ResponseTimeTracker, Long> operation) {
-        if (!Settings.INSTANCE.isDebugDaemonTimingEnabled()) {
-            return CompletableFuture.completedFuture(null);
-        }
         var nanotime = System.nanoTime(); // Store current nanotime, as we can't control when the operation will run.
         return CompletableFuture.runAsync(() -> operation.accept(INSTANCE, nanotime));
     }
 
+    private static <Id extends Number> void dispatch(final long nanotime, final Id id,
+            final Map<Id, Long> registrations, final Timer timer) {
+        var registeredOn = registrations.remove(id);
+        if (registeredOn == null) {
+            LOGGER.trace("No registration found for #{}.", id);
+            return;
+        }
+        var nanosDuration = nanotime - registeredOn;
+        timer.record(nanosDuration, TimeUnit.NANOSECONDS);
+    }
+
     /**
      * Register that a {@link Loan} entered the system at this time.
-     * 
+     *
      * @param nanotime
      * @param id
      */
@@ -87,7 +83,7 @@ final class ResponseTimeTracker {
 
     /**
      * Register that a {@link Participation} entered the system at this time.
-     * 
+     *
      * @param nanotime
      * @param id
      */
@@ -97,68 +93,30 @@ final class ResponseTimeTracker {
 
     /**
      * Register that an investment attempt was made.
-     * 
+     *
      * @param nanotime
      * @param loan
      */
     public void dispatch(final long nanotime, final Loan loan) {
-        dispatch(nanotime, (long) loan.getId(), loanRegistrations, LOAN_OUTPUT_PATH);
+        dispatch(nanotime, (long) loan.getId(), loanRegistrations, loanTimer);
     }
 
     /**
      * Register that a purchase attempt was made.
-     * 
+     *
      * @param nanotime
      * @param participation
      */
     public void dispatch(final long nanotime, final Participation participation) {
-        dispatch(nanotime, participation.getId(), participationRegistrations, PARTICIPATION_OUTPUT_PATH);
-    }
-
-    private <Id extends Number> void dispatch(final long nanotime, final Id id, final Map<Id, Long> registrations,
-            final Path output) {
-        var registeredOn = registrations.remove(id);
-        if (registeredOn == null) {
-            LOGGER.trace("No registration found for #{}.", id);
-            return;
-        }
-        var nanosDuration = nanotime - registeredOn;
-        var content = id + " " + nanosDuration;
-        toWrite.compute(output, (f, contents) -> {
-            var strings = contents == null ? new CopyOnWriteArrayList<String>() : contents;
-            strings.add(content);
-            return strings;
-        });
-    }
-
-    private void clear(final Path output, final Map<Long, Long> registrations) {
-        try {
-            var contents = toWrite.remove(output);
-            if (contents == null) {
-                return;
-            }
-            write(output, contents.stream()
-                .collect(joining(System.lineSeparator())));
-        } catch (Exception ex) {
-            LOGGER.trace("Failed writing into {}.", output, ex);
-        } finally {
-            registrations.clear();
-        }
+        dispatch(nanotime, participation.getId(), participationRegistrations, participationTimer);
     }
 
     /**
      * To be called at the end of operations to write the results and clear any undispatched items.
      */
     public void clear() {
-        if (!Settings.INSTANCE.isDebugDaemonTimingEnabled()) {
-            return;
-        }
-        synchronized (LOAN_OUTPUT_PATH) {
-            clear(LOAN_OUTPUT_PATH, loanRegistrations);
-        }
-        synchronized (PARTICIPATION_OUTPUT_PATH) {
-            clear(PARTICIPATION_OUTPUT_PATH, participationRegistrations);
-        }
+        loanRegistrations.clear();
+        participationRegistrations.clear();
     }
 
 }

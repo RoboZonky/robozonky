@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 
+import io.micrometer.core.instrument.Timer;
+
 class PaginatedApi<S, T> {
 
     private static final Logger LOGGER = LogManager.getLogger(PaginatedApi.class);
@@ -35,20 +37,17 @@ class PaginatedApi<S, T> {
     private final String url;
     private final ResteasyClient client;
     private final Supplier<ZonkyApiToken> tokenSupplier;
-    private final RequestCounter counter;
-
-    PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
-            final ResteasyClient client) {
-        this(api, url, token, client, null);
-    }
+    private final Timer meteredRequestTimer;
+    private final Timer unmeteredRequestTimer;
 
     public PaginatedApi(final Class<T> api, final String url, final Supplier<ZonkyApiToken> token,
-            final ResteasyClient client, final RequestCounter counter) {
+            final ResteasyClient client, final Timer meteredRequestTimer, final Timer unmeteredRequestTimer) {
         this.api = api;
         this.url = url;
         this.client = client;
         this.tokenSupplier = token;
-        this.counter = counter;
+        this.meteredRequestTimer = meteredRequestTimer;
+        this.unmeteredRequestTimer = unmeteredRequestTimer;
     }
 
     public void setSortString(final String sortString) {
@@ -85,8 +84,9 @@ class PaginatedApi<S, T> {
     }
 
     <Q> Q execute(final Function<T, Q> function, final RoboZonkyFilter filter, final boolean trackRequests) {
-        final T proxy = ProxyFactory.newProxy(client, filter, api, url);
-        return Api.call(function, proxy, trackRequests ? counter : null);
+        var timer = trackRequests ? meteredRequestTimer : unmeteredRequestTimer;
+        var proxy = ProxyFactory.newProxy(client, filter, api, url);
+        return timer.record(() -> function.apply(proxy));
     }
 
     public PaginatedResult<S> execute(final Function<T, List<S>> function, final Select select, final int pageNo,

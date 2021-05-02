@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,10 @@ import com.github.robozonky.api.notifications.RoboZonkyEndingEvent;
 import com.github.robozonky.api.notifications.RoboZonkyInitializedEvent;
 import com.github.robozonky.app.events.Events;
 import com.github.robozonky.internal.Defaults;
+
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.jmx.JmxConfig;
+import io.micrometer.jmx.JmxMeterRegistry;
 
 /**
  * Will send {@link RoboZonkyInitializedEvent} immediately and {@link RoboZonkyEndingEvent} when it's time to shut down
@@ -82,6 +86,7 @@ class RoboZonkyStartupNotifier implements ShutdownHook.Handler {
     public Optional<Consumer<ReturnCode>> get() {
         var version = Defaults.ROBOZONKY_VERSION;
         LOGGER.info(readBanner(version));
+        Defaults.METER_REGISTRY.add(new JmxMeterRegistry(JmxConfig.DEFAULT, Clock.SYSTEM));
         LOGGER.debug("Running {} {} v{} from {}.", getProperty("java.vm.vendor"), getProperty("java.vm.name"),
                 getProperty("java.vm.version"), getProperty("java.home"));
         LOGGER.debug("Running on {} v{} ({}, {} CPUs, {}, {}).", getProperty("os.name"), getProperty("os.version"),
