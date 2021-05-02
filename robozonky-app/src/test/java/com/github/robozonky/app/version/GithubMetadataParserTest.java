@@ -87,7 +87,21 @@ class GithubMetadataParserTest extends AbstractRoboZonkyTest {
             assertThat(result.get())
                 .extracting(Response::getMoreRecentStableVersion,
                         InstanceOfAssertFactories.optional(GithubRelease.class))
-                .hasValueSatisfying(r -> assertThat(r.getName()).isEqualTo("RoboZonky 6.4.0"));
+                .hasValueSatisfying(r -> {
+                    assertThat(r.getName()).isEqualTo("RoboZonky 6.4.0");
+                    assertThat(r.getUrl()).hasHost("github.com");
+                    assertThat(r.isPrerelease()).isFalse();
+                    assertThat(r.isDraft()).isFalse();
+                    assertThat(r.getAssets()).hasSize(8);
+                    assertThat(r.getAssets())
+                        .first()
+                        .satisfies(asset -> {
+                            assertThat(asset.getName()).isEqualTo("robozonky-6.4.0-linux-x64.tar.xz");
+                            assertThat(asset.getDownloadUrl()).hasHost("github.com");
+                            assertThat(asset.getDownloadCount()).isEqualTo(19);
+                            assertThat(asset.getSizeInBytes()).isEqualTo(52110228L);
+                        });
+                });
             assertThat(result.get())
                 .extracting(Response::getMoreRecentExperimentalVersion,
                         InstanceOfAssertFactories.optional(GithubRelease.class))

@@ -557,6 +557,7 @@
           </jvmArgs>
           <avoidCallsTo>
             <avoidCallsTo>org.apache.logging.log4j</avoidCallsTo> <!-- don't mutate logging calls -->
+            <avoidCallsTo>io.micrometer</avoidCallsTo> <!-- don't mutate metrics calls -->
           </avoidCallsTo>
           <!-- speed up PITest during development -->
           <maxDependencyDistance>2</maxDependencyDistance>
