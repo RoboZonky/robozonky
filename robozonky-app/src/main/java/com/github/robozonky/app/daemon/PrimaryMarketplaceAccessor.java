@@ -70,7 +70,10 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
          * The code is designed to invest, rebuild the portfolio structure, and then invest again.
          */
         var loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
-            .peek(l -> ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerLoan(nanotime, l.getId())))
+            .peek(l -> {
+                FirstNoticeTracker.executeAsync((r, now) -> r.register(now, l));
+                ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerLoan(nanotime, l.getId()));
+            })
             .filter(l -> l.getMyInvestment()
                 .isEmpty()); // re-investing would fail
         if (getMaximumItemsToRead().isPresent()) {

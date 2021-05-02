@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class DaemonTest extends AbstractZonkyLeveragingTest {
             lifecycle.resumeToShutdown(); // unblock
             assertThat(f.get()).isEqualTo(ReturnCode.OK); // should now finish
             // call all the jobs and daemons we know about
-            verify(d, times(1)).submitTenantless(any(), any(SimplePayload.class), any(), any(), any(), any());
+            verify(d, times(2)).submitTenantless(any(), any(SimplePayload.class), any(), any(), any(), any());
             verify(d, times(8)).submitWithTenant(any(), any(), any(), any(), any(), any());
         } finally {
             e.shutdownNow();

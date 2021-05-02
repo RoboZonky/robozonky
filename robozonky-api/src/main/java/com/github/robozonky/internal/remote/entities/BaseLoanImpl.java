@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public abstract class BaseLoanImpl implements BaseLoan {
 
     // OffsetDateTime is expensive to parse, and Loans are on the hot path. Only do it when needed.
     protected String datePublished;
+    protected String deadline;
 
     protected Money amount;
     protected Money remainingInvestment;
@@ -162,6 +163,15 @@ public abstract class BaseLoanImpl implements BaseLoan {
 
     public void setDatePublished(final OffsetDateTime datePublished) {
         this.datePublished = datePublished.toString();
+    }
+
+    @Override
+    public OffsetDateTime getDeadline() {
+        return OffsetDateTime.parse(deadline);
+    }
+
+    public void setDeadline(final OffsetDateTime deadline) {
+        this.deadline = deadline.toString();
     }
 
     @Override

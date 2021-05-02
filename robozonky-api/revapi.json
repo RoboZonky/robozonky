@@ -22,6 +22,12 @@
         "old": "method java.lang.String com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent::getNewVersion()",
         "new": "method com.github.robozonky.api.notifications.Release com.github.robozonky.api.notifications.RoboZonkyUpdateDetectedEvent::getNewVersion()",
         "justification": "New version format."
+      },
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline()",
+        "justification": "We now use the deadline field on Loan."
       }
     ]
   }
