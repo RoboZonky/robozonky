@@ -72,11 +72,13 @@ public class ApiProvider implements AutoCloseable {
         this.client = Memoizer.memoize(ProxyFactory::newResteasyClient);
         var clientName = Objects.requireNonNullElse(id, "default");
         meteredRequestTimer = Timer.builder("robozonky.api.requests")
-            .tag("metered", clientName)
+            .tag("metered", "true")
+            .tag("client", clientName)
             .description("Rate-limited requests to Zonky API.")
             .register(Defaults.METER_REGISTRY);
         unmeteredRequestTimer = Timer.builder("robozonky.api.requests")
-            .tag("unmetered", clientName)
+            .tag("metered", "false")
+            .tag("client", clientName)
             .description("Non-rate-limited requests to Zonky API.")
             .register(Defaults.METER_REGISTRY);
     }
