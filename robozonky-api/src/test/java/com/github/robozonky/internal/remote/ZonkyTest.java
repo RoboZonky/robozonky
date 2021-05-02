@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
@@ -58,6 +59,9 @@ import com.github.robozonky.internal.remote.entities.RestrictionsImpl;
 import com.github.robozonky.internal.remote.entities.SellInfoImpl;
 import com.github.robozonky.internal.remote.entities.ZonkyApiTokenImpl;
 
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
 class ZonkyTest {
 
     private static <T, S> PaginatedApi<T, S> mockApi() {
@@ -79,14 +83,14 @@ class ZonkyTest {
     private static Zonky mockZonkyControl(final Api<ControlApi> ca) {
         final ApiProvider apiProvider = mockApiProvider();
         doReturn(ca).when(apiProvider)
-            .obtainNormal(eq(ControlApi.class), any());
+            .obtainNormal(eq(ControlApi.class), any(), any());
         return new Zonky(apiProvider, () -> mock(ZonkyApiTokenImpl.class));
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
             final Class<T> blueprint,
             final PaginatedApi<S, T> api) {
-        when(apiProvider.obtainPaginated(eq(blueprint), any(), any())).thenReturn(api);
+        when(apiProvider.obtainPaginated(eq(blueprint), any())).thenReturn(api);
     }
 
     private static <S, T extends EntityCollectionApi<S>> void mockPaginated(final ApiProvider apiProvider,
@@ -98,9 +102,12 @@ class ZonkyTest {
         final ApiProvider apiProvider = spy(new ApiProvider());
         final ControlApi camock = mock(ControlApi.class);
         when(camock.restrictions()).thenReturn(new RestrictionsImpl());
-        final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(camock, null);
+        final Api<ControlApi> ca = ApiProvider.actuallyObtainNormal(camock,
+                Timer.builder(UUID.randomUUID()
+                    .toString())
+                    .register(new SimpleMeterRegistry()));
         doReturn(ca).when(apiProvider)
-            .obtainNormal(eq(ControlApi.class), any());
+            .obtainNormal(eq(ControlApi.class), any(), any());
         mockPaginated(apiProvider, LoanApi.class);
         mockPaginated(apiProvider, PortfolioApi.class);
         mockPaginated(apiProvider, ParticipationApi.class);
@@ -110,7 +117,7 @@ class ZonkyTest {
     private static Zonky mockZonky(final Api<ControlApi> ca, final PaginatedApi<LoanImpl, LoanApi> la) {
         final ApiProvider apiProvider = mockApiProvider();
         doReturn(ca).when(apiProvider)
-            .obtainNormal(eq(ControlApi.class), any());
+            .obtainNormal(eq(ControlApi.class), any(), any());
         mockPaginated(apiProvider, LoanApi.class, la);
         return new Zonky(apiProvider, () -> mock(ZonkyApiTokenImpl.class));
     }

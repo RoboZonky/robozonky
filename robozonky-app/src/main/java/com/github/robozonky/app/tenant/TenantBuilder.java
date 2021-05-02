@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public final class TenantBuilder {
         if (secrets == null) {
             throw new IllegalStateException("Secret provider must be provided.");
         }
-        var apiProvider = api == null ? new ApiProvider() : api;
+        var apiProvider = api == null ? new ApiProvider(name) : api;
         var tokenSupplier = new ZonkyApiTokenSupplier(apiProvider, secrets);
         return new PowerTenantImpl(secrets.getUsername(), name, enableDryRun, apiProvider, strategyProvider,
                 tokenSupplier);

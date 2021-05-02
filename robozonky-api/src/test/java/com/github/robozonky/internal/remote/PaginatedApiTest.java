@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.function.Function;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.junit.jupiter.api.Test;
 
+import io.micrometer.core.instrument.Timer;
+
 class PaginatedApiTest<S, T> {
 
     @Test
@@ -36,7 +38,8 @@ class PaginatedApiTest<S, T> {
         final Function<T, BigDecimal> f = o -> BigDecimal.ONE;
         final Select sel = mock(Select.class);
         final RoboZonkyFilter filter = new RoboZonkyFilter();
-        final PaginatedApi<BigDecimal, T> p = spy(new PaginatedApi<>(null, null, null, null));
+        final PaginatedApi<BigDecimal, T> p = spy(
+                new PaginatedApi<>(null, null, null, null, mock(Timer.class), mock(Timer.class)));
         doReturn(BigDecimal.ONE).when(p)
             .execute(eq(f), eq(filter), anyBoolean());
         assertThat(p.execute(f, sel, filter)).isEqualTo(BigDecimal.ONE);
@@ -47,7 +50,8 @@ class PaginatedApiTest<S, T> {
     @Test
     void checkSimple() {
         final Function<T, S> f = o -> null;
-        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, null));
+        final PaginatedApi<S, T> p = spy(
+                new PaginatedApi<>(null, null, null, null, mock(Timer.class), mock(Timer.class)));
         doReturn(null).when(p)
             .execute(eq(f), any(), anyBoolean());
         p.execute(f);
@@ -56,7 +60,8 @@ class PaginatedApiTest<S, T> {
 
     @Test
     void checkPagination() {
-        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, mock(ResteasyClient.class)));
+        final PaginatedApi<S, T> p = spy(
+                new PaginatedApi<>(null, null, null, mock(ResteasyClient.class), mock(Timer.class), mock(Timer.class)));
         doReturn(null).when(p)
             .execute(any(), any(), any());
         final Function<T, List<S>> f = o -> Collections.emptyList();
@@ -77,7 +82,8 @@ class PaginatedApiTest<S, T> {
     void checkSorting() {
         String sortString = UUID.randomUUID()
             .toString();
-        final PaginatedApi<S, T> p = spy(new PaginatedApi<>(null, null, null, mock(ResteasyClient.class)));
+        final PaginatedApi<S, T> p = spy(
+                new PaginatedApi<>(null, null, null, mock(ResteasyClient.class), mock(Timer.class), mock(Timer.class)));
         p.setSortString(sortString);
         doReturn(null).when(p)
             .execute(any(), any(), any());

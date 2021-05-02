@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,11 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 
 import com.github.robozonky.internal.Defaults;
-import com.github.robozonky.internal.remote.RequestCounter;
 import com.github.robozonky.internal.tenant.Availability;
 import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.test.AbstractRoboZonkyTest;
+
+import io.micrometer.core.instrument.Timer;
 
 class AvailabilityImplTest extends AbstractRoboZonkyTest {
 
@@ -119,7 +120,9 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
 
     @Test
     void noSuccessUntilRequestCounterIncrease() {
-        final RequestCounter counter = mock(RequestCounter.class);
+        final Timer counter = mock(Timer.class);
+        doReturn(0L).when(counter)
+            .count();
         final Availability a = new AvailabilityImpl(s, counter);
         final ZonedDateTime zonedNow = DateUtil.zonedNow();
         final Instant now = zonedNow.toInstant();
@@ -132,7 +135,8 @@ class AvailabilityImplTest extends AbstractRoboZonkyTest {
         assertThat(a.isAvailable()).isFalse();
         // move time and increase the request counter
         setClock(Clock.fixed(now.plus(Duration.ofMinutes(2)), Defaults.ZONKYCZ_ZONE_ID));
-        when(counter.hasMoreRecent(notNull())).thenReturn(true);
+        doReturn(1L).when(counter)
+            .count();
         assertThat(a.registerSuccess()).contains(zonedNow);
         assertThat(a.isAvailable()).isTrue();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package com.github.robozonky.internal.remote;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -29,6 +30,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 
 import com.github.robozonky.api.remote.entities.ZonkyApiToken;
 import com.github.robozonky.internal.ApiConstants;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.remote.endpoints.ControlApi;
 import com.github.robozonky.internal.remote.endpoints.EntityCollectionApi;
 import com.github.robozonky.internal.remote.endpoints.LoanApi;
@@ -42,9 +44,14 @@ import com.github.robozonky.internal.remote.entities.ParticipationImpl;
 import com.github.robozonky.internal.util.StreamUtil;
 import com.github.robozonky.internal.util.functional.Memoizer;
 
+import io.micrometer.core.instrument.Timer;
+
 public class ApiProvider implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(ApiProvider.class);
+
+    private final Timer meteredRequestTimer;
+    private final Timer unmeteredRequestTimer;
     /**
      * Instances of the Zonky API are kept for as long as the token supplier is kept by the GC. This guarantees that,
      * for the lifetime of the token supplier, the expensive API-retrieving operations wouldn't be executed twice.
@@ -55,19 +62,27 @@ public class ApiProvider implements AutoCloseable {
      * be reused as much as possible.
      */
     private final Supplier<ResteasyClient> client;
-    private final RequestCounter counter;
 
     public ApiProvider() {
-        this(new RequestCounterImpl());
+        this(UUID.randomUUID()
+            .toString());
     }
 
-    public ApiProvider(final RequestCounter requestCounter) {
+    public ApiProvider(String id) {
         this.client = Memoizer.memoize(ProxyFactory::newResteasyClient);
-        this.counter = requestCounter;
+        var clientName = Objects.requireNonNullElse(id, "default");
+        meteredRequestTimer = Timer.builder("robozonky.api.requests")
+            .tag("metered", clientName)
+            .description("Rate-limited requests to Zonky API.")
+            .register(Defaults.METER_REGISTRY);
+        unmeteredRequestTimer = Timer.builder("robozonky.api.requests")
+            .tag("unmetered", clientName)
+            .description("Non-rate-limited requests to Zonky API.")
+            .register(Defaults.METER_REGISTRY);
     }
 
-    static <T> Api<T> actuallyObtainNormal(final T proxy, final RequestCounter counter) {
-        return new Api<>(proxy, counter);
+    static <T> Api<T> actuallyObtainNormal(final T proxy, final Timer timer) {
+        return new Api<>(proxy, timer);
     }
 
     /**
@@ -81,35 +96,20 @@ public class ApiProvider implements AutoCloseable {
      */
     <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
             final Supplier<ZonkyApiToken> token) {
-        return obtainPaginated(api, token, counter);
+        return new PaginatedApi<>(api, ApiConstants.ZONKY_API_HOSTNAME, token, client.get(), meteredRequestTimer,
+                unmeteredRequestTimer);
     }
 
-    /**
-     * Instantiate an API as a RESTEasy client proxy.
-     * 
-     * @param <S>     API return type.
-     * @param <T>     API type.
-     * @param api     RESTEasy endpoint.
-     * @param token   Supplier of a valid Zonky API token, always representing the active user.
-     * @param counter Will only be request-counted if this is not null.
-     * @return RESTEasy client proxy for the API, ready to be called.
-     */
-    <S, T extends EntityCollectionApi<S>> PaginatedApi<S, T> obtainPaginated(final Class<T> api,
-            final Supplier<ZonkyApiToken> token,
-            final RequestCounter counter) {
-        return new PaginatedApi<>(api, ApiConstants.ZONKY_API_HOSTNAME, token, client.get(), counter);
-    }
-
-    <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token) {
-        final T proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api,
+    <T> Api<T> obtainNormal(final Class<T> api, final Supplier<ZonkyApiToken> token, Timer timer) {
+        var proxy = ProxyFactory.newProxy(client.get(), new AuthenticatedFilter(token), api,
                 ApiConstants.ZONKY_API_HOSTNAME);
-        return actuallyObtainNormal(proxy, counter);
+        return actuallyObtainNormal(proxy, timer);
     }
 
     private OAuth oauth() {
         var proxy = ProxyFactory.newProxy(client.get(), new AuthenticationFilter(), ZonkyOAuthApi.class,
                 ApiConstants.ZONKY_API_HOSTNAME);
-        return new OAuth(actuallyObtainNormal(proxy, counter));
+        return new OAuth(actuallyObtainNormal(proxy, unmeteredRequestTimer));
     }
 
     /**
@@ -155,8 +155,7 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      */
     PaginatedApi<ParticipationImpl, ParticipationApi> secondaryMarketplace(final Supplier<ZonkyApiToken> token) {
-        // if we ever use the API for retrieving anything but the whole marketplace, request counting must be enabled
-        return this.obtainPaginated(ParticipationApi.class, token, null);
+        return this.obtainPaginated(ParticipationApi.class, token);
     }
 
     /**
@@ -176,7 +175,7 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      */
     Api<ControlApi> control(final Supplier<ZonkyApiToken> token) {
-        return obtainNormal(ControlApi.class, token);
+        return obtainNormal(ControlApi.class, token, unmeteredRequestTimer);
     }
 
     /**
@@ -186,11 +185,11 @@ public class ApiProvider implements AutoCloseable {
      * @return New API instance.
      */
     Api<ReservationApi> reservations(final Supplier<ZonkyApiToken> token) {
-        return obtainNormal(ReservationApi.class, token);
+        return obtainNormal(ReservationApi.class, token, meteredRequestTimer);
     }
 
-    public Optional<RequestCounter> getRequestCounter() {
-        return Optional.ofNullable(counter);
+    public Timer getMeteredRequestTimer() {
+        return meteredRequestTimer;
     }
 
     @Override

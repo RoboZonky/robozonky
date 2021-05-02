@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,9 @@ import com.github.robozonky.internal.secrets.SecretProvider;
 import com.github.robozonky.internal.state.TenantState;
 import com.github.robozonky.internal.tenant.RemotePortfolio;
 import com.github.robozonky.internal.tenant.Tenant;
+
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * This is a suggested parent class for all RoboZonky tests using this module. It will make sure to clear shared state
@@ -121,6 +124,11 @@ public abstract class AbstractRoboZonkyTest extends AbstractMinimalRoboZonkyTest
             return null;
         }).when(api)
             .run(any(), any());
+        doReturn(Timer.builder(UUID.randomUUID()
+            .toString())
+            .register(new SimpleMeterRegistry()))
+                .when(api)
+                .getMeteredRequestTimer();
         return api;
     }
 

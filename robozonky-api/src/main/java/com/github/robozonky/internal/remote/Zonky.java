@@ -93,8 +93,7 @@ public class Zonky {
     }
 
     private static <X, T extends X, S extends EntityCollectionApi<T>> Stream<X> getStream(final PaginatedApi<T, S> api,
-            final Function<S, List<T>> function,
-            final Select select) {
+            final Function<S, List<T>> function, final Select select) {
         var pageSize = Settings.INSTANCE.getDefaultApiPageSize();
         return PagingStreams.build(new EntityCollectionPageSource<>(api, function, select, pageSize))
             .map(x -> x);
