@@ -43,11 +43,14 @@ final class AvailabilityImpl implements Availability {
     private final ZonkyApiTokenSupplier zonkyApiTokenSupplier;
     private final AtomicReference<Status> pause = new AtomicReference<>();
     private final Timer meteredRequestTimer;
+    private final Timer downtimeTimer;
     private final AtomicLong requestCountAtTimeOfError = new AtomicLong(0);
 
     public AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier, final Timer requestTimer) {
         this.zonkyApiTokenSupplier = zonkyTokenSupplier;
         this.meteredRequestTimer = requestTimer;
+        this.downtimeTimer = Timer.builder("robozonky.downtime") // TODO make tenant-specific one day.
+            .register(Defaults.METER_REGISTRY);
     }
 
     AvailabilityImpl(final ZonkyApiTokenSupplier zonkyTokenSupplier) {
@@ -110,6 +113,9 @@ final class AvailabilityImpl implements Availability {
         var hasNewerRequest = requestCountAtTimeOfError.get() < 0 ||
                 meteredRequestTimer.count() > requestCountAtTimeOfError.get();
         if (hasNewerRequest) {
+            var downtime = Duration.between(paused.getExceptionRegisteredOn(), DateUtil.zonedNow())
+                .abs();
+            downtimeTimer.record(downtime);
             requestCountAtTimeOfError.set(-1);
             pause.set(null);
             LOGGER.info(() -> "Resumed after a forced pause on " + DateUtil.toString(pausedOn) + ".");
