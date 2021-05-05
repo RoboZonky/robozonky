@@ -1,3 +1,4 @@
+# Uses Github's default JDKs (Azul) to test the release, for simplicity of configs.
 name: Acceptance
 
 on: [pull_request]
