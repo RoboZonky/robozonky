@@ -73,13 +73,12 @@ final class GithubMetadataParser implements Function<String, Either<Throwable, R
         // Assumes that versions are sorted in the decreasing order of recency.
         var newerReleases = knownVersions.stream()
             .takeWhile(release -> !Objects.equals(release.getName(), knownVersionName))
+            .filter(f -> !f.isDraft())
             .collect(Collectors.toUnmodifiableList());
         var latestRelease = newerReleases.stream()
-            .filter(f -> !f.isDraft())
             .filter(f -> !f.isPrerelease())
             .findFirst();
         var latestExperimentalRelease = newerReleases.stream()
-            .filter(f -> !f.isDraft())
             .filter(GithubRelease::isPrerelease)
             .findFirst();
 
