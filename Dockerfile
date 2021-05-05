@@ -1,4 +1,3 @@
-# Requires support for multi-stage builds, available in Docker 17.05 or later
 # First build RoboZonky and unpack into the install directory...
 FROM maven:3-jdk-11 AS scratch
 ENV SOURCE_DIRECTORY=/usr/src/robozonky \
@@ -18,11 +17,11 @@ RUN ROBOZONKY_VERSION=$(mvn -q \
     && chmod +x $BINARY_DIRECTORY/robozonky.sh
 
 # ... then build a minimalistic Java runtime using jlink ...
-FROM azul/zulu-openjdk-alpine:16 AS jlink
+FROM adoptopenjdk/openjdk16:alpine AS jlink
 ENV WORKING_DIRECTORY=/tmp/robozonky
 COPY --from=scratch /tmp/robozonky $WORKING_DIRECTORY
 COPY . .
-RUN apk add binutils
+RUN apk add --no-cache tzdata musl-locales musl-locales-lang binutils
 RUN rm $(find $WORKING_DIRECTORY -name "robozonky-cli*jar")
 RUN ROBOZONKY_EXECUTABLE=$(find $WORKING_DIRECTORY -name "robozonky-app*jar") \
     && .github/workflows/jlink.sh $ROBOZONKY_EXECUTABLE $WORKING_DIRECTORY/runtime
