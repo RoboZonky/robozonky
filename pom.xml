@@ -370,7 +370,7 @@
       <dependency> <!-- For log4j's async logging. -->
         <groupId>com.lmax</groupId>
         <artifactId>disruptor</artifactId>
-        <version>3.4.3</version>
+        <version>3.4.4</version>
       </dependency>
       <!-- For the sake of used/unused dependency analysis and convergence. -->
       <dependency>
