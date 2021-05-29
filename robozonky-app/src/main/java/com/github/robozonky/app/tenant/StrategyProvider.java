@@ -61,7 +61,7 @@ class StrategyProvider implements ReloadListener<String> {
         .tag(TIMER_KEY, "investing")
         .register(Defaults.METER_REGISTRY);
     private final Timer reservationTimer = Timer.builder(TIMER_NAME)
-        .tag(TIMER_KEY, "selling")
+        .tag(TIMER_KEY, "reservations")
         .register(Defaults.METER_REGISTRY);
     private final Timer purchasingTimer = Timer.builder(TIMER_NAME)
         .tag(TIMER_KEY, "purchasing")
