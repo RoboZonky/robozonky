@@ -72,7 +72,6 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
         var loans = tenant.call(zonky -> zonky.getAvailableLoans(getIncrementalFilter()))
             .peek(l -> {
                 FirstNoticeTracker.executeAsync((r, now) -> r.register(now, l));
-                ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerLoan(nanotime, l.getId()));
             })
             .filter(l -> l.getMyInvestment()
                 .isEmpty()); // re-investing would fail
@@ -87,9 +86,8 @@ final class PrimaryMarketplaceAccessor extends AbstractMarketplaceAccessor<LoanD
     @Override
     public boolean hasUpdates() {
         try {
-            final LastPublishedItem current = tenant.call(Zonky::getLastPublishedLoanInfo);
-            ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerLoan(nanotime, current.getId()));
-            final LastPublishedItem previous = stateAccessor.apply(current);
+            var current = tenant.call(Zonky::getLastPublishedLoanInfo);
+            var previous = stateAccessor.apply(current);
             LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {

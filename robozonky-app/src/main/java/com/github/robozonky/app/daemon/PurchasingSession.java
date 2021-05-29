@@ -68,7 +68,6 @@ final class PurchasingSession extends
     }
 
     private boolean actualPurchase(final Participation participation) {
-        ResponseTimeTracker.executeAsync((r, nanotime) -> r.dispatch(nanotime, participation));
         try {
             tenant.run(zonky -> zonky.purchase(participation));
             logger.info("Purchased a participation worth {}.", participation.getRemainingPrincipal());

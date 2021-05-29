@@ -81,7 +81,6 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
          * The code is designed to purchase, rebuild the portfolio structure, and then purchase again.
          */
         var participations = tenant.call(zonky -> zonky.getAvailableParticipations(getIncrementalFilter()))
-            .peek(p -> ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerParticipation(nanotime, p.getId())))
             .filter(p -> { // never re-purchase what was once sold
                 var loanId = p.getLoanId();
                 if (cache.wasOnceSold(p.getInvestmentId())) {
@@ -106,9 +105,8 @@ final class SecondaryMarketplaceAccessor extends AbstractMarketplaceAccessor<Par
     @Override
     public boolean hasUpdates() {
         try {
-            final LastPublishedItem current = tenant.call(Zonky::getLastPublishedParticipationInfo);
-            ResponseTimeTracker.executeAsync((r, nanotime) -> r.registerParticipation(nanotime, current.getId()));
-            final LastPublishedItem previous = stateAccessor.apply(current);
+            var current = tenant.call(Zonky::getLastPublishedParticipationInfo);
+            var previous = stateAccessor.apply(current);
             LOGGER.trace("Current is {}, previous is {}.", current, previous);
             return !Objects.equals(previous, current);
         } catch (final Exception ex) {

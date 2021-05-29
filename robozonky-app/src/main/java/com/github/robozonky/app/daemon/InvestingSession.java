@@ -87,8 +87,6 @@ final class InvestingSession extends AbstractSession<RecommendedLoan, LoanDescri
 
     @Override
     protected boolean accept(final RecommendedLoan recommendation) {
-        ResponseTimeTracker.executeAsync((r, nanotime) -> r.dispatch(nanotime, recommendation.descriptor()
-            .item()));
         if (!isBalanceAcceptable(recommendation)) {
             logger.debug("Will not invest in {} due to balance ({}) likely too low.", recommendation,
                     tenant.getKnownBalanceUpperBound());
