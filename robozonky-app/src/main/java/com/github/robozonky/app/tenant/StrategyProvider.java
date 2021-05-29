@@ -26,19 +26,29 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.robozonky.api.SessionInfo;
 import com.github.robozonky.api.strategies.InvestmentStrategy;
+import com.github.robozonky.api.strategies.PortfolioOverview;
 import com.github.robozonky.api.strategies.PurchaseStrategy;
+import com.github.robozonky.api.strategies.ReservationDescriptor;
+import com.github.robozonky.api.strategies.ReservationMode;
 import com.github.robozonky.api.strategies.ReservationStrategy;
 import com.github.robozonky.api.strategies.SellStrategy;
+import com.github.robozonky.internal.Defaults;
 import com.github.robozonky.internal.async.ReloadListener;
 import com.github.robozonky.internal.async.Reloadable;
 import com.github.robozonky.internal.extensions.StrategyLoader;
+import com.github.robozonky.internal.test.DateUtil;
 import com.github.robozonky.internal.util.StringUtil;
 import com.github.robozonky.internal.util.UrlUtil;
+
+import io.micrometer.core.instrument.Timer;
 
 class StrategyProvider implements ReloadListener<String> {
 
     private static final Logger LOGGER = LogManager.getLogger(StrategyProvider.class);
+    private static final String TIMER_NAME = "robozonky.response";
+    private static final String TIMER_KEY = "strategy";
 
     private final AtomicReference<String> lastLoadedStrategy = new AtomicReference<>();
     private final AtomicReference<InvestmentStrategy> toInvest = new AtomicReference<>();
@@ -46,6 +56,19 @@ class StrategyProvider implements ReloadListener<String> {
     private final AtomicReference<PurchaseStrategy> toPurchase = new AtomicReference<>();
     private final AtomicReference<ReservationStrategy> forReservations = new AtomicReference<>();
     private final Reloadable<String> reloadableStrategy;
+
+    private final Timer investingTimer = Timer.builder(TIMER_NAME)
+        .tag(TIMER_KEY, "investing")
+        .register(Defaults.METER_REGISTRY);
+    private final Timer reservationTimer = Timer.builder(TIMER_NAME)
+        .tag(TIMER_KEY, "selling")
+        .register(Defaults.METER_REGISTRY);
+    private final Timer purchasingTimer = Timer.builder(TIMER_NAME)
+        .tag(TIMER_KEY, "purchasing")
+        .register(Defaults.METER_REGISTRY);
+    private final Timer sellingTimer = Timer.builder(TIMER_NAME)
+        .tag(TIMER_KEY, "selling")
+        .register(Defaults.METER_REGISTRY);
 
     StrategyProvider(final String strategyLocation) {
         this.reloadableStrategy = Reloadable.with(() -> readStrategy(strategyLocation))
@@ -96,12 +119,48 @@ class StrategyProvider implements ReloadListener<String> {
             return;
         }
         LOGGER.trace("Loading strategies.");
-        var investStrategy = set(toInvest, () -> StrategyLoader.toInvest(newValue), "Primary marketplace investment");
-        var purchaseStrategy = set(toPurchase, () -> StrategyLoader.toPurchase(newValue),
-                "Secondary marketplace purchase");
-        var sellingStrategy = set(toSell, () -> StrategyLoader.toSell(newValue), "Portfolio selling");
-        var reservationStrategy = set(forReservations, () -> StrategyLoader.forReservations(newValue),
-                "Loan reservation confirmation");
+        var investStrategy = set(toInvest, () -> StrategyLoader.toInvest(newValue)
+            .map(strategy -> (loanDescriptor, portfolioOverviewSupplier, sessionInfo) -> {
+                // Decorate the freshly created strategy with a operation timer.
+                var startInstant = DateUtil.now();
+                var result = strategy.recommend(loanDescriptor, portfolioOverviewSupplier, sessionInfo);
+                investingTimer.record(Duration.between(startInstant, DateUtil.now()));
+                return result;
+            }), "Primary marketplace investment");
+        var purchaseStrategy = set(toPurchase, () -> StrategyLoader.toPurchase(newValue)
+            .map(strategy -> (participationDescriptor, portfolioOverviewSupplier, sessionInfo) -> {
+                // Decorate the freshly created strategy with a operation timer.
+                var startInstant = DateUtil.now();
+                var result = strategy.recommend(participationDescriptor, portfolioOverviewSupplier, sessionInfo);
+                purchasingTimer.record(Duration.between(startInstant, DateUtil.now()));
+                return result;
+            }), "Secondary marketplace purchase");
+        var sellingStrategy = set(toSell, () -> StrategyLoader.toSell(newValue)
+            .map(strategy -> (investmentDescriptor, portfolioOverviewSupplier, sessionInfo) -> {
+                // Decorate the freshly created strategy with a operation timer.
+                var startInstant = DateUtil.now();
+                var result = strategy.recommend(investmentDescriptor, portfolioOverviewSupplier, sessionInfo);
+                sellingTimer.record(Duration.between(startInstant, DateUtil.now()));
+                return result;
+            }), "Portfolio selling");
+        var reservationStrategy = set(forReservations, () -> StrategyLoader.forReservations(newValue)
+            .map(strategy -> new ReservationStrategy() {
+                @Override
+                public ReservationMode getMode() {
+                    return strategy.getMode();
+                }
+
+                @Override
+                public boolean recommend(ReservationDescriptor reservationDescriptor,
+                        Supplier<PortfolioOverview> portfolioOverviewSupplier,
+                        SessionInfo sessionInfo) {
+                    // Decorate the freshly created strategy with a operation timer.
+                    var startInstant = DateUtil.now();
+                    var result = strategy.recommend(reservationDescriptor, portfolioOverviewSupplier, sessionInfo);
+                    reservationTimer.record(Duration.between(startInstant, DateUtil.now()));
+                    return result;
+                }
+            }), "Loan reservation confirmation");
         var allStrategiesMissing = Stream.of(investStrategy, purchaseStrategy, sellingStrategy, reservationStrategy)
             .allMatch(Objects::isNull);
         if (allStrategiesMissing) {

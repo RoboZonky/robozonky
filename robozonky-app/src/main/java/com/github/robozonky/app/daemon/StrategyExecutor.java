@@ -97,16 +97,12 @@ class StrategyExecutor<T, S, R> implements Supplier<Stream<R>> {
             return Stream.empty();
         }
         var marketplaceCheckTimestamp = DateUtil.zonedNow();
-        try {
-            var marketplace = marketplaceAccessor.getMarketplace();
-            var result = operationDescriptor.getOperation()
-                .apply(tenant, marketplace, strategy);
-            lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
-            logger.trace("Marketplace processing complete.");
-            return result;
-        } finally {
-            ResponseTimeTracker.executeAsync((r, nanotime) -> r.clear());
-        }
+        var marketplace = marketplaceAccessor.getMarketplace();
+        var result = operationDescriptor.getOperation()
+            .apply(tenant, marketplace, strategy);
+        lastSuccessfulMarketplaceCheck.set(marketplaceCheckTimestamp);
+        logger.trace("Marketplace processing complete.");
+        return result;
     }
 
     @Override
