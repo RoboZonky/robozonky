@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.notifications.Release;
 import com.github.robozonky.internal.Defaults;

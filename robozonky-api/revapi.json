@@ -28,6 +28,150 @@
         "code": "java.method.addedToInterface",
         "new": "method java.time.OffsetDateTime com.github.robozonky.api.remote.entities.BaseLoan::getDeadline()",
         "justification": "We now use the deadline field on Loan."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "class com.github.robozonky.api.Money",
+        "new": "class com.github.robozonky.api.Money",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeAdapter(com.github.robozonky.internal.util.json.MoneyAdapter.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "class com.github.robozonky.api.Money",
+        "new": "class com.github.robozonky.api.Money",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeAdapter(com.github.robozonky.internal.util.json.MoneyAdapter.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "class com.github.robozonky.api.Ratio",
+        "new": "class com.github.robozonky.api.Ratio",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeAdapter(com.github.robozonky.internal.util.json.RatioAdapter.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "class com.github.robozonky.api.Ratio",
+        "new": "class com.github.robozonky.api.Ratio",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeAdapter(com.github.robozonky.internal.util.json.RatioAdapter.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.DetailLabel",
+        "new": "enum com.github.robozonky.api.remote.enums.DetailLabel",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.DetailLabelDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.DetailLabel",
+        "new": "enum com.github.robozonky.api.remote.enums.DetailLabel",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.DetailLabelDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.Label",
+        "new": "enum com.github.robozonky.api.remote.enums.Label",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.LabelDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.Label",
+        "new": "enum com.github.robozonky.api.remote.enums.Label",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.LabelDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.LoanHealth",
+        "new": "enum com.github.robozonky.api.remote.enums.LoanHealth",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.LoanHealthInfoDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.LoanHealth",
+        "new": "enum com.github.robozonky.api.remote.enums.LoanHealth",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.LoanHealthInfoDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.MainIncomeIndustry",
+        "new": "enum com.github.robozonky.api.remote.enums.MainIncomeIndustry",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.MainIncomeIndustryDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.MainIncomeIndustry",
+        "new": "enum com.github.robozonky.api.remote.enums.MainIncomeIndustry",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.MainIncomeIndustryDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.MainIncomeType",
+        "new": "enum com.github.robozonky.api.remote.enums.MainIncomeType",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.MainIncomeTypeDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.MainIncomeType",
+        "new": "enum com.github.robozonky.api.remote.enums.MainIncomeType",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.MainIncomeTypeDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.Purpose",
+        "new": "enum com.github.robozonky.api.remote.enums.Purpose",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.PurposeDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.Purpose",
+        "new": "enum com.github.robozonky.api.remote.enums.Purpose",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.PurposeDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.added",
+        "old": "enum com.github.robozonky.api.remote.enums.Region",
+        "new": "enum com.github.robozonky.api.remote.enums.Region",
+        "annotation": "@jakarta.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.RegionDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
+      },
+      {
+        "ignore": true,
+        "code": "java.annotation.removed",
+        "old": "enum com.github.robozonky.api.remote.enums.Region",
+        "new": "enum com.github.robozonky.api.remote.enums.Region",
+        "annotation": "@javax.json.bind.annotation.JsonbTypeDeserializer(com.github.robozonky.internal.util.json.RegionDeserializer.class)",
+        "justification": "javax.json replaced by jakarta.json."
       }
     ]
   }

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.Money;
 import com.github.robozonky.api.Ratio;
