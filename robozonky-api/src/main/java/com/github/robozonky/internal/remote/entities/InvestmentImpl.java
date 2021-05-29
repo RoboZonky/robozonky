@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import javax.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbProperty;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
