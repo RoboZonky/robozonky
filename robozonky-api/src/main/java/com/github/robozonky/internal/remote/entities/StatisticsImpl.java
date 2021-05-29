@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
 
-import jakarta.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.Ratio;
 import com.github.robozonky.api.remote.entities.RiskPortfolio;

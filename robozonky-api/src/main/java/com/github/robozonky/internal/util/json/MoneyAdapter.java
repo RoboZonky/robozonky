@@ -16,7 +16,7 @@
 
 package com.github.robozonky.internal.util.json;
 
-import jakarta.json.bind.adapter.JsonbAdapter;
+import javax.json.bind.adapter.JsonbAdapter;
 
 import com.github.robozonky.api.Money;
 

@@ -18,8 +18,8 @@ package com.github.robozonky.internal.remote.entities;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 import org.junit.jupiter.api.Test;
 

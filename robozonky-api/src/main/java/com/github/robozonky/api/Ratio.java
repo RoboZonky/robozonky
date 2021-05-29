@@ -22,7 +22,7 @@ import static com.github.robozonky.internal.util.BigDecimalCalculator.toScale;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import jakarta.json.bind.annotation.JsonbTypeAdapter;
+import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import com.github.robozonky.internal.util.json.RatioAdapter;
 

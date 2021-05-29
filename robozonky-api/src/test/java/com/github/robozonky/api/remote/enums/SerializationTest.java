@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;

@@ -19,7 +19,7 @@ package com.github.robozonky.internal.remote.entities;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import jakarta.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.remote.entities.Loan;
 import com.github.robozonky.api.remote.entities.LoanInvestmentData;

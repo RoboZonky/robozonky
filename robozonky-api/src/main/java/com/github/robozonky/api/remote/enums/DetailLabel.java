@@ -16,7 +16,7 @@
 
 package com.github.robozonky.api.remote.enums;
 
-import jakarta.json.bind.annotation.JsonbTypeDeserializer;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
 import com.github.robozonky.internal.util.json.DetailLabelDeserializer;
 

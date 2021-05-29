@@ -19,7 +19,7 @@ package com.github.robozonky.app.version;
 import java.net.URL;
 import java.util.StringJoiner;
 
-import jakarta.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.notifications.ReleaseAsset;
 

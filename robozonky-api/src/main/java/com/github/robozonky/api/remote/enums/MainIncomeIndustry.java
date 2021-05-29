@@ -19,7 +19,7 @@ package com.github.robozonky.api.remote.enums;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import jakarta.json.bind.annotation.JsonbTypeDeserializer;
+import javax.json.bind.annotation.JsonbTypeDeserializer;
 
 import com.github.robozonky.internal.util.json.MainIncomeIndustryDeserializer;
 

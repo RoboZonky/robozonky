@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-import jakarta.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbProperty;
 
 import com.github.robozonky.api.remote.entities.Consent;
 import com.github.robozonky.api.remote.entities.Consents;

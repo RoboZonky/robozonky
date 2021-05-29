@@ -28,8 +28,8 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 import org.junit.jupiter.api.Test;
 
