@@ -40,12 +40,11 @@ import io.micrometer.core.instrument.Timer;
  */
 final class FirstNoticeTracker {
 
-    private static final Logger LOGGER = LogManager.getLogger(FirstNoticeTracker.class);
     static final FirstNoticeTracker INSTANCE = new FirstNoticeTracker();
-
+    private static final Logger LOGGER = LogManager.getLogger(FirstNoticeTracker.class);
     private final Instant firstAcceptedPublication = DateUtil.now();
     private final Timer timer;
-    private final Map<Integer, OffsetDateTime> registrations = new ConcurrentHashMap<>(0);
+    private final Map<Long, OffsetDateTime> deadlines = new ConcurrentHashMap<>(0);
 
     private FirstNoticeTracker() {
         this.timer = Timer.builder("robozonky.first.notice")
@@ -58,31 +57,39 @@ final class FirstNoticeTracker {
         return CompletableFuture.runAsync(() -> operation.accept(INSTANCE, firstNotice));
     }
 
-    public void register(final Instant firstNotice, final Loan loan) {
-        if (loan.getDatePublished()
-            .toInstant()
-            .isBefore(firstAcceptedPublication)) {
+    public void register(final Instant notice, final long loanId, final OffsetDateTime datePublished) {
+        register(notice, loanId, datePublished.toInstant(), datePublished.plusDays(7)); // Guess deadline, adjust later.
+    }
+
+    public void register(final Instant notice, final Loan loan) {
+        register(notice, loan.getId(), loan.getDatePublished()
+            .toInstant(), loan.getDeadline());
+    }
+
+    private void register(final Instant notice, final long loanId, final Instant datePublished,
+            final OffsetDateTime deadline) {
+        if (datePublished.isBefore(firstAcceptedPublication)) {
             // Loans from before the robot was started would be skewing the metric.
             return;
         }
-        var previousDeadline = registrations.putIfAbsent(loan.getId(), loan.getDeadline());
-        if (previousDeadline == null) {
-            var sincePublished = Duration.between(firstNotice, loan.getDatePublished()
-                .toInstant())
+        var previousDeadline = deadlines.put(loanId, deadline); // Always adjust deadline.
+        if (previousDeadline == null) { // Only record time if this is the first time we're seeing the loan.
+            var sincePublished = Duration.between(notice, datePublished)
                 .abs();
             timer.record(sincePublished);
         } else {
-            LOGGER.trace("Loan #{} already noticed.", loan.getId());
+            LOGGER.trace("Loan #{} already noticed.", loanId);
         }
     }
 
     public void cleanup() { // Prevent unrestricted growth of the map.
-        for (var entry : registrations.entrySet()) {
-            if (entry.getValue()
-                .isAfter(OffsetDateTime.now())) {
+        var now = DateUtil.zonedNow().toOffsetDateTime();
+        for (var entry : deadlines.entrySet()) {
+            var deadline = entry.getValue();
+            if (deadline.isAfter(now)) {
                 continue;
             }
-            registrations.remove(entry.getKey());
+            deadlines.remove(entry.getKey());
         }
     }
 
