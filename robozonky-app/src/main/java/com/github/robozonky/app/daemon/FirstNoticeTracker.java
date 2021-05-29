@@ -83,7 +83,8 @@ final class FirstNoticeTracker {
     }
 
     public void cleanup() { // Prevent unrestricted growth of the map.
-        var now = DateUtil.zonedNow().toOffsetDateTime();
+        var now = DateUtil.zonedNow()
+            .toOffsetDateTime();
         for (var entry : deadlines.entrySet()) {
             var deadline = entry.getValue();
             if (deadline.isAfter(now)) {
