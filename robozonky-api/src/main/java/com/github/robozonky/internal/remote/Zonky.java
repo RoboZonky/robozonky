@@ -130,7 +130,7 @@ public class Zonky {
         final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation()
             .getId(), Resolution.ACCEPTED);
         final Resolutions rs = new Resolutions(singleton(r));
-        controlApi.run(c -> c.accept(rs));
+        controlApi.run(c -> c.resolve(rs));
     }
 
     /**

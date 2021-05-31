@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public interface ControlApi {
 
     @PATCH
     @Path(ApiConstants.RESERVATIONS)
-    void accept(Resolutions resolutions);
+    void resolve(Resolutions resolutions);
 
     @PATCH
     @Path(ApiConstants.RESERVATION_PREFERENCES)
