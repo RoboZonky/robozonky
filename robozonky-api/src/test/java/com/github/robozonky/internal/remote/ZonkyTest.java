@@ -259,7 +259,7 @@ class ZonkyTest {
         final Reservation r = mock(ReservationImpl.class);
         when(r.getMyReservation()).thenReturn(mr);
         z.accept(r);
-        verify(control).accept(argThat(rs -> {
+        verify(control).resolve(argThat(rs -> {
             final List<ResolutionRequest> rr = rs.getResolutions();
             return rr.size() == 1 && Objects.equals(rr.get(0)
                 .getReservationId(),

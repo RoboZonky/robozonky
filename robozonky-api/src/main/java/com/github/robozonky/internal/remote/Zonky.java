@@ -127,10 +127,15 @@ public class Zonky {
     }
 
     public void accept(final Reservation reservation) {
-        final ResolutionRequest r = new ResolutionRequest(reservation.getMyReservation()
+        var resolution = new ResolutionRequest(reservation.getMyReservation()
             .getId(), Resolution.ACCEPTED);
-        final Resolutions rs = new Resolutions(singleton(r));
-        controlApi.run(c -> c.accept(rs));
+        controlApi.run(c -> c.resolve(new Resolutions(singleton(resolution))));
+    }
+
+    public void reject(final Reservation reservation) {
+        var resolution = new ResolutionRequest(reservation.getMyReservation()
+            .getId(), Resolution.REJECTED);
+        controlApi.run(c -> c.resolve(new Resolutions(singleton(resolution))));
     }
 
     /**
