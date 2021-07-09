@@ -138,7 +138,8 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/parent"
           install: |
-            apt-get -y install curl git zip
+            apt update
+            apt -y install curl git zip
             curl -s "https://get.sdkman.io" | bash
           run: |
             source /root/.sdkman/bin/sdkman-init.sh
