@@ -138,7 +138,7 @@ jobs:
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
-          shell: /bin/sh
+          shell: /bin/bash
           run: |
             apk add bash curl git zip
             curl -s "https://get.sdkman.io" | bash
@@ -154,8 +154,8 @@ jobs:
               org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
             )
             echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
-            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
-            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-installer-jre
+            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
+            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre
       - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
         with:
