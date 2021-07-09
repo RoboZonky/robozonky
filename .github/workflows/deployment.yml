@@ -138,7 +138,7 @@ jobs:
           dockerRunArgs: |
             --volume "${PWD}:/parent"
           install: |
-            dnf install curl git zip
+            dnf install -y curl git zip
             curl -s "https://get.sdkman.io" | bash
           run: |
             source /root/.sdkman/bin/sdkman-init.sh
@@ -157,12 +157,12 @@ jobs:
       - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
         with:
-          name: robozonky-jre-aarch64
+          name: robozonky-jre-linux-arm64v8
           path: robozonky-jre/**/*
       - name: Upload JLinked installer JRE
         uses: actions/upload-artifact@v2
         with:
-          name: robozonky-installer-jre-aarch64
+          name: robozonky-installer-jre-linux-arm64v8
           path: robozonky-installer-jre/**/*
   build:
     name: Build and deploy
@@ -190,11 +190,16 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Download Linux main app JRE
+      - name: Download Linux (x64) main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-linux
           path: robozonky-distribution/robozonky-distribution-full/target/jre-linux
+      - name: Download Linux (arm64v8) main app JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-jre-linux-arm64v8
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-linux-arm64v8
       - name: Download MacOS main app JRE
         uses: actions/download-artifact@v2
         with:
@@ -205,11 +210,16 @@ jobs:
         with:
           name: robozonky-jre-windows
           path: robozonky-distribution/robozonky-distribution-full/target/jre-windows
-      - name: Download Linux installer JRE
+      - name: Download Linux (x64) installer JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-installer-jre-linux
           path: robozonky-distribution/robozonky-distribution-installer/target/jre-linux
+      - name: Download Linux (arm64v8) installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-linux-arm64v8
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-linux-arm64v8
       - name: Download MacOS installer JRE
         uses: actions/download-artifact@v2
         with:
@@ -276,6 +286,14 @@ jobs:
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_name: robozonky-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_content_type: application/x-xz
+      - name: Upload Main app (Linux, arm64v8)
+        if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
+          asset_name: robozonky-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
+          asset_content_type: application/x-xz
       - name: Upload Main app (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
@@ -307,6 +325,14 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_name: robozonky-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
+          asset_content_type: application/x-xz
+      - name: Upload Installer (Linux, arm64v8)
+        if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
+          asset_name: robozonky-installer-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
           asset_content_type: application/x-xz
       - name: Upload Installer (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
