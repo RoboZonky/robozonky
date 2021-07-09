@@ -141,6 +141,7 @@ jobs:
           install: |
             apk add bash curl git zip
             curl -s "https://get.sdkman.io" | bash
+          shell: /bin/bash
           run: |
             source "/root/.sdkman/bin/sdkman-init.sh"
             sdk install maven
