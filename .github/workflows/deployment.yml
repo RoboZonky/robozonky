@@ -138,11 +138,10 @@ jobs:
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
-          shell: /bin/bash
-          run: |
+          install: |
             apk add bash curl git zip
             curl -s "https://get.sdkman.io" | bash
-            source "/root/.sdkman/bin/sdkman-init.sh"
+          run: |
             sdk install java 16.0.1.hs-adpt
             sdk install maven
             cd ./parent
