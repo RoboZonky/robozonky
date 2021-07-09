@@ -136,33 +136,16 @@ jobs:
           arch: ${{ matrix.arch }}
           distro: alpine_latest
           githubToken: ${{ github.token }}
-
-          # Create an artifacts directory
-          setup: |
-            mkdir -p "${PWD}/artifacts"
-
-          # Mount the artifacts directory as /artifacts in the container
           dockerRunArgs: |
-            --volume "${PWD}/artifacts:/artifacts"
-
-          # Pass some environment variables to the container
-          env: | # YAML, but pipe character is necessary
-            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
-
-          # The shell to run commands with in the container
+            --volume "${PWD}:/parent"
           shell: /bin/sh
-
-          # Install some dependencies in the container. This speeds up builds if
-          # you are also using githubToken. Any dependencies installed here will
-          # be part of the container image that gets cached, so subsequent
-          # builds don't have to re-install them. The image layer is cached
-          # publicly in your project's package repository, so it is vital that
-          # no secrets are present in the container state or logs.
           run: |
             apk add bash curl git zip
             curl -s "https://get.sdkman.io" | bash
+            source "/root/.sdkman/bin/sdkman-init.sh"
             sdk install java 16.0.1.hs-adpt
             sdk install maven
+            cd ./parent
             mvn install --batch-mode -DskipTests
             ROBOZONKY_VERSION=$(mvn -q \
               -Dexec.executable="echo" \
@@ -171,22 +154,17 @@ jobs:
               org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
             )
             echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
-            echo "ROBOZONKY_VERSION=$ROBOZONKY_VERSION" >> $GITHUB_ENV
-            echo "ROBOZONKY_OS=aarch64" >> $GITHUB_ENV
-            ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
-            ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-installer-jre
-      - name: Run JLink for the JARs
-        run: |
-          chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
+            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
+            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-installer-jre
       - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
         with:
-          name: robozonky-jre-${{ env.ROBOZONKY_OS }}
+          name: robozonky-jre-aarch64
           path: robozonky-jre/**/*
       - name: Upload JLinked installer JRE
         uses: actions/upload-artifact@v2
         with:
-          name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
+          name: robozonky-installer-jre-aarch64
           path: robozonky-installer-jre/**/*
   build:
     name: Build and deploy
