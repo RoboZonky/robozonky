@@ -123,7 +123,7 @@ jobs:
     strategy:
       fail-fast: false # Always see all results on all platforms.
       matrix:
-        arch: [aarch64]
+        arch: [ aarch64 ]
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -134,7 +134,7 @@ jobs:
         id: build
         with:
           arch: ${{ matrix.arch }}
-          distro: alpine-latest
+          distro: alpine_latest
           githubToken: ${{ github.token }}
 
           # Create an artifacts directory
