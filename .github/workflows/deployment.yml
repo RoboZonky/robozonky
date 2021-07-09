@@ -49,7 +49,7 @@ jobs:
       - name: Build and test
         run: mvn install --batch-mode -Dpit.skip=true
   jlink:
-    name: Prepare JREs for natively supported platforms
+    name: JREs for natively supported platforms
     needs: test
     strategy:
       fail-fast: false # Always see all results on all platforms.
@@ -118,7 +118,7 @@ jobs:
           name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
           path: robozonky-installer-jre/**/*
   jlink-arm:
-    name: Prepare JREs for ARM
+    name: JREs for ARM
     needs: test
     strategy:
       fail-fast: false # Always see all results on all platforms.
@@ -133,7 +133,7 @@ jobs:
         name: Build the JARs and run JLink
         with:
           arch: ${{ matrix.arch }}
-          distro: ubuntu_latest
+          distro: buster
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
