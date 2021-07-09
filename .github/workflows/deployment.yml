@@ -130,8 +130,7 @@ jobs:
         uses: actions/checkout@v2
       # Build and publish the JLinked JRE.
       - uses: uraimo/run-on-arch-action@v2.0.10
-        name: Build artifact
-        id: build
+        name: Build the JARs and run JLink
         with:
           arch: ${{ matrix.arch }}
           distro: alpine_latest
@@ -141,14 +140,15 @@ jobs:
           install: |
             apk add bash curl git zip
             curl -s "https://get.sdkman.io" | bash
-          shell: /bin/bash
+          # First hack SDKMAN to run in Bash.
+          # Then build the project.
+          # Then run JLink.
           run: |
-            source "/root/.sdkman/bin/sdkman-init.sh"
-            sdk install maven
-            sdk install java 16.0.1.hs-adpt
-            sdk install maven
-            cd ./parent
-            mvn install --batch-mode -DskipTests
+            echo "source /root/.sdkman/bin/sdkman-init.sh \
+              && sdk install maven \
+              && sdk install java 16.0.1.hs-adpt \
+              && mvn install --batch-mode -DskipTests" >> buildProject.sh
+            bash buildProject.sh
             ROBOZONKY_VERSION=$(mvn -q \
               -Dexec.executable="echo" \
               -Dexec.args='${project.version}' \
