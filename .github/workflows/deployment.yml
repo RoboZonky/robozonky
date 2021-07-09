@@ -49,7 +49,7 @@ jobs:
       - name: Build and test
         run: mvn install --batch-mode -Dpit.skip=true
   jlink:
-    name: Prepare JREs
+    name: Prepare JREs for natively supported platforms
     needs: test
     strategy:
       fail-fast: false # Always see all results on all platforms.
@@ -117,9 +117,82 @@ jobs:
         with:
           name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
           path: robozonky-installer-jre/**/*
+  jlink-arm:
+    name: Prepare JREs for ARM
+    needs: test
+    strategy:
+      fail-fast: false # Always see all results on all platforms.
+      matrix:
+        arch: [aarch64]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      # Build and publish the JLinked JRE.
+      - uses: uraimo/run-on-arch-action@v2.0.10
+        name: Build artifact
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: alpine-latest
+          githubToken: ${{ github.token }}
+
+          # Create an artifacts directory
+          setup: |
+            mkdir -p "${PWD}/artifacts"
+
+          # Mount the artifacts directory as /artifacts in the container
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+
+          # Pass some environment variables to the container
+          env: | # YAML, but pipe character is necessary
+            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+
+          # The shell to run commands with in the container
+          shell: /bin/sh
+
+          # Install some dependencies in the container. This speeds up builds if
+          # you are also using githubToken. Any dependencies installed here will
+          # be part of the container image that gets cached, so subsequent
+          # builds don't have to re-install them. The image layer is cached
+          # publicly in your project's package repository, so it is vital that
+          # no secrets are present in the container state or logs.
+          install: |
+            mvn install --batch-mode -DskipTests
+            ROBOZONKY_VERSION=$(mvn -q \
+              -Dexec.executable="echo" \
+              -Dexec.args='${project.version}' \
+              --non-recursive \
+              org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+            )
+            echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
+            echo "ROBOZONKY_VERSION=$ROBOZONKY_VERSION" >> $GITHUB_ENV
+            echo "ROBOZONKY_OS=aarch64" >> $GITHUB_ENV
+            ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-jre
+            ./${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-${{ env.ROBOZONKY_VERSION }}-full.jar robozonky-installer-jre
+          # Produce a binary artifact and place it in the mounted volume
+          run: |
+            cp $(which git) "/artifacts/${artifact_name}"
+            echo "Produced artifact at /artifacts/${artifact_name}"
+      - name: Run JLink for the JARs
+        run: |
+          chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
+      - name: Upload JLinked app JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-jre-${{ env.ROBOZONKY_OS }}
+          path: robozonky-jre/**/*
+      - name: Upload JLinked installer JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
+          path: robozonky-installer-jre/**/*
   build:
     name: Build and deploy
-    needs: jlink
+    needs:
+      - jlink
+      - jlink-arm
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
