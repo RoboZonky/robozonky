@@ -22,7 +22,7 @@ HERE=$(dirname $0)
 if [ -f $HERE/dist/$ROBOZONKY_EXECUTABLE ]; then
     HERE=$HERE/dist
 fi
-echo "Will run '$ROBOZONKY_EXECUTABLE' from '$HERE'."
+# echo "Will run '$ROBOZONKY_EXECUTABLE' from '$HERE'."
 
 # Use Java runtime bundled with RoboZonky, if available.
 CUSTOM_JRE_LOCATION="$HERE/runtime"
@@ -31,9 +31,9 @@ JAVA_EXECUTABLE="java"
 if [ -f $CUSTOM_JRE_LOCATION/bin/$JAVA_EXECUTABLE ]; then
     JAVA_EXECUTABLE=$CUSTOM_JRE_LOCATION/bin/$JAVA_EXECUTABLE
     JAVA_HOME=$CUSTOM_JRE_LOCATION
-    echo "JAVA_HOME set to '$JAVA_HOME'."
+    # echo "JAVA_HOME set to '$JAVA_HOME'."
 fi
-echo "Will use '$JAVA_EXECUTABLE' as the Java executable."
+# echo "Will use '$JAVA_EXECUTABLE' as the Java executable."
 
 ROBOZONKY_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError -Duser.timezone=Europe/Prague -Dlog4j.configurationFile=log4j2.xml -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true"
 # Added exec to propagate signals when Docker stop is issued, see https://github.com/RoboZonky/robozonky/pull/305.

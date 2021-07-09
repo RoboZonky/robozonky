@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The RoboZonky Project
+ * Copyright 2021 The RoboZonky Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,23 +36,27 @@ abstract class AbstractFeature implements Feature {
 
     @Override
     public void run() {
-        logger.info("Welcome to the RoboZonky command-line configuration and validation tool.");
-        logger.warn("This is a tool for the brave. Create a backup copy of RoboZonky " +
+        System.out.println("Welcome to the RoboZonky command-line configuration and validation tool.");
+        System.out.println("This is a tool for the brave. Create a backup copy of RoboZonky " +
                 "or use RoboZonky installer instead.");
         try {
             final String description = describe();
-            logger.info("--- Press any key to run: '{}'", description);
+            System.out.println("--- Press any key to run: '" + description + "'");
             System.in.read();
             setup();
-            logger.info("--- Executed, running test of the new setup.");
+            System.out.println("--- Executed, running test of the new setup.");
             test();
-            logger.info("--- Success.");
+            System.out.println("--- Success.");
         } catch (final SetupFailedException | IOException e) {
-            logger.error("Could not perform setup, configuration may have been corrupted.", e);
+            System.err.println("Could not perform setup, configuration may have been corrupted.");
+            e.printStackTrace(System.err);
             exitCode.set(CommandLine.ExitCode.SOFTWARE);
         } catch (final TestFailedException e) {
-            logger.error("Could not test setup, configuration may have been corrupted.", e);
+            System.err.println("Could not test setup, configuration may have been corrupted.");
+            e.printStackTrace(System.err);
             exitCode.set(CommandLine.ExitCode.SOFTWARE + 1);
+        } finally {
+            System.out.println("--- Terminating.");
         }
     }
 }
