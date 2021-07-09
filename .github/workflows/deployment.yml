@@ -142,6 +142,8 @@ jobs:
             apk add bash curl git zip
             curl -s "https://get.sdkman.io" | bash
           run: |
+            source "/root/.sdkman/bin/sdkman-init.sh"
+            sdk install maven
             sdk install java 16.0.1.hs-adpt
             sdk install maven
             cd ./parent
