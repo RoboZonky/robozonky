@@ -133,7 +133,7 @@ jobs:
         name: Build the JARs and run JLink
         with:
           arch: ${{ matrix.arch }}
-          distro: alpine_latest
+          distro: fedora_latest
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
@@ -145,19 +145,19 @@ jobs:
           # Then run JLink.
           run: |
             echo "source /root/.sdkman/bin/sdkman-init.sh \
-              && sdk install maven \
-              && sdk install java 16.0.1.hs-adpt \
-              && mvn install --batch-mode -DskipTests" >> buildProject.sh
+              sdk install java 16.0.1.hs-adpt \
+              sdk install maven \
+              mvn install --batch-mode -DskipTests \
+              ROBOZONKY_VERSION=$(mvn -q \
+                -Dexec.executable="echo" \
+                -Dexec.args='${project.version}' \
+                --non-recursive \
+                org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+              ) \
+              echo "The detected RoboZonky version is $ROBOZONKY_VERSION" \
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre \
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre" >> buildProject.sh
             bash buildProject.sh
-            ROBOZONKY_VERSION=$(mvn -q \
-              -Dexec.executable="echo" \
-              -Dexec.args='${project.version}' \
-              --non-recursive \
-              org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
-            )
-            echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
-            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
-            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre
       - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
         with:
