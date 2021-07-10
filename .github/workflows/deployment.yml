@@ -133,14 +133,14 @@ jobs:
         name: Build the JARs and run JLink
         with:
           arch: ${{ matrix.arch }}
-          distro: bullseye
+          distro: ubuntu20.04
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
           shell: /bin/bash
           install: |
-            apt update
-            apt -y install curl git zip
+            apt-get update -q -y
+            apt-get install -q -y curl git zip
             curl -s "https://get.sdkman.io" | bash
           run: |
             source "$HOME/.sdkman/bin/sdkman-init.sh"
