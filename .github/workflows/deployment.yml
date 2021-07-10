@@ -140,23 +140,22 @@ jobs:
           shell: /bin/bash
           install: |
             apt-get update
+            apt-get -qq -y install bash curl wget unzip zip
             rm /bin/sh && ln -s /bin/bash /bin/sh
-            apt-get -qq -y install curl wget unzip zip
-            curl -s "https://get.sdkman.io" | bash
-            source "$HOME/.sdkman/bin/sdkman-init.sh"
           run: |
-            sdk install java 16.0.1.hs-adpt
-            sdk install maven
-            mvn install --batch-mode -DskipTests
-            ROBOZONKY_VERSION=$(mvn -q \
-              -Dexec.executable="echo" \
-              -Dexec.args='${project.version}' \
-              --non-recursive \
-              org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
-            )
-            echo "The detected RoboZonky version is $ROBOZONKY_VERSION"
-            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
-            ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre
+            bash -c "curl -s https://get.sdkman.io | bash && \
+              source $HOME/.sdkman/bin/sdkman-init.sh && \
+              sdk install java 16.0.1.hs-adpt && \
+              sdk install maven && \
+              mvn install --batch-mode -DskipTests && \
+              ROBOZONKY_VERSION=$(mvn -q \
+                -Dexec.executable=echo \
+                -Dexec.args='${project.version}' \
+                --non-recursive \
+                org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+              ) && \
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre && \
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre"
       - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
         with:
