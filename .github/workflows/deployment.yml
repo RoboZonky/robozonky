@@ -134,7 +134,6 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
           distro: bullseye
-          githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
           shell: /bin/bash
@@ -145,8 +144,8 @@ jobs:
             curl -s https://get.sdkman.io | bash
           run: |
             echo "source /root/.sdkman/bin/sdkman-init.sh
-              sdk install maven
               sdk install java 16.0.1.hs-adpt
+              sdk install maven
               mvn install --batch-mode -DskipTests
               ROBOZONKY_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)
               ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
