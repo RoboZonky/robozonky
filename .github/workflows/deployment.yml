@@ -133,17 +133,18 @@ jobs:
         name: Build the JARs and run JLink
         with:
           arch: ${{ matrix.arch }}
-          distro: fedora_latest
+          distro: buster
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
           shell: /bin/bash
           install: |
-            dnf -y update
-            dnf -y install curl git zip
-          run: |
-            curl -s "https://get.sdkman.io?rcupdate=false" | bash
+            apt-get update
+            rm /bin/sh && ln -s /bin/bash /bin/sh
+            apt-get -qq -y install curl wget unzip zip
+            curl -s "https://get.sdkman.io" | bash
             source "$HOME/.sdkman/bin/sdkman-init.sh"
+          run: |
             sdk install java 16.0.1.hs-adpt
             sdk install maven
             mvn install --batch-mode -DskipTests
