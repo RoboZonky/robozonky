@@ -156,6 +156,7 @@ jobs:
               )
               ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
               ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre" >> buildProject.sh
+            cat buildProject.sh
             bash buildProject.sh
       - name: Upload JLinked app JRE
         uses: actions/upload-artifact@v2
