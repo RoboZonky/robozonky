@@ -141,8 +141,8 @@ jobs:
           install: |
             apt-get update -q -y
             apt-get install -q -y curl git zip
-            curl -s "https://get.sdkman.io?rcupdate=false" | bash
           run: |
+            curl -s "https://get.sdkman.io?rcupdate=false" | bash
             source "$HOME/.sdkman/bin/sdkman-init.sh"
             sdk install java 16.0.1.hs-adpt
             sdk install maven
