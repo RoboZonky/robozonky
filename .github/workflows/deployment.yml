@@ -133,7 +133,7 @@ jobs:
         name: Build the JARs and run JLink
         with:
           arch: ${{ matrix.arch }}
-          distro: buster
+          distro: bullseye
           githubToken: ${{ github.token }}
           dockerRunArgs: |
             --volume "${PWD}:/parent"
