@@ -144,17 +144,12 @@ jobs:
             rm /bin/sh && ln -s /bin/bash /bin/sh
             curl -s https://get.sdkman.io | bash
           run: |
-            echo "source /root/.sdkman/bin/sdkman-init.sh \
-              sdk install maven \
-              sdk install java 16.0.1.hs-adpt \
-              mvn install --batch-mode -DskipTests \
-              ROBOZONKY_VERSION=$(mvn -q \
-                -Dexec.executable=echo \
-                -Dexec.args='${project.version}' \
-                --non-recursive \
-                org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
-              ) \
-              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre \
+            echo "source /root/.sdkman/bin/sdkman-init.sh
+              sdk install maven
+              sdk install java 16.0.1.hs-adpt
+              mvn install --batch-mode -DskipTests
+              ROBOZONKY_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
               ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre" >> buildProject.sh
             cat buildProject.sh
             bash -x buildProject.sh
