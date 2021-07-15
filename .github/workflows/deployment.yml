@@ -49,7 +49,7 @@ jobs:
       - name: Build and test
         run: mvn install --batch-mode -Dpit.skip=true
   jlink:
-    name: Prepare JREs
+    name: JREs for natively supported platforms
     needs: test
     strategy:
       fail-fast: false # Always see all results on all platforms.
@@ -117,9 +117,55 @@ jobs:
         with:
           name: robozonky-installer-jre-${{ env.ROBOZONKY_OS }}
           path: robozonky-installer-jre/**/*
+  jlink-arm:
+    name: JREs for ARM
+    needs: test
+    strategy:
+      fail-fast: false # Always see all results on all platforms.
+      matrix:
+        arch: [ aarch64 ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      # Build and publish the JLinked JRE.
+      - uses: uraimo/run-on-arch-action@v2.0.10
+        name: Build the JARs and run JLink
+        with:
+          arch: ${{ matrix.arch }}
+          distro: bullseye
+          dockerRunArgs: |
+            --volume "${PWD}:/parent"
+          shell: /bin/bash
+          install: |
+            apt-get update
+            apt-get -qq -y install bash curl wget unzip zip
+          run:
+            bash -c "curl -s https://get.sdkman.io | bash
+              source /root/.sdkman/bin/sdkman-init.sh
+              sdk install java 16.0.1.hs-adpt
+              sdk install maven
+              cd profile
+              mvn install --batch-mode -DskipTests
+              ROBOZONKY_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.6.0:exec)
+              chmod +x ${{ env.JLINK_SCRIPT_FILENAME }}
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-app/target/robozonky-app-$ROBOZONKY_VERSION-full.jar robozonky-jre
+              ${{ env.JLINK_SCRIPT_FILENAME }} robozonky-installer/target/robozonky-installer-$ROBOZONKY_VERSION-full.jar robozonky-installer-jre"
+      - name: Upload JLinked app JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-jre-linux-arm64v8
+          path: robozonky-jre/**/*
+      - name: Upload JLinked installer JRE
+        uses: actions/upload-artifact@v2
+        with:
+          name: robozonky-installer-jre-linux-arm64v8
+          path: robozonky-installer-jre/**/*
   build:
     name: Build and deploy
-    needs: jlink
+    needs:
+      - jlink
+      - jlink-arm
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -141,11 +187,16 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Download Linux main app JRE
+      - name: Download Linux (x64) main app JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-jre-linux
           path: robozonky-distribution/robozonky-distribution-full/target/jre-linux
+      - name: Download Linux (arm64v8) main app JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-jre-linux-arm64v8
+          path: robozonky-distribution/robozonky-distribution-full/target/jre-linux-arm64v8
       - name: Download MacOS main app JRE
         uses: actions/download-artifact@v2
         with:
@@ -156,11 +207,16 @@ jobs:
         with:
           name: robozonky-jre-windows
           path: robozonky-distribution/robozonky-distribution-full/target/jre-windows
-      - name: Download Linux installer JRE
+      - name: Download Linux (x64) installer JRE
         uses: actions/download-artifact@v2
         with:
           name: robozonky-installer-jre-linux
           path: robozonky-distribution/robozonky-distribution-installer/target/jre-linux
+      - name: Download Linux (arm64v8) installer JRE
+        uses: actions/download-artifact@v2
+        with:
+          name: robozonky-installer-jre-linux-arm64v8
+          path: robozonky-distribution/robozonky-distribution-installer/target/jre-linux-arm64v8
       - name: Download MacOS installer JRE
         uses: actions/download-artifact@v2
         with:
@@ -227,6 +283,14 @@ jobs:
           asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_name: robozonky-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_content_type: application/x-xz
+      - name: Upload Main app (Linux, arm64v8)
+        if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: robozonky-distribution/robozonky-distribution-full/target/robozonky-distribution-full-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
+          asset_name: robozonky-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
+          asset_content_type: application/x-xz
       - name: Upload Main app (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
         uses: actions/upload-release-asset@v1
@@ -258,6 +322,14 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
           asset_name: robozonky-installer-${{ env.ROBOZONKY_VERSION }}-linux-x64.tar.xz
+          asset_content_type: application/x-xz
+      - name: Upload Installer (Linux, arm64v8)
+        if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: robozonky-distribution/robozonky-distribution-installer/target/robozonky-distribution-installer-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
+          asset_name: robozonky-installer-${{ env.ROBOZONKY_VERSION }}-linux-arm64v8.tar.xz
           asset_content_type: application/x-xz
       - name: Upload Installer (noarch)
         if: false == contains(env.ROBOZONKY_VERSION, 'SNAPSHOT')

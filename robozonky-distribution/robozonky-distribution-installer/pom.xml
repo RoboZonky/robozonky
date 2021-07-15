@@ -120,6 +120,12 @@
           <version>${project.version}</version>
           <classifier>linux-x64</classifier>
         </dependency>
+        <dependency>
+          <groupId>com.github.robozonky</groupId>
+          <artifactId>robozonky-installer</artifactId>
+          <version>${project.version}</version>
+          <classifier>linux-arm64v8</classifier>
+        </dependency>
       </dependencies>
       <build>
         <plugins>
@@ -137,6 +143,7 @@
                     <requireFilesExist>
                       <files>
                         <file>${project.build.directory}/jre-linux</file>
+                        <file>${project.build.directory}/jre-linux-arm64v8</file>
                         <file>${project.build.directory}/jre-windows</file>
                         <file>${project.build.directory}/jre-macos</file>
                       </files>
@@ -160,6 +167,21 @@
                   </descriptors>
                 </configuration>
                 <id>package-jlink-linux</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <filters>
+                    <filter>src/main/assembly/jlink-linux-arm64v8.properties</filter>
+                  </filters>
+                  <descriptors>
+                    <descriptor>src/main/assembly/jlink-linux-arm64v8.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>package-jlink-linux-arm64v8</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
