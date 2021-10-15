@@ -46,7 +46,7 @@
     <version.com.fasterxml.jackson.core>2.12.4</version.com.fasterxml.jackson.core>
     <version.org.jboss.resteasy>4.7.0.Final</version.org.jboss.resteasy>
     <version.org.junit>5.7.2</version.org.junit>
-    <version.org.junit.platform>1.7.2</version.org.junit.platform>
+    <version.org.junit.platform>1.8.1</version.org.junit.platform>
     <version.org.mockito>3.11.2</version.org.mockito>
     <version.org.mock-server>5.11.2</version.org.mock-server>
     <version.org.apache.logging.log4j>2.14.1</version.org.apache.logging.log4j>
