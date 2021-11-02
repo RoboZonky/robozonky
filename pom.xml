@@ -53,7 +53,7 @@
     <version.org.slf4j>1.7.32</version.org.slf4j>
     <version.com.sun.activation>1.2.2</version.com.sun.activation>
     <version.com.sun.mail>1.6.7</version.com.sun.mail>
-    <version.io.micrometer>1.7.2</version.io.micrometer>
+    <version.io.micrometer>1.7.4</version.io.micrometer>
     <!--
       Make sure tests work on Appveyor and other Windows platforms, while working together with Sonar Cloud.
       Recommended here: https://docs.sonarqube.org/display/PLUG/Usage+of+JaCoCo+with+SonarJava
